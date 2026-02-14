@@ -2,7 +2,8 @@
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    
     <title>瑞芳導覽地圖</title>
 
     <meta property="og:title" content="瑞芳導覽地圖" />
@@ -43,7 +44,7 @@
            2. 頂部 UI 區塊 (搜尋欄與單列報幕)
            ========================================= */
         #top-ui { 
-            position: absolute; top: 15px; left: 50%; transform: translateX(-50%); 
+            position: absolute; top: max(15px, env(safe-area-inset-top)); left: 50%; transform: translateX(-50%); 
             z-index: 3000; width: 85%; max-width: 380px;
             display: flex; flex-direction: column; align-items: center; gap: 6px; 
         }
@@ -74,7 +75,7 @@
            3. 右上角天氣 UI 小方格
            ========================================= */
         #weather-box { 
-            position: absolute; top: 15px; right: 15px; z-index: 3000;
+            position: absolute; top: max(15px, env(safe-area-inset-top)); right: max(15px, env(safe-area-inset-right)); z-index: 3000;
             width: 50px; height: 50px; /* 小正方形設計 */
             background: var(--glass); backdrop-filter: blur(8px); 
             border-radius: 12px; box-shadow: 0 4px 15px var(--card-shadow); 
@@ -94,7 +95,7 @@
             -ms-overflow-style: none; scrollbar-width: none; /* 隱藏原生捲軸 */
         }
         /* 收藏夾面板定位在右下方按鈕旁 */
-        #fav-list-panel { position: absolute; bottom: 160px; right: 70px; width: 200px; }
+        #fav-list-panel { position: absolute; bottom: 160px; right: max(70px, env(safe-area-inset-right)); width: 200px; }
         
         /* 清單內項目樣式 */
         .list-item { padding: 14px 20px; border-bottom: 1px solid rgba(0,0,0,0.05); cursor: pointer; display: flex; align-items: center; gap: 10px; color: var(--text); justify-content: space-between; }
@@ -104,7 +105,7 @@
         /* =========================================
            5. 右下方功能按鈕組
            ========================================= */
-        .map-controls { position: absolute; bottom: 100px; right: 12px; z-index: 3000; display: flex; flex-direction: column; gap: 12px; }
+        .map-controls { position: absolute; bottom: max(100px, env(safe-area-inset-bottom)); right: max(12px, env(safe-area-inset-right)); z-index: 3000; display: flex; flex-direction: column; gap: 12px; }
         .control-btn { 
             background: var(--glass); width: 50px; height: 50px; border-radius: 50%; 
             display: flex; align-items: center; justify-content: center; 
@@ -119,27 +120,73 @@
         .active { color: var(--primary); border: 2px solid var(--primary); }
 
         /* =========================================
-           6. GPS 座標純文字版 (與比例尺並列)
+           6. GPS 座標與比例尺 (防重疊與安全邊距)
            ========================================= */
+        /* 修改 Leaflet 內建比例尺的邊距，適配手機邊緣與瀏海 */
+        .leaflet-control-scale { 
+            margin-bottom: max(20px, env(safe-area-inset-bottom)) !important; 
+            margin-right: max(15px, env(safe-area-inset-right)) !important; 
+        }
+        .leaflet-control-scale-line { 
+            background: rgba(255, 255, 255, 0.8) !important; 
+            border: 2px solid #333 !important; 
+            font-weight: bold; 
+        }
+
+        /* GPS 座標移至左下角，徹底避開比例尺，並加入全黑/白描邊確保可讀性 */
         #gps-val-text {
-            position: absolute; bottom: 22px; right: 120px; /* 避開右下角約寬 100px 的比例尺 */
+            position: absolute; 
+            left: max(15px, env(safe-area-inset-left)); 
+            bottom: max(22px, env(safe-area-inset-bottom)); 
             z-index: 3000; font-family: monospace; font-size: 12px; font-weight: bold;
-            color: var(--text); text-shadow: 0px 0px 3px rgba(255,255,255,0.8); /* 加上文字陰影確保可讀性 */
+            color: var(--text); 
+            text-shadow: -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff, 0 0 5px rgba(255,255,255,0.8); 
             pointer-events: none; white-space: nowrap;
         }
-        body.dark-mode #gps-val-text { text-shadow: 0px 0px 3px rgba(0,0,0,0.8); }
+        body.dark-mode #gps-val-text { 
+            text-shadow: -1px -1px 0 #222, 1px -1px 0 #222, -1px 1px 0 #222, 1px 1px 0 #222, 0 0 5px rgba(0,0,0,0.8); 
+        }
 
         /* =========================================
-           7. 手機版 UI 防衝突適配
+           7. 手機版 UI 防衝突適配 (直式與橫式)
            ========================================= */
-        @media (max-width: 480px) {
+        /* 【直式】手機螢幕 (Portrait) */
+        @media (max-width: 768px) and (orientation: portrait) {
             #top-ui { 
-                left: 15px; transform: none; width: calc(100% - 85px); align-items: stretch; 
+                left: max(15px, env(safe-area-inset-left)); transform: none; width: calc(100% - 85px - env(safe-area-inset-right)); align-items: stretch; 
             }
             #search { text-align: left; padding-left: 20px; } 
-            /* 報幕文字在手機版靠左對齊搜尋欄 */
             #map-center-panel { justify-content: flex-start; padding-left: 20px; }
             #fav-list-panel { right: 70px; bottom: 110px; } 
+        }
+
+        /* 【橫式】手機螢幕 (Landscape) - 高度較扁 */
+        @media (max-height: 500px) and (orientation: landscape) {
+            #top-ui { 
+                /* 橫式寬度夠，但上方有瀏海，所以加上安全邊距 */
+                left: max(15px, env(safe-area-inset-left)); 
+                transform: none; 
+                width: 300px; /* 固定寬度，不干擾右側天氣 */
+                align-items: stretch; 
+            }
+            #search { text-align: left; padding-left: 20px; } 
+            #map-center-panel { justify-content: flex-start; padding-left: 20px; }
+
+            /* 橫向時高度不夠，將右下方功能按鈕改為「橫向」排列，避免超出螢幕頂端 */
+            .map-controls {
+                flex-direction: row; /* 改為橫向排列 */
+                bottom: max(20px, env(safe-area-inset-bottom));
+                /* 避開右下角的比例尺 (比例尺約寬 100px) */
+                right: calc(max(15px, env(safe-area-inset-right)) + 110px); 
+            }
+            .control-btn {
+                width: 40px; height: 40px; font-size: 16px; /* 橫式稍微縮小按鈕 */
+            }
+            /* 收藏夾清單對齊橫向排列的按鈕 */
+            #fav-list-panel { 
+                right: calc(max(15px, env(safe-area-inset-right)) + 110px); 
+                bottom: max(70px, env(safe-area-inset-bottom)); 
+            } 
         }
 
         /* =========================================
@@ -154,6 +201,7 @@
             /* 讓觸控滑動更順暢 */
             -webkit-overflow-scrolling: touch;
             will-change: transform;
+            padding-bottom: max(25px, env(safe-area-inset-bottom)); /* 底部預留瀏海安全區 */
         }
         /* 開啟卡片時滑入畫面 */
         #card.open { transform: translateY(0); } 
@@ -191,9 +239,6 @@
         .walk-badge { font-size: 11px; background: #e8f4fd; color: #007bff; padding: 3px 8px; border-radius: 12px; font-weight: bold; }
         .mini-tag { display: inline-block; font-size: 10px; padding: 2px 6px; margin: 2px 2px 0 0; border-radius: 4px; background: rgba(0,123,255,0.1); color: var(--primary); font-weight: bold; }
         .food-preview { font-size: 12px; color: var(--accent); font-weight: bold; border-top: 1px dashed rgba(0,0,0,0.1); padding-top: 8px; margin-top: 8px; }
-
-        /* 覆蓋 Leaflet 原生比例尺樣式 */
-        .leaflet-control-scale-line { background: rgba(255, 255, 255, 0.8) !important; border: 2px solid #333 !important; font-weight: bold; }
     </style>
 </head>
 <body id="main-body">
@@ -289,7 +334,7 @@ let myFavs = JSON.parse(localStorage.getItem('ruifang_favs')) || [];
 const map = L.map('map', { zoomControl: false, attributionControl: false }).setView([25.1032, 121.8224], 14);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
-// 在右下角加入比例尺 (會自動避開 GPS 文字)
+// 在右下角加入比例尺 (CSS已設定安全邊距)
 L.control.scale({ metric: true, imperial: false, position: 'bottomright' }).addTo(map);
 
 // 點擊地圖任意處，關閉資訊卡及下拉清單
@@ -301,7 +346,7 @@ map.on('click', () => { closeCard(); document.getElementById("suggest").style.di
 map.locate({setView: false, watch: true}); // 持續追蹤使用者位置
 map.on('locationfound', e => {
     userPos = e.latlng;
-    // 更新純文字 GPS 顯示
+    // 更新左下角的純文字 GPS 顯示
     document.getElementById("gps-val-text").innerText = `GPS: ${e.latlng.lat.toFixed(4)}, ${e.latlng.lng.toFixed(4)}`;
     // 繪製或更新使用者藍點
     if(!window.userMarker) window.userMarker = L.circleMarker(userPos, { radius: 8, color: '#fff', fillColor: '#007bff', fillOpacity: 1, weight: 3 }).addTo(map);
