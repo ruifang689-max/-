@@ -21,24 +21,25 @@
            1. 基礎變數與全局設定
            ========================================= */
         :root { 
-            --primary: #007bff;           
-            --glass: rgba(255, 255, 255, 0.95); 
-            --accent: #e67e22;            
-            --danger: #ff4757;            
-            --text: #333;                 
-            --card-shadow: rgba(0,0,0,0.15); 
+            --primary: #007bff;           /* 主色調：藍色 */
+            --glass: rgba(255, 255, 255, 0.95); /* 毛玻璃背景透明度 */
+            --accent: #e67e22;            /* 強調色：橘色 (用於美食或車站) */
+            --danger: #ff4757;            /* 警告色/愛心色：紅色 */
+            --text: #333;                 /* 預設字體顏色：深灰 */
+            --card-shadow: rgba(0,0,0,0.15); /* 統一的陰影效果 */
         }
 
+        /* 深色模式變數覆蓋 */
         body.dark-mode { 
             --glass: rgba(40, 40, 40, 0.95); 
             --text: #f0f0f0; 
             --card-shadow: rgba(0,0,0,0.4);
         }
 
-        /* 修正手機瀏覽器下方導航列吃掉畫面的問題 (100dvh) */
+        /* 修正手機瀏覽器下方導航列吃掉畫面的問題 (100dvh)，確保佈局完美貼底 */
         html, body { 
             margin: 0; padding: 0; width: 100vw; 
-            height: 100%; height: 100dvh; /* 動態視區高度，終極解法 */
+            height: 100%; height: 100dvh; 
             overflow: hidden; 
             font-family: -apple-system, "Microsoft JhengHei", sans-serif; 
         }
@@ -59,6 +60,7 @@
             display: flex; flex-direction: column; align-items: center; gap: 6px; 
         }
 
+        /* 搜尋輸入框 */
         #search { 
             width: 100%; padding: 12px 20px; border: none; border-radius: 30px; 
             box-shadow: 0 4px 20px var(--card-shadow); outline: none; 
@@ -66,13 +68,16 @@
             box-sizing: border-box;
         }
 
+        /* 地點報幕框 (無邊框單列文字，加上發光描邊確保地圖上易讀) */
         #map-center-panel {
             width: 100%; color: var(--text); font-size: 13px; font-weight: bold;
             display: flex; justify-content: center; align-items: center; gap: 6px;
-            pointer-events: none; 
+            pointer-events: none; /* 讓滑鼠穿透，不阻擋地圖操作 */
             text-shadow: -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff, 0 0 5px rgba(255,255,255,0.8);
         }
-        body.dark-mode #map-center-panel { text-shadow: -1px -1px 0 #222, 1px -1px 0 #222, -1px 1px 0 #222, 1px 1px 0 #222, 0 0 5px rgba(0,0,0,0.8); }
+        body.dark-mode #map-center-panel { 
+            text-shadow: -1px -1px 0 #222, 1px -1px 0 #222, -1px 1px 0 #222, 1px 1px 0 #222, 0 0 5px rgba(0,0,0,0.8); 
+        }
 
         /* =========================================
            3. 右上角天氣 UI 小方格
@@ -99,6 +104,7 @@
             box-shadow: 0 10px 25px var(--card-shadow); z-index: 3100;
             -ms-overflow-style: none; scrollbar-width: none; 
         }
+        /* 電腦版預設：收藏夾清單靠右 */
         #fav-list-panel { 
             position: absolute; 
             bottom: calc(150px + env(safe-area-inset-bottom, 0px)); 
@@ -111,9 +117,9 @@
         .list-item i { color: var(--primary); font-size: 14px; }
 
         /* =========================================
-           5. GPS 座標與比例尺 (強勢並列、避開死角)
+           5. GPS 座標與比例尺
            ========================================= */
-        /* 介入 Leaflet 底層，強制提昇右下角容器高度，避開手機底部安全區 */
+        /* 提升右下角比例尺高度，避開手機底部導航橫條 */
         .leaflet-bottom.leaflet-right {
             bottom: calc(20px + env(safe-area-inset-bottom, 0px)) !important;
             right: calc(15px + env(safe-area-inset-right, 0px)) !important;
@@ -125,19 +131,22 @@
             font-weight: bold; line-height: 1.2; padding: 2px 5px;
         }
 
-        /* GPS 文字定位於比例尺正左方，無邊框單列 */
+        /* 【電腦版預設】GPS 座標位於右側 (與比例尺並排) */
         #gps-val-text {
             position: absolute; 
             bottom: calc(21px + env(safe-area-inset-bottom, 0px));
-            right: calc(125px + env(safe-area-inset-right, 0px)); /* 避開比例尺的寬度 */
+            right: calc(125px + env(safe-area-inset-right, 0px)); /* 留出 100px 給比例尺 */
+            left: auto; /* 確保重置 */
             z-index: 3000; font-family: monospace; font-size: 12px; font-weight: bold;
             color: var(--text); line-height: 1.5; pointer-events: none; white-space: nowrap;
             text-shadow: -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff, 0 0 5px rgba(255,255,255,0.8); 
         }
-        body.dark-mode #gps-val-text { text-shadow: -1px -1px 0 #222, 1px -1px 0 #222, -1px 1px 0 #222, 1px 1px 0 #222, 0 0 5px rgba(0,0,0,0.8); }
+        body.dark-mode #gps-val-text { 
+            text-shadow: -1px -1px 0 #222, 1px -1px 0 #222, -1px 1px 0 #222, 1px 1px 0 #222, 0 0 5px rgba(0,0,0,0.8); 
+        }
 
         /* =========================================
-           6. 右下方功能按鈕組
+           6. 功能按鈕組 (預設直向排於右側)
            ========================================= */
         .map-controls { 
             position: absolute; 
@@ -159,7 +168,8 @@
         /* =========================================
            7. 手機版 UI 防衝突適配 (直式與橫式分離)
            ========================================= */
-        /* 【直式】(Portrait) 縮小搜尋列，確保天氣不重疊 */
+
+        /* 【直式】(Portrait) 座標改回左側 */
         @media (max-width: 768px) and (orientation: portrait) {
             #top-ui { 
                 left: calc(15px + env(safe-area-inset-left, 0px)); 
@@ -168,9 +178,15 @@
             #search { text-align: left; padding-left: 20px; } 
             #map-center-panel { justify-content: flex-start; padding-left: 20px; }
             #fav-list-panel { right: 70px; bottom: 110px; } 
+            
+            /* 手機直式：GPS 座標改回左下方 */
+            #gps-val-text {
+                left: calc(15px + env(safe-area-inset-left, 0px));
+                right: auto;
+            }
         }
 
-        /* 【橫式】(Landscape) 重點優化！按鈕轉為橫向列，置於比例尺上方 */
+        /* 【橫式】(Landscape) 重點佈局：座標左、按鍵中、比例尺右 */
         @media (max-height: 500px) and (orientation: landscape) {
             #top-ui { 
                 left: calc(15px + env(safe-area-inset-left, 0px)); transform: none; width: 300px; align-items: stretch; 
@@ -178,19 +194,30 @@
             #search { text-align: left; padding-left: 20px; } 
             #map-center-panel { justify-content: flex-start; padding-left: 20px; }
 
-            /* 功能按鈕轉為橫向排排站 */
+            /* 手機橫式：GPS 座標固定於左側 */
+            #gps-val-text {
+                left: calc(15px + env(safe-area-inset-left, 0px));
+                right: auto;
+            }
+
+            /* 手機橫式：功能按鍵轉為橫列，絕對置中 */
             .map-controls {
                 flex-direction: row; 
-                bottom: calc(65px + env(safe-area-inset-bottom, 0px)); /* 高度提升，避開比例尺 */
-                right: calc(15px + env(safe-area-inset-right, 0px)); 
+                bottom: calc(15px + env(safe-area-inset-bottom, 0px)); 
+                left: 50%; transform: translateX(-50%); 
+                right: auto; 
                 gap: 10px;
             }
-            .control-btn { width: 40px; height: 40px; font-size: 16px; } /* 按鈕微縮小 */
+            .control-btn { width: 40px; height: 40px; font-size: 16px; } 
             
+            /* 收藏夾清單對齊置中的按鍵 */
             #fav-list-panel { 
-                right: calc(15px + env(safe-area-inset-right, 0px)); 
-                bottom: calc(115px + env(safe-area-inset-bottom, 0px)); 
+                left: 50%; transform: translateX(-50%); 
+                right: auto;
+                bottom: calc(65px + env(safe-area-inset-bottom, 0px)); 
             } 
+            
+            /* 備註：比例尺受 Leaflet 控制，預設會乖乖待在右側 */
         }
 
         /* =========================================
@@ -200,7 +227,7 @@
             position: absolute; bottom: 0; left: 0; width: 100%; transform: translateY(110%); 
             max-height: 80vh; background: var(--glass); color: var(--text); 
             transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1); z-index: 4000; 
-            padding: 25px; padding-bottom: calc(25px + env(safe-area-inset-bottom, 0px)); /* 底部預留瀏海安全區 */
+            padding: 25px; padding-bottom: calc(25px + env(safe-area-inset-bottom, 0px)); 
             box-sizing: border-box; border-radius: 25px 25px 0 0; 
             box-shadow: 0 -8px 25px var(--card-shadow); overflow-y: auto; 
             -webkit-overflow-scrolling: touch; will-change: transform;
@@ -316,8 +343,11 @@ const spots = [
     { name: "南子吝步道", lat: 25.1206, lng: 121.8863, tags: ["登山", "海景"], food: "南雅麵店", highlights: "360度無敵山海景", history: "高度僅196公尺卻擁有高山氣勢的超高CP值步道。", transport: "公車 856/886", heat: 0.6 }
 ];
 
+// 預設旅遊路線：時空旅人線
 const themeRouteCoords = [[25.108, 121.805], [25.086, 121.828], [25.0606, 121.8226], [25.1091, 121.8576]];
+// 全域狀態變數
 let userPos = null, isNight = false, heatLayer = null, currentRoute = null, targetSpot = null;
+// 讀取瀏覽器中的我的收藏夾資料，若無則為空陣列
 let myFavs = JSON.parse(localStorage.getItem('ruifang_favs')) || []; 
 
 // =========================================
@@ -326,9 +356,10 @@ let myFavs = JSON.parse(localStorage.getItem('ruifang_favs')) || [];
 const map = L.map('map', { zoomControl: false, attributionControl: false }).setView([25.1032, 121.8224], 14);
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
-// 呼叫 Leaflet 比例尺，靠右下角顯示
+// 呼叫 Leaflet 比例尺，靠右下角顯示 (受 CSS 安全邊距保護)
 L.control.scale({ metric: true, imperial: false, position: 'bottomright' }).addTo(map);
 
+// 點擊地圖任意處，關閉資訊卡及下拉清單
 map.on('click', () => { closeCard(); document.getElementById("suggest").style.display = "none"; document.getElementById("fav-list-panel").style.display = "none"; });
 
 // =========================================
@@ -342,6 +373,7 @@ map.on('locationfound', e => {
     else window.userMarker.setLatLng(userPos);
 });
 
+// 移動地圖後自動更新上方單列地址
 map.on('moveend', function() {
     const center = map.getCenter();
     fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${center.lat}&lon=${center.lng}&zoom=18&addressdetails=1&accept-language=zh-TW`)
