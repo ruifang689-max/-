@@ -162,8 +162,21 @@
         }
         .control-btn:active { transform: scale(0.9); } 
         .route-btn { color: #8e44ad; } .fav-btn { color: var(--danger); } 
-        .station-btn { color: var(--accent); } .compass-btn { color: #2ecc71; } 
+        .compass-btn { color: #2ecc71; } 
         .active { color: var(--primary); border: 2px solid var(--primary); }
+
+        /* 專屬瑞字印章圖樣 (取代原本的火車 icon) */
+        .rui-icon {
+            font-family: "DFKai-sb", "BiauKai", serif; /* 使用標楷體或襯線體增添傳統感 */
+            font-weight: 900;
+            font-size: 18px;
+            color: var(--accent);
+            border: 2px solid var(--accent);
+            border-radius: 4px;
+            padding: 1px 3px;
+            line-height: 1;
+            display: inline-block;
+        }
 
         /* =========================================
            7. 手機版 UI 防衝突適配 (直式與橫式分離)
@@ -209,6 +222,7 @@
                 gap: 10px;
             }
             .control-btn { width: 40px; height: 40px; font-size: 16px; } 
+            .rui-icon { font-size: 14px; border-width: 1px; padding: 1px 2px; } /* 橫式稍縮小印章 */
             
             /* 收藏夾清單對齊置中的按鍵 */
             #fav-list-panel { 
@@ -216,8 +230,6 @@
                 right: auto;
                 bottom: calc(65px + env(safe-area-inset-bottom, 0px)); 
             } 
-            
-            /* 備註：比例尺受 Leaflet 控制，預設會乖乖待在右側 */
         }
 
         /* =========================================
@@ -283,7 +295,7 @@
     <div class="control-btn compass-btn" onclick="resetNorth()" title="回到全景"><i class="fas fa-compass"></i></div>
     <div class="control-btn route-btn" onclick="drawThemeRoute()" title="推薦：時空旅人路線"><i class="fas fa-route"></i></div>
     <div class="control-btn fav-btn" onclick="toggleFavList()" title="我的收藏夾"><i class="fas fa-folder-open"></i></div>
-    <div class="control-btn station-btn" onclick="goToStation()" title="回到瑞芳中心"><i class="fas fa-train"></i></div>
+    <div class="control-btn station-btn" onclick="goToStation()" title="回到瑞芳中心"><span class="rui-icon">瑞</span></div>
     <div class="control-btn" onclick="toggleNight()" title="日夜模式"><i class="fas fa-moon"></i></div>
     <div class="control-btn active" onclick="goToUser()" title="我的位置"><i class="fas fa-location-crosshairs"></i></div>
 </div>
