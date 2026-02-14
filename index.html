@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    
     <title>瑞芳導覽地圖</title>
 
     <meta property="og:title" content="瑞芳導覽地圖" />
@@ -21,22 +20,20 @@
            1. 基礎變數與全局設定
            ========================================= */
         :root { 
-            --primary: #007bff;           /* 主色調：藍色 */
-            --glass: rgba(255, 255, 255, 0.95); /* 毛玻璃背景透明度 */
-            --accent: #e67e22;            /* 強調色：橘色 (用於美食或車站) */
-            --danger: #ff4757;            /* 警告色/愛心色：紅色 */
-            --text: #333;                 /* 預設字體顏色：深灰 */
-            --card-shadow: rgba(0,0,0,0.15); /* 統一的陰影效果 */
+            --primary: #007bff;           
+            --glass: rgba(255, 255, 255, 0.95); 
+            --accent: #e67e22;            
+            --danger: #ff4757;            
+            --text: #333;                 
+            --card-shadow: rgba(0,0,0,0.15); 
         }
 
-        /* 深色模式變數覆蓋 */
         body.dark-mode { 
             --glass: rgba(40, 40, 40, 0.95); 
             --text: #f0f0f0; 
             --card-shadow: rgba(0,0,0,0.4);
         }
 
-        /* 修正手機瀏覽器下方導航列吃掉畫面的問題 (100dvh)，確保佈局完美貼底 */
         html, body { 
             margin: 0; padding: 0; width: 100vw; 
             height: 100%; height: 100dvh; 
@@ -44,23 +41,18 @@
             font-family: -apple-system, "Microsoft JhengHei", sans-serif; 
         }
         
-        #map { 
-            position: absolute; top: 0; left: 0; right: 0; bottom: 0; 
-            z-index: 1; 
-        }
+        #map { position: absolute; top: 0; left: 0; right: 0; bottom: 0; z-index: 1; }
 
         /* =========================================
            2. 頂部 UI 區塊 (搜尋欄與單列報幕)
            ========================================= */
         #top-ui { 
-            position: absolute; 
-            top: calc(15px + env(safe-area-inset-top, 0px)); 
+            position: absolute; top: calc(15px + env(safe-area-inset-top, 0px)); 
             left: 50%; transform: translateX(-50%); 
             z-index: 3000; width: 85%; max-width: 380px;
             display: flex; flex-direction: column; align-items: center; gap: 6px; 
         }
 
-        /* 搜尋輸入框 */
         #search { 
             width: 100%; padding: 12px 20px; border: none; border-radius: 30px; 
             box-shadow: 0 4px 20px var(--card-shadow); outline: none; 
@@ -68,24 +60,18 @@
             box-sizing: border-box;
         }
 
-        /* 地點報幕框 (無邊框單列文字，加上發光描邊確保地圖上易讀) */
         #map-center-panel {
             width: 100%; color: var(--text); font-size: 13px; font-weight: bold;
-            display: flex; justify-content: center; align-items: center; gap: 6px;
-            pointer-events: none; /* 讓滑鼠穿透，不阻擋地圖操作 */
+            display: flex; justify-content: center; align-items: center; gap: 6px; pointer-events: none; 
             text-shadow: -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff, 0 0 5px rgba(255,255,255,0.8);
         }
-        body.dark-mode #map-center-panel { 
-            text-shadow: -1px -1px 0 #222, 1px -1px 0 #222, -1px 1px 0 #222, 1px 1px 0 #222, 0 0 5px rgba(0,0,0,0.8); 
-        }
+        body.dark-mode #map-center-panel { text-shadow: -1px -1px 0 #222, 1px -1px 0 #222, -1px 1px 0 #222, 1px 1px 0 #222, 0 0 5px rgba(0,0,0,0.8); }
 
         /* =========================================
            3. 右上角天氣 UI 小方格
            ========================================= */
         #weather-box { 
-            position: absolute; 
-            top: calc(15px + env(safe-area-inset-top, 0px)); 
-            right: calc(15px + env(safe-area-inset-right, 0px)); 
+            position: absolute; top: calc(15px + env(safe-area-inset-top, 0px)); right: calc(15px + env(safe-area-inset-right, 0px)); 
             z-index: 3000; width: 50px; height: 50px; 
             background: var(--glass); backdrop-filter: blur(8px); 
             border-radius: 12px; box-shadow: 0 4px 15px var(--card-shadow); 
@@ -96,62 +82,37 @@
         #weather-temp { font-size: 12px; font-weight: bold; }
 
         /* =========================================
-           4. 搜尋建議下拉清單 & 收藏夾清單
+           4. 下拉清單 (搜尋與收藏)
            ========================================= */
         #suggest, #fav-list-panel { 
             background: var(--glass); border-radius: 18px; margin-top: 2px; 
             overflow-y: auto; max-height: 220px; width: 100%; display: none;
-            box-shadow: 0 10px 25px var(--card-shadow); z-index: 3100;
-            -ms-overflow-style: none; scrollbar-width: none; 
+            box-shadow: 0 10px 25px var(--card-shadow); z-index: 3100; scrollbar-width: none; 
         }
-        /* 電腦版預設：收藏夾清單靠右 */
-        #fav-list-panel { 
-            position: absolute; 
-            bottom: calc(150px + env(safe-area-inset-bottom, 0px)); 
-            right: calc(70px + env(safe-area-inset-right, 0px)); 
-            width: 200px; 
-        }
-        
+        #fav-list-panel { position: absolute; bottom: calc(150px + env(safe-area-inset-bottom, 0px)); right: calc(70px + env(safe-area-inset-right, 0px)); width: 200px; }
         .list-item { padding: 14px 20px; border-bottom: 1px solid rgba(0,0,0,0.05); cursor: pointer; display: flex; align-items: center; gap: 10px; color: var(--text); justify-content: space-between; }
         .list-item:active { background: rgba(0,0,0,0.05); }
-        .list-item i { color: var(--primary); font-size: 14px; }
 
         /* =========================================
            5. GPS 座標與比例尺
            ========================================= */
-        /* 提升右下角比例尺高度，避開手機底部導航橫條 */
-        .leaflet-bottom.leaflet-right {
-            bottom: calc(20px + env(safe-area-inset-bottom, 0px)) !important;
-            right: calc(15px + env(safe-area-inset-right, 0px)) !important;
-        }
+        .leaflet-bottom.leaflet-right { bottom: calc(20px + env(safe-area-inset-bottom, 0px)) !important; right: calc(15px + env(safe-area-inset-right, 0px)) !important; }
         .leaflet-control-scale { margin: 0 !important; }
-        .leaflet-control-scale-line { 
-            background: rgba(255, 255, 255, 0.8) !important; 
-            border: 2px solid #333 !important; 
-            font-weight: bold; line-height: 1.2; padding: 2px 5px;
-        }
+        .leaflet-control-scale-line { background: rgba(255, 255, 255, 0.8) !important; border: 2px solid #333 !important; font-weight: bold; line-height: 1.2; padding: 2px 5px; }
 
-        /* 【電腦版預設】GPS 座標位於右側 (與比例尺並排) */
         #gps-val-text {
-            position: absolute; 
-            bottom: calc(21px + env(safe-area-inset-bottom, 0px));
-            right: calc(125px + env(safe-area-inset-right, 0px)); /* 留出 100px 給比例尺 */
-            left: auto; /* 確保重置 */
+            position: absolute; bottom: calc(21px + env(safe-area-inset-bottom, 0px)); right: calc(125px + env(safe-area-inset-right, 0px)); 
             z-index: 3000; font-family: monospace; font-size: 12px; font-weight: bold;
             color: var(--text); line-height: 1.5; pointer-events: none; white-space: nowrap;
             text-shadow: -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff, 0 0 5px rgba(255,255,255,0.8); 
         }
-        body.dark-mode #gps-val-text { 
-            text-shadow: -1px -1px 0 #222, 1px -1px 0 #222, -1px 1px 0 #222, 1px 1px 0 #222, 0 0 5px rgba(0,0,0,0.8); 
-        }
+        body.dark-mode #gps-val-text { text-shadow: -1px -1px 0 #222, 1px -1px 0 #222, -1px 1px 0 #222, 1px 1px 0 #222, 0 0 5px rgba(0,0,0,0.8); }
 
         /* =========================================
-           6. 功能按鈕組 (預設直向排於右側)
+           6. 功能按鈕組與動畫
            ========================================= */
         .map-controls { 
-            position: absolute; 
-            bottom: calc(85px + env(safe-area-inset-bottom, 0px)); 
-            right: calc(12px + env(safe-area-inset-right, 0px)); 
+            position: absolute; bottom: calc(85px + env(safe-area-inset-bottom, 0px)); right: calc(12px + env(safe-area-inset-right, 0px)); 
             z-index: 3000; display: flex; flex-direction: column; gap: 12px; 
         }
         .control-btn { 
@@ -161,79 +122,58 @@
             color: var(--text); font-size: 20px; border: 1px solid rgba(255,255,255,0.2); transition: all 0.3s ease; 
         }
         .control-btn:active { transform: scale(0.9); } 
-        .route-btn { color: #8e44ad; } .fav-btn { color: var(--danger); } 
-        .compass-btn { color: #2ecc71; } 
+        .route-btn { color: #8e44ad; } .fav-btn { color: var(--danger); } .compass-btn { color: #2ecc71; } 
         .active { color: var(--primary); border: 2px solid var(--primary); }
 
-        /* 專屬瑞字印章圖樣 (取代原本的火車 icon) */
-        .rui-icon {
-            font-family: "DFKai-sb", "BiauKai", serif; /* 使用標楷體或襯線體增添傳統感 */
-            font-weight: 900;
-            font-size: 18px;
-            color: var(--accent);
-            border: 2px solid var(--accent);
-            border-radius: 4px;
-            padding: 1px 3px;
-            line-height: 1;
-            display: inline-block;
+        /* 瑞字印章 */
+        .rui-icon { font-family: "DFKai-sb", "BiauKai", serif; font-weight: 900; font-size: 18px; color: var(--accent); border: 2px solid var(--accent); border-radius: 4px; padding: 1px 3px; line-height: 1; transition: all 0.2s ease; }
+        @keyframes stamp-press {
+            0% { transform: scale(1) rotate(0deg); text-shadow: none; box-shadow: none; }
+            40% { transform: scale(0.8) rotate(-8deg); color: var(--danger); border-color: var(--danger); text-shadow: 0 0 8px rgba(255, 71, 87, 0.8); box-shadow: 0 0 12px rgba(255, 71, 87, 0.5) inset, 0 0 12px rgba(255, 71, 87, 0.5); }
+            70% { transform: scale(1.1) rotate(3deg); } 
+            100% { transform: scale(1) rotate(0deg); text-shadow: none; box-shadow: none; }
         }
+        .rui-icon.stamped { animation: stamp-press 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
 
         /* =========================================
-           7. 手機版 UI 防衝突適配 (直式與橫式分離)
+           7. 專屬圖釘 & 雷達波紋特效 (全新加入)
            ========================================= */
+        /* 自訂圖釘外觀 */
+        .custom-pin { display: flex; flex-direction: column; align-items: center; }
+        .pin-bg { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; box-shadow: 0 4px 6px rgba(0,0,0,0.4); z-index: 2; border: 2px solid #fff; }
+        .pin-point { width: 0; height: 0; border-left: 6px solid transparent; border-right: 6px solid transparent; border-top: 12px solid #fff; margin-top: -4px; z-index: 1; filter: drop-shadow(0 4px 2px rgba(0,0,0,0.3)); }
+        .pin-bg i { font-size: 14px; }
 
-        /* 【直式】(Portrait) 座標改回左側 */
+        /* 使用者定位雷達波紋 */
+        .user-pulse-icon { display: flex; justify-content: center; align-items: center; }
+        .user-pulse-icon .dot { width: 14px; height: 14px; background: #007bff; border: 2px solid #fff; border-radius: 50%; z-index: 2; box-shadow: 0 0 8px rgba(0,0,0,0.5); }
+        .user-pulse-icon .pulse { position: absolute; width: 40px; height: 40px; background: rgba(0, 123, 255, 0.6); border-radius: 50%; animation: radar-pulse 1.5s infinite ease-out; z-index: 1; }
+        @keyframes radar-pulse { 0% { transform: scale(0.5); opacity: 1; } 100% { transform: scale(2.5); opacity: 0; } }
+
+        /* =========================================
+           8. 手機版 UI 適配 (直向與橫向)
+           ========================================= */
         @media (max-width: 768px) and (orientation: portrait) {
-            #top-ui { 
-                left: calc(15px + env(safe-area-inset-left, 0px)); 
-                transform: none; width: calc(100% - 85px - env(safe-area-inset-right, 0px)); align-items: stretch; 
-            }
+            #top-ui { left: calc(15px + env(safe-area-inset-left, 0px)); transform: none; width: calc(100% - 85px - env(safe-area-inset-right, 0px)); align-items: stretch; }
             #search { text-align: left; padding-left: 20px; } 
             #map-center-panel { justify-content: flex-start; padding-left: 20px; }
             #fav-list-panel { right: 70px; bottom: 110px; } 
-            
-            /* 手機直式：GPS 座標改回左下方 */
-            #gps-val-text {
-                left: calc(15px + env(safe-area-inset-left, 0px));
-                right: auto;
-            }
+            #gps-val-text { left: calc(15px + env(safe-area-inset-left, 0px)); right: auto; }
         }
 
-        /* 【橫式】(Landscape) 重點佈局：座標左、按鍵中、比例尺右 */
         @media (max-height: 500px) and (orientation: landscape) {
-            #top-ui { 
-                left: calc(15px + env(safe-area-inset-left, 0px)); transform: none; width: 300px; align-items: stretch; 
-            }
+            #top-ui { left: calc(15px + env(safe-area-inset-left, 0px)); transform: none; width: 300px; align-items: stretch; }
             #search { text-align: left; padding-left: 20px; } 
             #map-center-panel { justify-content: flex-start; padding-left: 20px; }
-
-            /* 手機橫式：GPS 座標固定於左側 */
-            #gps-val-text {
-                left: calc(15px + env(safe-area-inset-left, 0px));
-                right: auto;
-            }
-
-            /* 手機橫式：功能按鍵轉為橫列，絕對置中 */
-            .map-controls {
-                flex-direction: row; 
-                bottom: calc(15px + env(safe-area-inset-bottom, 0px)); 
-                left: 50%; transform: translateX(-50%); 
-                right: auto; 
-                gap: 10px;
-            }
+            #gps-val-text { left: calc(15px + env(safe-area-inset-left, 0px)); right: auto; }
+            .map-controls { flex-direction: row; bottom: calc(15px + env(safe-area-inset-bottom, 0px)); left: 50%; transform: translateX(-50%); right: auto; gap: 10px; }
             .control-btn { width: 40px; height: 40px; font-size: 16px; } 
-            .rui-icon { font-size: 14px; border-width: 1px; padding: 1px 2px; } /* 橫式稍縮小印章 */
-            
-            /* 收藏夾清單對齊置中的按鍵 */
-            #fav-list-panel { 
-                left: 50%; transform: translateX(-50%); 
-                right: auto;
-                bottom: calc(65px + env(safe-area-inset-bottom, 0px)); 
-            } 
+            .rui-icon { font-size: 14px; border-width: 1px; padding: 1px 2px; } 
+            #fav-list-panel { left: 50%; transform: translateX(-50%); right: auto; bottom: calc(65px + env(safe-area-inset-bottom, 0px)); } 
         }
 
         /* =========================================
-           8. 底部詳細資訊大卡片 (Bottom Sheet)
+           9. 底部卡片與 Popup
            ========================================= */
         #card { 
             position: absolute; bottom: 0; left: 0; width: 100%; transform: translateY(110%); 
@@ -245,24 +185,18 @@
             -webkit-overflow-scrolling: touch; will-change: transform;
         }
         #card.open { transform: translateY(0); } 
-        
         .close-bar { width: 50px; height: 5px; background: #888; border-radius: 10px; margin: -10px auto 15px; cursor: pointer; }
         .card-header-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
         #title { margin: 0; font-size: 26px; }
         #card-fav-icon { font-size: 24px; cursor: pointer; color: #ccc; transition: transform 0.2s; }
         #card-fav-icon.active { color: var(--danger); transform: scale(1.2); }
         #img { width: 100%; height: 180px; object-fit: cover; border-radius: 15px; margin-bottom: 15px; background: #eee; }
-        
         .info-label { font-weight: bold; color: var(--text); display: block; margin-top: 15px; font-size: 15px; border-left: 4px solid var(--primary); padding-left: 8px; }
         .info-text { color: var(--text); opacity: 0.9; font-size: 14px; line-height: 1.6; margin-top: 5px; display: block; }
-        
         .btn-group { display: flex; gap: 10px; margin-top: 25px; }
         button { flex: 1; padding: 14px; border: none; border-radius: 12px; background: var(--primary); color: white; cursor: pointer; font-weight: bold; font-size: 15px; }
         button.secondary { background: #555; }
 
-        /* =========================================
-           9. 地圖浮動小圖卡 (Popup)
-           ========================================= */
         .leaflet-popup-content-wrapper { border-radius: 15px; background: var(--glass); padding: 0; }
         .leaflet-popup-content { margin: 0; width: 260px !important; color: var(--text); }
         .preview-card { width: 260px; cursor: pointer; }
@@ -278,16 +212,12 @@
 <body id="main-body">
 
 <div id="weather-box" title="即時天氣">
-    <i class="fas fa-cloud-sun"></i>
-    <span id="weather-temp">20°C</span>
+    <i class="fas fa-cloud-sun"></i><span id="weather-temp">20°C</span>
 </div>
 
 <div id="top-ui">
     <input id="search" placeholder="🔍 搜尋瑞芳景點、秘境...">
-    <div id="map-center-panel">
-        <i class="fas fa-map-marker-alt" style="color:var(--primary)"></i> 
-        <span id="addr-text">定位中...</span>
-    </div>
+    <div id="map-center-panel"><i class="fas fa-map-marker-alt" style="color:var(--primary)"></i><span id="addr-text">定位中...</span></div>
     <div id="suggest"></div>
 </div>
 
@@ -296,7 +226,11 @@
     <div class="control-btn route-btn" onclick="drawThemeRoute()" title="推薦：時空旅人路線"><i class="fas fa-route"></i></div>
     <div class="control-btn fav-btn" onclick="toggleFavList()" title="我的收藏夾"><i class="fas fa-folder-open"></i></div>
     <div class="control-btn station-btn" onclick="goToStation()" title="回到瑞芳中心"><span class="rui-icon">瑞</span></div>
-    <div class="control-btn" onclick="toggleNight()" title="日夜模式"><i class="fas fa-moon"></i></div>
+    
+    <div class="control-btn" id="layer-btn" onclick="toggleLayer()" title="切換底圖 (街道/等高線/夜間)">
+        <i class="fas fa-map"></i>
+    </div>
+    
     <div class="control-btn active" onclick="goToUser()" title="我的位置"><i class="fas fa-location-crosshairs"></i></div>
 </div>
 
@@ -305,20 +239,16 @@
 </div>
 
 <div id="gps-val-text">GPS: 定位中...</div>
-
 <div id="map"></div>
 
 <div id="card">
     <div class="close-bar" onclick="closeCard()"></div>
-    
     <div class="card-header-row">
         <h2 id="title"></h2>
         <i id="card-fav-icon" class="fas fa-heart" onclick="toggleCurrentFav()"></i>
     </div>
-
     <div id="card-tags" style="margin: 0 0 15px 0;"></div>
     <img id="img">
-    
     <div class="info-section"><span class="info-label"><i class="fas fa-utensils"></i> 在地飲食特色</span><span id="card-food" class="info-text"></span></div>
     <div class="info-section"><span class="info-label"><i class="fas fa-star"></i> 景點推薦與亮點</span><span id="card-highlights" class="info-text"></span></div>
     <div class="info-section"><span class="info-label"><i class="fas fa-history"></i> 簡介與歷史</span><span id="card-history" class="info-text"></span></div>
@@ -339,53 +269,82 @@
 // 1. 景點資料庫定義 
 // =========================================
 const spots = [
-    { name: "瑞芳", lat: 25.108, lng: 121.805, tags: ["交通樞紐", "美食"], highlights: "瑞芳美食廣場、瑞芳老街", food: "龍鳳腿、胡椒餅、牛肉麵", history: "瑞芳曾因採礦而興，是進入九份與平溪線門戶。", transport: "台鐵瑞芳站、國道客運965/1062", heat: 0.6 },
-    { name: "四腳亭", lat: 25.103, lng: 121.762, tags: ["砲台", "古道"], highlights: "四腳亭砲台、橋頭排骨麵", food: "排骨麵、傳統早點", history: "早期為基隆通往宜蘭的重要古道據點。", transport: "台鐵四腳亭站", heat: 0.4 },
-    { name: "猴硐", lat: 25.086, lng: 121.828, tags: ["貓村", "煤礦"], highlights: "猴硐貓村、瑞三整煤廠", food: "礦工麵、大麵發", history: "曾為全台煤礦產量第一，現以貓村與工業遺跡聞名。", transport: "台鐵平溪線猴硐站", heat: 0.9 },
-    { name: "九份老街", lat: 25.1099, lng: 121.8452, tags: ["夜景", "黃金山城"], highlights: "阿妹茶樓、昇平戲院", food: "阿柑姨芋圓、阿蘭草仔粿", history: "採金時期的繁華山城，建築依山而建。", transport: "瑞芳站轉乘客運 788 / 965", heat: 1.0 },
-    { name: "深澳", lat: 25.133, lng: 121.824, tags: ["象鼻岩", "海景鐵道"], highlights: "象鼻岩、深澳鐵道自行車", food: "鯊魚羹、小卷米粉", history: "曾為重要煤礦輸出港，現以海蝕奇岩聞名。", transport: "瑞芳站轉公車T99、791", heat: 0.8 },
-    { name: "鼻頭角", lat: 25.12588, lng: 121.92028, tags: ["自然景觀"], food: "海產", highlights: "鼻頭角步道、燈塔", history: "瑞芳東北角的絕美岬角。", transport: "客運 856 / 886", heat: 0.7 },
-    { name: "金瓜石", lat: 25.10911, lng: 121.85768, tags: ["礦業"], food: "礦工便當", highlights: "黃金博物館、黃金神社", history: "昔日亞洲第一金礦山。", transport: "客運 788 / 856", heat: 0.6 },
-    { name: "無耳茶壺山", lat: 25.10637, lng: 121.86596, tags: ["登山"], food: "無", highlights: "絕美海景", history: "因山形狀似無耳茶壺而得名。", transport: "金瓜石步行登山", heat: 0.8 },
-    { name: "水湳洞", lat: 25.12248, lng: 121.86033, tags: ["地標"], food: "小吃", highlights: "陰陽海、水湳洞漁港", history: "採礦工業與自然交界。", transport: "客運 856 / 886", heat: 0.7 },
-    { name: "十三層遺址", lat: 25.11826, lng: 121.86465, tags: ["工業遺址"], food: "無", highlights: "點燈美景、台版龐貝城", history: "昔日大型選煉廠遺址。", transport: "長仁社區附近", heat: 0.9 },
+    { name: "瑞芳", lat: 25.108, lng: 121.805, tags: ["交通樞紐", "美食"], highlights: "瑞芳美食廣場、瑞芳老街", food: "龍鳳腿、胡椒餅", history: "瑞芳曾因採礦而興，是進入九份與平溪線門戶。", transport: "台鐵瑞芳站", heat: 0.6 },
+    { name: "四腳亭", lat: 25.103, lng: 121.762, tags: ["古蹟", "古道"], highlights: "四腳亭砲台、橋頭排骨麵", food: "排骨麵", history: "早期為基隆通往宜蘭的重要古道據點。", transport: "台鐵四腳亭站", heat: 0.4 },
+    { name: "猴硐", lat: 25.086, lng: 121.828, tags: ["貓村", "歷史"], highlights: "猴硐貓村、瑞三整煤廠", food: "礦工麵", history: "曾為全台煤礦產量第一，現以貓村與工業遺跡聞名。", transport: "台鐵猴硐站", heat: 0.9 },
+    { name: "九份老街", lat: 25.1099, lng: 121.8452, tags: ["熱門", "歷史"], highlights: "阿妹茶樓、昇平戲院", food: "阿柑姨芋圓", history: "採金時期的繁華山城，建築依山而建。", transport: "客運 788 / 965", heat: 1.0 },
+    { name: "深澳", lat: 25.133, lng: 121.824, tags: ["自然", "海景鐵道"], highlights: "象鼻岩、深澳鐵道自行車", food: "小卷米粉", history: "曾為重要煤礦輸出港，現以海蝕奇岩聞名。", transport: "公車T99、791", heat: 0.8 },
+    { name: "鼻頭角", lat: 25.12588, lng: 121.92028, tags: ["自然"], food: "海產", highlights: "鼻頭角步道、燈塔", history: "瑞芳東北角的絕美岬角。", transport: "客運 856 / 886", heat: 0.7 },
+    { name: "金瓜石", lat: 25.10911, lng: 121.85768, tags: ["歷史", "礦業"], food: "礦工便當", highlights: "黃金博物館、黃金神社", history: "昔日亞洲第一金礦山。", transport: "客運 788 / 856", heat: 0.6 },
+    { name: "無耳茶壺山", lat: 25.10637, lng: 121.86596, tags: ["登山", "自然"], food: "無", highlights: "絕美海景", history: "因山形狀似無耳茶壺而得名。", transport: "金瓜石步行登山", heat: 0.8 },
+    { name: "水湳洞", lat: 25.12248, lng: 121.86033, tags: ["歷史", "海景"], food: "小吃", highlights: "陰陽海", history: "採礦工業與自然交界。", transport: "客運 856 / 886", heat: 0.7 },
+    { name: "十三層遺址", lat: 25.11826, lng: 121.86465, tags: ["古蹟"], food: "無", highlights: "點燈美景", history: "昔日大型選煉廠遺址。", transport: "長仁社區附近", heat: 0.9 },
     { name: "黃金瀑布", lat: 25.11713, lng: 121.86148, tags: ["自然"], food: "無", highlights: "金黃岩石與水流", history: "礦體與地下水作用形成。", transport: "客運 856 / 886", heat: 0.9 },
     { name: "三貂嶺", lat: 25.06066, lng: 121.82264, tags: ["秘境"], food: "麵食、披薩", highlights: "鐵道拍攝、瀑布群", history: "全台唯一汽車無法直達的車站。", transport: "台鐵三貂嶺站", heat: 0.7 },
-    { name: "不厭亭", lat: 25.0895, lng: 121.8473, tags: ["秘境", "打卡"], food: "建議自備", highlights: "寂寞公路、最美102縣道", history: "名字取自李白詩句「相看兩不厭」。", transport: "自行開車/計程車", heat: 0.5 },
-    { name: "南子吝步道", lat: 25.1206, lng: 121.8863, tags: ["登山", "海景"], food: "南雅麵店", highlights: "360度無敵山海景", history: "高度僅196公尺卻擁有高山氣勢的超高CP值步道。", transport: "公車 856/886", heat: 0.6 }
+    { name: "不厭亭", lat: 25.0895, lng: 121.8473, tags: ["秘境", "打卡"], food: "建議自備", highlights: "寂寞公路", history: "名字取自李白詩句。", transport: "自行開車", heat: 0.5 },
+    { name: "南子吝步道", lat: 25.1206, lng: 121.8863, tags: ["登山", "自然"], food: "南雅麵店", highlights: "360度無敵山海景", history: "高CP值步道。", transport: "公車 856", heat: 0.6 }
 ];
 
-// 預設旅遊路線：時空旅人線
 const themeRouteCoords = [[25.108, 121.805], [25.086, 121.828], [25.0606, 121.8226], [25.1091, 121.8576]];
-// 全域狀態變數
-let userPos = null, isNight = false, heatLayer = null, currentRoute = null, targetSpot = null;
-// 讀取瀏覽器中的我的收藏夾資料，若無則為空陣列
+let userPos = null, heatLayer = null, currentRoute = null, targetSpot = null;
 let myFavs = JSON.parse(localStorage.getItem('ruifang_favs')) || []; 
 
 // =========================================
-// 2. 地圖初始化設定
+// 2. 地圖初始化設定 & 三段式圖層切換
 // =========================================
 const map = L.map('map', { zoomControl: false, attributionControl: false }).setView([25.1032, 121.8224], 14);
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png').addTo(map);
 
-// 呼叫 Leaflet 比例尺，靠右下角顯示 (受 CSS 安全邊距保護)
+// 定義三種底圖
+const mapLayers = [
+    { url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', name: '街道', icon: 'fa-map', dark: false },
+    { url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', name: '等高線', icon: 'fa-mountain', dark: false },
+    { url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', name: '夜間', icon: 'fa-moon', dark: true }
+];
+
+let currentLayerIdx = 0; // 0:街道, 1:等高線, 2:夜間
+let currentTileLayer = L.tileLayer(mapLayers[0].url).addTo(map);
 L.control.scale({ metric: true, imperial: false, position: 'bottomright' }).addTo(map);
 
-// 點擊地圖任意處，關閉資訊卡及下拉清單
+// 圖層切換函式
+function toggleLayer() {
+    currentLayerIdx = (currentLayerIdx + 1) % mapLayers.length; // 0->1->2->0 循環
+    const config = mapLayers[currentLayerIdx];
+    
+    // 替換圖層
+    map.removeLayer(currentTileLayer);
+    currentTileLayer = L.tileLayer(config.url).addTo(map);
+    
+    // 更新按鈕 icon
+    document.querySelector('#layer-btn i').className = `fas ${config.icon}`;
+    
+    // 切換深色模式 UI
+    if (config.dark) { document.body.classList.add("dark-mode"); } 
+    else { document.body.classList.remove("dark-mode"); }
+}
+
 map.on('click', () => { closeCard(); document.getElementById("suggest").style.display = "none"; document.getElementById("fav-list-panel").style.display = "none"; });
 
 // =========================================
-// 3. 定位與地址更新
+// 3. 定位更新 & 雷達波紋特效
 // =========================================
+// 定義雷達波紋 Icon
+const userPulseIcon = L.divIcon({
+    className: 'user-pulse-icon',
+    html: '<div class="pulse"></div><div class="dot"></div>',
+    iconSize: [40, 40],
+    iconAnchor: [20, 20]
+});
+
 map.locate({setView: false, watch: true}); 
 map.on('locationfound', e => {
     userPos = e.latlng;
     document.getElementById("gps-val-text").innerText = `GPS: ${e.latlng.lat.toFixed(4)}, ${e.latlng.lng.toFixed(4)}`;
-    if(!window.userMarker) window.userMarker = L.circleMarker(userPos, { radius: 8, color: '#fff', fillColor: '#007bff', fillOpacity: 1, weight: 3 }).addTo(map);
+    
+    // 套用雷達波紋 Icon
+    if(!window.userMarker) window.userMarker = L.marker(userPos, { icon: userPulseIcon }).addTo(map);
     else window.userMarker.setLatLng(userPos);
 });
 
-// 移動地圖後自動更新上方單列地址
 map.on('moveend', function() {
     const center = map.getCenter();
     fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${center.lat}&lon=${center.lng}&zoom=18&addressdetails=1&accept-language=zh-TW`)
@@ -401,7 +360,7 @@ map.on('moveend', function() {
 map.fire('moveend'); 
 
 // =========================================
-// 4. 標記 (Markers) 生成
+// 4. 智慧專屬圖釘 (Custom Pins)
 // =========================================
 const cluster = L.markerClusterGroup();
 map.addLayer(cluster);
@@ -412,11 +371,34 @@ function calculateWalk(lat, lng) {
     return mins < 1 ? "1分內" : `約 ${mins} 分`;
 }
 
+// 根據景點 Tag 動態生成專屬圖示與顏色
+const createCustomPin = (tags) => {
+    let iconClass = 'fa-map-marker-alt';
+    let iconColor = '#e74c3c'; // 預設紅色
+
+    if (tags.includes('美食')) { iconClass = 'fa-utensils'; iconColor = '#e67e22'; }
+    else if (tags.includes('貓村')) { iconClass = 'fa-cat'; iconColor = '#8e44ad'; }
+    else if (tags.includes('自然') || tags.includes('登山')) { iconClass = 'fa-leaf'; iconColor = '#2ecc71'; }
+    else if (tags.includes('歷史') || tags.includes('礦業') || tags.includes('古蹟')) { iconClass = 'fa-landmark'; iconColor = '#7f8c8d'; }
+    else if (tags.includes('交通樞紐')) { iconClass = 'fa-train'; iconColor = '#3498db'; }
+    else if (tags.includes('秘境')) { iconClass = 'fa-gem'; iconColor = '#e84393'; }
+
+    return L.divIcon({
+        className: 'custom-pin',
+        html: `<div class="pin-bg" style="background-color:${iconColor}"><i class="fas ${iconClass}"></i></div><div class="pin-point"></div>`,
+        iconSize: [30, 42],
+        iconAnchor: [15, 42],
+        popupAnchor: [0, -40] // 讓 Popup 不會擋住圖釘
+    });
+};
+
 spots.forEach(s => {
     fetch(`https://zh.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(s.name)}`)
     .then(r => r.json()).then(d => { s.wikiImg = d.thumbnail?.source; });
 
-    const m = L.marker([s.lat, s.lng]);
+    // 替換原本的標準 Marker，改為呼叫 createCustomPin()
+    const m = L.marker([s.lat, s.lng], { icon: createCustomPin(s.tags) });
+    
     m.bindPopup(() => {
         const img = s.wikiImg || 'https://via.placeholder.com/260x130?text=Ruifang';
         return `
@@ -522,10 +504,17 @@ function startNav() {
 
 function resetNorth() { map.flyTo([25.1032, 121.8224], 14); } 
 function goToUser() { if(userPos) map.flyTo(userPos, 16); } 
-function goToStation() { map.flyTo([25.108, 121.805], 16); closeCard(); } 
-function toggleNight() { isNight = !isNight; document.body.classList.toggle("dark-mode"); const darkMap = 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'; const lightMap = 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png'; L.tileLayer(isNight ? darkMap : lightMap).addTo(map); }
-function toggleHeat() { if(heatLayer) { map.removeLayer(heatLayer); heatLayer = null; } else { heatLayer = L.heatLayer(spots.map(s => [s.lat, s.lng, s.heat]), {radius: 35}).addTo(map); } }
-function aiTrip() { if(!userPos) return alert("等待 GPS 定位..."); const sorted = [...spots].sort((a,b) => map.distance(userPos,[a.lat,a.lng]) - map.distance(userPos,[b.lat,b.lng])); alert("🤖 根據您現在位置的 AI 推薦：\n" + sorted.slice(0,5).map((s,i) => `${i+1}. ${s.name}`).join("\n")); }
+
+function goToStation() { 
+    const ruiIcon = document.querySelector('.rui-icon');
+    if (ruiIcon) {
+        ruiIcon.classList.remove('stamped');
+        void ruiIcon.offsetWidth; 
+        ruiIcon.classList.add('stamped');
+    }
+    map.flyTo([25.108, 121.805], 16); 
+    closeCard(); 
+} 
 
 // =========================================
 // 7. 搜尋聯想功能
