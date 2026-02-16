@@ -24,14 +24,11 @@ font-family: -apple-system, "Microsoft JhengHei", sans-serif;
     position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
     background: #111111; z-index: 10005; display: flex; flex-direction: column; 
     align-items: center; justify-content: center; 
-    transition: opacity 0.5s ease-in-out; /* 改由 JS 控制淡出，避免圖層殘留 */
+    /* 🌟 加入終極保險：不管 JS 有沒有當機，3秒後 CSS 強制讓它透明並消失！ */
+    animation: fadeOut 0.5s ease-in-out 2.5s forwards; 
+    pointer-events: none; /* 確保不會阻擋點擊 */
 }
-.logo-anim { width: 100px; height: 100px; border: 4px solid #ffffff; color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 50px; font-weight: bold; border-radius: 20px; animation: scaleUp 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
-.splash-title-text { color: #ffffff; margin-top: 20px; letter-spacing: 4px; font-size: 22px; opacity: 0; animation: fadeInText 0.8s ease-out 0.3s forwards; }
-
-@keyframes scaleUp { 0% { transform: scale(0.5); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
-@keyframes fadeInText { 0% { transform: translateY(10px); opacity: 0; } 100% { transform: translateY(0); opacity: 1; } }
-
+    
 /* =========================================
    3. 第二階段：歡迎介面 (純黑白風格)
    ========================================= */
