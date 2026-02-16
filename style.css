@@ -2,7 +2,7 @@
    1. 基礎變數與全局設定 (支援動態主題色)
    ========================================= */
 :root { 
-    --primary: #f39c12;   /* 預設橘色，可由 JS 動態替換 */
+    --primary: #007bff;   /* 恢復早期預設藍色 */
     --accent: #e67e22;    
     --danger: #ff4757;    
     --success: #28a745;   
@@ -45,15 +45,13 @@ html, body {
 #map { position: absolute; top: 0; left: 0; right: 0; bottom: 0; z-index: 1; }
 
 /* =========================================
-   2. 三階段進入介面 (動畫延長至2秒)
+   2. 三階段進入介面 
    ========================================= */
-/* 動畫層：延遲 2.0 秒後淡出 */
 #splash-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-color); z-index: 10001; display: flex; flex-direction: column; align-items: center; justify-content: center; animation: fadeOut 0.8s ease-in-out 2.0s forwards; pointer-events: none; }
 .logo-anim { width: 120px; height: 120px; border: 4px solid var(--primary); color: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 60px; font-weight: bold; border-radius: 20px; animation: scaleUp 0.8s ease-out; }
 @keyframes scaleUp { 0% { transform: scale(0.5); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
 @keyframes fadeOut { 0% { opacity: 1; } 100% { opacity: 0; visibility: hidden; } }
 
-/* 歡迎介面 */
 #welcome-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-color); z-index: 10000; display: flex; flex-direction: column; align-items: center; padding: 20px; overflow-y: auto; }
 .content-wrapper { width: 100%; max-width: 320px; display: flex; flex-direction: column; align-items: center; }
 .logo-static { margin-top: 5vh; width: 100px; height: 100px; border: 3px solid var(--primary); color: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 50px; font-weight: bold; border-radius: 15px; }
@@ -64,7 +62,6 @@ html, body {
 .link-box a { background: rgba(0,0,0,0.05); padding: 12px; border-radius: 10px; text-align: center; text-decoration: none; color: var(--primary); font-weight: bold; font-size: 14px; border: 1px solid var(--border-color); }
 .link-box a i { margin-right: 5px; }
 
-/* 教學說明 */
 #tutorial-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 9999; display: none; align-items: center; justify-content: center; padding: 20px; }
 .tutorial-box { background: var(--bg-color); width: 100%; max-width: 350px; border-radius: 20px; padding: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: 2px solid var(--primary); }
 .tutorial-box h3 { color: var(--primary); margin-top: 0; border-bottom: 1px dashed var(--divider-color); padding-bottom: 10px; }
@@ -94,7 +91,7 @@ html, body {
 .route-data { display: flex; flex-direction: column; line-height: 1.2; } .route-time { color: var(--primary); font-size: 18px; font-weight: bold; } .route-dist { font-size: 12px; color: var(--text-sub); font-weight: bold; } .route-close { cursor: pointer; color: #888; font-size: 22px; transition: color 0.2s; }
 
 /* =========================================
-   5. 搜尋清單與按鈕組件 (印章動畫修復)
+   5. 搜尋清單與地圖控制組件
    ========================================= */
 #suggest, #fav-list-panel { background: var(--glass); border-radius: 18px; margin-top: 5px; overflow-y: auto; width: 100%; display: none; box-shadow: 0 10px 25px var(--card-shadow); z-index: 3100; scrollbar-width: none; border: 1px solid var(--border-color); }
 #suggest { max-height: 45vh; }
@@ -111,7 +108,6 @@ html, body {
 .control-btn:active { transform: scale(0.9); }
 .route-btn { color: #8e44ad; } .fav-btn { color: var(--danger); } .compass-btn { color: var(--success); } .active { color: var(--primary); border: 2px solid var(--primary); }
 
-/* --- 瑞字印章特效 --- */
 .rui-icon { font-family: "DFKai-sb", "BiauKai", serif; font-weight: 900; font-size: 18px; color: var(--accent); border: 2px solid var(--accent); border-radius: 4px; padding: 1px 3px; line-height: 1; transition: all 0.2s ease; }
 @keyframes stamp-press { 
     0% { transform: scale(1) rotate(0deg); text-shadow: none; box-shadow: none; } 
@@ -122,7 +118,7 @@ html, body {
 .rui-icon.stamped { animation: stamp-press 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
 
 /* =========================================
-   6. 彈出視窗 Modal 與卡片
+   6. Modal 彈出視窗與底部卡片
    ========================================= */
 .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh; background: rgba(0,0,0,0.6); backdrop-filter: blur(5px); z-index: 6000; display: none; align-items: center; justify-content: center; }
 .modal-box { background: var(--bg-color); width: 85%; max-width: 420px; max-height: 85vh; overflow-y: auto; border-radius: 20px; padding: 25px; display: flex; flex-direction: column; gap: 15px; color: var(--text-main); border: 1px solid var(--border-color); }
@@ -143,11 +139,23 @@ html, body {
 .info-section { margin-bottom: 15px; } .info-label { font-weight: bold; color: var(--primary); display: block; margin-bottom: 4px; font-size: 15px; border-left: 4px solid var(--primary); padding-left: 10px; } .info-text { color: var(--text-sub); font-size: 14px; line-height: 1.6; display: block; padding-left: 14px; }
 .btn-group { display: flex; gap: 10px; margin-top: 25px; } .btn-group button { flex: 1; padding: 14px; border: none; border-radius: 12px; background: var(--primary); color: white; cursor: pointer; font-weight: bold; font-size: 15px; display: flex; align-items: center; justify-content: center; gap: 6px;} .btn-group button.secondary { background: #555; } .btn-group button.danger { background: var(--danger); } 
 
+/* =========================================
+   7. 浮動小卡與圖釘 (已修正回早期代碼樣式)
+   ========================================= */
 .custom-pin-wrap { position: relative; } .gmap-pin { width: 32px; height: 32px; border-radius: 50% 50% 50% 0; position: absolute; transform: rotate(-45deg); left: 50%; top: 50%; margin: -16px 0 0 -16px; box-shadow: -2px 2px 4px rgba(0,0,0,0.4); border: 2px solid #fff; display: flex; align-items: center; justify-content: center; } .gmap-pin i { transform: rotate(45deg); color: #fff; font-size: 14px; }
-.leaflet-popup-content-wrapper { border-radius: 15px; background: var(--bg-color); padding: 0; overflow: hidden; border: 1px solid var(--primary); } .leaflet-popup-content { margin: 0; width: 260px !important; color: var(--text-main); } .preview-card { width: 260px; cursor: pointer; } .preview-img { width: 100%; height: 130px; object-fit: cover; } .preview-info { padding: 12px; } .preview-title { font-weight: bold; font-size: 17px; color: var(--primary); } .mini-tag { display: inline-block; font-size: 10px; padding: 2px 6px; margin: 2px 2px 0 0; border-radius: 4px; background: rgba(0,0,0,0.05); color: var(--text-main); font-weight: bold; } 
+.leaflet-popup-content-wrapper { border-radius: 15px; background: var(--glass); padding: 0; overflow: hidden; border: 1px solid var(--primary); } 
+.leaflet-popup-content { margin: 0; width: 260px !important; color: var(--text-main); } 
+.preview-card { width: 260px; cursor: pointer; } 
+.preview-img { width: 100%; height: 130px; object-fit: cover; } 
+.preview-info { padding: 12px; } 
+.preview-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 5px; } 
+.preview-title { font-weight: bold; font-size: 17px; color: var(--primary); } 
+.walk-badge { font-size: 11px; background: var(--divider-color); color: var(--primary); padding: 3px 8px; border-radius: 12px; font-weight: bold; } 
+.mini-tag { display: inline-block; font-size: 10px; padding: 2px 6px; margin: 2px 2px 0 0; border-radius: 4px; background: rgba(0,0,0,0.05); color: var(--text-main); font-weight: bold; } 
+.food-preview { font-size: 13px; color: var(--accent); font-weight: bold; border-top: 1px dashed var(--border-color); padding-top: 10px; margin-top: 10px; }
 
 /* =========================================
-   7. 手機適配 (直式 / 橫式極限優化)
+   8. 手機適配 (直式 / 橫式極限優化)
    ========================================= */
 @media (min-width: 768px) { .content-wrapper { max-width: 480px; } .logo-static { width: 120px; height: 120px; font-size: 60px; } p, ul, li { font-size: 16px !important; } .btn-start { padding: 18px 80px; font-size: 20px; } }
 
