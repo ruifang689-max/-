@@ -7,11 +7,10 @@
     <title>瑞芳導覽地圖 App</title>
 
     <script>
+        // 防破圖與清除舊快取
         if (!window.location.pathname.endsWith('/') && !window.location.pathname.endsWith('.html') && window.location.hostname.includes('github.io')) {
             window.location.replace(window.location.pathname + '/' + window.location.search + window.location.hash);
         }
-        
-        // 🌟 進網頁第一件事：強制殺掉舊版錯誤的 PWA 快取！
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.getRegistrations().then(function(registrations) {
                 for(let registration of registrations) { registration.unregister(); }
@@ -30,10 +29,10 @@
 
     <link rel="manifest" href="./manifest.json">
     <meta name="theme-color" content="#007bff"> 
-    <link rel="apple-touch-icon" href="icon-192.png">
-    <link rel="icon" type="image/png" href="icon-192.png">
+    <link rel="apple-touch-icon" href="./icon-192.png">
+    <link rel="icon" type="image/png" href="./icon-192.png">
     
-    <link rel="stylesheet" href="style.css?v=100">
+    <link rel="stylesheet" href="./style.css?v=101">
 </head>
 <body id="main-body">
 
@@ -164,15 +163,24 @@
 
             <h3 data-i18n="theme"><i class="fas fa-palette"></i> 主題顏色</h3>
             <select id="theme-select" onchange="changeTheme(this.value)" class="modal-select">
-                <option value="#007bff">藍色 (預設)</option>
+                <option value="#333333">黑色 (預設)</option>
+                <option value="#007bff">藍色</option>
                 <option value="#f39c12">橘色</option>
-                <option value="#333333">黑色</option>
-                <option value="#95a5a6">銀白色</option>
+                <option value="#28a745">綠色</option>
+                <option value="#8e44ad">紫色</option>
+                <option value="#e84393">粉色</option>
                 <option value="custom">自訂顏色...</option>
             </select>
             <input type="color" id="custom-color-picker" style="display:none; width:100%; margin-top:5px; height: 40px; border:none; border-radius:10px;" onchange="applyCustomTheme(this.value)">
 
-            <div style="margin-top: 20px; text-align: center; display: flex; flex-direction: column; gap: 15px; border-top: 1px dashed var(--divider-color); padding-top: 20px;">
+            <div style="margin-top: 15px; border-top: 1px dashed var(--divider-color); padding-top: 15px;">
+                <label style="display: flex; align-items: center; gap: 10px; font-weight: bold; font-size: 15px; cursor: pointer; color: var(--text-main);">
+                    <input type="checkbox" id="skip-intro-toggle" onchange="toggleSkipIntro(this.checked)" style="width: 18px; height: 18px;">
+                    <span data-i18n="skip_intro">啟動時略過開場與教學</span>
+                </label>
+            </div>
+
+            <div style="margin-top: 15px; text-align: center; display: flex; flex-direction: column; gap: 12px; border-top: 1px dashed var(--divider-color); padding-top: 15px;">
                 <div>
                     <span style="font-size: 12px; color: var(--text-sub);" data-i18n="contact">聯絡開發團隊</span><br>
                     <a href="mailto:ruifang689@gmail.com" style="color: var(--primary); font-size: 15px; text-decoration: none; font-weight: bold;">📧 ruifang689@gmail.com</a>
@@ -183,7 +191,7 @@
                 </div>
             </div>
 
-            <button id="install-btn" style="display: none; margin-top: 20px; background-color: var(--success);" class="modal-save" onclick="installPWA()">⬇️ 將 App 安裝至桌面</button>
+            <button id="install-btn" style="display: none; margin-top: 15px; background-color: var(--success);" class="modal-save" onclick="installPWA()">⬇️ 將 App 安裝至桌面</button>
             <div class="modal-btns">
                 <button class="modal-cancel" onclick="closeSettings()" data-i18n="close">關閉</button>
             </div>
@@ -205,17 +213,19 @@
         </div>
     </div>
 
+    <div id="fav-manage-modal" class="modal-overlay">
+        <div class="modal-box">
+            <h3><i class="fas fa-folder-open"></i> 管理收藏夾</h3>
+            <div id="fav-manage-list" style="max-height: 50vh; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding-right: 5px;"></div>
+            <div class="modal-btns">
+                <button class="modal-cancel" onclick="closeFavManage()" data-i18n="close" style="width: 100%;">關閉</button>
+            </div>
+        </div>
+    </div>
+
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
+    <script src="./app.js?v=101"></script>
 
-    <script src="./app.js?v=100"></script>
-
-    <script>
-        setTimeout(() => {
-            const splash = document.getElementById('splash-screen');
-            if (splash) splash.style.display = 'none';
-        }, 3500); 
-    </script>
 </body>
 </html>
-
