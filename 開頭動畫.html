@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>瑞芳導覽 - 開頭動畫單獨測試</title>
+    <style>
+        /* 重置預設邊距 */
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            font-family: -apple-system, "Microsoft JhengHei", sans-serif;
+            background-color: #f5f5f5; /* 模擬底層網頁背景色 */
+        }
+
+        /* 模擬主畫面內容（動畫結束後會看到這個） */
+        .main-content {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            font-size: 20px;
+            color: #333;
+            font-weight: bold;
+        }
+
+        /* =========================================
+           開場動畫 (Splash Screen) - 黑白配色 3s
+           ========================================= */
+        #splash-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #111111; /* 黑底 */
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            
+            /* 動畫總長 3 秒：延遲 2.5 秒後，花 0.5 秒淡出 */
+            animation: fadeOut 0.5s ease-in-out 2.5s forwards;
+            pointer-events: none; /* 淡出後允許點擊穿透，不阻擋底層 */
+        }
+
+        .logo-anim {
+            width: 120px;
+            height: 120px;
+            border: 4px solid #ffffff; /* 白框 */
+            color: #ffffff; /* 白字 */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 60px;
+            font-weight: bold;
+            border-radius: 20px;
+            
+            /* Logo 彈出與放大動畫 */
+            animation: scaleUp 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        .title-text {
+            color: #ffffff; /* 白字 */
+            margin-top: 25px;
+            letter-spacing: 4px;
+            font-size: 24px;
+            opacity: 0;
+            
+            /* 標題文字稍微延遲出現，增加層次感 */
+            animation: fadeInText 0.8s ease-out 0.3s forwards;
+        }
+
+        /* --- 定義動畫關鍵影格 --- */
+        
+        /* Logo 放大特效 */
+        @keyframes scaleUp {
+            0% { transform: scale(0.5); opacity: 0; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        /* 標題文字浮現特效 */
+        @keyframes fadeInText {
+            0% { transform: translateY(10px); opacity: 0; }
+            100% { transform: translateY(0); opacity: 1; }
+        }
+
+        /* 整個黑白畫面的淡出特效 */
+        @keyframes fadeOut {
+            0% { opacity: 1; visibility: visible; }
+            100% { opacity: 0; visibility: hidden; }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="splash-screen">
+        <div class="logo-anim">瑞</div>
+        <h2 class="title-text">瑞芳導覽</h2>
+    </div>
+
+    <div class="main-content">
+        您已進入導覽地圖！<br>(開頭動畫已結束)
+    </div>
+
+</body>
+</html>
