@@ -261,9 +261,10 @@
         <div class="btn-group" id="card-btn-group"></div>
     </div>
 
-    <div id="settings-modal-overlay" class="modal-overlay">
+   <div id="settings-modal-overlay" class="modal-overlay">
         <div class="modal-box">
-            <h2 id="settings-title" data-i18n="settings_title"><i class="fas fa-cog"></i> 系統設定</h2>
+            <h2 id="settings-title"><i class="fas fa-cog"></i> 系統設定</h2>
+            
             <h3 id="settings-lang-title"><i class="fas fa-globe"></i> 語言 / Language</h3>
             <select id="lang-select-settings" onchange="translateWithGoogle('lang-select-settings')" class="modal-select">
                 <option value="zh-TW">繁體中文 (預設)</option>
@@ -271,8 +272,13 @@
                 <option value="ja">日本語 (Google Translate)</option>
                 <option value="ko">한국어 (Google Translate)</option>
             </select>
+
+            <button id="install-btn" style="display: none; margin-top: 15px; background-color: var(--success);" class="modal-save" onclick="installPWA()">
+                ⬇️ 將 App 安裝至桌面
+            </button>
+
             <div class="modal-btns">
-                <button class="modal-cancel" onclick="closeSettings()" id="settings-cancel" data-i18n="cancel">關閉</button>
+                <button class="modal-cancel" onclick="closeSettings()">關閉</button>
             </div>
         </div>
     </div>
@@ -684,3 +690,4 @@
     </script>
 </body>
 </html>
+
