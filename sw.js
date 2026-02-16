@@ -1,10 +1,11 @@
-const CACHE_NAME = 'ruifang-app-v4'; // 更新版本號
+// 🌟 升級版本號到 v5，觸發舊快取刪除機制
+const CACHE_NAME = 'ruifang-app-v5'; 
 
-// 嚴格列出檔案，將 app.js 納入快取
+// 🌟 更新快取名單，補上 ?v=2
 const urlsToCache = [
   './index.html',
-  './style.css',
-  './app.js',
+  'style.css?v=2',
+  'app.js?v=2',
   './manifest.json',
   './icon-192.png',
   './icon-512.png'
@@ -27,13 +28,14 @@ self.addEventListener('fetch', event => {
   );
 });
 
-// 啟動時自動清除舊版快取，避免吃手機容量
+// 啟動時自動清除舊版快取
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys().then(cacheNames => {
       return Promise.all(
         cacheNames.map(cacheName => {
           if (cacheName !== CACHE_NAME) {
+            console.log('🧹 清除舊快取:', cacheName);
             return caches.delete(cacheName);
           }
         })
