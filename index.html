@@ -199,10 +199,17 @@
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
+    <script src="app.js?v=4"></script>
 
-    <script src="app.js?v=3"></script>
+    <script>
+        setTimeout(() => {
+            const splash = document.getElementById('splash-screen');
+            if (splash) splash.style.display = 'none';
+        }, 3000); // 3秒後不管怎樣直接砍掉動畫層
+    </script>
     
 </body>
 </html>
+
 
 
