@@ -16,7 +16,7 @@ function installPWA() {
     if (!deferredPrompt) return;
     document.getElementById('install-btn').style.display = 'none';
     deferredPrompt.prompt();
-    deferredPrompt.userChoice.then((choiceResult) => { deferredPrompt = null; });
+    deferredPrompt.userChoice.then(() => { deferredPrompt = null; });
 }
 
 // =========================================
@@ -43,6 +43,8 @@ function finishTutorial() {
     setTimeout(() => {
         overlay.style.display = 'none';
         localStorage.setItem('ruifang_welcomed', 'true');
+        // 修復地圖灰塊 bug，強制地圖重繪
+        map.invalidateSize(); 
     }, 400);
 }
 
@@ -77,7 +79,7 @@ function shareAppMap() {
 }
 
 // =========================================
-// 3. 多國語言字典
+// 3. 多國語言字典 (已修復翻譯錯字與替換邏輯)
 // =========================================
 const translations = {
     'zh': {
@@ -130,13 +132,19 @@ function applyLanguage(lang) {
     document.getElementById('search').placeholder = t.search_ph;
     document.getElementById('addr-text').innerText = t.locating;
     
+    // 更安全的圖示文字替換邏輯
     document.querySelectorAll('[data-i18n]').forEach(el => {
         const key = el.getAttribute('data-i18n');
         if (t[key]) {
-            if(el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') el.placeholder = t[key];
-            else el.innerHTML = el.innerHTML.replace(/<i class=".*"><\/i>/, match => match + " ") ? el.innerHTML.replace(/(<i class=".*"><\/i>).*/, `$1 ${t[key]}`) : t[key];
+            if(el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
+                el.placeholder = t[key];
+            } else {
+                const iconMatch = el.innerHTML.match(/<i[^>]*><\/i>/);
+                el.innerHTML = iconMatch ? iconMatch[0] + ' ' + t[key] : t[key];
+            }
         }
     });
+    
     document.getElementById('lang-select-startup').value = lang;
     document.getElementById('lang-select-settings').value = lang;
     if(targetSpot && document.getElementById("card").classList.contains("open")) renderCardButtons(targetSpot, t);
@@ -375,5 +383,6 @@ window.onload = () => {
         document.getElementById('splash-screen').style.display = 'none'; 
         document.getElementById('welcome-screen').style.display = 'none'; 
         document.getElementById('tutorial-overlay').style.display = 'none';
+        map.invalidateSize(); // 確保地圖尺寸正確
     }
 };
