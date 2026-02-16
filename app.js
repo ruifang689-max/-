@@ -1,11 +1,20 @@
 // =========================================
-// 0. PWA 註冊與安裝
+// 0. PWA 註冊與強制清除舊快取 (解救破圖)
 // =========================================
 if ('serviceWorker' in navigator) {
+    // 每次載入都要求 Service Worker 檢查更新，打破死循環
+    navigator.serviceWorker.getRegistrations().then(function(registrations) {
+        for(let registration of registrations) {
+            registration.update();
+        }
+    });
+
     window.addEventListener('load', () => {
-        navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW 未註冊'));
+        // 直接註冊 sw.js (不加 ./)
+        navigator.serviceWorker.register('sw.js').catch(err => console.log('SW 未註冊', err));
     });
 }
+
 let deferredPrompt;
 window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault(); deferredPrompt = e;
@@ -16,9 +25,10 @@ function installPWA() {
     if (!deferredPrompt) return;
     document.getElementById('install-btn').style.display = 'none';
     deferredPrompt.prompt();
-    deferredPrompt.userChoice.then(() => { deferredPrompt = null; });
+    deferredPrompt.userChoice.then((choiceResult) => { deferredPrompt = null; });
 }
 
+// ... 下方的 1. 三階段進入動線與教學邏輯 保留不變 ...
 // =========================================
 // 1. 三階段進入動線與教學邏輯 (精準控制)
 // =========================================
