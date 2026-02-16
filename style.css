@@ -2,7 +2,7 @@
    1. 基礎變數與全局設定 (支援動態主題色)
    ========================================= */
 :root { 
-    --primary: #007bff;   
+    --primary: #007bff;   /* 預設藍色主題 */
     --accent: #e67e22;    
     --danger: #ff4757;    
     --success: #28a745;   
@@ -41,14 +41,11 @@ html, body {
     overflow: hidden; background-color: var(--bg-color); color: var(--text-main); 
     transition: background-color 0.3s, color 0.3s; 
     font-family: -apple-system, "Microsoft JhengHei", sans-serif;
-    box-sizing: border-box;
 }
-*, *:before, *:after { box-sizing: inherit; }
-
 #map { position: absolute; top: 0; left: 0; right: 0; bottom: 0; z-index: 1; }
 
 /* =========================================
-   2. 第一階段：開場動畫 (黑白 3 秒)
+   2. 第一階段：開場動畫 (純黑白 3 秒)
    ========================================= */
 #splash-screen { 
     position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
@@ -56,45 +53,42 @@ html, body {
     align-items: center; justify-content: center; 
     animation: fadeOut 0.5s ease-in-out 2.5s forwards; pointer-events: none; 
 }
-.logo-anim { width: 100px; height: 100px; border: 4px solid #ffffff; color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 50px; font-weight: bold; border-radius: 20px; animation: scaleUp 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
-.splash-title-text { color: #ffffff; margin-top: 20px; letter-spacing: 4px; font-size: 22px; opacity: 0; animation: fadeInText 0.8s ease-out 0.3s forwards; }
+.logo-anim { width: 120px; height: 120px; border: 4px solid #ffffff; color: #ffffff; display: flex; align-items: center; justify-content: center; font-size: 60px; font-weight: bold; border-radius: 20px; animation: scaleUp 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+.splash-title-text { color: #ffffff; margin-top: 25px; letter-spacing: 4px; font-size: 24px; opacity: 0; animation: fadeInText 0.8s ease-out 0.3s forwards; }
 
 @keyframes scaleUp { 0% { transform: scale(0.5); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
 @keyframes fadeInText { 0% { transform: translateY(10px); opacity: 0; } 100% { transform: translateY(0); opacity: 1; } }
 @keyframes fadeOut { 0% { opacity: 1; visibility: visible; } 100% { opacity: 0; visibility: hidden; } }
 
 /* =========================================
-   3. 第二階段：歡迎介面 (排版極致壓縮，防出界)
+   3. 第二階段：歡迎介面 (純黑白風格)
    ========================================= */
-#welcome-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #ffffff; z-index: 10001; display: flex; flex-direction: column; align-items: center; padding: 15px; overflow-y: auto; transition: opacity 0.4s ease, visibility 0.4s ease; }
-.welcome-wrapper { width: 100%; max-width: 320px; display: flex; flex-direction: column; align-items: center; padding-top: 3vh; padding-bottom: 20px; margin: auto; }
-.logo-static { width: 80px; height: 80px; border: 4px solid #111111; color: #111111; display: flex; align-items: center; justify-content: center; font-size: 40px; font-weight: bold; border-radius: 15px; }
-.welcome-title { color: #111111; margin-top: 15px; margin-bottom: 10px; text-align: center; letter-spacing: 2px; font-size: 22px; }
-.welcome-desc { text-align: center; color: #555555; line-height: 1.5; font-size: 14px; margin-bottom: 20px; width: 100%; }
+#welcome-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #ffffff; z-index: 10001; display: flex; flex-direction: column; align-items: center; padding: 20px; overflow-y: auto; transition: opacity 0.4s ease, visibility 0.4s ease; }
+.welcome-wrapper { width: 100%; max-width: 320px; display: flex; flex-direction: column; align-items: center; padding-top: 5vh; padding-bottom: 40px; }
+.logo-static { width: 100px; height: 100px; border: 4px solid #111111; color: #111111; display: flex; align-items: center; justify-content: center; font-size: 50px; font-weight: bold; border-radius: 15px; }
+.welcome-title { color: #111111; margin-top: 25px; text-align: center; letter-spacing: 2px; }
+.welcome-desc { text-align: center; color: #555555; line-height: 1.6; max-width: 300px; margin-bottom: 30px; }
 
-.input-group { width: 100%; margin-bottom: 20px; }
-.input-group label { font-weight: bold; display: block; margin-bottom: 8px; color: #111111; font-size: 14px; text-align: center; }
-.welcome-select { width: 100%; padding: 10px 15px; border: 2px solid #111111; border-radius: 8px; font-size: 15px; background: #ffffff; color: #111111; outline: none; cursor: pointer; }
-
-.link-box { display: flex; flex-direction: column; gap: 10px; width: 100%; margin-bottom: 25px; }
-.link-box a { display: flex; align-items: center; justify-content: center; padding: 12px; border-radius: 8px; text-decoration: none; color: #111111; font-weight: bold; font-size: 14px; border: 2px solid #111111; background: transparent; transition: background 0.2s, color 0.2s; }
+/* 語言與按鈕 (黑白) */
+.welcome-select { width: 100%; padding: 12px 15px; border: 2px solid #111111; border-radius: 8px; font-size: 16px; background: #ffffff; color: #111111; outline: none; margin-bottom: 25px; cursor: pointer; }
+.link-box { display: flex; flex-direction: column; gap: 12px; width: 100%; margin-bottom: 30px; }
+.link-box a { display: flex; align-items: center; justify-content: center; padding: 14px; border-radius: 8px; text-decoration: none; color: #111111; font-weight: bold; font-size: 15px; border: 2px solid #111111; background: transparent; transition: background 0.2s, color 0.2s; }
 .link-box a:active { background: #111111; color: #ffffff; }
-.link-box a i { margin-right: 8px; font-size: 16px; }
+.link-box a i { margin-right: 8px; font-size: 18px; }
 
-.btn-enter-map { width: 100%; padding: 14px 20px; background: #111111; color: #ffffff; border: 2px solid #111111; border-radius: 30px; font-size: 16px; font-weight: bold; letter-spacing: 1px; cursor: pointer; transition: transform 0.2s; }
+.btn-enter-map { width: 100%; padding: 16px 50px; background: #111111; color: #ffffff; border: 2px solid #111111; border-radius: 30px; font-size: 18px; font-weight: bold; letter-spacing: 1px; cursor: pointer; transition: transform 0.2s; }
 .btn-enter-map:active { transform: scale(0.96); }
 
 /* =========================================
-   4. 第三階段：地圖教學 Overlay (縮小間距，自適應寬度)
+   4. 第三階段：地圖教學 Overlay (依循主題色)
    ========================================= */
-#tutorial-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 10000; display: none; align-items: center; justify-content: center; padding: 15px; transition: opacity 0.4s ease, visibility 0.4s ease; }
-.tutorial-box { background: var(--bg-color); width: 92%; max-width: 340px; border-radius: 15px; padding: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: 2px solid var(--primary); }
-.tutorial-box h3 { color: var(--primary); margin-top: 0; border-bottom: 1px dashed var(--divider-color); padding-bottom: 8px; margin-bottom: 10px; font-size: 16px; display: flex; align-items: center; gap: 8px;}
-.tutorial-box ul { padding-left: 0; list-style: none; font-size: 14px; line-height: 1.6; color: var(--text-sub); margin: 0;}
-.tutorial-box ul li { margin: 8px 0; }
+#tutorial-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 10000; display: none; align-items: center; justify-content: center; padding: 20px; transition: opacity 0.4s ease, visibility 0.4s ease; }
+.tutorial-box { background: var(--bg-color); width: 100%; max-width: 350px; border-radius: 20px; padding: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: 2px solid var(--primary); }
+.tutorial-box h3 { color: var(--primary); margin-top: 0; border-bottom: 1px dashed var(--divider-color); padding-bottom: 10px; display: flex; align-items: center; gap: 8px;}
+.tutorial-box ul { padding-left: 0; list-style: none; font-size: 14.5px; line-height: 1.8; color: var(--text-sub); }
 .tutorial-box ul li b { color: var(--text-main); }
-.tutorial-btns { display: flex; justify-content: space-between; gap: 10px; margin-top: 20px; }
-.tutorial-btns button { flex: 1; padding: 12px; border: none; border-radius: 8px; font-weight: bold; font-size: 15px; cursor: pointer; transition: transform 0.1s; }
+.tutorial-btns { display: flex; justify-content: space-between; gap: 10px; margin-top: 25px; }
+.tutorial-btns button { flex: 1; padding: 12px; border: none; border-radius: 10px; font-weight: bold; font-size: 15px; cursor: pointer; transition: transform 0.1s; }
 .tutorial-btns button:active { transform: scale(0.95); }
 .btn-outline { background: transparent; border: 2px solid var(--primary); color: var(--primary); }
 .btn-fill { background: var(--primary); color: white; }
@@ -103,7 +97,7 @@ html, body {
    5. 地圖頂部 UI 與分類標籤
    ========================================= */
 #top-ui { position: absolute; top: calc(15px + env(safe-area-inset-top, 0px)); left: 50%; transform: translateX(-50%); z-index: 3000; width: 85%; max-width: 420px; display: flex; flex-direction: column; align-items: center; gap: 8px; }
-#search { width: 100%; padding: 12px 20px; border: none; border-radius: 30px; box-shadow: 0 4px 20px var(--card-shadow); outline: none; background: var(--glass); color: var(--text-main); font-size: 15px; text-align: center; }
+#search { width: 100%; padding: 12px 20px; border: none; border-radius: 30px; box-shadow: 0 4px 20px var(--card-shadow); outline: none; background: var(--glass); color: var(--text-main); font-size: 15px; text-align: center; box-sizing: border-box; }
 #category-chips { display: flex; gap: 8px; overflow-x: auto; width: 100%; padding: 2px 5px; scrollbar-width: none; }
 #category-chips::-webkit-scrollbar { display: none; }
 .chip { background: var(--glass); border: 1px solid var(--border-color); padding: 8px 16px; border-radius: 20px; font-size: 13px; font-weight: bold; color: var(--text-main); white-space: nowrap; cursor: pointer; box-shadow: 0 2px 5px var(--card-shadow); transition: all 0.2s; }
@@ -146,10 +140,10 @@ html, body {
 .rui-icon.stamped { animation: stamp-press 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
 
 /* =========================================
-   8. Modal 彈出視窗與卡片
+   8. Modal 彈出視窗與卡片 (修復小卡虛線)
    ========================================= */
-.modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh; background: rgba(0,0,0,0.6); backdrop-filter: blur(5px); z-index: 6000; display: none; align-items: center; justify-content: center; padding: 15px;}
-.modal-box { background: var(--bg-color); width: 100%; max-width: 400px; max-height: 85vh; overflow-y: auto; border-radius: 20px; padding: 25px; display: flex; flex-direction: column; gap: 15px; color: var(--text-main); border: 1px solid var(--border-color); }
+.modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh; background: rgba(0,0,0,0.6); backdrop-filter: blur(5px); z-index: 6000; display: none; align-items: center; justify-content: center; }
+.modal-box { background: var(--bg-color); width: 85%; max-width: 420px; max-height: 85vh; overflow-y: auto; border-radius: 20px; padding: 25px; display: flex; flex-direction: column; gap: 15px; color: var(--text-main); border: 1px solid var(--border-color); }
 .modal-box h2, .modal-box h3 { color: var(--primary); margin: 0; font-size: 18px;}
 .modal-input, .modal-textarea, .modal-select { width: 100%; padding: 12px 15px; border: 1px solid var(--border-color); border-radius: 12px; font-size: 15px; background: var(--input-bg); outline: none; color: var(--text-main); }
 .modal-textarea { height: 100px; resize: none; }
@@ -184,12 +178,7 @@ html, body {
 /* =========================================
    9. 手機適配 (直式 / 橫式極限優化)
    ========================================= */
-@media (min-width: 768px) { 
-    .welcome-wrapper { max-width: 400px; padding-top: 10vh; } 
-    .logo-static { width: 100px; height: 100px; font-size: 50px; } 
-    .btn-enter-map { padding: 16px 80px; font-size: 20px; } 
-    .tutorial-box { max-width: 400px; padding: 30px; }
-}
+@media (min-width: 768px) { .content-wrapper, .welcome-wrapper { max-width: 480px; } .logo-static { width: 120px; height: 120px; font-size: 60px; } p, ul, li { font-size: 16px !important; } .btn-start, .btn-enter-map { padding: 18px 80px; font-size: 20px; } }
 
 @media (max-width: 768px) and (orientation: portrait) { 
     #top-ui { left: 15px; transform: none; width: calc(100% - 85px); } 
@@ -197,21 +186,6 @@ html, body {
 }
 
 @media (max-height: 500px) and (orientation: landscape) { 
-    /* 橫式：歡迎介面高度壓縮防出界 */
-    .welcome-wrapper { padding-top: 10px; padding-bottom: 10px; }
-    .logo-static { width: 60px; height: 60px; font-size: 30px; margin-top: 0; }
-    .welcome-title { margin-top: 10px; font-size: 20px; }
-    .welcome-desc { margin-bottom: 15px; font-size: 13px; }
-    .link-box { margin-bottom: 15px; }
-    .btn-enter-map { padding: 10px 40px; font-size: 16px; }
-
-    /* 橫式：教學介面防超出螢幕 */
-    .tutorial-box { padding: 15px; max-height: 90vh; overflow-y: auto; }
-    .tutorial-box h3 { padding-bottom: 5px; margin-bottom: 5px; }
-    .tutorial-box ul li { margin: 5px 0; }
-    .tutorial-btns { margin-top: 10px; }
-
-    /* 橫式：地圖介面避開遮擋 */
     #top-ui { width: 260px; left: 15px; transform: none; top: 10px; gap: 4px; } 
     #search { padding: 8px 15px; font-size: 13px; }
     #category-chips .chip { padding: 4px 10px; font-size: 11px; }
