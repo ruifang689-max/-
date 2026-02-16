@@ -1,0 +1,145 @@
+/* =========================================
+   1. 基礎變數與全局設定 (橘色主題 & 深色模式)
+   ========================================= */
+:root { 
+    --primary: #f39c12;   /* 主題字體/按鈕：橘色 */
+    --accent: #e67e22;    /* 強調：深橘色 */
+    --danger: #ff4757;    
+    --success: #28a745;   
+    --card-shadow: rgba(0,0,0,0.15); 
+    --bg-color: #ffffff;
+    --text-main: #333333;
+    --text-sub: #666666;
+    --border-color: #cccccc;
+    --divider-color: #eeeeee;
+    --btn-bg: #333333;
+    --btn-text: #ffffff;
+    --input-bg: #ffffff;
+    --logo-border: #f39c12; /* Logo外框橘色 */
+    --glass: rgba(255, 255, 255, 0.95);
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --bg-color: #121212; --text-main: #e0e0e0; --text-sub: #aaaaaa;
+        --border-color: #555555; --divider-color: #333333; --btn-bg: #e0e0e0;
+        --btn-text: #121212; --input-bg: #2c2c2c; --logo-border: #f39c12;
+        --glass: rgba(40, 40, 40, 0.95); --card-shadow: rgba(0,0,0,0.4);
+    }
+}
+
+body.dark-mode { 
+    --bg-color: #121212; --text-main: #e0e0e0; --text-sub: #aaaaaa; 
+    --border-color: #555555; --divider-color: #333333; --btn-bg: #e0e0e0; 
+    --btn-text: #121212; --input-bg: #2c2c2c; --logo-border: #f39c12;
+    --glass: rgba(40, 40, 40, 0.95); --card-shadow: rgba(0,0,0,0.4); 
+    color: var(--text-main);
+}
+
+html, body { 
+    margin: 0; padding: 0; width: 100vw; height: 100%; height: 100dvh; 
+    overflow: hidden; background-color: var(--bg-color); color: var(--text-main); 
+    transition: background-color 0.3s, color 0.3s; 
+    font-family: -apple-system, "Microsoft JhengHei", sans-serif;
+}
+
+#map { position: absolute; top: 0; left: 0; right: 0; bottom: 0; z-index: 1; }
+
+/* =========================================
+   2. 動畫與說明介面 
+   ========================================= */
+#splash-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-color); z-index: 10000; display: flex; flex-direction: column; align-items: center; justify-content: center; animation: fadeOut 0.5s ease-in-out 1.0s forwards; pointer-events: none; }
+.logo-anim { width: 120px; height: 120px; border: 4px solid var(--primary); color: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 60px; font-weight: bold; border-radius: 20px; animation: scaleUp 0.8s ease-out; }
+@keyframes scaleUp { 0% { transform: scale(0.5); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+@keyframes fadeOut { 0% { opacity: 1; } 100% { opacity: 0; visibility: hidden; } }
+
+#startup-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-color); z-index: 9999; display: flex; flex-direction: column; align-items: center; padding: 20px; overflow-y: auto; }
+.content-wrapper { width: 100%; max-width: 320px; display: flex; flex-direction: column; align-items: center; }
+.logo-static { margin-top: 8vh; width: 100px; height: 100px; border: 3px solid var(--primary); color: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 50px; font-weight: bold; border-radius: 15px; }
+
+.title-text { color: var(--primary); margin-top: 20px; text-align: center;}
+.btn-start { margin-top: 30px; padding: 15px 60px; background: var(--primary); color: white; border: none; border-radius: 30px; font-size: 18px; font-weight: bold; cursor: pointer; transition: transform 0.2s, background 0.3s; }
+.btn-start:active { transform: scale(0.95); background: var(--accent); }
+
+/* =========================================
+   3. 頂部 UI 與分類標籤
+   ========================================= */
+#top-ui { position: absolute; top: calc(15px + env(safe-area-inset-top, 0px)); left: 50%; transform: translateX(-50%); z-index: 3000; width: 85%; max-width: 420px; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+#search { width: 100%; padding: 12px 20px; border: none; border-radius: 30px; box-shadow: 0 4px 20px var(--card-shadow); outline: none; background: var(--glass); color: var(--text-main); font-size: 15px; text-align: center; box-sizing: border-box; }
+
+#category-chips { display: flex; gap: 8px; overflow-x: auto; width: 100%; padding: 2px 5px; scrollbar-width: none; }
+#category-chips::-webkit-scrollbar { display: none; }
+.chip { background: var(--glass); border: 1px solid var(--border-color); padding: 8px 16px; border-radius: 20px; font-size: 13px; font-weight: bold; color: var(--text-main); white-space: nowrap; cursor: pointer; box-shadow: 0 2px 5px var(--card-shadow); transition: all 0.2s; }
+.chip.active { background: var(--primary); color: white; border-color: var(--primary); }
+
+#map-center-panel { width: 100%; color: var(--primary); font-size: 13px; font-weight: bold; display: flex; justify-content: center; align-items: center; gap: 6px; pointer-events: none; text-shadow: -1px -1px 0 var(--bg-color), 1px -1px 0 var(--bg-color), -1px 1px 0 var(--bg-color), 1px 1px 0 var(--bg-color); }
+
+/* =========================================
+   4. 天氣方塊 & 導航面板
+   ========================================= */
+#weather-box { position: absolute; top: calc(15px + env(safe-area-inset-top, 0px)); right: calc(15px + env(safe-area-inset-right, 0px)); z-index: 3000; width: 50px; height: 50px; background: var(--glass); backdrop-filter: blur(8px); border-radius: 12px; box-shadow: 0 4px 15px var(--card-shadow); border: 1px solid var(--border-color); color: var(--primary); display: flex; flex-direction: column; justify-content: center; align-items: center; }
+#weather-box i { font-size: 20px; margin-bottom: 2px; } #weather-temp { font-size: 12px; font-weight: bold; }
+
+#route-info-panel { position: absolute; top: calc(125px + env(safe-area-inset-top, 0px)); left: 50%; transform: translateX(-50%); background: var(--glass); backdrop-filter: blur(10px); color: var(--text-main); padding: 12px 25px; border-radius: 30px; box-shadow: 0 8px 25px rgba(243, 156, 18, 0.3); display: none; align-items: center; gap: 15px; z-index: 3000; border: 2px solid var(--primary); }
+.route-data { display: flex; flex-direction: column; line-height: 1.2; } .route-time { color: var(--primary); font-size: 18px; font-weight: bold; } .route-dist { font-size: 12px; color: var(--text-sub); font-weight: bold; } .route-close { cursor: pointer; color: #888; font-size: 22px; transition: color 0.2s; }
+
+/* =========================================
+   5. 搜尋清單與按鈕組件
+   ========================================= */
+#suggest, #fav-list-panel { background: var(--glass); border-radius: 18px; margin-top: 5px; overflow-y: auto; max-height: 250px; width: 100%; display: none; box-shadow: 0 10px 25px var(--card-shadow); z-index: 3100; scrollbar-width: none; border: 1px solid var(--border-color); }
+#fav-list-panel { position: absolute; bottom: calc(150px + env(safe-area-inset-bottom, 0px)); right: calc(70px + env(safe-area-inset-right, 0px)); width: 200px; }
+.list-item { padding: 14px 20px; border-bottom: 1px solid var(--divider-color); cursor: pointer; display: flex; align-items: center; gap: 10px; color: var(--text-main); justify-content: space-between; font-size: 15px; font-weight: bold; }
+.search-section-title { padding: 12px 20px 6px; font-size: 12px; color: var(--text-sub); font-weight: bold; background: var(--divider-color); letter-spacing: 1px; }
+
+.leaflet-bottom.leaflet-right { bottom: calc(20px + env(safe-area-inset-bottom, 0px)) !important; right: calc(15px + env(safe-area-inset-right, 0px)) !important; }
+.leaflet-control-scale-line { background: rgba(255, 255, 255, 0.8) !important; border: 2px solid #333 !important; font-weight: bold; padding: 2px 5px; color: #333 !important;}
+#gps-val-text { position: absolute; bottom: calc(21px + env(safe-area-inset-bottom, 0px)); right: calc(125px + env(safe-area-inset-right, 0px)); left: auto; z-index: 3000; font-family: monospace; font-size: 12px; font-weight: bold; color: var(--primary); pointer-events: none; text-shadow: -1px -1px 0 var(--bg-color), 1px -1px 0 var(--bg-color), -1px 1px 0 var(--bg-color), 1px 1px 0 var(--bg-color); }
+
+.map-controls { position: absolute; bottom: calc(85px + env(safe-area-inset-bottom, 0px)); right: calc(12px + env(safe-area-inset-right, 0px)); z-index: 3000; display: flex; flex-direction: column; gap: 12px; }
+.control-btn { background: var(--glass); width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px var(--card-shadow); cursor: pointer; color: var(--text-main); font-size: 20px; border: 1px solid var(--border-color); transition: transform 0.1s; }
+.control-btn:active { transform: scale(0.9); }
+.route-btn { color: #8e44ad; } .fav-btn { color: var(--danger); } .compass-btn { color: var(--success); } .active { color: var(--primary); border: 2px solid var(--primary); }
+.rui-icon { font-family: "DFKai-sb", "BiauKai", serif; font-weight: 900; font-size: 18px; color: var(--primary); border: 2px solid var(--primary); border-radius: 4px; padding: 1px 3px; line-height: 1; }
+
+/* =========================================
+   6. 彈出視窗 Modal 與卡片
+   ========================================= */
+.modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh; background: rgba(0,0,0,0.6); backdrop-filter: blur(5px); z-index: 6000; display: none; align-items: center; justify-content: center; }
+.modal-box { background: var(--bg-color); width: 85%; max-width: 420px; max-height: 85vh; overflow-y: auto; border-radius: 20px; padding: 25px; display: flex; flex-direction: column; gap: 15px; color: var(--text-main); border: 1px solid var(--border-color); }
+.modal-box h2, .modal-box h3 { color: var(--primary); margin: 0; }
+.modal-input, .modal-textarea, .modal-select { width: 100%; padding: 12px 15px; border: 1px solid var(--border-color); border-radius: 12px; font-size: 15px; background: var(--input-bg); outline: none; color: var(--text-main); }
+.modal-textarea { height: 100px; resize: none; }
+.modal-btns { display: flex; gap: 12px; margin-top: 10px; } .modal-btns button { flex: 1; padding: 14px; border: none; border-radius: 12px; font-weight: bold; font-size: 16px; cursor: pointer; color: white; } .modal-save { background: var(--primary); } .modal-cancel { background: #888; }
+
+#card { position: absolute; bottom: 0; left: 0; width: 100%; transform: translateY(110%); max-height: 80vh; background: var(--glass); color: var(--text-main); transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1); z-index: 4000; padding: 25px; padding-bottom: calc(25px + env(safe-area-inset-bottom, 0px)); box-sizing: border-box; border-radius: 25px 25px 0 0; box-shadow: 0 -8px 25px var(--card-shadow); overflow-y: auto; will-change: transform; border-top: 2px solid var(--primary); }
+#card.open { transform: translateY(0); } .close-bar { width: 50px; height: 5px; background: #888; border-radius: 10px; margin: -10px auto 15px; cursor: pointer; }
+.card-header-row { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; position: relative; }
+#title { margin: 0; font-size: 26px; line-height: 1.2; padding-right: 70px; color: var(--primary); }
+.card-header-icons { position: absolute; right: 0; top: 0; display: flex; gap: 15px; align-items: center; margin-top: 4px; }
+.card-header-icons i { font-size: 22px; cursor: pointer; color: var(--text-sub); transition: all 0.2s; }
+#card-share-icon { color: var(--primary) !important; } #card-fav-icon.active { color: var(--danger) !important; transform: scale(1.2); }
+#card-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 15px; }
+#img { width: 100%; height: 180px; object-fit: cover; border-radius: 15px; margin-bottom: 15px; background: var(--divider-color); }
+.info-section { margin-bottom: 15px; } .info-label { font-weight: bold; color: var(--primary); display: block; margin-bottom: 4px; font-size: 15px; border-left: 4px solid var(--primary); padding-left: 10px; } .info-text { color: var(--text-sub); font-size: 14px; line-height: 1.6; display: block; padding-left: 14px; }
+.btn-group { display: flex; gap: 10px; margin-top: 25px; } .btn-group button { flex: 1; padding: 14px; border: none; border-radius: 12px; background: var(--primary); color: white; cursor: pointer; font-weight: bold; font-size: 15px; display: flex; align-items: center; justify-content: center; gap: 6px;} .btn-group button.secondary { background: #555; } .btn-group button.danger { background: var(--danger); } 
+
+.custom-pin-wrap { position: relative; } .gmap-pin { width: 32px; height: 32px; border-radius: 50% 50% 50% 0; position: absolute; transform: rotate(-45deg); left: 50%; top: 50%; margin: -16px 0 0 -16px; box-shadow: -2px 2px 4px rgba(0,0,0,0.4); border: 2px solid #fff; display: flex; align-items: center; justify-content: center; } .gmap-pin i { transform: rotate(45deg); color: #fff; font-size: 14px; }
+.leaflet-popup-content-wrapper { border-radius: 15px; background: var(--bg-color); padding: 0; overflow: hidden; border: 1px solid var(--primary); } .leaflet-popup-content { margin: 0; width: 260px !important; color: var(--text-main); } .preview-card { width: 260px; cursor: pointer; } .preview-img { width: 100%; height: 130px; object-fit: cover; } .preview-info { padding: 12px; } .preview-title { font-weight: bold; font-size: 17px; color: var(--primary); } .mini-tag { display: inline-block; font-size: 10px; padding: 2px 6px; margin: 2px 2px 0 0; border-radius: 4px; background: rgba(243, 156, 18, 0.1); color: var(--primary); font-weight: bold; } 
+
+/* =========================================
+   7. 手機適配 (直式 / 橫式優化)
+   ========================================= */
+@media (min-width: 768px) { .content-wrapper { max-width: 480px; } .logo-static { width: 120px; height: 120px; font-size: 60px; } p, ul, li { font-size: 16px !important; } .btn-start { padding: 18px 80px; font-size: 20px; } }
+@media (max-width: 768px) and (orientation: portrait) { 
+    #top-ui { left: calc(15px + env(safe-area-inset-left, 0px)); transform: none; width: calc(100% - 30px); } 
+    #gps-val-text { left: calc(15px + env(safe-area-inset-left, 0px)); right: auto; } 
+}
+@media (max-height: 500px) and (orientation: landscape) { 
+    #top-ui { width: 280px; left: 15px; transform: none; top: 10px; gap: 4px; } 
+    #category-chips .chip { padding: 4px 10px; font-size: 11px; }
+    #route-info-panel { top: 90px; }
+    .map-controls { flex-direction: row; bottom: 15px; left: 50%; transform: translateX(-50%); right: auto; gap: 8px; } 
+    .control-btn { width: 40px; height: 40px; font-size: 16px; } 
+    #gps-val-text { left: 15px; right: auto; bottom: 65px; }
+    #card { max-height: 65vh; padding: 15px; } 
+}
