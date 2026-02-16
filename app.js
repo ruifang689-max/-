@@ -20,31 +20,41 @@ function installPWA() {
 }
 
 // =========================================
-// 1. 三階段進入動線與教學邏輯
+// 1. 三階段進入動線與教學邏輯 (精準控制)
 // =========================================
 function enterMap() {
-    document.getElementById('welcome-screen').style.opacity = '0';
+    const welcome = document.getElementById('welcome-screen');
+    const tutorial = document.getElementById('tutorial-overlay');
+    
+    // 開幕介面淡出
+    welcome.style.opacity = '0';
+    
     setTimeout(() => {
-        document.getElementById('welcome-screen').style.display = 'none';
-        document.getElementById('tutorial-overlay').style.display = 'flex';
+        welcome.style.display = 'none'; // 徹底移除
+        tutorial.style.display = 'flex'; // 顯示說明容器
+        void tutorial.offsetWidth; // 強制瀏覽器重繪 (極其重要，確保動畫生效)
+        tutorial.style.opacity = '1'; // 說明介面淡入
     }, 400);
 }
+
 function nextTutorial() {
     document.getElementById('tut-step-1').style.display = 'none';
     document.getElementById('tut-step-2').style.display = 'block';
 }
+
 function prevTutorial() {
     document.getElementById('tut-step-2').style.display = 'none';
     document.getElementById('tut-step-1').style.display = 'block';
 }
+
 function finishTutorial() {
     const overlay = document.getElementById('tutorial-overlay');
-    overlay.style.opacity = '0';
+    overlay.style.opacity = '0'; // 說明介面淡出
+    
     setTimeout(() => {
         overlay.style.display = 'none';
         localStorage.setItem('ruifang_welcomed', 'true');
-        // 修復地圖灰塊 bug，強制地圖重繪
-        map.invalidateSize(); 
+        map.invalidateSize(); // 確保底層地圖尺寸正確載入
     }, 400);
 }
 
