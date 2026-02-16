@@ -28,7 +28,7 @@
         <h2 class="title-text" style="letter-spacing: 2px;">瑞芳導覽</h2>
     </div>
 
-    <div id="startup-screen">
+    <div id="welcome-screen">
         <div class="content-wrapper">
             <div class="logo-static">瑞</div>
             <h1 class="title-text" data-i18n="splash_title">瑞芳導覽 App</h1>
@@ -37,32 +37,49 @@
             </p>
             
             <div style="margin-top: 20px; width: 100%; max-width: 300px;">
-                <label style="font-weight: bold; display: block; margin-bottom: 10px; color: var(--primary);" data-i18n="lang">語言 / Language</label>
+                <label style="font-weight: bold; display: block; margin-bottom: 10px; color: var(--text-main);" data-i18n="lang">語言 / Language</label>
                 <select id="lang-select-startup" onchange="applyLanguage(this.value)" class="modal-select">
-                    <option value="zh">繁體中文</option>
-                    <option value="en">English</option>
-                    <option value="ja">日本語</option>
+                    <option value="zh">繁體中文 (🇹🇼)</option>
+                    <option value="en">English (🇺🇸)</option>
+                    <option value="ja">日本語 (🇯🇵)</option>
+                    <option value="ko">한국어 (🇰🇷)</option>
+                    <option value="vi">Tiếng Việt (🇻🇳)</option>
                 </select>
             </div>
 
-            <div style="margin-top: 30px; text-align: left; width: 100%; max-width: 300px; font-size: 14px; color: var(--text-main);">
-                <h3 style="border-bottom: 1px solid var(--primary); padding-bottom: 8px; margin-bottom: 10px; color: var(--primary);" data-i18n="ui_guide">介面功能說明</h3>
-                <ul style="list-style: none; padding: 0; color: var(--text-sub);">
-                    <li style="margin: 12px 0;">🔍 <b style="color: var(--text-main);">搜尋與標籤</b>：上方可快速尋找與篩選。</li>
-                    <li style="margin: 12px 0;">📍 <b style="color: var(--text-main);">長按新增</b>：地圖長按可新增私房景點。</li>
-                    <li style="margin: 12px 0;">🌡️ <b style="color: var(--text-main);">天氣資訊</b>：右上方顯示即時氣溫。</li>
-                    <li style="margin: 12px 0;"><span style="color: var(--primary);">●</span> <b style="color: var(--text-main);">分享鍵</b>：藍色，快速分享景點。</li>
-                    <li style="margin: 12px 0;"><span style="color: var(--success);">●</span> <b style="color: var(--text-main);">指北針</b>：綠色，指引前進方向。</li>
-                </ul>
+            <div class="link-box" style="max-width: 300px;">
+                <a href="mailto:ruifang689@gmail.com"><i class="fas fa-envelope"></i> ruifang689@gmail.com</a>
+                <a href="https://docs.google.com/forms/d/e/1FAIpQLSfi76mygYPT0XeWDkTVjy1F3NjWTW1qveFKTV2bC5TlJ6yybA/viewform?usp=header" target="_blank"><i class="fas fa-clipboard-list"></i> <span data-i18n="form_link">填寫意見問卷</span></a>
             </div>
 
-            <button class="btn-start" onclick="closeStartup()" data-i18n="start_btn">開始探索</button>
+            <button class="btn-start" onclick="enterMap()" data-i18n="enter_map">進入地圖</button>
+        </div>
+    </div>
 
-            <div style="margin-top: 30px; margin-bottom: 40px; text-align: center;">
-                <span style="font-size: 12px; color: var(--text-sub);" data-i18n="contact">聯絡開發團隊</span><br>
-                <a href="mailto:ruifang689@gmail.com" style="color: var(--primary); font-size: 14px; text-decoration: none; font-weight: bold;">
-                    📧 ruifang689@gmail.com
-                </a>
+    <div id="tutorial-overlay">
+        <div class="tutorial-box">
+            <div id="tut-step-1">
+                <h3 data-i18n="tut_step1_title"><i class="fas fa-search"></i> 功能說明 (1/2)</h3>
+                <ul>
+                    <li style="margin: 10px 0;">🔍 <b data-i18n="tut_search">搜尋與標籤</b>：上方可快速尋找與篩選景點。</li>
+                    <li style="margin: 10px 0;">📍 <b data-i18n="tut_add">長按新增</b>：地圖長按可新增私房景點。</li>
+                    <li style="margin: 10px 0;">🌡️ <b data-i18n="tut_weather">天氣資訊</b>：右上方顯示即時氣溫。</li>
+                </ul>
+                <div class="tutorial-btns">
+                    <button class="btn-fill" style="width: 100%;" onclick="nextTutorial()" data-i18n="tut_next">下一步</button>
+                </div>
+            </div>
+            <div id="tut-step-2" style="display:none;">
+                <h3 data-i18n="tut_step2_title"><i class="fas fa-tools"></i> 快捷功能 (2/2)</h3>
+                <ul>
+                    <li style="margin: 10px 0;">⚙️ <b data-i18n="tut_settings">設定</b>：可切換主題色與分享地圖。</li>
+                    <li style="margin: 10px 0;">🧭 <b data-i18n="tut_compass">指北針</b>：綠色按鈕，指引方向。</li>
+                    <li style="margin: 10px 0;"><span style="color: var(--primary);">●</span> <b data-i18n="tut_share">分享鍵</b>：快速分享景點連結給好友。</li>
+                </ul>
+                <div class="tutorial-btns">
+                    <button class="btn-outline" onclick="prevTutorial()" data-i18n="tut_prev">前一步</button>
+                    <button class="btn-fill" onclick="finishTutorial()" data-i18n="tut_finish">開始使用</button>
+                </div>
             </div>
         </div>
     </div>
@@ -71,28 +88,20 @@
 
     <div id="top-ui">
         <input id="search" placeholder="🔍 搜尋景點或長按地圖標記..." data-i18n="search_ph">
-        
         <div id="category-chips">
-            <div class="chip active" onclick="filterSpots('all', this)">🌟 全部</div>
-            <div class="chip" onclick="filterSpots('美食', this)">🍜 美食</div>
-            <div class="chip" onclick="filterSpots('歷史', this)">🏛️ 歷史</div>
-            <div class="chip" onclick="filterSpots('自然', this)">⛰️ 自然景觀</div>
-            <div class="chip" onclick="filterSpots('自訂', this)">📍 我的標記</div>
+            <div class="chip active" onclick="filterSpots('all', this)" data-i18n="chip_all">🌟 全部</div>
+            <div class="chip" onclick="filterSpots('美食', this)" data-i18n="chip_food">🍜 美食</div>
+            <div class="chip" onclick="filterSpots('歷史', this)" data-i18n="chip_history">🏛️ 歷史</div>
+            <div class="chip" onclick="filterSpots('自然', this)" data-i18n="chip_nature">⛰️ 自然景觀</div>
+            <div class="chip" onclick="filterSpots('自訂', this)" data-i18n="chip_custom">📍 我的標記</div>
         </div>
-
-        <div id="map-center-panel">
-            <i class="fas fa-map-marker-alt" style="color:var(--primary)"></i>
-            <span id="addr-text" data-i18n="locating">定位中...</span>
-        </div>
+        <div id="map-center-panel"><i class="fas fa-map-marker-alt" style="color:var(--primary)"></i><span id="addr-text" data-i18n="locating">定位中...</span></div>
         <div id="suggest"></div>
     </div>
 
     <div id="route-info-panel">
         <i class="fas fa-car" style="font-size:20px; color:var(--primary);"></i>
-        <div class="route-data">
-            <span id="route-time" class="route-time">-- 分鐘</span>
-            <span id="route-dist" class="route-dist">-- km</span>
-        </div>
+        <div class="route-data"><span id="route-time" class="route-time">-- 分鐘</span><span id="route-dist" class="route-dist">-- km</span></div>
         <i class="fas fa-times-circle route-close" onclick="closeNav()"></i>
     </div>
 
@@ -107,7 +116,7 @@
     </div>
 
     <div id="fav-list-panel"></div>
-    <div id="gps-val-text">GPS: 定位中...</div>
+    <div id="gps-val-text" data-i18n="gps_locating">GPS: 定位中...</div>
     <div id="map"></div>
 
     <div id="card">
@@ -134,16 +143,28 @@
             
             <h3 data-i18n="lang"><i class="fas fa-globe"></i> 語言 / Language</h3>
             <select id="lang-select-settings" onchange="applyLanguage(this.value)" class="modal-select">
-                <option value="zh">繁體中文</option>
-                <option value="en">English</option>
-                <option value="ja">日本語</option>
+                <option value="zh">繁體中文 (🇹🇼)</option>
+                <option value="en">English (🇺🇸)</option>
+                <option value="ja">日本語 (🇯🇵)</option>
+                <option value="ko">한국어 (🇰🇷)</option>
+                <option value="vi">Tiếng Việt (🇻🇳)</option>
             </select>
 
-            <h3 style="margin-top:10px;"><i class="fas fa-envelope"></i> 聯絡團隊</h3>
-            <a href="mailto:ruifang689@gmail.com" style="color: var(--primary); text-decoration: none; font-weight: bold; font-size: 16px; text-align: center; display: block; padding: 10px; background: rgba(243, 156, 18, 0.1); border-radius: 12px;">
-                ruifang689@gmail.com
-            </a>
+            <h3 data-i18n="theme"><i class="fas fa-palette"></i> 主題顏色</h3>
+            <select id="theme-select" onchange="changeTheme(this.value)" class="modal-select">
+                <option value="#f39c12">橘色 (預設)</option>
+                <option value="#007bff">藍色</option>
+                <option value="#28a745">綠色</option>
+                <option value="#8e44ad">紫色</option>
+                <option value="#e84393">粉色</option>
+                <option value="#333333">黑白</option>
+                <option value="custom">自訂顏色...</option>
+            </select>
+            <input type="color" id="custom-color-picker" style="display:none; width:100%; margin-top:5px; height: 40px; border:none; border-radius:10px;" onchange="applyCustomTheme(this.value)">
 
+            <button class="modal-save" style="margin-top:10px; background:var(--primary);" onclick="shareAppMap()">
+                <i class="fas fa-share-square"></i> <span data-i18n="share_map">分享導覽地圖</span>
+            </button>
             <button id="install-btn" style="display: none; margin-top: 10px; background-color: var(--success);" class="modal-save" onclick="installPWA()">
                 ⬇️ 將 App 安裝至桌面
             </button>
@@ -174,21 +195,19 @@
 
     <script>
         // =========================================
-        // 0. PWA 註冊與安裝邏輯
+        // 0. PWA 註冊與安裝
         // =========================================
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
                 navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW 未註冊'));
             });
         }
-
         let deferredPrompt;
         window.addEventListener('beforeinstallprompt', (e) => {
             e.preventDefault(); deferredPrompt = e;
             const installBtn = document.getElementById('install-btn');
             if(installBtn) installBtn.style.display = 'block';
         });
-
         function installPWA() {
             if (!deferredPrompt) return;
             document.getElementById('install-btn').style.display = 'none';
@@ -197,25 +216,96 @@
         }
 
         // =========================================
-        // 1. 本地多國語言字典 (i18n)
+        // 1. 三階段進入動線與教學邏輯
+        // =========================================
+        function enterMap() {
+            document.getElementById('welcome-screen').style.display = 'none';
+            document.getElementById('tutorial-overlay').style.display = 'flex';
+        }
+        function nextTutorial() {
+            document.getElementById('tut-step-1').style.display = 'none';
+            document.getElementById('tut-step-2').style.display = 'block';
+        }
+        function prevTutorial() {
+            document.getElementById('tut-step-2').style.display = 'none';
+            document.getElementById('tut-step-1').style.display = 'block';
+        }
+        function finishTutorial() {
+            document.getElementById('tutorial-overlay').style.display = 'none';
+            localStorage.setItem('ruifang_welcomed', 'true');
+        }
+
+        // =========================================
+        // 2. 主題色與分享功能
+        // =========================================
+        function changeTheme(color) {
+            if (color === 'custom') {
+                document.getElementById('custom-color-picker').style.display = 'block';
+                document.getElementById('custom-color-picker').click();
+            } else {
+                document.getElementById('custom-color-picker').style.display = 'none';
+                applyCustomTheme(color);
+            }
+        }
+        function applyCustomTheme(color) {
+            document.documentElement.style.setProperty('--primary', color);
+            document.documentElement.style.setProperty('--logo-border', color);
+            localStorage.setItem('ruifang_theme', color);
+        }
+        // 分享整個 App 網址
+        function shareAppMap() {
+            const shareData = { title: '瑞芳導覽地圖 App', text: '快來看看這個瑞芳專屬的智慧導覽地圖！', url: 'https://ruifang689-max.github.io/-/' };
+            if (navigator.share) navigator.share(shareData).catch(()=>{}); 
+            else { navigator.clipboard.writeText(shareData.url).then(() => alert('✅ 網址已複製！')); }
+        }
+
+        // =========================================
+        // 3. 多國語言字典 (含韓文、越南文)
         // =========================================
         const translations = {
             'zh': {
-                splash_title: "瑞芳導覽 App", splash_desc: "致力於提供瑞芳地區最精準的在地導覽，帶領您深度探索山城之美。", lang: "語言 / Language", ui_guide: "介面功能說明", start_btn: "開始探索", contact: "聯絡開發團隊", settings: "系統設定", close: "關閉",
-                search_ph: "🔍 搜尋景點或長按新增...", locating: "定位中...", food: "在地飲食", highlights: "推薦亮點", history: "簡介歷史", transport: "交通方式", nav: " 導航", ai: " 行程規劃"
+                splash_title: "瑞芳導覽 App", splash_desc: "致力於提供瑞芳地區最精準的在地導覽，帶領您深度探索山城之美。", lang: "語言 / Language", enter_map: "進入地圖", form_link: "填寫意見問卷",
+                tut_step1_title: "功能說明 (1/2)", tut_search: "搜尋與標籤", tut_add: "長按新增", tut_weather: "天氣資訊", tut_next: "下一步",
+                tut_step2_title: "快捷功能 (2/2)", tut_settings: "設定", tut_compass: "指北針", tut_share: "分享鍵", tut_prev: "前一步", tut_finish: "開始使用",
+                settings: "系統設定", theme: "主題顏色", share_map: "分享導覽地圖", close: "關閉", search_ph: "🔍 搜尋景點或長按新增...", locating: "定位中...", 
+                food: "在地飲食", highlights: "推薦亮點", history: "簡介歷史", transport: "交通方式", nav: " 導航", ai: " 行程規劃",
+                chip_all: "🌟 全部", chip_food: "🍜 美食", chip_history: "🏛️ 歷史", chip_nature: "⛰️ 自然", chip_custom: "📍 標記"
             },
             'en': {
-                splash_title: "Ruifang Guide", splash_desc: "Dedicated to providing the most accurate local guide in Ruifang.", lang: "Language", ui_guide: "UI Guide", start_btn: "Start", contact: "Contact Team", settings: "Settings", close: "Close",
-                search_ph: "🔍 Search or long press...", locating: "Locating...", food: "Food", highlights: "Highlights", history: "History", transport: "Transport", nav: " Navigate", ai: " Plan Trip"
+                splash_title: "Ruifang Guide", splash_desc: "The most accurate local guide in Ruifang.", lang: "Language", enter_map: "Enter Map", form_link: "Feedback Form",
+                tut_step1_title: "Features (1/2)", tut_search: "Search & Tags", tut_add: "Long Press Add", tut_weather: "Weather", tut_next: "Next",
+                tut_step2_title: "Shortcuts (2/2)", tut_settings: "Settings", tut_compass: "Compass", tut_share: "Share", tut_prev: "Back", tut_finish: "Start",
+                settings: "Settings", theme: "Theme Color", share_map: "Share Map", close: "Close", search_ph: "🔍 Search or long press...", locating: "Locating...", 
+                food: "Food", highlights: "Highlights", history: "History", transport: "Transport", nav: " Navigate", ai: " Plan Trip",
+                chip_all: "🌟 All", chip_food: "🍜 Food", chip_history: "🏛️ History", chip_nature: "⛰️ Nature", chip_custom: "📍 Custom"
             },
             'ja': {
-                splash_title: "瑞芳(ルイファン)ガイド", splash_desc: "瑞芳エリアの正確なローカルガイドを提供し、山の美しさを探索します。", lang: "言語 / Language", ui_guide: "UIガイド", start_btn: "開始する", contact: "お問い合わせ", settings: "設定", close: "閉じる",
-                search_ph: "🔍 検索または長押し...", locating: "位置取得中...", food: "地元グルメ", highlights: "見どころ", history: "歴史", transport: "アクセス", nav: " ナビ", ai: " ルート計画"
+                splash_title: "瑞芳ガイド", splash_desc: "瑞芳の正確なローカルガイド。", lang: "言語", enter_map: "マップへ", form_link: "アンケート",
+                tut_step1_title: "機能 (1/2)", tut_search: "検索とタグ", tut_add: "長押しで追加", tut_weather: "天気", tut_next: "次へ",
+                tut_step2_title: "ショートカット (2/2)", tut_settings: "設定", tut_compass: "コンパス", tut_share: "共有", tut_prev: "戻る", tut_finish: "始める",
+                settings: "設定", theme: "テーマ色", share_map: "マップを共有", close: "閉じる", search_ph: "🔍 検索または長押し...", locating: "取得中...", 
+                food: "グルメ", highlights: "見どころ", history: "歴史", transport: "アクセス", nav: " ナビ", ai: " ルート",
+                chip_all: "🌟 全て", chip_food: "🍜 食事", chip_history: "🏛️ 歴史", chip_nature: "⛰️ 自然", chip_custom: "📍 カスタム"
+            },
+            'ko': {
+                splash_title: "루이팡 가이드", splash_desc: "루이팡 지역의 정확한 로컬 가이드.", lang: "언어 / Language", enter_map: "지도 입장", form_link: "설문조사",
+                tut_step1_title: "기능 (1/2)", tut_search: "검색 및 태그", tut_add: "길게 눌러 추가", tut_weather: "날씨", tut_next: "다음",
+                tut_step2_title: "단축키 (2/2)", tut_settings: "설정", tut_compass: "나침반", tut_share: "공유", tut_prev: "이전", tut_finish: "시작하기",
+                settings: "설정", theme: "테마 색상", share_map: "지도 공유", close: "닫기", search_ph: "🔍 검색 또는 길게 누르기...", locating: "위치 확인 중...", 
+                food: "음식", highlights: "하이라이트", history: "역사", transport: "교통", nav: " 내비게이션", ai: " 추천",
+                chip_all: "🌟 전체", chip_food: "🍜 음식", chip_history: "🏛️ 역사", chip_nature: "⛰️ 자연", chip_custom: "📍 마커"
+            },
+            'vi': {
+                splash_title: "Bản đồ Ruifang", splash_desc: "Hướng dẫn du lịch địa phương chính xác nhất.", lang: "Ngôn ngữ", enter_map: "Vào Bản Đồ", form_link: "Bảng câu hỏi",
+                tut_step1_title: "Chức năng (1/2)", tut_search: "Tìm kiếm", tut_add: "Nhấn giữ thêm", tut_weather: "Thời tiết", tut_next: "Tiếp",
+                tut_step2_title: "Phím tắt (2/2)", tut_settings: "Cài đặt", tut_compass: "La bàn", tut_share: "Chia sẻ", tut_prev: "Trước", tut_finish: "Bắt đầu",
+                settings: "Cài đặt", theme: "Màu chủ đề", share_map: "Chia sẻ Bản đồ", close: "Đóng", search_ph: "🔍 Tìm kiếm...", locating: "Đang định vị...", 
+                food: "Ẩm thực", highlights: "Nổi bật", history: "Lịch sử", transport: "Di chuyển", nav: " Chỉ đường", ai: " Hành trình",
+                chip_all: "🌟 Tất cả", chip_food: "🍜 Ăn", chip_history: "🏛️ Lịch sử", chip_nature: "⛰️ Tự nhiên", chip_custom: "📍 Đã lưu"
             }
         };
 
         let currentLang = localStorage.getItem('ruifang_lang') || 'zh';
-
         function applyLanguage(lang) {
             currentLang = lang; localStorage.setItem('ruifang_lang', lang);
             const t = translations[lang]; if(!t) return;
@@ -235,19 +325,11 @@
             if(targetSpot && document.getElementById("card").classList.contains("open")) renderCardButtons(targetSpot, t);
         }
 
-        function closeStartup() {
-            const startupScreen = document.getElementById('startup-screen');
-            startupScreen.style.transition = "opacity 0.4s ease";
-            startupScreen.style.opacity = "0";
-            setTimeout(() => { startupScreen.style.display = 'none'; }, 400); 
-            localStorage.setItem('ruifang_welcomed', 'true');
-        }
-
         function openSettings() { document.getElementById('settings-modal-overlay').style.display = 'flex'; }
         function closeSettings() { document.getElementById('settings-modal-overlay').style.display = 'none'; }
 
         // =========================================
-        // 2. 天氣與地圖初始化
+        // 4. 天氣與地圖初始化
         // =========================================
         async function fetchWeather() {
             try {
@@ -255,10 +337,10 @@
                 const data = await res.json();
                 const temp = Math.round(data.current_weather.temperature);
                 const code = data.current_weather.weathercode;
-                let iconClass = 'fa-cloud-sun'; let iconColor = '#f39c12'; 
-                if(code === 0) { iconClass = 'fa-sun'; iconColor = '#f1c40f'; } else if(code <= 3) { iconClass = 'fa-cloud-sun'; iconColor = '#f39c12'; } else if(code <= 67 || (code >= 80 && code <= 82)) { iconClass = 'fa-cloud-rain'; iconColor = '#3498db'; } 
+                let iconClass = 'fa-cloud-sun'; 
+                if(code === 0) iconClass = 'fa-sun'; else if(code > 3) iconClass = 'fa-cloud-rain'; 
                 document.getElementById('weather-temp').innerText = `${temp}°C`;
-                const iconEl = document.querySelector('#weather-box i'); iconEl.className = `fas ${iconClass}`; iconEl.style.color = iconColor;
+                document.querySelector('#weather-box i').className = `fas ${iconClass}`; 
             } catch (e) { document.getElementById('weather-temp').innerText = "--"; }
         }
 
@@ -297,17 +379,15 @@
         });
 
         // =========================================
-        // 3. 景點與 Firebase 設定
+        // 5. 景點與 Firebase 設定
         // =========================================
         const spots = [
-            { name: "瑞芳", lat: 25.108, lng: 121.805, tags: ["交通", "美食"], keywords: ["火車站", "龍鳳腿", "胡椒餅"], highlights: "瑞芳美食廣場", food: "龍鳳腿、胡椒餅、牛肉麵", history: "進入九份與平溪線門戶。", transport: "台鐵瑞芳站" },
+            { name: "瑞芳", lat: 25.108, lng: 121.805, tags: ["交通", "美食"], keywords: ["火車站", "龍鳳腿", "胡椒餅"], highlights: "瑞芳美食廣場", food: "龍鳳腿、胡椒餅", history: "進入九份與平溪線門戶。", transport: "台鐵瑞芳站" },
             { name: "瑞芳後站老街", lat: 25.109, lng: 121.806, tags: ["歷史", "美食"], keywords: ["保雲芋圓", "老街"], highlights: "瑞芳創始芋圓", food: "保雲芋圓", history: "早期礦工的聚集地。", transport: "瑞芳火車站後站" },
-            { name: "九份老街", lat: 25.1099, lng: 121.8452, tags: ["歷史", "美食"], keywords: ["阿妹茶樓", "芋圓", "山城"], highlights: "阿妹茶樓、豎崎路", food: "阿柑姨芋圓、草仔粿", history: "黃金山城。", transport: "客運 788/965" },
-            { name: "猴硐貓村", lat: 25.086, lng: 121.828, tags: ["歷史"], keywords: ["貓", "瑞三整煤廠"], highlights: "貓咪療癒、整煤廠遺跡", food: "礦工麵", history: "曾為全台煤礦產量第一。", transport: "台鐵猴硐站" },
-            { name: "金瓜石黃金博物館", lat: 25.1091, lng: 121.8576, tags: ["歷史"], keywords: ["金瓜石", "礦工便當"], highlights: "大金磚、黃金神社", food: "礦工便當", history: "昔日亞洲第一金礦山。", transport: "客運 788/856" },
-            { name: "無耳茶壺山", lat: 25.1063, lng: 121.8659, tags: ["自然"], keywords: ["海景", "爬山"], highlights: "絕美海景", food: "無", history: "因山形狀似無耳茶壺得名。", transport: "金瓜石步行登山" },
-            { name: "深澳鐵道自行車", lat: 25.133, lng: 121.824, tags: ["自然"], keywords: ["自行車", "海景"], highlights: "海景鐵道與光雕隧道", food: "小卷米粉", history: "昔日運煤鐵路轉型。", transport: "公車T99" },
-            { name: "不厭亭", lat: 25.0895, lng: 121.8473, tags: ["自然"], keywords: ["寂寞公路", "102縣道"], highlights: "寂寞公路", food: "無", history: "名字取自李白詩句。", transport: "自行開車" }
+            { name: "九份老街", lat: 25.1099, lng: 121.8452, tags: ["歷史", "美食"], keywords: ["阿妹茶樓", "芋圓", "山城"], highlights: "阿妹茶樓", food: "阿柑姨芋圓", history: "黃金山城。", transport: "客運 788/965" },
+            { name: "猴硐貓村", lat: 25.086, lng: 121.828, tags: ["歷史"], keywords: ["貓", "瑞三整煤廠"], highlights: "貓咪療癒", food: "礦工麵", history: "全台煤礦產量第一。", transport: "台鐵猴硐站" },
+            { name: "金瓜石黃金博物館", lat: 25.1091, lng: 121.8576, tags: ["歷史"], keywords: ["金瓜石", "礦工便當"], highlights: "大金磚", food: "礦工便當", history: "亞洲第一金礦山。", transport: "客運 788/856" },
+            { name: "無耳茶壺山", lat: 25.1063, lng: 121.8659, tags: ["自然"], keywords: ["海景", "爬山"], highlights: "絕美海景", food: "無", history: "山形似無耳茶壺。", transport: "金瓜石步行登山" }
         ];
 
         let targetSpot = null; let currentRoute = null;
@@ -333,18 +413,17 @@
                 import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js").then(fs => { db = fs.getFirestore(app); console.log("Firebase 已啟用"); });
             }).catch(e => console.log(e));
         }
-
         async function saveFavToCloud() {
             if (!db) return; 
             try { const { doc, setDoc } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"); await setDoc(doc(db, "users", userId), { favorites: myFavs }, { merge: true }); } catch(e) {}
         }
 
         // =========================================
-        // 4. 圖釘、卡片與地圖操作
+        // 6. 圖釘、卡片與地圖操作
         // =========================================
         const cluster = L.markerClusterGroup(); map.addLayer(cluster);
         function calculateWalk(lat, lng) { if(!userPos) return "--"; const mins = Math.round(map.distance(userPos, [lat, lng]) / 80); return mins < 1 ? "1分內" : `約 ${mins} 分`; }
-        const createCustomPin = (tags) => { let cls = 'fa-map-marker-alt', col = '#ea4335'; if (tags.includes('美食')) { cls = 'fa-utensils'; col = '#f39c12'; } else if (tags.includes('歷史')) { cls = 'fa-landmark'; col = '#7f8c8d'; } else if (tags.includes('自然')) { cls = 'fa-leaf'; col = '#2ecc71'; } else if (tags.includes('自訂')) { cls = 'fa-star'; col = '#f1c40f'; } return L.divIcon({ className: 'custom-pin-wrap', html: `<div class="gmap-pin" style="background-color:${col}"><i class="fas ${cls}"></i></div>`, iconSize: [32,32], iconAnchor: [16,38], popupAnchor: [0,-38] }); };
+        const createCustomPin = (tags) => { let cls = 'fa-map-marker-alt', col = '#ea4335'; if (tags.includes('美食')) { cls = 'fa-utensils'; col = 'var(--primary)'; } else if (tags.includes('歷史')) { cls = 'fa-landmark'; col = '#7f8c8d'; } else if (tags.includes('自然')) { cls = 'fa-leaf'; col = '#2ecc71'; } else if (tags.includes('自訂')) { cls = 'fa-star'; col = 'var(--accent)'; } return L.divIcon({ className: 'custom-pin-wrap', html: `<div class="gmap-pin" style="background-color:${col}"><i class="fas ${cls}"></i></div>`, iconSize: [32,32], iconAnchor: [16,38], popupAnchor: [0,-38] }); };
 
         function addMarkerToMap(s) {
             if (!s.tags.includes('自訂') && !s.wikiImg) fetch(`https://zh.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(s.name)}`).then(r=>r.json()).then(d=>{s.wikiImg=d.thumbnail?.source;}).catch(()=>{});
@@ -391,11 +470,11 @@
         function startNav() {
             if(!userPos || !targetSpot) return alert("請開啟 GPS 定位"); closeCard(); document.getElementById('route-time').innerText = "計算中..."; document.getElementById('route-dist').innerText = ""; document.getElementById('route-info-panel').style.display = 'flex';
             fetch(`https://router.project-osrm.org/route/v1/driving/${userPos.lng},${userPos.lat};${targetSpot.lng},${targetSpot.lat}?overview=full&geometries=geojson`)
-            .then(r => r.json()).then(data => { if(currentRoute) map.removeLayer(currentRoute); const route = data.routes[0]; const coords = route.geometry.coordinates.map(c => [c[1], c[0]]); currentRoute = L.polyline(coords, {color: '#f39c12', weight: 8}).addTo(map); map.fitBounds(currentRoute.getBounds(), {padding: [80, 80]}); document.getElementById('route-time').innerText = `${Math.round(route.duration / 60)} 分鐘`; document.getElementById('route-dist').innerText = `${(route.distance / 1000).toFixed(1)} km`; }).catch(() => { document.getElementById('route-time').innerText = "規劃失敗"; });
+            .then(r => r.json()).then(data => { if(currentRoute) map.removeLayer(currentRoute); const route = data.routes[0]; const coords = route.geometry.coordinates.map(c => [c[1], c[0]]); currentRoute = L.polyline(coords, {color: 'var(--primary)', weight: 8}).addTo(map); map.fitBounds(currentRoute.getBounds(), {padding: [80, 80]}); document.getElementById('route-time').innerText = `${Math.round(route.duration / 60)} 分鐘`; document.getElementById('route-dist').innerText = `${(route.distance / 1000).toFixed(1)} km`; }).catch(() => { document.getElementById('route-time').innerText = "規劃失敗"; });
         }
 
         // =========================================
-        // 5. 搜尋與工具
+        // 7. 搜尋與工具
         // =========================================
         const searchInput = document.getElementById("search"); const sugBox = document.getElementById("suggest");
         searchInput.addEventListener('focus', () => { if(!searchInput.value.trim()) renderDefaultSearch(); });
@@ -415,7 +494,15 @@
             const params = new URLSearchParams(window.location.search); const spotQuery = params.get('spot');
             if(spotQuery) { const s = spots.find(x => x.name === spotQuery); if(s) { setTimeout(() => { map.flyTo([s.lat, s.lng], 16); showCard(s); }, 1000); } }
             applyLanguage(currentLang); fetchWeather();
-            if(localStorage.getItem('ruifang_welcomed')) { document.getElementById('splash-screen').style.display = 'none'; document.getElementById('startup-screen').style.display = 'none'; }
+            
+            // 讀取儲存的主題色
+            const savedTheme = localStorage.getItem('ruifang_theme');
+            if (savedTheme) applyCustomTheme(savedTheme);
+
+            if(localStorage.getItem('ruifang_welcomed')) { 
+                document.getElementById('splash-screen').style.display = 'none'; 
+                document.getElementById('welcome-screen').style.display = 'none'; 
+            }
         };
     </script>
 </body>
