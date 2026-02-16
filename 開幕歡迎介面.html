@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>瑞芳導覽 - 黑白開幕介面測試</title>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+
+    <style>
+        /* =========================================
+           1. 基礎重置與黑白變數
+           ========================================= */
+        :root {
+            --bg-color: #ffffff;      /* 純白背景 */
+            --text-main: #111111;     /* 極黑字體 */
+            --text-sub: #555555;      /* 深灰次要字體 */
+            --border-color: #111111;  /* 黑色邊框 */
+            --btn-bg: #111111;        /* 黑色按鈕背景 */
+            --btn-text: #ffffff;      /* 白色按鈕字體 */
+            --hover-bg: #f5f5f5;      /* 淺灰懸停背景 */
+        }
+
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            font-family: -apple-system, "Microsoft JhengHei", sans-serif;
+            background-color: #e0e0e0; /* 模擬底層地圖的灰色背景 */
+        }
+
+        /* 模擬主畫面內容（點擊進入後會看到這個） */
+        .main-content {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            font-size: 20px;
+            color: #333;
+            font-weight: bold;
+        }
+
+        /* =========================================
+           2. 黑白風格開幕歡迎介面
+           ========================================= */
+        #welcome-screen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--bg-color);
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            overflow-y: auto;
+            box-sizing: border-box;
+            transition: opacity 0.4s ease, visibility 0.4s ease; /* 關閉時的淡出動畫 */
+        }
+
+        .content-wrapper {
+            width: 100%;
+            max-width: 320px; /* 手機版寬度 */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding-top: 5vh;
+            padding-bottom: 40px;
+        }
+
+        /* 黑色方框 Logo */
+        .logo-static {
+            width: 100px;
+            height: 100px;
+            border: 4px solid var(--border-color);
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 50px;
+            font-weight: bold;
+            border-radius: 15px; /* 微圓角柔和黑白銳利感 */
+        }
+
+        .title-text {
+            color: var(--text-main);
+            margin-top: 25px;
+            text-align: center;
+            letter-spacing: 2px;
+        }
+
+        .desc-text {
+            text-align: center;
+            color: var(--text-sub);
+            line-height: 1.6;
+            max-width: 300px;
+            margin-bottom: 30px;
+        }
+
+        /* 語言下拉選單 (黑白框線設計) */
+        .input-group {
+            width: 100%;
+            max-width: 300px;
+            margin-bottom: 25px;
+        }
+        .input-group label {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 10px;
+            color: var(--text-main);
+        }
+        .modal-select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 16px;
+            background: var(--bg-color);
+            color: var(--text-main);
+            outline: none;
+            font-family: inherit;
+            cursor: pointer;
+            transition: border-color 0.2s;
+        }
+
+        /* 聯絡與問卷按鈕區塊 (黑框線設計) */
+        .link-box {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            width: 100%;
+            max-width: 300px;
+            margin-bottom: 30px;
+        }
+        .link-box a {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 14px;
+            border-radius: 8px;
+            text-decoration: none;
+            color: var(--text-main);
+            font-weight: bold;
+            font-size: 15px;
+            border: 2px solid var(--border-color);
+            background: transparent;
+            transition: background 0.2s, color 0.2s;
+        }
+        .link-box a:hover, .link-box a:active {
+            background: var(--text-main);
+            color: var(--bg-color);
+        }
+        .link-box a i {
+            margin-right: 8px;
+            font-size: 18px;
+        }
+
+        /* 黑色實心進入按鈕 */
+        .btn-start {
+            width: 100%;
+            max-width: 300px;
+            padding: 16px 50px;
+            background: var(--btn-bg);
+            color: var(--btn-text);
+            border: 2px solid var(--btn-bg);
+            border-radius: 30px; /* 膠囊形狀按鈕 */
+            font-size: 18px;
+            font-weight: bold;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: transform 0.2s, background 0.3s;
+        }
+        .btn-start:hover {
+            background: #333333;
+            border-color: #333333;
+        }
+        .btn-start:active {
+            transform: scale(0.96);
+        }
+
+        /* 電腦與平板 (RWD) 版面微調 */
+        @media (min-width: 768px) { 
+            .content-wrapper { max-width: 400px; } 
+            .logo-static { width: 120px; height: 120px; font-size: 60px; } 
+            .btn-start { padding: 18px 80px; font-size: 20px; } 
+        }
+    </style>
+</head>
+<body>
+
+    <div id="welcome-screen">
+        <div class="content-wrapper">
+            
+            <div class="logo-static">瑞</div>
+            
+            <h1 class="title-text">瑞芳導覽 App</h1>
+            <p class="desc-text">
+                致力於提供瑞芳地區最精準的在地導覽，帶領您深度探索山城之美。
+            </p>
+            
+            <div class="input-group">
+                <label>語言 / Language</label>
+                <select id="lang-select-startup" onchange="changeLanguage(this.value)" class="modal-select">
+                    <option value="zh">繁體中文 (🇹🇼)</option>
+                    <option value="en">English (🇺🇸)</option>
+                    <option value="ja">日本語 (🇯🇵)</option>
+                    <option value="ko">한국어 (🇰🇷)</option>
+                    <option value="vi">Tiếng Việt (🇻🇳)</option>
+                </select>
+            </div>
+
+            <div class="link-box">
+                <a href="mailto:ruifang689@gmail.com">
+                    <i class="fas fa-envelope"></i> ruifang689@gmail.com
+                </a>
+                <a href="https://docs.google.com/forms/d/e/1FAIpQLSfi76mygYPT0XeWDkTVjy1F3NjWTW1qveFKTV2bC5TlJ6yybA/viewform?usp=header" target="_blank">
+                    <i class="fas fa-clipboard-list"></i> 填寫意見問卷
+                </a>
+            </div>
+
+            <button class="btn-start" onclick="enterMap()">進入地圖</button>
+
+        </div>
+    </div>
+
+    <div class="main-content">
+        您已進入地圖主畫面！<br>
+        (開幕介面已關閉)
+    </div>
+
+    <script>
+        // 模擬語言切換行為
+        function changeLanguage(lang) {
+            console.log("選擇了語言：" + lang);
+            // 這裡可以放入您原本的 applyLanguage(lang) 邏輯
+        }
+
+        // 點擊「進入地圖」後關閉開幕介面
+        function enterMap() {
+            const welcomeScreen = document.getElementById('welcome-screen');
+            // 添加淡出過場動畫
+            welcomeScreen.style.opacity = "0";
+            welcomeScreen.style.visibility = "hidden";
+            
+            console.log("已觸發進入地圖，準備顯示教學覆蓋層(Tutorial Overlay)");
+        }
+    </script>
+
+</body>
+</html>
