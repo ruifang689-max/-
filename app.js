@@ -379,15 +379,27 @@ const cardEl = document.getElementById("card"); let touchStartY = 0, isSwiping =
 window.onload = () => {
     const params = new URLSearchParams(window.location.search); const spotQuery = params.get('spot');
     if(spotQuery) { const s = spots.find(x => x.name === spotQuery); if(s) { setTimeout(() => { map.flyTo([s.lat, s.lng], 16); showCard(s); }, 1000); } }
+    
     applyLanguage(currentLang); fetchWeather();
     
     const savedTheme = localStorage.getItem('ruifang_theme');
     if (savedTheme) { applyCustomTheme(savedTheme); } else { applyCustomTheme('#007bff'); }
 
+    const splash = document.getElementById('splash-screen');
+    const welcome = document.getElementById('welcome-screen');
+    const tutorial = document.getElementById('tutorial-overlay');
+
     if(localStorage.getItem('ruifang_welcomed')) { 
-        document.getElementById('splash-screen').style.display = 'none'; 
-        document.getElementById('welcome-screen').style.display = 'none'; 
-        document.getElementById('tutorial-overlay').style.display = 'none';
-        map.invalidateSize(); // 確保地圖尺寸正確
+        // 已經訪問過：全部隱藏，直接秀地圖
+        splash.style.display = 'none'; 
+        welcome.style.display = 'none'; 
+        tutorial.style.display = 'none';
+        map.invalidateSize(); 
+    } else {
+        // 第一次訪問：精準控制 3 秒黑白動畫 (2.5秒顯示 + 0.5秒淡出)
+        setTimeout(() => {
+            splash.style.opacity = '0';
+            setTimeout(() => { splash.style.display = 'none'; }, 500); // 確保徹底移除圖層
+        }, 2500);
     }
 };
