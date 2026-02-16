@@ -7,9 +7,15 @@
     <title>瑞芳導覽地圖 App</title>
 
     <script>
-        // 確保路徑結尾有斜線，並防破圖
         if (!window.location.pathname.endsWith('/') && !window.location.pathname.endsWith('.html') && window.location.hostname.includes('github.io')) {
             window.location.replace(window.location.pathname + '/' + window.location.search + window.location.hash);
+        }
+        
+        // 🌟 進網頁第一件事：強制殺掉舊版錯誤的 PWA 快取！
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                for(let registration of registrations) { registration.unregister(); }
+            });
         }
     </script>
 
@@ -22,11 +28,11 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.Default.css"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
-    <link rel="manifest" href="manifest.json">
+    <link rel="manifest" href="./manifest.json">
     <meta name="theme-color" content="#007bff"> 
-    <link rel="apple-touch-icon" href="icon-192.png">
+    <link rel="apple-touch-icon" href="./icon-192.png">
     
-    <link rel="stylesheet" href="style.css?v=5">
+    <link rel="stylesheet" href="./style.css?v=100">
 </head>
 <body id="main-body">
 
@@ -39,9 +45,7 @@
         <div class="welcome-wrapper">
             <div class="logo-static">瑞</div>
             <h1 class="welcome-title" data-i18n="splash_title">瑞芳導覽 App</h1>
-            <p class="welcome-desc" data-i18n="splash_desc">
-                致力於提供瑞芳地區最精準的在地導覽，帶領您深度探索山城之美。
-            </p>
+            <p class="welcome-desc" data-i18n="splash_desc">致力於提供瑞芳地區最精準的在地導覽，帶領您深度探索山城之美。</p>
             
             <div class="input-group">
                 <label data-i18n="lang">語言 / Language</label>
@@ -203,14 +207,13 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
 
-    <script src="app.js?v=5"></script>
+    <script src="./app.js?v=100"></script>
 
     <script>
         setTimeout(() => {
             const splash = document.getElementById('splash-screen');
             if (splash) splash.style.display = 'none';
-        }, 3000); 
+        }, 3500); 
     </script>
-
 </body>
 </html>
