@@ -7,6 +7,7 @@
     <title>瑞芳導覽地圖 App</title>
 
     <script>
+        // 確保路徑結尾有斜線，並防破圖
         if (!window.location.pathname.endsWith('/') && !window.location.pathname.endsWith('.html') && window.location.hostname.includes('github.io')) {
             window.location.replace(window.location.pathname + '/' + window.location.search + window.location.hash);
         }
@@ -25,7 +26,7 @@
     <meta name="theme-color" content="#007bff"> 
     <link rel="apple-touch-icon" href="icon-192.png">
     
-    <link rel="stylesheet" href="style.css?v=3">
+    <link rel="stylesheet" href="style.css?v=5">
 </head>
 <body id="main-body">
 
@@ -38,7 +39,9 @@
         <div class="welcome-wrapper">
             <div class="logo-static">瑞</div>
             <h1 class="welcome-title" data-i18n="splash_title">瑞芳導覽 App</h1>
-            <p class="welcome-desc" data-i18n="splash_desc">致力於提供瑞芳地區最精準的在地導覽，帶領您深度探索山城之美。</p>
+            <p class="welcome-desc" data-i18n="splash_desc">
+                致力於提供瑞芳地區最精準的在地導覽，帶領您深度探索山城之美。
+            </p>
             
             <div class="input-group">
                 <label data-i18n="lang">語言 / Language</label>
@@ -199,17 +202,15 @@
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
-    <script src="app.js?v=4"></script>
+
+    <script src="app.js?v=5"></script>
 
     <script>
         setTimeout(() => {
             const splash = document.getElementById('splash-screen');
             if (splash) splash.style.display = 'none';
-        }, 3000); // 3秒後不管怎樣直接砍掉動畫層
+        }, 3000); 
     </script>
-    
+
 </body>
 </html>
-
-
-
