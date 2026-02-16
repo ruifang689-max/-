@@ -38,15 +38,17 @@ let searchHistory = JSON.parse(localStorage.getItem('ruifang_search_history')) |
 // =========================================
 // 2. 三階段進入動線與教學邏輯
 // =========================================
+function toggleSkipIntro(isChecked) {
+    localStorage.setItem('ruifang_skip_intro', isChecked ? 'true' : 'false');
+}
+
 function enterMap() {
     const welcome = document.getElementById('welcome-screen');
     const tutorial = document.getElementById('tutorial-overlay');
-    
     welcome.style.opacity = '0';
     setTimeout(() => {
         welcome.style.display = 'none';
         tutorial.style.display = 'flex';
-        // 確保 display 切換後，瀏覽器有時間重繪再改變透明度
         setTimeout(() => { tutorial.style.opacity = '1'; }, 50);
     }, 400);
 }
@@ -63,8 +65,7 @@ function finishTutorial() {
     overlay.style.opacity = '0';
     setTimeout(() => {
         overlay.style.display = 'none';
-        localStorage.setItem('ruifang_welcomed', 'true');
-        if (typeof map !== 'undefined') map.invalidateSize(); // 確保地圖灰塊消失
+        if (typeof map !== 'undefined') map.invalidateSize(); 
     }, 400);
 }
 
@@ -91,6 +92,14 @@ function applyCustomTheme(color) {
         themeSelect.value = 'custom';
     }
 }
+function shareSpot() { 
+    if(!targetSpot) return; 
+    const spotUrl = new URL(window.location.href.split('?')[0]); 
+    spotUrl.searchParams.set('spot', targetSpot.name); 
+    const shareData = { title: `瑞芳導覽地圖 - ${targetSpot.name}`, text: `我在瑞芳地圖上發現了「${targetSpot.name}」！\n趕快點擊連結查看：`, url: spotUrl.toString() }; 
+    if (navigator.share) navigator.share(shareData).catch(()=>{}); 
+    else navigator.clipboard.writeText(`${shareData.text}\n${shareData.url}`).then(() => alert('✅ 已複製景點資訊與連結！')); 
+}
 function shareAppMap() {
     const shareData = { title: '瑞芳導覽地圖 App', text: '快來看看這個瑞芳專屬的智慧導覽地圖！', url: 'https://ruifang689-max.github.io/-/' };
     if (navigator.share) navigator.share(shareData).catch(()=>{}); 
@@ -101,11 +110,11 @@ function shareAppMap() {
 // 4. 多國語言字典
 // =========================================
 const translations = {
-    'zh': { splash_title: "瑞芳導覽 App", splash_desc: "致力於提供瑞芳地區最精準的在地導覽，帶領您深度探索山城之美。", lang: "語言 / Language", enter_map: "進入地圖", form_link: "填寫意見問卷", tut_step1_title: "功能說明 (1/2)", tut_search: "搜尋與標籤", tut_add: "長按新增", tut_weather: "天氣資訊", tut_next: "下一步", tut_step2_title: "快捷功能 (2/2)", tut_settings: "設定", tut_compass: "指北針", tut_share: "分享鍵", tut_prev: "前一步", tut_finish: "開始使用", settings: "系統設定", theme: "主題顏色", share_map_title: "推薦給好友", share_map: "分享導覽地圖", close: "關閉", search_ph: "🔍 搜尋景點或長按新增...", locating: "定位中...", food: "在地飲食", highlights: "推薦亮點", history: "簡介歷史", transport: "交通方式", nav: " 導航", ai: " 行程規劃", chip_all: "🌟 全部", chip_food: "🍜 美食", chip_history: "🏛️ 歷史", chip_nature: "⛰️ 自然", chip_custom: "📍 標記", contact: "聯絡開發團隊" },
-    'en': { splash_title: "Ruifang Guide", splash_desc: "The most accurate local guide in Ruifang.", lang: "Language", enter_map: "Enter Map", form_link: "Feedback Form", tut_step1_title: "Features (1/2)", tut_search: "Search & Tags", tut_add: "Long Press Add", tut_weather: "Weather", tut_next: "Next", tut_step2_title: "Shortcuts (2/2)", tut_settings: "Settings", tut_compass: "Compass", tut_share: "Share", tut_prev: "Back", tut_finish: "Start", settings: "Settings", theme: "Theme Color", share_map_title: "Recommend", share_map: "Share Map", close: "Close", search_ph: "🔍 Search or long press...", locating: "Locating...", food: "Food", highlights: "Highlights", history: "History", transport: "Transport", nav: " Navigate", ai: " Plan Trip", chip_all: "🌟 All", chip_food: "🍜 Food", chip_history: "🏛️ History", chip_nature: "⛰️ Nature", chip_custom: "📍 Custom", contact: "Contact Team" },
-    'ja': { splash_title: "瑞芳ガイド", splash_desc: "瑞芳の正確なローカルガイド。", lang: "言語", enter_map: "マップへ", form_link: "アンケート", tut_step1_title: "機能 (1/2)", tut_search: "検索とタグ", tut_add: "長押しで追加", tut_weather: "天気", tut_next: "次へ", tut_step2_title: "ショートカット (2/2)", tut_settings: "設定", tut_compass: "コンパス", tut_share: "共有", tut_prev: "戻る", tut_finish: "始める", settings: "設定", theme: "テーマ色", share_map_title: "友達に勧める", share_map: "マップを共有", close: "閉じる", search_ph: "🔍 検索または長押し...", locating: "取得中...", food: "グルメ", highlights: "見どころ", history: "歴史", transport: "アクセス", nav: " ナビ", ai: " ルート", chip_all: "🌟 全て", chip_food: "🍜 食事", chip_history: "🏛️ 歴史", chip_nature: "⛰️ 自然", chip_custom: "📍 カスタム", contact: "お問い合わせ" },
-    'ko': { splash_title: "루이팡 가이드", splash_desc: "루이팡 지역의 정확한 로컬 가이드.", lang: "언어 / Language", enter_map: "지도 입장", form_link: "설문조사", tut_step1_title: "기능 (1/2)", tut_search: "검색 및 태그", tut_add: "길게 눌러 추가", tut_weather: "날씨", tut_next: "다음", tut_step2_title: "단축키 (2/2)", tut_settings: "설정", tut_compass: "나침반", tut_share: "공유", tut_prev: "이전", tut_finish: "시작하기", settings: "설정", theme: "테마 색상", share_map_title: "친구에게 추천", share_map: "지도 공유", close: "닫기", search_ph: "🔍 검색 또는 길게 누르기...", locating: "위치 확인 중...", food: "음식", highlights: "하이라이트", history: "역사", transport: "교통", nav: " 내비게이션", ai: " 추천", chip_all: "🌟 전체", chip_food: "🍜 음식", chip_history: "🏛️ 역사", chip_nature: "⛰️ 자연", chip_custom: "📍 마커", contact: "개발팀에 문의" },
-    'vi': { splash_title: "Bản đồ Ruifang", splash_desc: "Hướng dẫn du lịch địa phương chính xác nhất.", lang: "Ngôn ngữ", enter_map: "Vào Bản Đồ", form_link: "Bảng câu hỏi", tut_step1_title: "Chức năng (1/2)", tut_search: "Tìm kiếm", tut_add: "Nhấn giữ thêm", tut_weather: "Thời tiết", tut_next: "Tiếp", tut_step2_title: "Phím tắt (2/2)", tut_settings: "Cài đặt", tut_compass: "La bàn", tut_share: "Chia sẻ", tut_prev: "Trước", tut_finish: "Bắt đầu", settings: "Cài đặt", theme: "Màu chủ đề", share_map_title: "Giới thiệu bạn bè", share_map: "Chia sẻ Bản đồ", close: "Đóng", search_ph: "🔍 Tìm kiếm...", locating: "Đang định vị...", food: "Ẩm thực", highlights: "Nổi bật", history: "Lịch sử", transport: "Di chuyển", nav: " Chỉ đường", ai: " Hành trình", chip_all: "🌟 Tất cả", chip_food: "🍜 Ăn", chip_history: "🏛️ Lịch sử", chip_nature: "⛰️ Tự nhiên", chip_custom: "📍 Đã lưu", contact: "Liên hệ" }
+    'zh': { splash_title: "瑞芳導覽 App", splash_desc: "致力於提供瑞芳地區最精準的在地導覽，帶領您深度探索山城之美。", lang: "語言 / Language", enter_map: "進入地圖", form_link: "填寫意見問卷", skip_intro: "啟動時略過開場與教學", tut_step1_title: "功能說明 (1/2)", tut_search: "搜尋與標籤", tut_add: "長按新增", tut_weather: "天氣資訊", tut_next: "下一步", tut_step2_title: "快捷功能 (2/2)", tut_settings: "設定", tut_compass: "指北針", tut_share: "分享鍵", tut_prev: "前一步", tut_finish: "開始使用", settings: "系統設定", theme: "主題顏色", share_map_title: "推薦給好友", share_map: "分享導覽地圖", close: "關閉", search_ph: "🔍 搜尋景點或長按新增...", locating: "定位中...", food: "在地飲食", highlights: "推薦亮點", history: "簡介歷史", transport: "交通方式", nav: " 導航", ai: " 行程規劃", chip_all: "🌟 全部", chip_food: "🍜 美食", chip_history: "🏛️ 歷史", chip_nature: "⛰️ 自然", chip_custom: "📍 標記", contact: "聯絡開發團隊" },
+    'en': { splash_title: "Ruifang Guide", splash_desc: "The most accurate local guide in Ruifang.", lang: "Language", enter_map: "Enter Map", form_link: "Feedback Form", skip_intro: "Skip intro on startup", tut_step1_title: "Features (1/2)", tut_search: "Search & Tags", tut_add: "Long Press Add", tut_weather: "Weather", tut_next: "Next", tut_step2_title: "Shortcuts (2/2)", tut_settings: "Settings", tut_compass: "Compass", tut_share: "Share", tut_prev: "Back", tut_finish: "Start", settings: "Settings", theme: "Theme Color", share_map_title: "Recommend", share_map: "Share Map", close: "Close", search_ph: "🔍 Search or long press...", locating: "Locating...", food: "Food", highlights: "Highlights", history: "History", transport: "Transport", nav: " Navigate", ai: " Plan Trip", chip_all: "🌟 All", chip_food: "🍜 Food", chip_history: "🏛️ History", chip_nature: "⛰️ Nature", chip_custom: "📍 Custom", contact: "Contact Team" },
+    'ja': { splash_title: "瑞芳ガイド", splash_desc: "瑞芳の正確なローカルガイド。", lang: "言語", enter_map: "マップへ", form_link: "アンケート", skip_intro: "起動時にイントロをスキップ", tut_step1_title: "機能 (1/2)", tut_search: "検索とタグ", tut_add: "長押しで追加", tut_weather: "天気", tut_next: "次へ", tut_step2_title: "ショートカット (2/2)", tut_settings: "設定", tut_compass: "コンパス", tut_share: "共有", tut_prev: "戻る", tut_finish: "始める", settings: "設定", theme: "テーマ色", share_map_title: "友達に勧める", share_map: "マップを共有", close: "閉じる", search_ph: "🔍 検索または長押し...", locating: "取得中...", food: "グルメ", highlights: "見どころ", history: "歴史", transport: "アクセス", nav: " ナビ", ai: " ルート", chip_all: "🌟 全て", chip_food: "🍜 食事", chip_history: "🏛️ 歴史", chip_nature: "⛰️ 自然", chip_custom: "📍 カスタム", contact: "お問い合わせ" },
+    'ko': { splash_title: "루이팡 가이드", splash_desc: "루이팡 지역의 정확한 로컬 가이드.", lang: "언어 / Language", enter_map: "지도 입장", form_link: "설문조사", skip_intro: "시작 시 인트로 건너뛰기", tut_step1_title: "기능 (1/2)", tut_search: "검색 및 태그", tut_add: "길게 눌러 추가", tut_weather: "날씨", tut_next: "다음", tut_step2_title: "단축키 (2/2)", tut_settings: "설정", tut_compass: "나침반", tut_share: "공유", tut_prev: "이전", tut_finish: "시작하기", settings: "설정", theme: "테마 색상", share_map_title: "친구에게 추천", share_map: "지도 공유", close: "닫기", search_ph: "🔍 검색 또는 길게 누르기...", locating: "위치 확인 중...", food: "음식", highlights: "하이라이트", history: "역사", transport: "교통", nav: " 내비게이션", ai: " 추천", chip_all: "🌟 전체", chip_food: "🍜 음식", chip_history: "🏛️ 역사", chip_nature: "⛰️ 자연", chip_custom: "📍 마커", contact: "개발팀에 문의" },
+    'vi': { splash_title: "Bản đồ Ruifang", splash_desc: "Hướng dẫn du lịch địa phương chính xác nhất.", lang: "Ngôn ngữ", enter_map: "Vào Bản Đồ", form_link: "Bảng câu hỏi", skip_intro: "Bỏ qua giới thiệu khi khởi động", tut_step1_title: "Chức năng (1/2)", tut_search: "Tìm kiếm", tut_add: "Nhấn giữ thêm", tut_weather: "Thời tiết", tut_next: "Tiếp", tut_step2_title: "Phím tắt (2/2)", tut_settings: "Cài đặt", tut_compass: "La bàn", tut_share: "Chia sẻ", tut_prev: "Trước", tut_finish: "Bắt đầu", settings: "Cài đặt", theme: "Màu chủ đề", share_map_title: "Giới thiệu bạn bè", share_map: "Chia sẻ Bản đồ", close: "Đóng", search_ph: "🔍 Tìm kiếm...", locating: "Đang định vị...", food: "Ẩm thực", highlights: "Nổi bật", history: "Lịch sử", transport: "Di chuyển", nav: " Chỉ đường", ai: " Hành trình", chip_all: "🌟 Tất cả", chip_food: "🍜 Ăn", chip_history: "🏛️ Lịch sử", chip_nature: "⛰️ Tự nhiên", chip_custom: "📍 Đã lưu", contact: "Liên hệ" }
 };
 
 let currentLang = localStorage.getItem('ruifang_lang') || 'zh';
@@ -169,9 +178,8 @@ if (firebaseConfig.apiKey !== "請至Firebase後台取得 Web API Key") {
 async function saveFavToCloud() { if (!db) return; try { const { doc, setDoc } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js"); await setDoc(doc(db, "users", userId), { favorites: myFavs }, { merge: true }); } catch(e) {} }
 
 // =========================================
-// 7. 核心地圖初始化與圖釘操作 (修復 map 崩潰問題)
+// 7. 核心地圖初始化與圖釘操作
 // =========================================
-// 🌟 這裡正確宣告 map 實體，保證後面的 .on() 絕對不會報錯！
 const map = L.map('map', { zoomControl: false, attributionControl: false }).setView([25.1032, 121.8224], 14);
 
 const mapLayers = [
@@ -232,8 +240,8 @@ function addMarkerToMap(s) {
     if (!s.tags.includes('自訂') && !s.wikiImg) fetch(`https://zh.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(s.name)}`).then(r=>r.json()).then(d=>{s.wikiImg=d.thumbnail?.source;}).catch(()=>{});
     const m = L.marker([s.lat, s.lng], { icon: createCustomPin(s.tags) });
     m.bindPopup(() => {
-        // 🌟 完美 SVG 替代圖，保證 100% 絕對不破圖
-        const img = s.wikiImg || 'data:image/svg+xml;charset=UTF-8,<svg xmlns="http://www.w3.org/2000/svg" width="260" height="130"><rect width="100%" height="100%" fill="%23007bff"/><text x="50%" y="50%" fill="white" font-size="24" font-family="sans-serif" text-anchor="middle" dominant-baseline="middle">Ruifang</text></svg>';
+        const svgColor = getComputedStyle(document.documentElement).getPropertyValue('--primary').trim() || '#333333';
+        const img = s.wikiImg || `data:image/svg+xml;charset=UTF-8,<svg xmlns="http://www.w3.org/2000/svg" width="260" height="130"><rect width="100%" height="100%" fill="%23${svgColor.replace('#','')}"/><text x="50%" y="50%" fill="white" font-size="24" font-family="sans-serif" text-anchor="middle" dominant-baseline="middle">Ruifang</text></svg>`;
         const foodIcon = s.tags.includes('自訂') ? 'fa-star' : 'fa-utensils';
         const foodText = s.tags.includes('自訂') ? '自訂地點' : `美食：${s.food || '--'}`;
         return `<div class="preview-card" onclick="openCardByName('${s.name}')"><img class="preview-img" src="${img}"><div class="preview-info"><div class="preview-header"><span class="preview-title">${s.name}</span><span class="walk-badge"><i class="fas fa-walking"></i> ${calculateWalk(s.lat, s.lng)}</span></div><div class="preview-tag-box">${s.tags.map(t=>`<span class="mini-tag">${t}</span>`).join('')}</div><div class="food-preview"><i class="fas ${foodIcon}"></i> ${foodText}</div></div></div>`;
@@ -255,6 +263,9 @@ map.on('contextmenu', function(e) {
     spots.push(newSpot); addMarkerToMap(newSpot); savedCustomSpots.push(newSpot); localStorage.setItem('ruifang_custom_spots', JSON.stringify(savedCustomSpots)); showCard(newSpot);
 });
 
+// =========================================
+// 8. 自訂景點編輯與刪除
+// =========================================
 function openEditModal(name) {
     currentEditingSpotName = name; const s = spots.find(x => x.name === name);
     document.getElementById('edit-name').value = s.name; document.getElementById('edit-highlights').value = s.highlights; document.getElementById('edit-history').value = s.history;
@@ -288,7 +299,7 @@ function deleteCustomSpot(name) {
     savedCustomSpots = savedCustomSpots.filter(s => s.name !== name); localStorage.setItem('ruifang_custom_spots', JSON.stringify(savedCustomSpots));
     const spotIndex = spots.findIndex(s => s.name === name);
     if (spotIndex > -1) { cluster.removeLayer(spots[spotIndex].markerObj); spots.splice(spotIndex, 1); }
-    if (myFavs.includes(name)) { myFavs = myFavs.filter(fav => fav !== name); localStorage.setItem('ruifang_favs', JSON.stringify(myFavs)); renderFavList(); }
+    if (myFavs.includes(name)) { myFavs = myFavs.filter(fav => fav !== name); localStorage.setItem('ruifang_favs', JSON.stringify(myFavs)); }
     closeCard(); alert('🗑️ 標記已刪除！');
 }
 
@@ -300,7 +311,8 @@ function renderCardButtons(s, t = translations[currentLang]) {
 
 function showCard(s) {
     targetSpot = s; document.getElementById("card-fav-icon").className = myFavs.includes(s.name) ? "fas fa-heart active" : "fas fa-heart";
-    const imgStr = 'data:image/svg+xml;charset=UTF-8,<svg xmlns="http://www.w3.org/2000/svg" width="400" height="200"><rect width="100%" height="100%" fill="%23007bff"/><text x="50%" y="50%" fill="white" font-size="32" font-family="sans-serif" text-anchor="middle" dominant-baseline="middle">Ruifang Spot</text></svg>';
+    const svgColor = getComputedStyle(document.documentElement).getPropertyValue('--primary').trim() || '#333333';
+    const imgStr = `data:image/svg+xml;charset=UTF-8,<svg xmlns="http://www.w3.org/2000/svg" width="400" height="200"><rect width="100%" height="100%" fill="%23${svgColor.replace('#','')}"/><text x="50%" y="50%" fill="white" font-size="32" font-family="sans-serif" text-anchor="middle" dominant-baseline="middle">Ruifang Spot</text></svg>`;
     document.getElementById("title").innerText = s.name; document.getElementById("img").src = s.wikiImg || imgStr;
     document.getElementById("card-tags").innerHTML = s.tags.map(t => `<span class="mini-tag">${t}</span>`).join('');
     document.getElementById("card-food").innerText = s.food || "--"; document.getElementById("card-highlights").innerText = s.highlights || "暫無介紹";
@@ -319,7 +331,7 @@ function startNav() {
 }
 
 // =========================================
-// 8. 搜尋與工具
+// 9. 搜尋與收藏夾管理
 // =========================================
 const searchInput = document.getElementById("search"); const sugBox = document.getElementById("suggest");
 searchInput.addEventListener('focus', () => { if(!searchInput.value.trim()) renderDefaultSearch(); });
@@ -329,7 +341,70 @@ function triggerSearch(name) { searchInput.value = name; sugBox.style.display = 
 searchInput.oninput = function() { const k = this.value.trim(); if(!k) { renderDefaultSearch(); return; } sugBox.innerHTML = ""; const matches = spots.filter(s => { return s.name.includes(k) || s.tags.some(t => t.includes(k)) || (s.keywords && s.keywords.some(kw => kw.includes(k))); }); if(matches.length > 0) { sugBox.style.display = "block"; matches.forEach(s => { const div = document.createElement("div"); div.className = "list-item"; div.innerHTML = `<span><i class="fas fa-map-marker-alt" style="color:var(--primary)"></i> ${s.name}</span>`; div.onclick = () => { saveSearchHistory(s.name); triggerSearch(s.name); }; sugBox.appendChild(div); }); } else { sugBox.style.display = "none"; } };
 
 function toggleCurrentFav() { if(!targetSpot) return; const idx = myFavs.indexOf(targetSpot.name); if(idx === -1) myFavs.push(targetSpot.name); else myFavs.splice(idx, 1); localStorage.setItem('ruifang_favs', JSON.stringify(myFavs)); document.getElementById("card-fav-icon").className = myFavs.includes(targetSpot.name) ? "fas fa-heart active" : "fas fa-heart"; saveFavToCloud(); }
-function toggleFavList() { const p = document.getElementById("fav-list-panel"); if(p.style.display === "block") { p.style.display = "none"; } else { p.innerHTML = ""; if(myFavs.length === 0) { p.innerHTML = `<div style="padding:15px; text-align:center; color:#888; font-size:13px;">尚無收藏景點<br>點擊卡片愛心加入！</div>`; } else { myFavs.forEach(name => { const div = document.createElement("div"); div.className = "list-item"; div.innerHTML = `<span><i class="fas fa-heart" style="color:var(--danger); margin-right:5px;"></i> ${name}</span>`; div.onclick = () => triggerSearch(name); p.appendChild(div); }); } p.style.display = "block"; } }
+
+function toggleFavList() { 
+    const p = document.getElementById("fav-list-panel"); 
+    if(p.style.display === "block") { p.style.display = "none"; } else { 
+        p.innerHTML = ""; 
+        if(myFavs.length === 0) { 
+            p.innerHTML = `<div style="padding:15px; text-align:center; color:#888; font-size:13px;">尚無收藏景點<br>點擊卡片愛心加入！</div>`; 
+        } else { 
+            myFavs.forEach(name => { 
+                const div = document.createElement("div"); div.className = "list-item"; 
+                div.innerHTML = `<span><i class="fas fa-heart" style="color:var(--danger); margin-right:5px;"></i> ${name}</span>`; 
+                div.onclick = () => { triggerSearch(name); p.style.display = "none"; }; 
+                p.appendChild(div); 
+            }); 
+        } 
+        const manageBtn = document.createElement('div');
+        manageBtn.style.cssText = "padding:12px; text-align:center; background:var(--divider-color); font-weight:bold; cursor:pointer; font-size:14px; color:var(--primary);";
+        manageBtn.innerHTML = "<i class='fas fa-cog'></i> 管理收藏夾";
+        manageBtn.onclick = () => { p.style.display = "none"; openFavManage(); };
+        p.appendChild(manageBtn);
+        p.style.display = "block"; 
+    } 
+}
+
+// 🌟 收藏夾獨立管理功能
+function openFavManage() {
+    document.getElementById('fav-manage-modal').style.display = 'flex';
+    renderFavManageList();
+}
+function closeFavManage() {
+    document.getElementById('fav-manage-modal').style.display = 'none';
+}
+function renderFavManageList() {
+    const listEl = document.getElementById('fav-manage-list');
+    listEl.innerHTML = '';
+    if (myFavs.length === 0) {
+        listEl.innerHTML = '<p style="text-align:center; color:#888;">目前無收藏景點</p>'; return;
+    }
+    myFavs.forEach((name, idx) => {
+        const item = document.createElement('div');
+        item.style.cssText = "display:flex; justify-content:space-between; align-items:center; padding:12px; background:var(--glass); border:1px solid var(--border-color); border-radius:8px;";
+        item.innerHTML = `
+            <span style="font-weight:bold; color:var(--text-main); font-size:15px;">${name}</span>
+            <div style="display:flex; gap:6px;">
+                <button onclick="moveFav(${idx}, -1)" style="padding:6px 12px; cursor:pointer; background:var(--divider-color); border:none; border-radius:6px; color:var(--text-main);" ${idx===0?'disabled':''}><i class="fas fa-arrow-up"></i></button>
+                <button onclick="moveFav(${idx}, 1)" style="padding:6px 12px; cursor:pointer; background:var(--divider-color); border:none; border-radius:6px; color:var(--text-main);" ${idx===myFavs.length-1?'disabled':''}><i class="fas fa-arrow-down"></i></button>
+                <button onclick="removeFavManage('${name}')" style="padding:6px 12px; background:var(--danger); color:white; cursor:pointer; border:none; border-radius:6px;"><i class="fas fa-trash"></i></button>
+            </div>
+        `;
+        listEl.appendChild(item);
+    });
+}
+function moveFav(idx, dir) {
+    if (idx + dir < 0 || idx + dir >= myFavs.length) return;
+    const temp = myFavs[idx]; myFavs[idx] = myFavs[idx + dir]; myFavs[idx + dir] = temp;
+    localStorage.setItem('ruifang_favs', JSON.stringify(myFavs));
+    renderFavManageList(); saveFavToCloud();
+}
+function removeFavManage(name) {
+    myFavs = myFavs.filter(fav => fav !== name);
+    localStorage.setItem('ruifang_favs', JSON.stringify(myFavs));
+    renderFavManageList(); saveFavToCloud();
+    if (targetSpot && targetSpot.name === name) document.getElementById("card-fav-icon").className = "fas fa-heart";
+}
 
 function resetNorth() { map.flyTo([25.1032, 121.8224], 14); } 
 function goToUser() { if(userPos) { map.flyTo(userPos, 16); } else { alert("📍 正在獲取定位...\n若無反應，請確認您已開啟手機與瀏覽器的 GPS 定位權限！"); map.locate({setView: false, watch: true, enableHighAccuracy: true}); } } 
@@ -340,26 +415,35 @@ function aiTrip() { if(!userPos) return alert("等待 GPS 定位..."); const sor
 const cardEl = document.getElementById("card"); let touchStartY = 0, isSwiping = false; cardEl.addEventListener('touchstart', (e) => { if(cardEl.scrollTop===0){ touchStartY=e.touches[0].clientY; isSwiping=true; cardEl.style.transition='none'; }},{passive:true}); cardEl.addEventListener('touchmove', (e) => { if(isSwiping && e.touches[0].clientY > touchStartY){ cardEl.style.transform=`translateY(${e.touches[0].clientY - touchStartY}px)`; }}); cardEl.addEventListener('touchend', (e) => { if(isSwiping){ isSwiping=false; cardEl.style.transition='transform 0.4s'; if((e.changedTouches[0]?.clientY || 0) - touchStartY > 100) closeCard(); else cardEl.style.transform=''; }});
 
 // =========================================
-// 9. 系統啟動與初始化
+// 10. 系統啟動與初始化 (修復開場邏輯)
 // =========================================
 window.addEventListener('load', () => {
+    // 解析網址參數 (分享進來的景點)
     const params = new URLSearchParams(window.location.search); const spotQuery = params.get('spot');
     if(spotQuery) { const s = spots.find(x => x.name === spotQuery); if(s) { setTimeout(() => { map.flyTo([s.lat, s.lng], 16); showCard(s); }, 1000); } }
     
     applyLanguage(currentLang); fetchWeather();
+    
+    // 設定預設主題色
     const savedTheme = localStorage.getItem('ruifang_theme');
-    if (savedTheme) { applyCustomTheme(savedTheme); } else { applyCustomTheme('#007bff'); }
+    if (savedTheme) { applyCustomTheme(savedTheme); } else { applyCustomTheme('#333333'); } // 預設黑底主題
 
     const splash = document.getElementById('splash-screen');
     const welcome = document.getElementById('welcome-screen');
     const tutorial = document.getElementById('tutorial-overlay');
 
-    if(localStorage.getItem('ruifang_welcomed')) { 
+    // 🌟 判斷是否略過開場
+    const skipIntro = localStorage.getItem('ruifang_skip_intro') === 'true';
+    document.getElementById('skip-intro-toggle').checked = skipIntro;
+
+    if(skipIntro) { 
+        // 略過開場，直接顯示地圖
         if(splash) splash.style.display = 'none'; 
         if(welcome) welcome.style.display = 'none'; 
         if(tutorial) tutorial.style.display = 'none';
         map.invalidateSize(); 
     } else {
+        // 每次重整皆顯示開場與開幕
         setTimeout(() => {
             if(splash) {
                 splash.style.opacity = '0';
