@@ -20,6 +20,44 @@
 
     <link rel="stylesheet" href="./style.css">
 </head>
+    <body>
+
+    <div class="main-map-simulation">
+        🗺️ 這裡是地圖主程式<br>
+        <button onclick="showTutorial()" style="margin-top: 20px; padding: 10px; cursor:pointer;">重新呼叫說明介面</button>
+    </div>
+
+    <div id="tutorial-overlay">
+        <div class="tutorial-box">
+            
+            <div id="tut-step-1">
+                <h3><i class="fas fa-search"></i> 功能說明 (1/2)</h3>
+                <ul>
+                    <li style="margin: 10px 0;">🔍 <b>搜尋與標籤</b>：上方可快速尋找與篩選景點。</li>
+                    <li style="margin: 10px 0;">📍 <b>長按新增</b>：地圖長按可新增私房景點。</li>
+                    <li style="margin: 10px 0;">🌡️ <b>天氣資訊</b>：右上方顯示即時氣溫。</li>
+                </ul>
+                <div class="tutorial-btns">
+                    <button class="btn-fill" style="width: 100%;" onclick="nextTutorial()">下一步</button>
+                </div>
+            </div>
+
+            <div id="tut-step-2" style="display:none;">
+                <h3><i class="fas fa-tools"></i> 快捷功能 (2/2)</h3>
+                <ul>
+                    <li style="margin: 10px 0;">⚙️ <b>設定</b>：可切換主題色與分享地圖。</li>
+                    <li style="margin: 10px 0;">🧭 <b>指北針</b>：綠色按鈕，回到全景。</li>
+                    <li style="margin: 10px 0;"><span style="color: var(--primary);">●</span> <b>分享鍵</b>：底部卡片可快速分享連結。</li>
+                </ul>
+                <div class="tutorial-btns">
+                    <button class="btn-outline" onclick="prevTutorial()">前一步</button>
+                    <button class="btn-fill" onclick="finishTutorial()">開始使用</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+        
 <body id="main-body">
 
     <div id="splash-screen">
@@ -573,3 +611,4 @@
     </script>
 </body>
 </html>
+
