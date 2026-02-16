@@ -45,15 +45,15 @@ html, body {
 #map { position: absolute; top: 0; left: 0; right: 0; bottom: 0; z-index: 1; }
 
 /* =========================================
-   2. 三階段進入介面 (動畫 -> 歡迎 -> 說明)
+   2. 三階段進入介面 (動畫延長至2秒)
    ========================================= */
-/* 動畫層：1秒後淡出 */
-#splash-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-color); z-index: 10001; display: flex; flex-direction: column; align-items: center; justify-content: center; animation: fadeOut 0.5s ease-in-out 1s forwards; pointer-events: none; }
+/* 動畫層：延遲 2.0 秒後淡出 */
+#splash-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-color); z-index: 10001; display: flex; flex-direction: column; align-items: center; justify-content: center; animation: fadeOut 0.8s ease-in-out 2.0s forwards; pointer-events: none; }
 .logo-anim { width: 120px; height: 120px; border: 4px solid var(--primary); color: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 60px; font-weight: bold; border-radius: 20px; animation: scaleUp 0.8s ease-out; }
 @keyframes scaleUp { 0% { transform: scale(0.5); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
 @keyframes fadeOut { 0% { opacity: 1; } 100% { opacity: 0; visibility: hidden; } }
 
-/* 歡迎介面：選擇語言與問卷 */
+/* 歡迎介面 */
 #welcome-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-color); z-index: 10000; display: flex; flex-direction: column; align-items: center; padding: 20px; overflow-y: auto; }
 .content-wrapper { width: 100%; max-width: 320px; display: flex; flex-direction: column; align-items: center; }
 .logo-static { margin-top: 5vh; width: 100px; height: 100px; border: 3px solid var(--primary); color: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 50px; font-weight: bold; border-radius: 15px; }
@@ -61,10 +61,10 @@ html, body {
 .btn-start { margin-top: 20px; padding: 15px 50px; background: var(--primary); color: white; border: none; border-radius: 30px; font-size: 18px; font-weight: bold; cursor: pointer; transition: transform 0.2s; width: 100%; }
 .btn-start:active { transform: scale(0.95); }
 .link-box { display: flex; flex-direction: column; gap: 10px; width: 100%; margin-top: 20px; }
-.link-box a { background: rgba(0,0,0,0.05); padding: 12px; border-radius: 10px; text-align: center; text-decoration: none; color: var(--text-main); font-weight: bold; font-size: 14px; }
-.link-box a i { color: var(--primary); margin-right: 5px; }
+.link-box a { background: rgba(0,0,0,0.05); padding: 12px; border-radius: 10px; text-align: center; text-decoration: none; color: var(--primary); font-weight: bold; font-size: 14px; border: 1px solid var(--border-color); }
+.link-box a i { margin-right: 5px; }
 
-/* 浮動教學說明介面 (在地圖上) */
+/* 教學說明 */
 #tutorial-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.6); z-index: 9999; display: none; align-items: center; justify-content: center; padding: 20px; }
 .tutorial-box { background: var(--bg-color); width: 100%; max-width: 350px; border-radius: 20px; padding: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border: 2px solid var(--primary); }
 .tutorial-box h3 { color: var(--primary); margin-top: 0; border-bottom: 1px dashed var(--divider-color); padding-bottom: 10px; }
@@ -94,10 +94,9 @@ html, body {
 .route-data { display: flex; flex-direction: column; line-height: 1.2; } .route-time { color: var(--primary); font-size: 18px; font-weight: bold; } .route-dist { font-size: 12px; color: var(--text-sub); font-weight: bold; } .route-close { cursor: pointer; color: #888; font-size: 22px; transition: color 0.2s; }
 
 /* =========================================
-   5. 搜尋清單與按鈕組件
+   5. 搜尋清單與按鈕組件 (印章動畫修復)
    ========================================= */
 #suggest, #fav-list-panel { background: var(--glass); border-radius: 18px; margin-top: 5px; overflow-y: auto; width: 100%; display: none; box-shadow: 0 10px 25px var(--card-shadow); z-index: 3100; scrollbar-width: none; border: 1px solid var(--border-color); }
-/* 限制直式搜尋最大高度 */
 #suggest { max-height: 45vh; }
 #fav-list-panel { position: absolute; bottom: calc(150px + env(safe-area-inset-bottom, 0px)); right: calc(70px + env(safe-area-inset-right, 0px)); width: 200px; max-height: 250px; }
 .list-item { padding: 14px 20px; border-bottom: 1px solid var(--divider-color); cursor: pointer; display: flex; align-items: center; gap: 10px; color: var(--text-main); justify-content: space-between; font-size: 15px; font-weight: bold; }
@@ -111,6 +110,16 @@ html, body {
 .control-btn { background: var(--glass); width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px var(--card-shadow); cursor: pointer; color: var(--text-main); font-size: 20px; border: 1px solid var(--border-color); transition: transform 0.1s; }
 .control-btn:active { transform: scale(0.9); }
 .route-btn { color: #8e44ad; } .fav-btn { color: var(--danger); } .compass-btn { color: var(--success); } .active { color: var(--primary); border: 2px solid var(--primary); }
+
+/* --- 瑞字印章特效 --- */
+.rui-icon { font-family: "DFKai-sb", "BiauKai", serif; font-weight: 900; font-size: 18px; color: var(--accent); border: 2px solid var(--accent); border-radius: 4px; padding: 1px 3px; line-height: 1; transition: all 0.2s ease; }
+@keyframes stamp-press { 
+    0% { transform: scale(1) rotate(0deg); text-shadow: none; box-shadow: none; } 
+    40% { transform: scale(0.8) rotate(-8deg); color: var(--danger); border-color: var(--danger); text-shadow: 0 0 8px rgba(255, 71, 87, 0.8); box-shadow: 0 0 12px rgba(255, 71, 87, 0.5) inset, 0 0 12px rgba(255, 71, 87, 0.5); } 
+    70% { transform: scale(1.1) rotate(3deg); } 
+    100% { transform: scale(1) rotate(0deg); text-shadow: none; box-shadow: none; } 
+}
+.rui-icon.stamped { animation: stamp-press 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
 
 /* =========================================
    6. 彈出視窗 Modal 與卡片
@@ -142,22 +151,19 @@ html, body {
    ========================================= */
 @media (min-width: 768px) { .content-wrapper { max-width: 480px; } .logo-static { width: 120px; height: 120px; font-size: 60px; } p, ul, li { font-size: 16px !important; } .btn-start { padding: 18px 80px; font-size: 20px; } }
 
-/* 直式模式：修正搜尋欄寬度，防止遮擋右側天氣方塊 */
 @media (max-width: 768px) and (orientation: portrait) { 
-    #top-ui { left: 15px; transform: none; width: calc(100% - 85px); } /* 空出 70px 給天氣方塊與邊距 */
+    #top-ui { left: 15px; transform: none; width: calc(100% - 85px); } 
     #gps-val-text { left: 15px; right: auto; } 
 }
 
-/* 橫式模式：大幅壓縮頂部 UI、搜尋建議高度，避免蓋住座標與地圖 */
 @media (max-height: 500px) and (orientation: landscape) { 
     #top-ui { width: 260px; left: 15px; transform: none; top: 10px; gap: 4px; } 
     #search { padding: 8px 15px; font-size: 13px; }
     #category-chips .chip { padding: 4px 10px; font-size: 11px; }
-    #suggest { max-height: 35vh; } /* 橫式下限制搜尋建議高度 */
-    
+    #suggest { max-height: 35vh; } 
     #route-info-panel { top: 90px; }
     .map-controls { flex-direction: row; bottom: 15px; left: 50%; transform: translateX(-50%); right: auto; gap: 8px; } 
     .control-btn { width: 40px; height: 40px; font-size: 16px; } 
-    #gps-val-text { left: 15px; right: auto; bottom: 70px; z-index: 4000; } /* 橫式座標上移並調高層級 */
+    #gps-val-text { left: 15px; right: auto; bottom: 70px; z-index: 4000; } 
     #card { max-height: 65vh; padding: 15px; } 
 }
