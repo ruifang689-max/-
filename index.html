@@ -20,62 +20,24 @@
 
     <link rel="stylesheet" href="./style.css">
 </head>
-    <body>
-
-    <div class="main-map-simulation">
-        🗺️ 這裡是地圖主程式<br>
-        <button onclick="showTutorial()" style="margin-top: 20px; padding: 10px; cursor:pointer;">重新呼叫說明介面</button>
-    </div>
-
-    <div id="tutorial-overlay">
-        <div class="tutorial-box">
-            
-            <div id="tut-step-1">
-                <h3><i class="fas fa-search"></i> 功能說明 (1/2)</h3>
-                <ul>
-                    <li style="margin: 10px 0;">🔍 <b>搜尋與標籤</b>：上方可快速尋找與篩選景點。</li>
-                    <li style="margin: 10px 0;">📍 <b>長按新增</b>：地圖長按可新增私房景點。</li>
-                    <li style="margin: 10px 0;">🌡️ <b>天氣資訊</b>：右上方顯示即時氣溫。</li>
-                </ul>
-                <div class="tutorial-btns">
-                    <button class="btn-fill" style="width: 100%;" onclick="nextTutorial()">下一步</button>
-                </div>
-            </div>
-
-            <div id="tut-step-2" style="display:none;">
-                <h3><i class="fas fa-tools"></i> 快捷功能 (2/2)</h3>
-                <ul>
-                    <li style="margin: 10px 0;">⚙️ <b>設定</b>：可切換主題色與分享地圖。</li>
-                    <li style="margin: 10px 0;">🧭 <b>指北針</b>：綠色按鈕，回到全景。</li>
-                    <li style="margin: 10px 0;"><span style="color: var(--primary);">●</span> <b>分享鍵</b>：底部卡片可快速分享連結。</li>
-                </ul>
-                <div class="tutorial-btns">
-                    <button class="btn-outline" onclick="prevTutorial()">前一步</button>
-                    <button class="btn-fill" onclick="finishTutorial()">開始使用</button>
-                </div>
-            </div>
-
-        </div>
-    </div>
-        
 <body id="main-body">
 
     <div id="splash-screen">
         <div class="logo-anim">瑞</div>
-        <h2 class="title-text" style="letter-spacing: 2px;">瑞芳導覽</h2>
+        <h2 class="splash-title-text" style="letter-spacing: 2px;">瑞芳導覽</h2>
     </div>
 
     <div id="welcome-screen">
-        <div class="content-wrapper">
+        <div class="welcome-wrapper">
             <div class="logo-static">瑞</div>
-            <h1 class="title-text" data-i18n="splash_title">瑞芳導覽 App</h1>
-            <p style="text-align: center; color: var(--text-sub); line-height: 1.6; max-width: 300px;" data-i18n="splash_desc">
+            <h1 class="welcome-title" data-i18n="splash_title">瑞芳導覽 App</h1>
+            <p class="welcome-desc" data-i18n="splash_desc">
                 致力於提供瑞芳地區最精準的在地導覽，帶領您深度探索山城之美。
             </p>
             
-            <div style="margin-top: 20px; width: 100%; max-width: 300px;">
-                <label style="font-weight: bold; display: block; margin-bottom: 10px; color: var(--text-main);" data-i18n="lang">語言 / Language</label>
-                <select id="lang-select-startup" onchange="applyLanguage(this.value)" class="modal-select">
+            <div style="width: 100%; max-width: 300px;">
+                <label style="font-weight: bold; display: block; margin-bottom: 10px; color: #111;" data-i18n="lang">語言 / Language</label>
+                <select id="lang-select-startup" onchange="applyLanguage(this.value)" class="welcome-select">
                     <option value="zh">繁體中文 (🇹🇼)</option>
                     <option value="en">English (🇺🇸)</option>
                     <option value="ja">日本語 (🇯🇵)</option>
@@ -84,12 +46,12 @@
                 </select>
             </div>
 
-            <div class="link-box" style="max-width: 300px;">
+            <div class="link-box">
                 <a href="mailto:ruifang689@gmail.com"><i class="fas fa-envelope"></i> ruifang689@gmail.com</a>
                 <a href="https://docs.google.com/forms/d/e/1FAIpQLSfi76mygYPT0XeWDkTVjy1F3NjWTW1qveFKTV2bC5TlJ6yybA/viewform?usp=header" target="_blank"><i class="fas fa-clipboard-list"></i> <span data-i18n="form_link">填寫意見問卷</span></a>
             </div>
 
-            <button class="btn-start" onclick="enterMap()" data-i18n="enter_map">進入地圖</button>
+            <button class="btn-enter-map" onclick="enterMap()" data-i18n="enter_map">進入地圖</button>
         </div>
     </div>
 
@@ -266,8 +228,11 @@
         // 1. 三階段進入動線與教學邏輯
         // =========================================
         function enterMap() {
-            document.getElementById('welcome-screen').style.display = 'none';
-            document.getElementById('tutorial-overlay').style.display = 'flex';
+            document.getElementById('welcome-screen').style.opacity = '0';
+            setTimeout(() => {
+                document.getElementById('welcome-screen').style.display = 'none';
+                document.getElementById('tutorial-overlay').style.display = 'flex';
+            }, 400);
         }
         function nextTutorial() {
             document.getElementById('tut-step-1').style.display = 'none';
@@ -278,8 +243,12 @@
             document.getElementById('tut-step-1').style.display = 'block';
         }
         function finishTutorial() {
-            document.getElementById('tutorial-overlay').style.display = 'none';
-            localStorage.setItem('ruifang_welcomed', 'true');
+            const overlay = document.getElementById('tutorial-overlay');
+            overlay.style.opacity = '0';
+            setTimeout(() => {
+                overlay.style.display = 'none';
+                localStorage.setItem('ruifang_welcomed', 'true');
+            }, 400);
         }
 
         // =========================================
@@ -299,7 +268,6 @@
             document.documentElement.style.setProperty('--logo-border', color);
             localStorage.setItem('ruifang_theme', color);
             
-            // 讓導航列設定的選單值同步
             const themeSelect = document.getElementById('theme-select');
             if([...themeSelect.options].some(o => o.value === color)) {
                 themeSelect.value = color;
@@ -347,7 +315,7 @@
                 tut_step2_title: "단축키 (2/2)", tut_settings: "설정", tut_compass: "나침반", tut_share: "공유", tut_prev: "이전", tut_finish: "시작하기",
                 settings: "설정", theme: "테마 색상", share_map_title: "친구에게 추천", share_map: "지도 공유", close: "닫기", search_ph: "🔍 검색 또는 길게 누르기...", locating: "위치 확인 중...", 
                 food: "음식", highlights: "하이라이트", history: "역사", transport: "교통", nav: " 내비게이션", ai: " 추천",
-                chip_all: "🌟 전체", 단_food: "🍜 음식", chip_history: "🏛️ 역사", chip_nature: "⛰️ 자연", chip_custom: "📍 마커", contact: "개발팀에 문의"
+                chip_all: "🌟 전체", chip_food: "🍜 음식", chip_history: "🏛️ 역사", chip_nature: "⛰️ 자연", chip_custom: "📍 마커", contact: "개발팀에 문의"
             },
             'vi': {
                 splash_title: "Bản đồ Ruifang", splash_desc: "Hướng dẫn du lịch địa phương chính xác nhất.", lang: "Ngôn ngữ", enter_map: "Vào Bản Đồ", form_link: "Bảng câu hỏi",
@@ -472,7 +440,7 @@
         }
 
         // =========================================
-        // 6. 圖釘、卡片與地圖操作 (還原小卡樣式與修復標記)
+        // 6. 圖釘、卡片與地圖操作 (修復標記編輯顯示)
         // =========================================
         const cluster = L.markerClusterGroup(); map.addLayer(cluster);
         function calculateWalk(lat, lng) { if(!userPos) return "--"; const mins = Math.round(map.distance(userPos, [lat, lng]) / 80); return mins < 1 ? "1分內" : `約 ${mins} 分`; }
@@ -486,7 +454,7 @@
                 const foodIcon = s.tags.includes('自訂') ? 'fa-star' : 'fa-utensils';
                 const foodText = s.tags.includes('自訂') ? '自訂地點' : `美食：${s.food || '--'}`;
                 
-                // 還原早期的 food-preview 浮動小卡結構
+                // 恢復虛線區隔與小卡資料顯示
                 return `<div class="preview-card" onclick="openCardByName('${s.name}')"><img class="preview-img" src="${img}"><div class="preview-info"><div class="preview-header"><span class="preview-title">${s.name}</span><span class="walk-badge"><i class="fas fa-walking"></i> ${calculateWalk(s.lat, s.lng)}</span></div><div class="preview-tag-box">${s.tags.map(t=>`<span class="mini-tag">${t}</span>`).join('')}</div><div class="food-preview"><i class="fas ${foodIcon}"></i> ${foodText}</div></div></div>`;
             }, { closeButton: false });
             m.on('mouseover', function() { this.openPopup(); }); m.on('click', (e) => { L.DomEvent.stopPropagation(e); showCard(s); });
@@ -526,17 +494,26 @@
             }; reader.readAsDataURL(file);
         });
 
-        // 修正自訂標記編輯：更新後重新渲染地圖圖釘以套用最新小卡資訊
+        // 修正：編輯標記後重繪地圖上的圖釘，以即時更新 Popup 內容
         function saveEditSpot() {
             const newName = document.getElementById('edit-name').value.trim(); if(!newName) return alert("名稱不能為空！");
             const s = spots.find(x => x.name === currentEditingSpotName); const savedIdx = savedCustomSpots.findIndex(x => x.name === currentEditingSpotName);
             s.name = newName; s.highlights = document.getElementById('edit-highlights').value; s.history = document.getElementById('edit-history').value; s.wikiImg = document.getElementById('edit-image-preview').src;
             if(savedIdx > -1) { savedCustomSpots[savedIdx] = s; localStorage.setItem('ruifang_custom_spots', JSON.stringify(savedCustomSpots)); }
             
-            if (s.markerObj) { cluster.removeLayer(s.markerObj); }
+            if(s.markerObj) cluster.removeLayer(s.markerObj);
             addMarkerToMap(s);
             
             closeEditModal(); showCard(s); 
+        }
+
+        function deleteCustomSpot(name) {
+            if(!confirm(`確定要刪除「${name}」？無法復原喔！`)) return;
+            savedCustomSpots = savedCustomSpots.filter(s => s.name !== name); localStorage.setItem('ruifang_custom_spots', JSON.stringify(savedCustomSpots));
+            const spotIndex = spots.findIndex(s => s.name === name);
+            if (spotIndex > -1) { cluster.removeLayer(spots[spotIndex].markerObj); spots.splice(spotIndex, 1); }
+            if (myFavs.includes(name)) { myFavs = myFavs.filter(fav => fav !== name); localStorage.setItem('ruifang_favs', JSON.stringify(myFavs)); renderFavList(); }
+            closeCard(); alert('🗑️ 標記已刪除！');
         }
 
         function renderCardButtons(s, t = translations[currentLang]) {
@@ -579,11 +556,18 @@
         function resetNorth() { map.flyTo([25.1032, 121.8224], 14); } 
         function goToUser() { if(userPos) map.flyTo(userPos, 16); } 
         function drawThemeRoute() { if(currentRoute) map.removeLayer(currentRoute); currentRoute = L.polyline(themeRouteCoords, { color: '#8e44ad', weight: 6, dashArray: '10, 10' }).addTo(map); map.fitBounds(currentRoute.getBounds(), { padding: [50, 50] }); closeCard(); alert("🚀 推薦路線已載入！"); } 
+        
         function goToStation() { 
             const ruiIcon = document.querySelector('.rui-icon'); 
-            if(ruiIcon){ ruiIcon.classList.remove('stamped'); void ruiIcon.offsetWidth; ruiIcon.classList.add('stamped'); } 
-            map.flyTo([25.108, 121.805], 16); closeCard(); 
+            if(ruiIcon){ 
+                ruiIcon.classList.remove('stamped'); 
+                void ruiIcon.offsetWidth; 
+                ruiIcon.classList.add('stamped'); 
+            } 
+            map.flyTo([25.108, 121.805], 16); 
+            closeCard(); 
         } 
+        
         function aiTrip() { if(!userPos) return alert("等待 GPS 定位..."); const sorted = [...spots].sort((a,b) => map.distance(userPos,[a.lat,a.lng]) - map.distance(userPos,[b.lat,b.lng])); alert("🤖 AI 推薦最近景點：\n" + sorted.slice(0,5).map((s,i) => `${i+1}. ${s.name}`).join("\n")); }
 
         const cardEl = document.getElementById("card"); let touchStartY = 0, isSwiping = false; cardEl.addEventListener('touchstart', (e) => { if(cardEl.scrollTop===0){ touchStartY=e.touches[0].clientY; isSwiping=true; cardEl.style.transition='none'; }},{passive:true}); cardEl.addEventListener('touchmove', (e) => { if(isSwiping && e.touches[0].clientY > touchStartY){ cardEl.style.transform=`translateY(${e.touches[0].clientY - touchStartY}px)`; }}); cardEl.addEventListener('touchend', (e) => { if(isSwiping){ isSwiping=false; cardEl.style.transition='transform 0.4s'; if((e.changedTouches[0]?.clientY || 0) - touchStartY > 100) closeCard(); else cardEl.style.transform=''; }});
@@ -593,12 +577,11 @@
             if(spotQuery) { const s = spots.find(x => x.name === spotQuery); if(s) { setTimeout(() => { map.flyTo([s.lat, s.lng], 16); showCard(s); }, 1000); } }
             applyLanguage(currentLang); fetchWeather();
             
-            // 讀取並套用儲存的主題色
+            // 讀取並套用儲存的主題色，預設為藍色 #007bff
             const savedTheme = localStorage.getItem('ruifang_theme');
             if (savedTheme) {
                 applyCustomTheme(savedTheme);
             } else {
-                // 如果沒有儲存記錄，就套用預設的藍色
                 applyCustomTheme('#007bff'); 
             }
 
@@ -611,4 +594,3 @@
     </script>
 </body>
 </html>
-
