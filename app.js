@@ -190,12 +190,35 @@ window.mapInstance.on('locationfound', e => {
 });
 window.mapInstance.on('locationerror', e => { document.getElementById("gps-val-text").innerText = "GPS: 請開啟定位權限"; });
 
-window.mapInstance.on('moveend', function() {
-    const center = window.mapInstance.getCenter();
-    fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${center.lat}&lon=${center.lng}&zoom=18&addressdetails=1&accept-language=zh-TW`)
-    .then(res => res.json()).then(data => {
-        if (data && data.address) { const a = data.address; document.getElementById("addr-text").innerText = ((a.city||a.town||a.county||"") + (a.suburb||a.district||"") + (a.village||a.neighbourhood||a.road||"")) || "探索瑞芳中..."; }
-    }).catch(()=>{}); 
+// 新增延遲計時器
+let geocodeTimer = null;
+
+map.on('moveend', function() {
+    // 每次滑動時先清空計時器，並顯示定位中
+    clearTimeout(geocodeTimer);
+    document.getElementById("addr-text").innerText = "定位中...";
+
+    // 停止滑動 1.2 秒後，才向伺服器發送一次請求 (防止被 OpenStreetMap 封鎖)
+    geocodeTimer = setTimeout(() => {
+        const center = map.getCenter();
+        // 🌟 網址尾端加入了您的信箱，符合 OSM 官方的 API 規範
+        const apiUrl = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${center.lat}&lon=${center.lng}&zoom=18&addressdetails=1&accept-language=zh-TW&email=ruifang689@gmail.com`;
+        
+        fetch(apiUrl)
+        .then(res => {
+            if (!res.ok) throw new Error('API 請求過於頻繁');
+            return res.json();
+        })
+        .then(data => {
+            if (data && data.address) { 
+                const a = data.address; 
+                document.getElementById("addr-text").innerText = ((a.city||a.town||a.county||"") + (a.suburb||a.district||"") + (a.village||a.neighbourhood||a.road||"")) || "探索瑞芳中..."; 
+            }
+        }).catch((e)=>{ 
+            console.warn("地理編碼失敗或被限制:", e);
+            document.getElementById("addr-text").innerText = "探索瑞芳中..."; 
+        }); 
+    }, 1200); 
 });
 
 const cluster = L.markerClusterGroup(); window.mapInstance.addLayer(cluster);
@@ -270,7 +293,7 @@ function renderCardButtons(s, t = translations[currentLang]) {
 }
 function showCard(s) {
     window.targetSpot = s; document.getElementById("card-fav-icon").className = myFavs.includes(s.name) ? "fas fa-heart active" : "fas fa-heart";
-    document.getElementById("title").innerText = s.name; document.getElementById("img").src = s.wikiImg || 'https://via.placeholder.com/400x200/007bff/ffffff?text=Ruifang';
+    document.getElementById("title").innerText = s.name; document.getElementById("img").src = s.wikiImg || 'data:image/svg+xml;charset=UTF-8,<svg xmlns="http://www.w3.org/2000/svg" width="400" height="200"><rect width="100%" height="100%" fill="%23f39c12"/><text x="50%" y="50%" fill="white" font-size="32" font-family="sans-serif" text-anchor="middle" dominant-baseline="middle">Ruifang Spot</text></svg>';
     document.getElementById("card-tags").innerHTML = s.tags.map(t => `<span class="mini-tag">${t}</span>`).join('');
     document.getElementById("card-food").innerText = s.food || "--"; document.getElementById("card-highlights").innerText = s.highlights || "暫無介紹";
     document.getElementById("card-history").innerText = s.history || "無"; document.getElementById("card-transport").innerText = s.transport || "自行前往";
