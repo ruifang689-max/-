@@ -351,6 +351,7 @@ window.addEventListener('load', () => {
         if(tutorial) tutorial.style.display = 'none';
         window.mapInstance.invalidateSize(); 
     } else {
+        // 第一次訪問：確保 2.5 秒後淡出
         setTimeout(() => {
             if(splash) {
                 splash.style.opacity = '0';
