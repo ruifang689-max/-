@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     
-    <title>瑞芳導覽地圖</title>
+    <title>瑞芳導覽地圖 App</title>
 
     <meta property="og:title" content="瑞芳導覽地圖" />
     <meta property="og:description" content="探索瑞芳秘境、在地美食與時空旅人路線的專屬智慧地圖！" />
@@ -15,631 +15,636 @@
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.Default.css"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#007bff">
+    <link rel="apple-touch-icon" href="icon-192.png">
+
     <style>
         /* =========================================
-           1. 基礎變數與全局設定
+           1. 基礎變數與全局設定 (支援淺色/深色模式自動切換)
            ========================================= */
         :root { 
-            --primary: #007bff;           
-            --glass: rgba(255, 255, 255, 0.95); 
-            --accent: #e67e22;            
-            --danger: #ff4757;            
-            --text: #333;                 
+            --primary: #007bff;   /* 主題藍色 */
+            --accent: #e67e22;    /* 強調橘色 */
+            --danger: #ff4757;    /* 警告紅色 */
+            --success: #28a745;   /* 成功綠色 */
             --card-shadow: rgba(0,0,0,0.15); 
+            --bg-color: #ffffff;
+            --text-main: #333333;
+            --text-sub: #666666;
+            --border-color: #cccccc;
+            --divider-color: #eeeeee;
+            --btn-bg: #333333;
+            --btn-text: #ffffff;
+            --input-bg: #ffffff;
+            --logo-border: #333333;
+            --glass: rgba(255, 255, 255, 0.95);
         }
 
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --bg-color: #121212; --text-main: #e0e0e0; --text-sub: #aaaaaa;
+                --border-color: #555555; --divider-color: #333333; --btn-bg: #e0e0e0;
+                --btn-text: #121212; --input-bg: #2c2c2c; --logo-border: #e0e0e0;
+                --glass: rgba(40, 40, 40, 0.95); --card-shadow: rgba(0,0,0,0.4);
+            }
+        }
         body.dark-mode { 
-            --glass: rgba(40, 40, 40, 0.95); 
-            --text: #f0f0f0; 
-            --card-shadow: rgba(0,0,0,0.4);
+            --bg-color: #121212; --text-main: #e0e0e0; --text-sub: #aaaaaa; 
+            --border-color: #555555; --divider-color: #333333; --btn-bg: #e0e0e0; 
+            --btn-text: #121212; --input-bg: #2c2c2c; --logo-border: #e0e0e0;
+            --glass: rgba(40, 40, 40, 0.95); --card-shadow: rgba(0,0,0,0.4); 
+            color: var(--text-main);
         }
 
-        html, body { margin: 0; padding: 0; width: 100vw; height: 100%; height: 100dvh; overflow: hidden; font-family: -apple-system, "Microsoft JhengHei", sans-serif; }
+        * { box-sizing: border-box; font-family: -apple-system, 'Helvetica Neue', Arial, sans-serif; }
+        html, body { margin: 0; padding: 0; width: 100vw; height: 100%; height: 100dvh; overflow: hidden; background-color: var(--bg-color); color: var(--text-main); transition: background-color 0.3s, color 0.3s; }
         #map { position: absolute; top: 0; left: 0; right: 0; bottom: 0; z-index: 1; }
 
         /* =========================================
-           2. 頂部 UI 區塊
+           2. 初始動畫與說明介面
            ========================================= */
-        #top-ui { position: absolute; top: calc(15px + env(safe-area-inset-top, 0px)); left: 50%; transform: translateX(-50%); z-index: 3000; width: 85%; max-width: 380px; display: flex; flex-direction: column; align-items: center; gap: 6px; }
-        #search { width: 100%; padding: 12px 20px; border: none; border-radius: 30px; box-shadow: 0 4px 20px var(--card-shadow); outline: none; background: var(--glass); color: var(--text); font-size: 15px; text-align: center; box-sizing: border-box; transition: all 0.3s; }
-        #search:focus { box-shadow: 0 4px 25px rgba(0, 123, 255, 0.3); }
-        #map-center-panel { width: 100%; color: var(--text); font-size: 13px; font-weight: bold; display: flex; justify-content: center; align-items: center; gap: 6px; pointer-events: none; text-shadow: -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff, 0 0 5px rgba(255,255,255,0.8); }
-        body.dark-mode #map-center-panel { text-shadow: -1px -1px 0 #222, 1px -1px 0 #222, -1px 1px 0 #222, 1px 1px 0 #222, 0 0 5px rgba(0,0,0,0.8); }
+        #splash-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-color); z-index: 10000; display: flex; flex-direction: column; align-items: center; justify-content: center; animation: fadeOut 0.5s ease-in-out 1.5s forwards; pointer-events: none; }
+        .logo-anim { width: 120px; height: 120px; border: 4px solid var(--logo-border); display: flex; align-items: center; justify-content: center; font-size: 60px; font-weight: bold; border-radius: 20px; animation: scaleUp 1s ease-out; }
+        @keyframes scaleUp { 0% { transform: scale(0.5); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+        @keyframes fadeOut { 0% { opacity: 1; } 100% { opacity: 0; visibility: hidden; } }
+
+        #startup-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-color); z-index: 9999; display: flex; flex-direction: column; align-items: center; padding: 20px; overflow-y: auto; }
+        .content-wrapper { width: 100%; max-width: 320px; display: flex; flex-direction: column; align-items: center; }
+        .logo-static { margin-top: 8vh; width: 100px; height: 100px; border: 3px solid var(--logo-border); display: flex; align-items: center; justify-content: center; font-size: 50px; font-weight: bold; border-radius: 15px; }
+        .btn-start { margin-top: 40px; padding: 15px 60px; background: var(--btn-bg); color: var(--btn-text); border: none; border-radius: 30px; font-size: 18px; font-weight: bold; cursor: pointer; transition: transform 0.2s, opacity 0.3s; }
+        .btn-start:active { transform: scale(0.95); }
+        @media (min-width: 768px) { .content-wrapper { max-width: 480px; } .logo-static { width: 120px; height: 120px; font-size: 60px; } p, ul, li { font-size: 16px !important; } .btn-start { padding: 18px 80px; font-size: 20px; } }
 
         /* =========================================
-           3. 天氣 & 導航面板
+           3. 頂部 UI (搜尋、分類標籤、報幕)
            ========================================= */
-        #weather-box { position: absolute; top: calc(15px + env(safe-area-inset-top, 0px)); right: calc(15px + env(safe-area-inset-right, 0px)); z-index: 3000; width: 50px; height: 50px; background: var(--glass); backdrop-filter: blur(8px); border-radius: 12px; box-shadow: 0 4px 15px var(--card-shadow); border: 1px solid rgba(255,255,255,0.2); color: var(--text); display: flex; flex-direction: column; justify-content: center; align-items: center; }
+        #top-ui { position: absolute; top: calc(15px + env(safe-area-inset-top, 0px)); left: 50%; transform: translateX(-50%); z-index: 3000; width: 85%; max-width: 420px; display: flex; flex-direction: column; align-items: center; gap: 8px; }
+        #search { width: 100%; padding: 12px 20px; border: none; border-radius: 30px; box-shadow: 0 4px 20px var(--card-shadow); outline: none; background: var(--glass); color: var(--text-main); font-size: 15px; text-align: center; box-sizing: border-box; transition: all 0.3s; }
+        
+        /* 新增：分類標籤 (Chips) UI */
+        #category-chips { display: flex; gap: 8px; overflow-x: auto; width: 100%; padding: 2px 5px; scrollbar-width: none; }
+        #category-chips::-webkit-scrollbar { display: none; }
+        .chip { background: var(--glass); border: 1px solid var(--border-color); padding: 8px 16px; border-radius: 20px; font-size: 13px; font-weight: bold; color: var(--text-main); white-space: nowrap; cursor: pointer; box-shadow: 0 2px 5px var(--card-shadow); transition: all 0.2s; }
+        .chip.active { background: var(--primary); color: white; border-color: var(--primary); }
+
+        #map-center-panel { width: 100%; color: var(--text-main); font-size: 13px; font-weight: bold; display: flex; justify-content: center; align-items: center; gap: 6px; pointer-events: none; text-shadow: -1px -1px 0 var(--bg-color), 1px -1px 0 var(--bg-color), -1px 1px 0 var(--bg-color), 1px 1px 0 var(--bg-color), 0 0 5px rgba(128,128,128,0.5); }
+
+        /* =========================================
+           4. 天氣方塊 & 導航面板
+           ========================================= */
+        #weather-box { position: absolute; top: calc(15px + env(safe-area-inset-top, 0px)); right: calc(15px + env(safe-area-inset-right, 0px)); z-index: 3000; width: 50px; height: 50px; background: var(--glass); backdrop-filter: blur(8px); border-radius: 12px; box-shadow: 0 4px 15px var(--card-shadow); border: 1px solid var(--border-color); color: var(--text-main); display: flex; flex-direction: column; justify-content: center; align-items: center; }
         #weather-box i { font-size: 20px; margin-bottom: 2px; } #weather-temp { font-size: 12px; font-weight: bold; }
-        #route-info-panel { position: absolute; top: calc(85px + env(safe-area-inset-top, 0px)); left: 50%; transform: translateX(-50%); background: var(--glass); backdrop-filter: blur(10px); color: var(--text); padding: 12px 25px; border-radius: 30px; box-shadow: 0 8px 25px rgba(255, 71, 87, 0.3); display: none; align-items: center; gap: 15px; z-index: 3000; border: 2px solid var(--danger); }
-        .route-data { display: flex; flex-direction: column; line-height: 1.2; } .route-time { color: var(--danger); font-size: 18px; font-weight: bold; } .route-dist { font-size: 12px; color: #666; font-weight: bold; } .route-close { cursor: pointer; color: #888; font-size: 22px; transition: color 0.2s; } .route-close:hover { color: var(--text); }
+        
+        #route-info-panel { position: absolute; top: calc(125px + env(safe-area-inset-top, 0px)); left: 50%; transform: translateX(-50%); background: var(--glass); backdrop-filter: blur(10px); color: var(--text-main); padding: 12px 25px; border-radius: 30px; box-shadow: 0 8px 25px rgba(255, 71, 87, 0.3); display: none; align-items: center; gap: 15px; z-index: 3000; border: 2px solid var(--danger); }
+        .route-data { display: flex; flex-direction: column; line-height: 1.2; } .route-time { color: var(--danger); font-size: 18px; font-weight: bold; } .route-dist { font-size: 12px; color: var(--text-sub); font-weight: bold; } .route-close { cursor: pointer; color: #888; font-size: 22px; transition: color 0.2s; }
 
         /* =========================================
-           4. 下拉清單 (搜尋與收藏)
+           5. 各式面板與按鈕
            ========================================= */
-        #suggest, #fav-list-panel { background: var(--glass); border-radius: 18px; margin-top: 5px; overflow-y: auto; max-height: 250px; width: 100%; display: none; box-shadow: 0 10px 25px var(--card-shadow); z-index: 3100; scrollbar-width: none; }
+        #suggest, #fav-list-panel { background: var(--glass); border-radius: 18px; margin-top: 5px; overflow-y: auto; max-height: 250px; width: 100%; display: none; box-shadow: 0 10px 25px var(--card-shadow); z-index: 3100; scrollbar-width: none; border: 1px solid var(--border-color); }
         #fav-list-panel { position: absolute; bottom: calc(150px + env(safe-area-inset-bottom, 0px)); right: calc(70px + env(safe-area-inset-right, 0px)); width: 200px; }
-        .list-item { padding: 14px 20px; border-bottom: 1px solid rgba(0,0,0,0.05); cursor: pointer; display: flex; align-items: center; gap: 10px; color: var(--text); justify-content: space-between; font-size: 15px; font-weight: bold; }
-        .list-item:active { background: rgba(0,0,0,0.05); } .search-section-title { padding: 12px 20px 6px; font-size: 12px; color: #888; font-weight: bold; background: rgba(0,0,0,0.03); letter-spacing: 1px; }
+        .list-item { padding: 14px 20px; border-bottom: 1px solid var(--divider-color); cursor: pointer; display: flex; align-items: center; gap: 10px; color: var(--text-main); justify-content: space-between; font-size: 15px; font-weight: bold; }
+        .search-section-title { padding: 12px 20px 6px; font-size: 12px; color: var(--text-sub); font-weight: bold; background: var(--divider-color); letter-spacing: 1px; }
 
-        /* =========================================
-           5. 基礎控制組件
-           ========================================= */
         .leaflet-bottom.leaflet-right { bottom: calc(20px + env(safe-area-inset-bottom, 0px)) !important; right: calc(15px + env(safe-area-inset-right, 0px)) !important; }
-        .leaflet-control-scale { margin: 0 !important; } .leaflet-control-scale-line { background: rgba(255, 255, 255, 0.8) !important; border: 2px solid #333 !important; font-weight: bold; line-height: 1.2; padding: 2px 5px; }
-        #gps-val-text { position: absolute; bottom: calc(21px + env(safe-area-inset-bottom, 0px)); right: calc(125px + env(safe-area-inset-right, 0px)); left: auto; z-index: 3000; font-family: monospace; font-size: 12px; font-weight: bold; color: var(--text); pointer-events: none; text-shadow: -1px -1px 0 #fff, 1px -1px 0 #fff, -1px 1px 0 #fff, 1px 1px 0 #fff, 0 0 5px rgba(255,255,255,0.8); }
-        body.dark-mode #gps-val-text { text-shadow: -1px -1px 0 #222, 1px -1px 0 #222, -1px 1px 0 #222, 1px 1px 0 #222, 0 0 5px rgba(0,0,0,0.8); }
+        .leaflet-control-scale-line { background: rgba(255, 255, 255, 0.8) !important; border: 2px solid #333 !important; font-weight: bold; padding: 2px 5px; color: #333 !important;}
+        #gps-val-text { position: absolute; bottom: calc(21px + env(safe-area-inset-bottom, 0px)); right: calc(125px + env(safe-area-inset-right, 0px)); left: auto; z-index: 3000; font-family: monospace; font-size: 12px; font-weight: bold; color: var(--text-main); pointer-events: none; text-shadow: -1px -1px 0 var(--bg-color), 1px -1px 0 var(--bg-color), -1px 1px 0 var(--bg-color), 1px 1px 0 var(--bg-color), 0 0 5px rgba(128,128,128,0.5); }
 
         .map-controls { position: absolute; bottom: calc(85px + env(safe-area-inset-bottom, 0px)); right: calc(12px + env(safe-area-inset-right, 0px)); z-index: 3000; display: flex; flex-direction: column; gap: 12px; }
-        .control-btn { background: var(--glass); width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px var(--card-shadow); cursor: pointer; color: var(--text); font-size: 20px; border: 1px solid rgba(255,255,255,0.2); transition: transform 0.1s; }
+        .control-btn { background: var(--glass); width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px var(--card-shadow); cursor: pointer; color: var(--text-main); font-size: 20px; border: 1px solid var(--border-color); transition: transform 0.1s; }
         .control-btn:active { transform: scale(0.9); }
-        .route-btn { color: #8e44ad; } .fav-btn { color: var(--danger); } .active { color: var(--primary); border: 2px solid var(--primary); }
+        .route-btn { color: #8e44ad; } .fav-btn { color: var(--danger); } .compass-btn { color: var(--success); } .active { color: var(--primary); border: 2px solid var(--primary); }
         .rui-icon { font-family: "DFKai-sb", "BiauKai", serif; font-weight: 900; font-size: 18px; color: var(--accent); border: 2px solid var(--accent); border-radius: 4px; padding: 1px 3px; line-height: 1; transition: all 0.2s ease; }
-        @keyframes stamp-press { 0% { transform: scale(1) rotate(0deg); text-shadow: none; box-shadow: none; } 40% { transform: scale(0.8) rotate(-8deg); color: var(--danger); border-color: var(--danger); text-shadow: 0 0 8px rgba(255, 71, 87, 0.8); box-shadow: 0 0 12px rgba(255, 71, 87, 0.5) inset, 0 0 12px rgba(255, 71, 87, 0.5); } 70% { transform: scale(1.1) rotate(3deg); } 100% { transform: scale(1) rotate(0deg); text-shadow: none; box-shadow: none; } }
-        .rui-icon.stamped { animation: stamp-press 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
 
         /* =========================================
-           6. 各式彈出視窗 (Modal) 的共用與專屬設計
-           包含：迎賓說明(Splash)、設定(Settings)、編輯(Edit)
+           6. Modal 彈出視窗與底部卡片
            ========================================= */
-        .modal-overlay {
-            position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh;
-            background: rgba(0,0,0,0.6); backdrop-filter: blur(5px);
-            z-index: 6000; display: none; align-items: center; justify-content: center;
-        }
-        @keyframes fadeInScale { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
-        .modal-box {
-            background: var(--glass); width: 85%; max-width: 420px; max-height: 85vh; overflow-y: auto;
-            border-radius: 20px; padding: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-            display: flex; flex-direction: column; gap: 15px; color: var(--text); border: 1px solid rgba(255,255,255,0.2);
-            animation: fadeInScale 0.3s ease-out;
-            -webkit-overflow-scrolling: touch;
-        }
-        .modal-box h2 { text-align: center; color: var(--primary); margin: 0 0 5px 0; font-size: 24px; }
-        .modal-box h3 { margin: 0; font-size: 18px; color: var(--accent); display: flex; align-items: center; gap: 8px; }
-        .modal-box p { margin: 5px 0 15px 0; font-size: 14px; line-height: 1.6; opacity: 0.9; }
-        
-        .modal-input, .modal-textarea, .modal-select { 
-            width: 100%; padding: 12px 15px; border: 1px solid rgba(0,0,0,0.1); 
-            border-radius: 12px; box-sizing: border-box; font-size: 15px; 
-            background: rgba(255,255,255,0.7); outline: none; font-family: inherit; color: var(--text);
-        }
-        .modal-input:focus, .modal-textarea:focus, .modal-select:focus { border-color: var(--primary); background: #fff; }
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh; background: rgba(0,0,0,0.6); backdrop-filter: blur(5px); z-index: 6000; display: none; align-items: center; justify-content: center; }
+        .modal-box { background: var(--bg-color); width: 85%; max-width: 420px; max-height: 85vh; overflow-y: auto; border-radius: 20px; padding: 25px; display: flex; flex-direction: column; gap: 15px; color: var(--text-main); border: 1px solid var(--border-color); }
+        .modal-input, .modal-textarea, .modal-select { width: 100%; padding: 12px 15px; border: 1px solid var(--border-color); border-radius: 12px; font-size: 15px; background: var(--input-bg); outline: none; color: var(--text-main); }
         .modal-textarea { height: 100px; resize: none; }
-        
-        .modal-file-label { display: block; background: #e8f4fd; color: var(--primary); text-align: center; padding: 12px; border-radius: 12px; cursor: pointer; font-weight: bold; border: 1px dashed var(--primary); transition: background 0.2s; }
-        .modal-file-label:active { background: #d0e7fb; }
+        .modal-file-label { display: block; background: rgba(0, 123, 255, 0.1); color: var(--primary); text-align: center; padding: 12px; border-radius: 12px; cursor: pointer; font-weight: bold; border: 1px dashed var(--primary); }
         #edit-image-preview { width: 100%; height: 140px; object-fit: cover; border-radius: 12px; display: none; margin-top: 5px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
-        
-        .modal-btns { display: flex; gap: 12px; margin-top: 10px; }
-        .modal-btns button { flex: 1; padding: 14px; border: none; border-radius: 12px; font-weight: bold; font-size: 16px; cursor: pointer; color: white; transition: transform 0.1s; }
-        .modal-btns button:active { transform: scale(0.95); }
-        .modal-save { background: var(--primary); } .modal-cancel { background: #888; }
+        .modal-btns { display: flex; gap: 12px; margin-top: 10px; } .modal-btns button { flex: 1; padding: 14px; border: none; border-radius: 12px; font-weight: bold; font-size: 16px; cursor: pointer; color: white; } .modal-save { background: var(--primary); } .modal-cancel { background: #888; }
 
-        /* =========================================
-           7. 底部詳細資訊大卡片
-           ========================================= */
-        #card { position: absolute; bottom: 0; left: 0; width: 100%; transform: translateY(110%); max-height: 80vh; background: var(--glass); color: var(--text); transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1); z-index: 4000; padding: 25px; padding-bottom: calc(25px + env(safe-area-inset-bottom, 0px)); box-sizing: border-box; border-radius: 25px 25px 0 0; box-shadow: 0 -8px 25px var(--card-shadow); overflow-y: auto; will-change: transform; }
+        #card { position: absolute; bottom: 0; left: 0; width: 100%; transform: translateY(110%); max-height: 80vh; background: var(--glass); color: var(--text-main); transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1); z-index: 4000; padding: 25px; padding-bottom: calc(25px + env(safe-area-inset-bottom, 0px)); box-sizing: border-box; border-radius: 25px 25px 0 0; box-shadow: 0 -8px 25px var(--card-shadow); overflow-y: auto; will-change: transform; border-top: 1px solid var(--border-color); }
         #card.open { transform: translateY(0); } .close-bar { width: 50px; height: 5px; background: #888; border-radius: 10px; margin: -10px auto 15px; cursor: pointer; }
         .card-header-row { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; position: relative; }
         #title { margin: 0; font-size: 26px; line-height: 1.2; padding-right: 70px; }
         .card-header-icons { position: absolute; right: 0; top: 0; display: flex; gap: 15px; align-items: center; margin-top: 4px; }
-        .card-header-icons i { font-size: 22px; cursor: pointer; color: #ccc; transition: all 0.2s; }
-        #card-share-icon { color: var(--primary) !important; } #card-share-icon:active { transform: scale(0.9); opacity: 0.8; }
-        #card-fav-icon.active { color: var(--danger); transform: scale(1.2); }
+        .card-header-icons i { font-size: 22px; cursor: pointer; color: var(--text-sub); transition: all 0.2s; }
+        #card-share-icon { color: var(--primary) !important; } #card-fav-icon.active { color: var(--danger) !important; transform: scale(1.2); }
         #card-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 15px; }
-        #img { width: 100%; height: 180px; object-fit: cover; border-radius: 15px; margin-bottom: 15px; background: #eee; }
-        .info-section { margin-bottom: 15px; } .info-label { font-weight: bold; color: var(--text); display: block; margin-bottom: 4px; font-size: 15px; border-left: 4px solid var(--primary); padding-left: 10px; line-height: 1.2; } .info-text { color: var(--text); opacity: 0.8; font-size: 14px; line-height: 1.6; display: block; padding-left: 14px; }
+        #img { width: 100%; height: 180px; object-fit: cover; border-radius: 15px; margin-bottom: 15px; background: var(--divider-color); }
+        .info-section { margin-bottom: 15px; } .info-label { font-weight: bold; color: var(--text-main); display: block; margin-bottom: 4px; font-size: 15px; border-left: 4px solid var(--primary); padding-left: 10px; } .info-text { color: var(--text-sub); font-size: 14px; line-height: 1.6; display: block; padding-left: 14px; }
         .btn-group { display: flex; gap: 10px; margin-top: 25px; } .btn-group button { flex: 1; padding: 14px; border: none; border-radius: 12px; background: var(--primary); color: white; cursor: pointer; font-weight: bold; font-size: 15px; display: flex; align-items: center; justify-content: center; gap: 6px;} .btn-group button.secondary { background: #555; } .btn-group button.danger { background: var(--danger); } .btn-group button.edit-btn { background: #f39c12; }
 
-        /* =========================================
-           8. 地圖小圖釘 & Popup
-           ========================================= */
+        /* 圖釘與 Popup 樣式 */
         .custom-pin-wrap { position: relative; } .gmap-pin { width: 32px; height: 32px; border-radius: 50% 50% 50% 0; position: absolute; transform: rotate(-45deg); left: 50%; top: 50%; margin: -16px 0 0 -16px; box-shadow: -2px 2px 4px rgba(0,0,0,0.4); border: 2px solid #fff; display: flex; align-items: center; justify-content: center; } .gmap-pin i { transform: rotate(45deg); color: #fff; font-size: 14px; }
-        .user-pulse-icon { display: flex; justify-content: center; align-items: center; } .user-pulse-icon .dot { width: 14px; height: 14px; background: #007bff; border: 2px solid #fff; border-radius: 50%; z-index: 2; box-shadow: 0 0 8px rgba(0,0,0,0.5); } .user-pulse-icon .pulse { position: absolute; width: 40px; height: 40px; background: rgba(0, 123, 255, 0.6); border-radius: 50%; animation: radar-pulse 1.5s infinite ease-out; z-index: 1; } @keyframes radar-pulse { 0% { transform: scale(0.5); opacity: 1; } 100% { transform: scale(2.5); opacity: 0; } }
-        .leaflet-popup-content-wrapper { border-radius: 15px; background: var(--glass); padding: 0; overflow: hidden; } .leaflet-popup-content { margin: 0; width: 260px !important; color: var(--text); } .preview-card { width: 260px; cursor: pointer; } .preview-img { width: 100%; height: 130px; object-fit: cover; } .preview-info { padding: 12px; } .preview-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 5px; } .preview-title { font-weight: bold; font-size: 17px; } .walk-badge { font-size: 11px; background: #e8f4fd; color: #007bff; padding: 3px 8px; border-radius: 12px; font-weight: bold; } .mini-tag { display: inline-block; font-size: 10px; padding: 2px 6px; margin: 2px 2px 0 0; border-radius: 4px; background: rgba(0,123,255,0.1); color: var(--primary); font-weight: bold; } .food-preview { font-size: 13px; color: var(--accent); font-weight: bold; border-top: 1px dashed rgba(0,0,0,0.1); padding-top: 10px; margin-top: 10px; } body.dark-mode .food-preview { border-top: 1px dashed rgba(255,255,255,0.2); }
+        .user-pulse-icon { display: flex; justify-content: center; align-items: center; } .user-pulse-icon .dot { width: 14px; height: 14px; background: var(--primary); border: 2px solid #fff; border-radius: 50%; z-index: 2; box-shadow: 0 0 8px rgba(0,0,0,0.5); } .user-pulse-icon .pulse { position: absolute; width: 40px; height: 40px; background: rgba(0, 123, 255, 0.6); border-radius: 50%; animation: radar-pulse 1.5s infinite ease-out; z-index: 1; } @keyframes radar-pulse { 0% { transform: scale(0.5); opacity: 1; } 100% { transform: scale(2.5); opacity: 0; } }
+        .leaflet-popup-content-wrapper { border-radius: 15px; background: var(--bg-color); padding: 0; overflow: hidden; border: 1px solid var(--border-color); } .leaflet-popup-content { margin: 0; width: 260px !important; color: var(--text-main); } .preview-card { width: 260px; cursor: pointer; } .preview-img { width: 100%; height: 130px; object-fit: cover; } .preview-info { padding: 12px; } .preview-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 5px; } .preview-title { font-weight: bold; font-size: 17px; } .walk-badge { font-size: 11px; background: rgba(0, 123, 255, 0.1); color: var(--primary); padding: 3px 8px; border-radius: 12px; font-weight: bold; } .mini-tag { display: inline-block; font-size: 10px; padding: 2px 6px; margin: 2px 2px 0 0; border-radius: 4px; background: rgba(0,123,255,0.1); color: var(--primary); font-weight: bold; } .food-preview { font-size: 13px; color: var(--accent); font-weight: bold; border-top: 1px dashed var(--border-color); padding-top: 10px; margin-top: 10px; } 
 
-        /* =========================================
-           9. 手機適配
-           ========================================= */
-        @media (max-width: 768px) and (orientation: portrait) { #top-ui { left: calc(15px + env(safe-area-inset-left, 0px)); transform: none; width: calc(100% - 85px - env(safe-area-inset-right, 0px)); align-items: stretch; } #search { text-align: left; padding-left: 20px; } #map-center-panel { justify-content: flex-start; padding-left: 20px; } #gps-val-text { left: calc(15px + env(safe-area-inset-left, 0px)); right: auto; } }
-        @media (max-height: 500px) and (orientation: landscape) { #top-ui { left: calc(15px + env(safe-area-inset-left, 0px)); transform: none; width: 300px; align-items: stretch; } #search { text-align: left; padding-left: 20px; } #map-center-panel { justify-content: flex-start; padding-left: 20px; } #gps-val-text { left: calc(15px + env(safe-area-inset-left, 0px)); right: auto; } .map-controls { flex-direction: row; bottom: calc(15px + env(safe-area-inset-bottom, 0px)); left: 50%; transform: translateX(-50%); right: auto; gap: 10px; } .control-btn { width: 40px; height: 40px; font-size: 16px; } .rui-icon { font-size: 14px; border-width: 1px; padding: 1px 2px; } #fav-list-panel { left: 50%; transform: translateX(-50%); right: auto; bottom: calc(65px + env(safe-area-inset-bottom, 0px)); } }
+        @media (max-width: 768px) and (orientation: portrait) { #top-ui { left: calc(15px + env(safe-area-inset-left, 0px)); transform: none; width: calc(100% - 30px); } #search { text-align: left; padding-left: 20px; } #map-center-panel { justify-content: flex-start; padding-left: 20px; } #gps-val-text { left: calc(15px + env(safe-area-inset-left, 0px)); right: auto; } }
     </style>
 </head>
-<body id="main-body">
+<body>
 
-<div id="weather-box" title="即時天氣"><i class="fas fa-spinner fa-spin" style="color:#ccc"></i><span id="weather-temp">--</span></div>
-
-<div id="top-ui">
-    <input id="search" placeholder="🔍 搜尋景點或長按地圖標記...">
-    <div id="map-center-panel"><i class="fas fa-map-marker-alt" style="color:var(--primary)"></i><span id="addr-text" data-i18n="addr_locating">定位中...</span></div>
-    <div id="suggest"></div>
-</div>
-
-<div id="route-info-panel">
-    <i class="fas fa-car" style="font-size:20px; color:var(--primary);"></i>
-    <div class="route-data">
-        <span id="route-time" class="route-time">-- 分鐘</span>
-        <span id="route-dist" class="route-dist">-- km</span>
+    <div id="splash-screen">
+        <div class="logo-anim">瑞</div>
+        <h2 style="margin-top: 20px; letter-spacing: 2px;">瑞芳導覽</h2>
     </div>
-    <i class="fas fa-times-circle route-close" onclick="closeNav()"></i>
-</div>
 
-<div class="map-controls">
-    <div class="control-btn" onclick="openSettings()" title="設定"><i class="fas fa-cog"></i></div>
-    <div class="control-btn compass-btn" onclick="resetNorth()" title="回到全景"><i class="fas fa-compass"></i></div>
-    <div class="control-btn route-btn" onclick="drawThemeRoute()" title="時空旅人路線"><i class="fas fa-route"></i></div>
-    <div class="control-btn fav-btn" onclick="toggleFavList()" title="我的收藏"><i class="fas fa-folder-open"></i></div>
-    <div class="control-btn station-btn" onclick="goToStation()" title="回到瑞芳中心"><span class="rui-icon">瑞</span></div>
-    <div class="control-btn" id="layer-btn" onclick="toggleLayer()" title="切換底圖"><i class="fas fa-map"></i></div>
-    <div class="control-btn active" onclick="goToUser()" title="我的位置"><i class="fas fa-location-crosshairs"></i></div>
-</div>
-
-<div id="fav-list-panel"></div>
-<div id="gps-val-text" data-i18n="gps_locating">GPS: 定位中...</div>
-<div id="map"></div>
-
-<div id="card">
-    <div class="close-bar" onclick="closeCard()"></div>
-    <div class="card-header-row">
-        <h2 id="title"></h2>
-        <div class="card-header-icons">
-            <i id="card-share-icon" class="fas fa-share-nodes" onclick="shareSpot()" title="分享此景點"></i>
-            <i id="card-fav-icon" class="fas fa-heart" onclick="toggleCurrentFav()"></i>
+    <div id="startup-screen">
+        <div class="content-wrapper">
+            <div class="logo-static">瑞</div>
+            <h1 style="margin-top: 20px;">瑞芳導覽 App</h1>
+            <p style="text-align: center; color: var(--text-sub); line-height: 1.6;">致力於提供瑞芳地區最精準的在地導覽，帶領您深度探索山城之美。</p>
+            <div style="margin-top: 20px; width: 100%;">
+                <label style="font-weight: bold; display: block; margin-bottom: 10px;">請選擇語言 / Select Language</label>
+                <select id="lang-select-startup" onchange="translateWithGoogle('lang-select-startup')" class="modal-select">
+                    <option value="zh-TW">繁體中文 (預設)</option>
+                    <option value="en">English (Google Translate)</option>
+                    <option value="ja">日本語 (Google Translate)</option>
+                </select>
+            </div>
+            <div style="margin-top: 30px; text-align: left; width: 100%; font-size: 15px;">
+                <h3 style="border-bottom: 1px solid var(--divider-color); padding-bottom: 8px; margin-bottom: 10px;">介面功能說明</h3>
+                <ul style="list-style: none; padding: 0; margin: 0; color: var(--text-sub);">
+                    <li style="margin: 12px 0;">🔍 <b style="color: var(--text-main);">搜尋與標籤</b>：上方可快速尋找與篩選景點。</li>
+                    <li style="margin: 12px 0;">📍 <b style="color: var(--text-main);">長按新增</b>：長按地圖可新增自訂私房景點。</li>
+                    <li style="margin: 12px 0;">🌡️ <b style="color: var(--text-main);">天氣資訊</b>：右上方方格顯示圖示與即時氣溫。</li>
+                    <li style="margin: 12px 0;"><span style="color: var(--primary);">●</span> <b style="color: var(--text-main);">分享鍵</b>：藍色按鈕，快速分享景點連結。</li>
+                </ul>
+            </div>
+            <button class="btn-start" onclick="closeStartup()">開始探索</button>
         </div>
     </div>
-    <div id="card-tags"></div>
-    <img id="img">
-    <div class="info-section"><span class="info-label"><i class="fas fa-utensils"></i> <span data-i18n="label_food">在地飲食</span></span><span id="card-food" class="info-text"></span></div>
-    <div class="info-section"><span class="info-label"><i class="fas fa-star"></i> <span data-i18n="label_highlight">推薦亮點</span></span><span id="card-highlights" class="info-text"></span></div>
-    <div class="info-section"><span class="info-label"><i class="fas fa-history"></i> <span data-i18n="label_history">簡介歷史</span></span><span id="card-history" class="info-text"></span></div>
-    <div class="info-section"><span class="info-label"><i class="fas fa-bus"></i> <span data-i18n="label_transport">交通方式</span></span><span id="card-transport" class="info-text"></span></div>
-    <div class="btn-group" id="card-btn-group"></div>
-</div>
 
-<div id="splash-screen" class="modal-overlay">
-    <div class="modal-box">
-        <h2 id="splash-title" data-i18n="splash_title">瑞芳導覽地圖</h2>
+    <div id="weather-box" title="即時天氣"><i class="fas fa-spinner fa-spin" style="color:#ccc"></i><span id="weather-temp">--</span></div>
+
+    <div id="top-ui">
+        <input id="search" placeholder="🔍 搜尋景點或長按地圖標記...">
         
-        <h3 id="splash-purpose-title"><i class="fas fa-bullseye"></i> 開發目的</h3>
-        <p id="splash-purpose-desc" data-i18n="splash_purpose_desc">專為探索瑞芳秘境、品嚐在地美食與體驗礦業歷史所設計，提供無縫的智慧導覽體驗。</p>
-        
-        <h3 id="splash-features-title"><i class="fas fa-star"></i> 核心功能</h3>
-        <p id="splash-features-desc" data-i18n="splash_features_desc">✨ 景點探索、🚗 路線導航、❤️ 專屬收藏、✏️ 自訂標記。</p>
-        
-        <h3 id="splash-ui-title"><i class="fas fa-mobile-alt"></i> 介面說明</h3>
-        <p id="splash-ui-desc" data-i18n="splash_ui_desc">點擊地圖圖釘可預覽景點；長按地圖可新增專屬地點；右下角按鈕提供圖層切換與功能捷徑。</p>
+        <div id="category-chips">
+            <div class="chip active" onclick="filterSpots('all', this)">🌟 全部</div>
+            <div class="chip" onclick="filterSpots('美食', this)">🍜 美食</div>
+            <div class="chip" onclick="filterSpots('歷史', this)">🏛️ 歷史</div>
+            <div class="chip" onclick="filterSpots('自然', this)">⛰️ 自然景觀</div>
+            <div class="chip" onclick="filterSpots('自訂', this)">📍 我的標記</div>
+        </div>
 
-        <h3 id="splash-lang-title"><i class="fas fa-globe"></i> Language / 語言</h3>
-        <select id="splash-lang" class="modal-select" onchange="previewLanguage(this.value)">
-            <option value="zh">繁體中文</option>
-            <option value="en">English</option>
-            <option value="ja">日本語</option>
-        </select>
+        <div id="map-center-panel">
+            <i class="fas fa-map-marker-alt" style="color:var(--primary)"></i>
+            <span id="addr-text">定位中...</span>
+        </div>
+        <div id="suggest"></div>
+    </div>
 
-        <div class="modal-btns">
-            <button class="modal-save" onclick="closeSplash()" id="start-explore-btn" data-i18n="start_explore">開始探索</button>
+    <div id="route-info-panel">
+        <i class="fas fa-car" style="font-size:20px; color:var(--primary);"></i>
+        <div class="route-data">
+            <span id="route-time" class="route-time">-- 分鐘</span>
+            <span id="route-dist" class="route-dist">-- km</span>
+        </div>
+        <i class="fas fa-times-circle route-close" onclick="closeNav()"></i>
+    </div>
+
+    <div class="map-controls">
+        <div class="control-btn" onclick="openSettings()" title="設定"><i class="fas fa-cog"></i></div>
+        <div class="control-btn compass-btn" onclick="resetNorth()" title="回到全景"><i class="fas fa-compass"></i></div>
+        <div class="control-btn route-btn" onclick="drawThemeRoute()" title="時空旅人路線"><i class="fas fa-route"></i></div>
+        <div class="control-btn fav-btn" onclick="toggleFavList()" title="我的收藏"><i class="fas fa-folder-open"></i></div>
+        <div class="control-btn station-btn" onclick="goToStation()" title="回到瑞芳中心"><span class="rui-icon">瑞</span></div>
+        <div class="control-btn" id="layer-btn" onclick="toggleLayer()" title="切換底圖"><i class="fas fa-map"></i></div>
+        <div class="control-btn active" onclick="goToUser()" title="我的位置"><i class="fas fa-location-crosshairs"></i></div>
+    </div>
+
+    <div id="fav-list-panel"></div>
+    <div id="gps-val-text">GPS: 定位中...</div>
+    <div id="map"></div>
+
+    <div id="card">
+        <div class="close-bar" onclick="closeCard()"></div>
+        <div class="card-header-row">
+            <h2 id="title"></h2>
+            <div class="card-header-icons">
+                <i id="card-share-icon" class="fas fa-share-nodes" onclick="shareSpot()" title="分享此景點"></i>
+                <i id="card-fav-icon" class="fas fa-heart" onclick="toggleCurrentFav()" title="加入/移除收藏"></i>
+            </div>
+        </div>
+        <div id="card-tags"></div>
+        <img id="img">
+        <div class="info-section"><span class="info-label"><i class="fas fa-utensils"></i> 在地飲食</span><span id="card-food" class="info-text"></span></div>
+        <div class="info-section"><span class="info-label"><i class="fas fa-star"></i> 推薦亮點</span><span id="card-highlights" class="info-text"></span></div>
+        <div class="info-section"><span class="info-label"><i class="fas fa-history"></i> 簡介歷史</span><span id="card-history" class="info-text"></span></div>
+        <div class="info-section"><span class="info-label"><i class="fas fa-bus"></i> 交通方式</span><span id="card-transport" class="info-text"></span></div>
+        <div class="btn-group" id="card-btn-group"></div>
+    </div>
+
+    <div id="settings-modal-overlay" class="modal-overlay">
+        <div class="modal-box">
+            <h2><i class="fas fa-cog"></i> 系統設定</h2>
+            <h3><i class="fas fa-globe"></i> 語言 / Language</h3>
+            <select id="lang-select-settings" onchange="translateWithGoogle('lang-select-settings')" class="modal-select">
+                <option value="zh-TW">繁體中文 (預設)</option>
+                <option value="en">English (Google Translate)</option>
+                <option value="ja">日本語 (Google Translate)</option>
+            </select>
+            <div class="modal-btns">
+                <button class="modal-cancel" onclick="closeSettings()">關閉</button>
+            </div>
         </div>
     </div>
-</div>
 
-<div id="settings-modal-overlay" class="modal-overlay">
-    <div class="modal-box">
-        <h2 id="settings-title" data-i18n="settings_title"><i class="fas fa-cog"></i> 設定</h2>
-        <h3 id="settings-lang-title"><i class="fas fa-globe"></i> Language / 語言</h3>
-        <select id="settings-lang" class="modal-select">
-            <option value="zh">繁體中文</option>
-            <option value="en">English</option>
-            <option value="ja">日本語</option>
-        </select>
-        <div class="modal-btns">
-            <button class="modal-cancel" onclick="closeSettings()" id="settings-cancel" data-i18n="cancel">取消</button>
-            <button class="modal-save" onclick="saveSettings()" id="settings-save" data-i18n="save">儲存</button>
+    <div id="edit-modal-overlay" class="modal-overlay">
+        <div class="modal-box">
+            <h3><i class="fas fa-edit"></i> <span id="edit-modal-title">編輯自訂標記</span></h3>
+            <input type="text" id="edit-name" class="modal-input" placeholder="名稱必填">
+            <input type="text" id="edit-highlights" class="modal-input" placeholder="推薦亮點">
+            <textarea id="edit-history" class="modal-textarea" placeholder="歷史簡介..."></textarea>
+            <label class="modal-file-label"><i class="fas fa-camera"></i> <span>上傳照片</span><input type="file" id="edit-image" accept="image/*" style="display:none;"></label>
+            <img id="edit-image-preview">
+            <div class="modal-btns">
+                <button class="modal-cancel" onclick="closeEditModal()">取消</button>
+                <button class="modal-save" onclick="saveEditSpot()">儲存</button>
+            </div>
         </div>
     </div>
-</div>
 
-<div id="edit-modal-overlay" class="modal-overlay">
-    <div class="modal-box">
-        <h3><i class="fas fa-edit"></i> <span id="edit-modal-title" data-i18n="edit_modal_title">編輯自訂標記</span></h3>
-        <input type="text" id="edit-name" class="modal-input" placeholder="名稱必填">
-        <input type="text" id="edit-highlights" class="modal-input" placeholder="推薦亮點">
-        <textarea id="edit-history" class="modal-textarea" placeholder="歷史簡介..."></textarea>
-        <label class="modal-file-label"><i class="fas fa-camera"></i> <span id="edit-photo-label" data-i18n="edit_photo">上傳照片</span><input type="file" id="edit-image" accept="image/*" style="display:none;"></label>
-        <img id="edit-image-preview">
-        <div class="modal-btns">
-            <button class="modal-cancel" onclick="closeEditModal()" id="edit-cancel" data-i18n="cancel">取消</button>
-            <button class="modal-save" onclick="saveEditSpot()" id="edit-save" data-i18n="save">儲存</button>
-        </div>
-    </div>
-</div>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
 
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
-
-<script>
-// =========================================
-// 0. 多國語言字典 (i18n) & 設定邏輯
-// =========================================
-const translations = {
-    'zh': {
-        splash_title: "瑞芳導覽地圖", splash_purpose_title: "開發目的", splash_purpose_desc: "專為探索瑞芳秘境、品嚐在地美食與體驗礦業歷史所設計，提供無縫的智慧導覽體驗。", splash_features_title: "核心功能", splash_features_desc: "✨ 景點探索、🚗 路線導航、❤️ 專屬收藏、✏️ 自訂標記。", splash_ui_title: "介面說明", splash_ui_desc: "點擊地圖圖釘可預覽景點；長按地圖可新增專屬地點；右下角按鈕提供切換與捷徑。", start_explore: "開始探索",
-        settings_title: "設定", cancel: "取消", save: "儲存",
-        search_placeholder: "🔍 搜尋景點或長按地圖新增標記...", addr_locating: "定位中...", gps_locating: "GPS: 定位中...", no_favs: "尚無收藏景點<br>點擊卡片愛心加入！",
-        label_food: "在地飲食", label_highlight: "推薦亮點", label_history: "簡介歷史", label_transport: "交通方式",
-        btn_nav: " 導航", btn_edit: " 編輯", btn_del: " 刪除", btn_trip: " 行程規劃",
-        edit_modal_title: "編輯自訂標記", edit_photo: "選擇封面照片"
-    },
-    'en': {
-        splash_title: "Ruifang Guide Map", splash_purpose_title: "Purpose", splash_purpose_desc: "Designed to explore Ruifang's hidden gems, local food, and mining history with a seamless smart guide experience.", splash_features_title: "Features", splash_features_desc: "✨ Spot Discovery, 🚗 Navigation, ❤️ Favorites, ✏️ Custom Markers.", splash_ui_title: "UI Guide", splash_ui_desc: "Click pins to preview spots; Long press map to add custom spots; Use bottom-right buttons for shortcuts.", start_explore: "Start Exploring",
-        settings_title: "Settings", cancel: "Cancel", save: "Save",
-        search_placeholder: "🔍 Search or long press to add...", addr_locating: "Locating...", gps_locating: "GPS: Locating...", no_favs: "No favorites yet.<br>Click heart to add!",
-        label_food: "Local Food", label_highlight: "Highlights", label_history: "History", label_transport: "Transport",
-        btn_nav: " Navigate", btn_edit: " Edit", btn_del: " Delete", btn_trip: " Plan Trip",
-        edit_modal_title: "Edit Marker", edit_photo: "Choose Photo"
-    },
-    'ja': {
-        splash_title: "ルイファン観光マップ", splash_purpose_title: "目的", splash_purpose_desc: "瑞芳（ルイファン）の秘境、地元グルメ、鉱業の歴史をシームレスに探索するために設計されました。", splash_features_title: "機能", splash_features_desc: "✨ スポット探索、🚗 ナビゲーション、❤️ お気に入り、✏️ カスタムマーカー", splash_ui_title: "UI ガイド", splash_ui_desc: "ピンをタップしてプレビュー、長押しで追加、右下のボタンで操作します。", start_explore: "探索を始める",
-        settings_title: "設定", cancel: "キャンセル", save: "保存",
-        search_placeholder: "🔍 検索、または長押しで追加...", addr_locating: "位置取得中...", gps_locating: "GPS: 取得中...", no_favs: "お気に入りがありません。<br>ハートを押して追加！",
-        label_food: "地元グルメ", label_highlight: "見どころ", label_history: "歴史", label_transport: "アクセス",
-        btn_nav: " ナビ", btn_edit: " 編集", btn_del: " 削除", btn_trip: " ルート計画",
-        edit_modal_title: "マーカー編集", edit_photo: "写真を選択"
-    }
-};
-
-let currentLang = localStorage.getItem('ruifang_lang') || 'zh';
-
-function applyLanguage(lang) {
-    currentLang = lang;
-    localStorage.setItem('ruifang_lang', lang);
-    const t = translations[lang]; if(!t) return;
-    
-    // Update simple texts
-    document.getElementById('search').placeholder = t.search_placeholder;
-    document.getElementById('addr-text').innerText = t.addr_locating;
-    document.getElementById('gps-val-text').innerText = t.gps_locating;
-    
-    // Update Elements with data-i18n attribute
-    document.querySelectorAll('[data-i18n]').forEach(el => {
-        const key = el.getAttribute('data-i18n');
-        if (t[key]) {
-            if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') { el.placeholder = t[key]; } 
-            else { el.innerText = t[key]; }
+    <script>
+        // --- 註冊 PWA Service Worker ---
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW 未註冊 (本地端開發時為正常現象)'));
+            });
         }
-    });
 
-    // Handle complex innerHTML updates manually to preserve icons
-    document.getElementById('splash-purpose-title').innerHTML = `<i class="fas fa-bullseye"></i> ${t.splash_purpose_title}`;
-    document.getElementById('splash-features-title').innerHTML = `<i class="fas fa-star"></i> ${t.splash_features_title}`;
-    document.getElementById('splash-ui-title').innerHTML = `<i class="fas fa-mobile-alt"></i> ${t.splash_ui_title}`;
-    document.getElementById('settings-title').innerHTML = `<i class="fas fa-cog"></i> ${t.settings_title}`;
-    
-    // Re-render fav list if empty
-    if(myFavs.length === 0 && document.getElementById('fav-list-panel').style.display === 'block'){
-        document.getElementById('fav-list-panel').innerHTML = `<div style="padding:15px; text-align:center; color:#888; font-size:13px;">${t.no_favs}</div>`;
-    }
-    
-    // Re-render open card buttons if open
-    if (document.getElementById('card').classList.contains('open') && targetSpot) {
-        renderCardButtons(targetSpot, t);
-    }
-}
-
-function previewLanguage(lang) { applyLanguage(lang); }
-function openSettings() { document.getElementById('settings-lang').value = currentLang; document.getElementById('settings-modal-overlay').style.display = 'flex'; }
-function closeSettings() { document.getElementById('settings-modal-overlay').style.display = 'none'; }
-function saveSettings() { applyLanguage(document.getElementById('settings-lang').value); closeSettings(); }
-function closeSplash() { localStorage.setItem('ruifang_welcomed', 'true'); document.getElementById('splash-screen').style.display = 'none'; }
-
-// =========================================
-// 1. 即時天氣 API
-// =========================================
-async function fetchWeather() {
-    try {
-        const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=25.108&longitude=121.805&current_weather=true&timezone=Asia%2FTaipei');
-        const data = await res.json();
-        const temp = Math.round(data.current_weather.temperature);
-        const code = data.current_weather.weathercode;
-        let iconClass = 'fa-cloud-sun'; let iconColor = '#f39c12'; 
-        if(code === 0) { iconClass = 'fa-sun'; iconColor = '#f1c40f'; } else if(code <= 3) { iconClass = 'fa-cloud-sun'; iconColor = '#f39c12'; } else if(code <= 67 || (code >= 80 && code <= 82)) { iconClass = 'fa-cloud-rain'; iconColor = '#3498db'; } 
-        document.getElementById('weather-temp').innerText = `${temp}°C`;
-        const iconEl = document.querySelector('#weather-box i'); iconEl.className = `fas ${iconClass}`; iconEl.style.color = iconColor;
-    } catch (e) { document.getElementById('weather-temp').innerText = "--"; }
-}
-
-// =========================================
-// 2. 景點資料庫與隱藏關鍵字
-// =========================================
-const spots = [
-    { name: "瑞芳", lat: 25.108, lng: 121.805, tags: ["交通樞紐", "美食"], keywords: ["火車站", "龍鳳腿", "胡椒餅", "牛肉麵", "市區"], highlights: "瑞芳美食廣場", food: "龍鳳腿、胡椒餅", history: "進入九份與平溪線門戶。", transport: "台鐵瑞芳站" },
-    { name: "四腳亭", lat: 25.103, lng: 121.762, tags: ["古蹟", "古道"], keywords: ["砲台", "排骨麵", "步道"], highlights: "四腳亭砲台", food: "排骨麵", history: "通往宜蘭的重要古道據點。", transport: "台鐵四腳亭站" },
-    { name: "猴硐", lat: 25.086, lng: 121.828, tags: ["貓村", "歷史"], keywords: ["貓", "煤礦", "瑞三", "打卡", "可愛"], highlights: "猴硐貓村、瑞三整煤廠", food: "礦工麵", history: "曾為全台煤礦產量第一。", transport: "台鐵猴硐站" },
-    { name: "九份老街", lat: 25.1099, lng: 121.8452, tags: ["熱門", "歷史"], keywords: ["夜景", "阿妹茶樓", "芋圓", "草仔粿", "山城", "悲情城市"], highlights: "阿妹茶樓", food: "阿柑姨芋圓", history: "黃金山城，建築依山而建。", transport: "客運 788 / 965" },
-    { name: "深澳", lat: 25.133, lng: 121.824, tags: ["自然", "海景鐵道"], keywords: ["象鼻岩", "自行車", "小卷米粉", "海鮮"], highlights: "深澳鐵道自行車", food: "小卷米粉", history: "現以海蝕奇岩聞名。", transport: "公車T99、791" },
-    { name: "鼻頭角", lat: 25.12588, lng: 121.92028, tags: ["自然", "秘境"], keywords: ["燈塔", "海產", "看海", "步道"], highlights: "鼻頭角步道", food: "海產", history: "瑞芳東北角的絕美岬角。", transport: "客運 856 / 886" },
-    { name: "金瓜石", lat: 25.10911, lng: 121.85768, tags: ["歷史", "礦業"], keywords: ["黃金博物館", "神社", "礦工便當", "淘金"], highlights: "黃金博物館", food: "礦工便當", history: "昔日亞洲第一金礦山。", transport: "客運 788 / 856" },
-    { name: "無耳茶壺山", lat: 25.10637, lng: 121.86596, tags: ["登山", "自然"], keywords: ["海景", "芒草", "爬山", "茶壺"], highlights: "絕美海景", food: "無", history: "因山形狀似無耳茶壺得名。", transport: "金瓜石步行登山" },
-    { name: "水湳洞", lat: 25.12248, lng: 121.86033, tags: ["歷史", "海景"], keywords: ["陰陽海", "漁港"], highlights: "陰陽海", food: "小吃", history: "採礦工業與自然交界。", transport: "客運 856 / 886" },
-    { name: "十三層遺址", lat: 25.11826, lng: 121.86465, tags: ["古蹟"], keywords: ["天空之城", "點燈", "水湳洞", "煉銅"], highlights: "台版天空之城", food: "無", history: "昔日大型選煉廠遺址。", transport: "長仁社區附近" },
-    { name: "不厭亭", lat: 25.0895, lng: 121.8473, tags: ["秘境", "打卡"], keywords: ["寂寞公路", "102縣道", "芒草", "夕陽"], highlights: "寂寞公路", food: "無", history: "名字取自李白詩句。", transport: "自行開車" },
-    { name: "南子吝步道", lat: 25.1206, lng: 121.8863, tags: ["登山", "自然"], keywords: ["海景", "無敵海景", "高CP值"], highlights: "360度無敵山海景", food: "南雅麵店", history: "高CP值步道。", transport: "公車 856" }
-];
-
-const themeRouteCoords = [[25.108, 121.805], [25.086, 121.828], [25.0606, 121.8226], [25.1091, 121.8576]];
-let userPos = null, currentRoute = null, targetSpot = null;
-let myFavs = JSON.parse(localStorage.getItem('ruifang_favs')) || []; 
-let savedCustomSpots = JSON.parse(localStorage.getItem('ruifang_custom_spots')) || []; 
-let searchHistory = JSON.parse(localStorage.getItem('ruifang_search_history')) || []; 
-
-// =========================================
-// 3. 地圖初始化
-// =========================================
-const map = L.map('map', { zoomControl: false, attributionControl: false }).setView([25.1032, 121.8224], 14);
-const mapLayers = [
-    { url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', name: '街道', icon: 'fa-map', dark: false },
-    { url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', name: '等高線', icon: 'fa-mountain', dark: false },
-    { url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', name: '夜間', icon: 'fa-moon', dark: true }
-];
-let currentLayerIdx = 0, currentTileLayer = L.tileLayer(mapLayers[0].url).addTo(map);
-L.control.scale({ metric: true, imperial: false, position: 'bottomright' }).addTo(map);
-
-function toggleLayer() {
-    currentLayerIdx = (currentLayerIdx + 1) % mapLayers.length; 
-    const c = mapLayers[currentLayerIdx];
-    map.removeLayer(currentTileLayer); currentTileLayer = L.tileLayer(c.url).addTo(map);
-    document.querySelector('#layer-btn i').className = `fas ${c.icon}`;
-    if (c.dark) document.body.classList.add("dark-mode"); else document.body.classList.remove("dark-mode");
-}
-
-map.on('click', () => { closeCard(); document.getElementById("suggest").style.display = "none"; });
-
-const userPulseIcon = L.divIcon({ className: 'user-pulse-icon', html: '<div class="pulse"></div><div class="dot"></div>', iconSize: [40, 40], iconAnchor: [20, 20] });
-map.locate({setView: false, watch: true}); 
-map.on('locationfound', e => {
-    userPos = e.latlng; document.getElementById("gps-val-text").innerText = `GPS: ${e.latlng.lat.toFixed(4)}, ${e.latlng.lng.toFixed(4)}`;
-    if(!window.userMarker) window.userMarker = L.marker(userPos, { icon: userPulseIcon }).addTo(map); else window.userMarker.setLatLng(userPos);
-});
-
-map.on('moveend', function() {
-    const center = map.getCenter();
-    fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${center.lat}&lon=${center.lng}&zoom=18&addressdetails=1&accept-language=zh-TW`)
-    .then(res => res.json()).then(data => {
-        if (data && data.address) {
-            const a = data.address;
-            document.getElementById("addr-text").innerText = ((a.city||a.town||a.county||"") + (a.suburb||a.district||"") + (a.village||a.neighbourhood||a.road||"")) || "探索瑞芳中...";
+        // --- 介面控制與 Google 翻譯 ---
+        function translateWithGoogle(selectId) {
+            const selectedLang = document.getElementById(selectId).value;
+            if (selectedLang === 'zh-TW') return;
+            const currentUrl = window.location.href;
+            if (currentUrl.startsWith('file://') || currentUrl.includes('localhost') || currentUrl.includes('127.0.0.1')) {
+                alert('提示：Google 網頁翻譯需要將網站發布到公開網址 (https) 才能翻譯。\n即將為您開啟 Google 翻譯首頁作為示範。');
+                window.open(`https://translate.google.com/?sl=zh-TW&tl=${selectedLang}&op=websites`, '_blank');
+            } else {
+                window.open(`https://translate.google.com/translate?sl=zh-TW&tl=${selectedLang}&u=${encodeURIComponent(currentUrl)}`, '_blank');
+            }
+            document.getElementById(selectId).value = 'zh-TW';
+            if(selectId === 'lang-select-settings') closeSettings();
         }
-    }).catch(()=>{}); 
-});
-map.fire('moveend'); 
 
-// =========================================
-// 4. 圖釘與標記生成
-// =========================================
-const cluster = L.markerClusterGroup(); map.addLayer(cluster);
+        function closeStartup() {
+            const startupScreen = document.getElementById('startup-screen');
+            startupScreen.style.transition = "opacity 0.4s ease";
+            startupScreen.style.opacity = "0";
+            setTimeout(() => { startupScreen.style.display = 'none'; }, 400); 
+            localStorage.setItem('ruifang_welcomed', 'true');
+        }
 
-function calculateWalk(lat, lng) {
-    if(!userPos) return "--";
-    const mins = Math.round(map.distance(userPos, [lat, lng]) / 80); 
-    return mins < 1 ? "1分內" : `約 ${mins} 分`;
-}
+        function openSettings() { document.getElementById('settings-modal-overlay').style.display = 'flex'; }
+        function closeSettings() { document.getElementById('settings-modal-overlay').style.display = 'none'; }
 
-const createCustomPin = (tags) => {
-    let cls = 'fa-map-marker-alt', col = '#ea4335'; 
-    if (tags.includes('美食')) { cls = 'fa-utensils'; col = '#f39c12'; } else if (tags.includes('貓村')) { cls = 'fa-cat'; col = '#9b59b6'; } else if (tags.includes('自然') || tags.includes('秘境')) { cls = 'fa-leaf'; col = '#2ecc71'; } else if (tags.includes('歷史')) { cls = 'fa-landmark'; col = '#7f8c8d'; } else if (tags.includes('自訂')) { cls = 'fa-star'; col = '#f1c40f'; } 
-    return L.divIcon({ className: 'custom-pin-wrap', html: `<div class="gmap-pin" style="background-color:${col}"><i class="fas ${cls}"></i></div>`, iconSize: [32,32], iconAnchor: [16,38], popupAnchor: [0,-38] });
-};
+        // --- 天氣 API ---
+        async function fetchWeather() {
+            try {
+                const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=25.108&longitude=121.805&current_weather=true&timezone=Asia%2FTaipei');
+                const data = await res.json();
+                const temp = Math.round(data.current_weather.temperature);
+                const code = data.current_weather.weathercode;
+                let iconClass = 'fa-cloud-sun'; let iconColor = '#f39c12'; 
+                if(code === 0) { iconClass = 'fa-sun'; iconColor = '#f1c40f'; } else if(code <= 3) { iconClass = 'fa-cloud-sun'; iconColor = '#f39c12'; } else if(code <= 67 || (code >= 80 && code <= 82)) { iconClass = 'fa-cloud-rain'; iconColor = '#3498db'; } 
+                document.getElementById('weather-temp').innerText = `${temp}°C`;
+                const iconEl = document.querySelector('#weather-box i'); iconEl.className = `fas ${iconClass}`; iconEl.style.color = iconColor;
+            } catch (e) { document.getElementById('weather-temp').innerText = "--"; }
+        }
 
-function addMarkerToMap(s) {
-    if (!s.tags.includes('自訂') && !s.wikiImg) fetch(`https://zh.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(s.name)}`).then(r=>r.json()).then(d=>{s.wikiImg=d.thumbnail?.source;}).catch(()=>{});
-    const m = L.marker([s.lat, s.lng], { icon: createCustomPin(s.tags) });
-    m.bindPopup(() => {
-        const img = s.wikiImg || 'https://via.placeholder.com/260x130/f1c40f/ffffff?text=Custom+Spot';
-        const foodIcon = s.tags.includes('自訂') ? 'fa-star' : 'fa-utensils';
-        const foodText = s.tags.includes('自訂') ? '自訂地點' : `美食：${s.food}`;
-        return `<div class="preview-card" onclick="openCardByName('${s.name}')"><img class="preview-img" src="${img}"><div class="preview-info"><div class="preview-header"><span class="preview-title">${s.name}</span><span class="walk-badge"><i class="fas fa-walking"></i> ${calculateWalk(s.lat, s.lng)}</span></div><div class="preview-tag-box">${s.tags.map(t=>`<span class="mini-tag">${t}</span>`).join('')}</div><div class="food-preview"><i class="fas ${foodIcon}"></i> ${foodText}</div></div></div>`;
-    }, { closeButton: false });
-    m.on('mouseover', function() { this.openPopup(); }); m.on('click', (e) => { L.DomEvent.stopPropagation(e); showCard(s); });
-    s.markerObj = m; cluster.addLayer(m);
-}
-spots.forEach(addMarkerToMap);
-savedCustomSpots.forEach(s => { spots.push(s); addMarkerToMap(s); });
+        // --- 擴充的景點資料庫 ---
+        const spots = [
+            // 交通與美食
+            { name: "瑞芳", lat: 25.108, lng: 121.805, tags: ["交通", "美食"], keywords: ["火車站", "龍鳳腿", "胡椒餅"], highlights: "瑞芳美食廣場", food: "龍鳳腿、胡椒餅、牛肉麵", history: "進入九份與平溪線門戶。", transport: "台鐵瑞芳站" },
+            { name: "瑞芳後站老街", lat: 25.109, lng: 121.806, tags: ["歷史", "美食"], keywords: ["保雲芋圓", "老街"], highlights: "瑞芳創始芋圓", food: "保雲芋圓", history: "早期礦工的聚集地。", transport: "瑞芳火車站後站" },
+            // 熱門歷史
+            { name: "九份老街", lat: 25.1099, lng: 121.8452, tags: ["歷史", "美食"], keywords: ["阿妹茶樓", "芋圓", "山城"], highlights: "阿妹茶樓、豎崎路", food: "阿柑姨芋圓、草仔粿", history: "昔日繁華的黃金山城。", transport: "客運 788/965" },
+            { name: "猴硐貓村", lat: 25.086, lng: 121.828, tags: ["歷史"], keywords: ["貓", "瑞三整煤廠"], highlights: "貓咪療癒、整煤廠遺跡", food: "礦工麵", history: "曾為全台煤礦產量第一。", transport: "台鐵猴硐站" },
+            { name: "黃金博物館", lat: 25.1091, lng: 121.8576, tags: ["歷史"], keywords: ["金瓜石", "礦工便當", "神社"], highlights: "大金磚、黃金神社", food: "礦工便當", history: "亞洲第一金礦山遺跡。", transport: "客運 788/856" },
+            { name: "水湳洞十三層遺址", lat: 25.1182, lng: 121.8646, tags: ["歷史"], keywords: ["天空之城", "煉銅"], highlights: "台版天空之城", food: "無", history: "日治時期的大型選煉廠。", transport: "公車 856" },
+            // 自然秘境
+            { name: "無耳茶壺山", lat: 25.1063, lng: 121.8659, tags: ["自然"], keywords: ["海景", "芒草", "爬山"], highlights: "絕美陰陽海全景", food: "無", history: "因山形狀似無耳茶壺得名。", transport: "金瓜石步行上山" },
+            { name: "報時山步道", lat: 25.1118, lng: 121.8596, tags: ["自然"], keywords: ["輕鬆", "海景", "木棧道"], highlights: "全台最短觀海步道", food: "無", history: "日治時期設有警報器定時鳴放。", transport: "勸濟堂停車場旁" },
+            { name: "深澳鐵道自行車", lat: 25.133, lng: 121.824, tags: ["自然"], keywords: ["自行車", "海景", "八斗子"], highlights: "海景鐵道與光雕隧道", food: "小卷米粉", history: "昔日運煤鐵路轉型。", transport: "台鐵八斗子站" },
+            { name: "蝙蝠洞公園", lat: 25.1235, lng: 121.8152, tags: ["自然"], keywords: ["蝙蝠", "海景", "夕陽"], highlights: "夏季賞摺翅蝠", food: "無", history: "全台最大摺翅蝠棲地。", transport: "客運 791/856" }
+        ];
 
-// =========================================
-// 5. 新增與編輯自訂標記
-// =========================================
-let currentEditingSpotName = ""; 
+        const themeRouteCoords = [[25.108, 121.805], [25.086, 121.828], [25.0606, 121.8226], [25.1091, 121.8576]];
+        let userPos = null, currentRoute = null, targetSpot = null;
+        let myFavs = JSON.parse(localStorage.getItem('ruifang_favs')) || []; 
+        let savedCustomSpots = JSON.parse(localStorage.getItem('ruifang_custom_spots')) || []; 
+        let searchHistory = JSON.parse(localStorage.getItem('ruifang_search_history')) || []; 
 
-map.on('contextmenu', function(e) {
-    const spotName = prompt("📍 新增自訂標記\n請為地點命名：", "我的景點");
-    if (!spotName) return; 
-    const newSpot = { name: spotName, lat: e.latlng.lat, lng: e.latlng.lng, tags: ["自訂"], highlights: "點擊下方編輯...", food: "--", history: "自訂標記", transport: "自行前往", wikiImg: "" };
-    spots.push(newSpot); addMarkerToMap(newSpot);
-    savedCustomSpots.push(newSpot); localStorage.setItem('ruifang_custom_spots', JSON.stringify(savedCustomSpots));
-    showCard(newSpot);
-});
+        // --- 地圖初始化 ---
+        const map = L.map('map', { zoomControl: false, attributionControl: false }).setView([25.1032, 121.8224], 14);
+        const mapLayers = [
+            { url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', name: '街道', icon: 'fa-map', dark: false },
+            { url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', name: '等高線', icon: 'fa-mountain', dark: false },
+            { url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', name: '夜間', icon: 'fa-moon', dark: true }
+        ];
+        let currentLayerIdx = 0, currentTileLayer = L.tileLayer(mapLayers[0].url).addTo(map);
+        L.control.scale({ metric: true, imperial: false, position: 'bottomright' }).addTo(map);
 
-function openEditModal(name) {
-    currentEditingSpotName = name; const s = spots.find(x => x.name === name);
-    document.getElementById('edit-name').value = s.name; document.getElementById('edit-highlights').value = s.highlights; document.getElementById('edit-history').value = s.history;
-    document.getElementById('edit-image-preview').style.display = s.wikiImg ? "block" : "none"; document.getElementById('edit-image-preview').src = s.wikiImg || "";
-    document.getElementById('edit-modal-overlay').style.display = "flex";
-}
-function closeEditModal() { document.getElementById('edit-modal-overlay').style.display = "none"; }
+        function toggleLayer() {
+            currentLayerIdx = (currentLayerIdx + 1) % mapLayers.length; 
+            const c = mapLayers[currentLayerIdx];
+            map.removeLayer(currentTileLayer); currentTileLayer = L.tileLayer(c.url).addTo(map);
+            document.querySelector('#layer-btn i').className = `fas ${c.icon}`;
+            if (c.dark) document.body.classList.add("dark-mode"); else document.body.classList.remove("dark-mode");
+        }
 
-document.getElementById('edit-image').addEventListener('change', function(e) {
-    const file = e.target.files[0]; if(!file) return; const reader = new FileReader();
-    reader.onload = event => {
-        const img = new Image();
-        img.onload = () => {
-            const canvas = document.createElement('canvas'); const scaleSize = 400 / img.width; canvas.width = 400; canvas.height = img.height * scaleSize;
-            const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-            document.getElementById('edit-image-preview').src = canvas.toDataURL('image/jpeg', 0.7); document.getElementById('edit-image-preview').style.display = "block";
-        }; img.src = event.target.result;
-    }; reader.readAsDataURL(file);
-});
+        map.on('click', () => { closeCard(); document.getElementById("suggest").style.display = "none"; });
 
-function saveEditSpot() {
-    const newName = document.getElementById('edit-name').value.trim(); if(!newName) return alert("名稱不能為空！");
-    const s = spots.find(x => x.name === currentEditingSpotName); const savedIdx = savedCustomSpots.findIndex(x => x.name === currentEditingSpotName);
-    s.name = newName; s.highlights = document.getElementById('edit-highlights').value; s.history = document.getElementById('edit-history').value; s.wikiImg = document.getElementById('edit-image-preview').src;
-    if(savedIdx > -1) { savedCustomSpots[savedIdx] = s; localStorage.setItem('ruifang_custom_spots', JSON.stringify(savedCustomSpots)); }
-    closeEditModal(); showCard(s); 
-}
-
-function deleteCustomSpot(name) {
-    if(!confirm(`確定要刪除「${name}」？無法復原喔！`)) return;
-    savedCustomSpots = savedCustomSpots.filter(s => s.name !== name); localStorage.setItem('ruifang_custom_spots', JSON.stringify(savedCustomSpots));
-    const spotIndex = spots.findIndex(s => s.name === name);
-    if (spotIndex > -1) { cluster.removeLayer(spots[spotIndex].markerObj); spots.splice(spotIndex, 1); }
-    if (myFavs.includes(name)) { myFavs = myFavs.filter(fav => fav !== name); localStorage.setItem('ruifang_favs', JSON.stringify(myFavs)); renderFavList(); }
-    closeCard(); alert('🗑️ 標記已刪除！');
-}
-
-// =========================================
-// 6. UI 面板與導航時間顯示
-// =========================================
-function renderCardButtons(s, t) {
-    const btnGroup = document.getElementById("card-btn-group");
-    if (s.tags.includes('自訂')) {
-        btnGroup.innerHTML = `<button onclick="startNav()" style="flex: 1.2;"><i class="fas fa-location-arrow"></i> ${t.btn_nav}</button><button class="edit-btn" onclick="openEditModal('${s.name}')"><i class="fas fa-edit"></i> ${t.btn_edit}</button><button class="danger" onclick="deleteCustomSpot('${s.name}')"><i class="fas fa-trash-alt"></i> ${t.btn_del}</button>`;
-    } else {
-        btnGroup.innerHTML = `<button onclick="startNav()"><i class="fas fa-location-arrow"></i> ${t.btn_nav}</button><button class="secondary" onclick="aiTrip()"><i class="fas fa-magic"></i> ${t.btn_trip}</button>`;
-    }
-}
-
-function showCard(s) {
-    targetSpot = s; updateHeartUI(s.name);
-    document.getElementById("title").innerText = s.name;
-    document.getElementById("img").src = s.wikiImg || 'https://via.placeholder.com/400x200/f1c40f/ffffff?text=Custom+Spot';
-    document.getElementById("card-tags").innerHTML = s.tags.map(t => `<span class="mini-tag">${t}</span>`).join('');
-    document.getElementById("card-food").innerText = s.food || "--";
-    document.getElementById("card-highlights").innerText = s.highlights || "暫無介紹";
-    document.getElementById("card-history").innerText = s.history || "無";
-    document.getElementById("card-transport").innerText = s.transport || "自行前往";
-    
-    renderCardButtons(s, translations[currentLang]);
-    
-    document.getElementById("card").classList.add("open"); document.getElementById("card").style.transform = '';
-}
-
-function openCardByName(name) { const s = spots.find(x => x.name === name); if(s) showCard(s); }
-function closeCard() { document.getElementById("card").classList.remove("open"); document.getElementById("card").style.transform = ''; }
-function closeNav() { if(currentRoute) map.removeLayer(currentRoute); document.getElementById('route-info-panel').style.display = 'none'; }
-
-function startNav() {
-    if(!userPos || !targetSpot) return alert("請開啟 GPS 定位");
-    closeCard(); document.getElementById('route-time').innerText = "計算中..."; document.getElementById('route-dist').innerText = ""; document.getElementById('route-info-panel').style.display = 'flex';
-    fetch(`https://router.project-osrm.org/route/v1/driving/${userPos.lng},${userPos.lat};${targetSpot.lng},${targetSpot.lat}?overview=full&geometries=geojson`)
-    .then(r => r.json()).then(data => {
-        if(currentRoute) map.removeLayer(currentRoute);
-        const route = data.routes[0]; const coords = route.geometry.coordinates.map(c => [c[1], c[0]]);
-        currentRoute = L.polyline(coords, {color: '#007bff', weight: 8}).addTo(map); map.fitBounds(currentRoute.getBounds(), {padding: [80, 80]}); 
-        document.getElementById('route-time').innerText = `${Math.round(route.duration / 60)} 分鐘`; document.getElementById('route-dist').innerText = `${(route.distance / 1000).toFixed(1)} km`;
-    }).catch(() => { document.getElementById('route-time').innerText = "規劃失敗"; });
-}
-
-// =========================================
-// 7. 智慧搜尋系統
-// =========================================
-const searchInput = document.getElementById("search"); const sugBox = document.getElementById("suggest");
-searchInput.addEventListener('focus', () => { if(!searchInput.value.trim()) renderDefaultSearch(); });
-
-function saveSearchHistory(name) {
-    searchHistory = searchHistory.filter(h => h !== name); searchHistory.unshift(name); 
-    if(searchHistory.length > 5) searchHistory.pop(); localStorage.setItem('ruifang_search_history', JSON.stringify(searchHistory));
-}
-
-function renderDefaultSearch() {
-    sugBox.innerHTML = "";
-    if(searchHistory.length > 0) {
-        sugBox.innerHTML += `<div class="search-section-title">🕒 歷史搜尋</div>`;
-        searchHistory.forEach(h => { sugBox.innerHTML += `<div class="list-item" onclick="triggerSearch('${h}')"><span><i class="fas fa-history" style="color:#aaa;"></i> ${h}</span></div>`; });
-    }
-    sugBox.innerHTML += `<div class="search-section-title">⭐ 推薦景點</div>`;
-    ["九份老街", "猴硐", "無耳茶壺山"].forEach(r => { sugBox.innerHTML += `<div class="list-item" onclick="triggerSearch('${r}')"><span><i class="fas fa-fire" style="color:#e74c3c;"></i> ${r}</span></div>`; });
-    sugBox.innerHTML += `<div class="search-section-title">🍖 在地必吃</div>`;
-    sugBox.innerHTML += `<div class="list-item" onclick="triggerSearch('瑞芳')"><span><i class="fas fa-utensils" style="color:#e67e22;"></i> 瑞芳美食廣場</span></div>`;
-    sugBox.style.display = "block";
-}
-
-function triggerSearch(name) {
-    searchInput.value = name; sugBox.style.display = "none";
-    const s = spots.find(x => x.name === name);
-    if(s) { map.flyTo([s.lat, s.lng], 16); setTimeout(() => showCard(s), 800); }
-}
-
-searchInput.oninput = function() {
-    const k = this.value.trim(); if(!k) { renderDefaultSearch(); return; }
-    sugBox.innerHTML = ""; 
-    const matches = spots.filter(s => { return s.name.includes(k) || s.tags.some(t => t.includes(k)) || (s.keywords && s.keywords.some(kw => kw.includes(k))); });
-    if(matches.length > 0) {
-        sugBox.style.display = "block";
-        matches.forEach(s => {
-            const div = document.createElement("div"); div.className = "list-item"; div.innerHTML = `<span><i class="fas fa-map-marker-alt" style="color:var(--primary)"></i> ${s.name}</span>`;
-            div.onclick = () => { saveSearchHistory(s.name); triggerSearch(s.name); }; sugBox.appendChild(div);
+        const userPulseIcon = L.divIcon({ className: 'user-pulse-icon', html: '<div class="pulse"></div><div class="dot"></div>', iconSize: [40, 40], iconAnchor: [20, 20] });
+        map.locate({setView: false, watch: true}); 
+        map.on('locationfound', e => {
+            userPos = e.latlng; document.getElementById("gps-val-text").innerText = `GPS: ${e.latlng.lat.toFixed(4)}, ${e.latlng.lng.toFixed(4)}`;
+            if(!window.userMarker) window.userMarker = L.marker(userPos, { icon: userPulseIcon }).addTo(map); else window.userMarker.setLatLng(userPos);
         });
-    } else { sugBox.style.display = "none"; }
-};
 
-// =========================================
-// 8. 收藏與分享
-// =========================================
-function toggleCurrentFav() {
-    if(!targetSpot) return; const idx = myFavs.indexOf(targetSpot.name);
-    if(idx === -1) myFavs.push(targetSpot.name); else myFavs.splice(idx, 1);
-    localStorage.setItem('ruifang_favs', JSON.stringify(myFavs)); updateHeartUI(targetSpot.name);
-}
-function updateHeartUI(name) { const icon = document.getElementById("card-fav-icon"); if(myFavs.includes(name)) icon.classList.add("active"); else icon.classList.remove("active"); }
-function toggleFavList() {
-    const p = document.getElementById("fav-list-panel");
-    if(p.style.display === "block") { p.style.display = "none"; } else {
-        p.innerHTML = ""; const t = translations[currentLang];
-        if(myFavs.length === 0) { p.innerHTML = `<div style="padding:15px; text-align:center; color:#888; font-size:13px;">${t.no_favs}</div>`; }
-        else { myFavs.forEach(name => { const div = document.createElement("div"); div.className = "list-item"; div.innerHTML = `<span><i class="fas fa-heart" style="color:var(--danger); margin-right:5px;"></i> ${name}</span>`; div.onclick = () => triggerSearch(name); p.appendChild(div); }); }
-        p.style.display = "block";
-    }
-}
-function shareSpot() {
-    if(!targetSpot) return; const spotUrl = new URL(window.location.href); spotUrl.searchParams.set('spot', targetSpot.name);
-    const shareData = { title: `瑞芳導覽地圖 - ${targetSpot.name}`, text: `我在瑞芳地圖上發現了「${targetSpot.name}」！\n👉 亮點：${targetSpot.highlights}\n趕快點擊連結查看：`, url: spotUrl.toString() };
-    if (navigator.share) navigator.share(shareData).catch(()=>{}); else navigator.clipboard.writeText(`${shareData.text}\n${shareData.url}`).then(() => alert('✅ 已複製景點資訊與連結！'));
-}
+        map.on('moveend', function() {
+            const center = map.getCenter();
+            fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${center.lat}&lon=${center.lng}&zoom=18&addressdetails=1&accept-language=zh-TW`)
+            .then(res => res.json()).then(data => {
+                if (data && data.address) {
+                    const a = data.address;
+                    document.getElementById("addr-text").innerText = ((a.city||a.town||a.county||"") + (a.suburb||a.district||"") + (a.village||a.neighbourhood||a.road||"")) || "探索瑞芳中...";
+                }
+            }).catch(()=>{}); 
+        });
+        map.fire('moveend'); 
 
-function resetNorth() { map.flyTo([25.1032, 121.8224], 14); } 
-function goToUser() { if(userPos) map.flyTo(userPos, 16); } 
-function drawThemeRoute() { if(currentRoute) map.removeLayer(currentRoute); currentRoute = L.polyline(themeRouteCoords, { color: '#8e44ad', weight: 6, dashArray: '10, 10' }).addTo(map); map.fitBounds(currentRoute.getBounds(), { padding: [50, 50] }); closeCard(); alert("🚀 推薦路線已載入！"); }
-function goToStation() { const ruiIcon = document.querySelector('.rui-icon'); if(ruiIcon){ ruiIcon.classList.remove('stamped'); void ruiIcon.offsetWidth; ruiIcon.classList.add('stamped'); } map.flyTo([25.108, 121.805], 16); closeCard(); } 
-function aiTrip() { if(!userPos) return alert("等待 GPS 定位..."); const sorted = [...spots].sort((a,b) => map.distance(userPos,[a.lat,a.lng]) - map.distance(userPos,[b.lat,b.lng])); alert("🤖 AI 推薦：\n" + sorted.slice(0,5).map((s,i) => `${i+1}. ${s.name}`).join("\n")); }
+        // --- 圖釘與標記 ---
+        const cluster = L.markerClusterGroup(); map.addLayer(cluster);
 
-const cardEl = document.getElementById("card"); let touchStartY = 0, isSwiping = false; 
-cardEl.addEventListener('touchstart', (e) => { if(cardEl.scrollTop===0){ touchStartY=e.touches[0].clientY; isSwiping=true; cardEl.style.transition='none'; }},{passive:true});
-cardEl.addEventListener('touchmove', (e) => { if(isSwiping && e.touches[0].clientY > touchStartY){ cardEl.style.transform=`translateY(${e.touches[0].clientY - touchStartY}px)`; }});
-cardEl.addEventListener('touchend', (e) => { if(isSwiping){ isSwiping=false; cardEl.style.transition='transform 0.4s'; if((e.changedTouches[0]?.clientY || 0) - touchStartY > 100) closeCard(); else cardEl.style.transform=''; }});
+        function calculateWalk(lat, lng) {
+            if(!userPos) return "--";
+            const mins = Math.round(map.distance(userPos, [lat, lng]) / 80); 
+            return mins < 1 ? "1分內" : `約 ${mins} 分`;
+        }
 
-// =========================================
-// 9. 初始化設定 (App Boot)
-// =========================================
-window.onload = () => {
-    // 檢查是否有深度連結 (分享連結)
-    const params = new URLSearchParams(window.location.search);
-    const spotQuery = params.get('spot');
-    if(spotQuery) {
-        const s = spots.find(x => x.name === spotQuery);
-        if(s) { setTimeout(() => { map.flyTo([s.lat, s.lng], 16); showCard(s); }, 1000); }
-    }
+        const createCustomPin = (tags) => {
+            let cls = 'fa-map-marker-alt', col = '#ea4335'; 
+            if (tags.includes('美食')) { cls = 'fa-utensils'; col = '#f39c12'; } 
+            else if (tags.includes('貓村')) { cls = 'fa-cat'; col = '#9b59b6'; } 
+            else if (tags.includes('自然')) { cls = 'fa-leaf'; col = '#2ecc71'; } 
+            else if (tags.includes('歷史')) { cls = 'fa-landmark'; col = '#7f8c8d'; } 
+            else if (tags.includes('自訂')) { cls = 'fa-star'; col = '#f1c40f'; } 
+            return L.divIcon({ className: 'custom-pin-wrap', html: `<div class="gmap-pin" style="background-color:${col}"><i class="fas ${cls}"></i></div>`, iconSize: [32,32], iconAnchor: [16,38], popupAnchor: [0,-38] });
+        };
 
-    // 啟動多國語言
-    applyLanguage(currentLang);
-    document.getElementById('splash-lang').value = currentLang;
-    document.getElementById('settings-lang').value = currentLang;
-    fetchWeather();
+        function addMarkerToMap(s) {
+            if (!s.tags.includes('自訂') && !s.wikiImg) fetch(`https://zh.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(s.name)}`).then(r=>r.json()).then(d=>{s.wikiImg=d.thumbnail?.source;}).catch(()=>{});
+            const m = L.marker([s.lat, s.lng], { icon: createCustomPin(s.tags) });
+            m.bindPopup(() => {
+                const img = s.wikiImg || 'https://via.placeholder.com/260x130/f1c40f/ffffff?text=Custom+Spot';
+                const foodIcon = s.tags.includes('自訂') ? 'fa-star' : 'fa-utensils';
+                const foodText = s.tags.includes('自訂') ? '自訂地點' : `美食：${s.food}`;
+                return `<div class="preview-card" onclick="openCardByName('${s.name}')"><img class="preview-img" src="${img}"><div class="preview-info"><div class="preview-header"><span class="preview-title">${s.name}</span><span class="walk-badge"><i class="fas fa-walking"></i> ${calculateWalk(s.lat, s.lng)}</span></div><div class="preview-tag-box">${s.tags.map(t=>`<span class="mini-tag">${t}</span>`).join('')}</div><div class="food-preview"><i class="fas ${foodIcon}"></i> ${foodText}</div></div></div>`;
+            }, { closeButton: false });
+            m.on('mouseover', function() { this.openPopup(); }); m.on('click', (e) => { L.DomEvent.stopPropagation(e); showCard(s); });
+            s.markerObj = m; cluster.addLayer(m);
+        }
+        
+        // 初始載入所有點位
+        spots.forEach(addMarkerToMap);
+        savedCustomSpots.forEach(s => { spots.push(s); addMarkerToMap(s); });
 
-    // 如果是第一次登入，顯示歡迎頁面
-    if(!localStorage.getItem('ruifang_welcomed')) {
-        document.getElementById('splash-screen').style.display = 'flex';
-    }
-};
-</script>
+        // --- 分類篩選功能 (按鈕觸發) ---
+        function filterSpots(category, element) {
+            // UI 按鈕變色
+            if(element) {
+                document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+                element.classList.add('active');
+            }
+            cluster.clearLayers(); 
+            const filteredSpots = category === 'all' ? spots : spots.filter(s => s.tags.includes(category));
+            filteredSpots.forEach(addMarkerToMap);
+            // 當前若有開啟卡片，關閉它
+            closeCard();
+        }
+
+        // --- 自訂地點 ---
+        let currentEditingSpotName = ""; 
+        map.on('contextmenu', function(e) {
+            const spotName = prompt("📍 新增自訂標記\n請為地點命名：", "我的景點");
+            if (!spotName) return; 
+            const newSpot = { name: spotName, lat: e.latlng.lat, lng: e.latlng.lng, tags: ["自訂"], highlights: "點擊下方編輯...", food: "--", history: "自訂標記", transport: "自行前往", wikiImg: "" };
+            spots.push(newSpot); addMarkerToMap(newSpot);
+            savedCustomSpots.push(newSpot); localStorage.setItem('ruifang_custom_spots', JSON.stringify(savedCustomSpots));
+            showCard(newSpot);
+        });
+
+        function openEditModal(name) {
+            currentEditingSpotName = name; const s = spots.find(x => x.name === name);
+            document.getElementById('edit-name').value = s.name; document.getElementById('edit-highlights').value = s.highlights; document.getElementById('edit-history').value = s.history;
+            document.getElementById('edit-image-preview').style.display = s.wikiImg ? "block" : "none"; document.getElementById('edit-image-preview').src = s.wikiImg || "";
+            document.getElementById('edit-modal-overlay').style.display = "flex";
+        }
+        function closeEditModal() { document.getElementById('edit-modal-overlay').style.display = "none"; }
+        
+        document.getElementById('edit-image').addEventListener('change', function(e) {
+            const file = e.target.files[0]; if(!file) return; const reader = new FileReader();
+            reader.onload = event => {
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas'); const scaleSize = 400 / img.width; canvas.width = 400; canvas.height = img.height * scaleSize;
+                    const ctx = canvas.getContext('2d'); ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    document.getElementById('edit-image-preview').src = canvas.toDataURL('image/jpeg', 0.7); document.getElementById('edit-image-preview').style.display = "block";
+                }; img.src = event.target.result;
+            }; reader.readAsDataURL(file);
+        });
+
+        function saveEditSpot() {
+            const newName = document.getElementById('edit-name').value.trim(); if(!newName) return alert("名稱不能為空！");
+            const s = spots.find(x => x.name === currentEditingSpotName); const savedIdx = savedCustomSpots.findIndex(x => x.name === currentEditingSpotName);
+            s.name = newName; s.highlights = document.getElementById('edit-highlights').value; s.history = document.getElementById('edit-history').value; s.wikiImg = document.getElementById('edit-image-preview').src;
+            if(savedIdx > -1) { savedCustomSpots[savedIdx] = s; localStorage.setItem('ruifang_custom_spots', JSON.stringify(savedCustomSpots)); }
+            closeEditModal(); showCard(s); 
+        }
+        function deleteCustomSpot(name) {
+            if(!confirm(`確定要刪除「${name}」？無法復原喔！`)) return;
+            savedCustomSpots = savedCustomSpots.filter(s => s.name !== name); localStorage.setItem('ruifang_custom_spots', JSON.stringify(savedCustomSpots));
+            const spotIndex = spots.findIndex(s => s.name === name);
+            if (spotIndex > -1) { cluster.removeLayer(spots[spotIndex].markerObj); spots.splice(spotIndex, 1); }
+            if (myFavs.includes(name)) { myFavs = myFavs.filter(fav => fav !== name); localStorage.setItem('ruifang_favs', JSON.stringify(myFavs)); renderFavList(); }
+            closeCard(); alert('🗑️ 標記已刪除！');
+        }
+
+        // --- 卡片與導航 ---
+        function renderCardButtons(s) {
+            const btnGroup = document.getElementById("card-btn-group");
+            if (s.tags.includes('自訂')) {
+                btnGroup.innerHTML = `<button onclick="startNav()" style="flex: 1.2;"><i class="fas fa-location-arrow"></i> 導航</button><button class="edit-btn" onclick="openEditModal('${s.name}')"><i class="fas fa-edit"></i> 編輯</button><button class="danger" onclick="deleteCustomSpot('${s.name}')"><i class="fas fa-trash-alt"></i> 刪除</button>`;
+            } else {
+                btnGroup.innerHTML = `<button onclick="startNav()"><i class="fas fa-location-arrow"></i> 導航</button><button class="secondary" onclick="aiTrip()"><i class="fas fa-magic"></i> 行程規劃</button>`;
+            }
+        }
+
+        function showCard(s) {
+            targetSpot = s; updateHeartUI(s.name);
+            document.getElementById("title").innerText = s.name;
+            document.getElementById("img").src = s.wikiImg || 'https://via.placeholder.com/400x200/f1c40f/ffffff?text=Custom+Spot';
+            document.getElementById("card-tags").innerHTML = s.tags.map(t => `<span class="mini-tag">${t}</span>`).join('');
+            document.getElementById("card-food").innerText = s.food || "--";
+            document.getElementById("card-highlights").innerText = s.highlights || "暫無介紹";
+            document.getElementById("card-history").innerText = s.history || "無";
+            document.getElementById("card-transport").innerText = s.transport || "自行前往";
+            renderCardButtons(s);
+            document.getElementById("card").classList.add("open"); document.getElementById("card").style.transform = '';
+        }
+
+        function openCardByName(name) { const s = spots.find(x => x.name === name); if(s) showCard(s); }
+        function closeCard() { document.getElementById("card").classList.remove("open"); document.getElementById("card").style.transform = ''; }
+        function closeNav() { if(currentRoute) map.removeLayer(currentRoute); document.getElementById('route-info-panel').style.display = 'none'; }
+
+        function startNav() {
+            if(!userPos || !targetSpot) return alert("請開啟 GPS 定位");
+            closeCard(); document.getElementById('route-time').innerText = "計算中..."; document.getElementById('route-dist').innerText = ""; document.getElementById('route-info-panel').style.display = 'flex';
+            fetch(`https://router.project-osrm.org/route/v1/driving/${userPos.lng},${userPos.lat};${targetSpot.lng},${targetSpot.lat}?overview=full&geometries=geojson`)
+            .then(r => r.json()).then(data => {
+                if(currentRoute) map.removeLayer(currentRoute);
+                const route = data.routes[0]; const coords = route.geometry.coordinates.map(c => [c[1], c[0]]);
+                currentRoute = L.polyline(coords, {color: '#007bff', weight: 8}).addTo(map); map.fitBounds(currentRoute.getBounds(), {padding: [80, 80]}); 
+                document.getElementById('route-time').innerText = `${Math.round(route.duration / 60)} 分鐘`; document.getElementById('route-dist').innerText = `${(route.distance / 1000).toFixed(1)} km`;
+            }).catch(() => { document.getElementById('route-time').innerText = "規劃失敗"; });
+        }
+
+        // --- 搜尋系統 ---
+        const searchInput = document.getElementById("search"); const sugBox = document.getElementById("suggest");
+        searchInput.addEventListener('focus', () => { if(!searchInput.value.trim()) renderDefaultSearch(); });
+
+        function saveSearchHistory(name) {
+            searchHistory = searchHistory.filter(h => h !== name); searchHistory.unshift(name); 
+            if(searchHistory.length > 5) searchHistory.pop(); localStorage.setItem('ruifang_search_history', JSON.stringify(searchHistory));
+        }
+
+        function renderDefaultSearch() {
+            sugBox.innerHTML = "";
+            if(searchHistory.length > 0) {
+                sugBox.innerHTML += `<div class="search-section-title">🕒 歷史搜尋</div>`;
+                searchHistory.forEach(h => { sugBox.innerHTML += `<div class="list-item" onclick="triggerSearch('${h}')"><span><i class="fas fa-history" style="color:#aaa;"></i> ${h}</span></div>`; });
+            }
+            sugBox.innerHTML += `<div class="search-section-title">⭐ 推薦景點</div>`;
+            ["九份老街", "猴硐貓村", "無耳茶壺山"].forEach(r => { sugBox.innerHTML += `<div class="list-item" onclick="triggerSearch('${r}')"><span><i class="fas fa-fire" style="color:#e74c3c;"></i> ${r}</span></div>`; });
+            sugBox.style.display = "block";
+        }
+
+        function triggerSearch(name) {
+            searchInput.value = name; sugBox.style.display = "none";
+            const s = spots.find(x => x.name === name);
+            if(s) { map.flyTo([s.lat, s.lng], 16); setTimeout(() => showCard(s), 800); }
+        }
+
+        searchInput.oninput = function() {
+            const k = this.value.trim(); if(!k) { renderDefaultSearch(); return; }
+            sugBox.innerHTML = ""; 
+            const matches = spots.filter(s => { return s.name.includes(k) || s.tags.some(t => t.includes(k)) || (s.keywords && s.keywords.some(kw => kw.includes(k))); });
+            if(matches.length > 0) {
+                sugBox.style.display = "block";
+                matches.forEach(s => {
+                    const div = document.createElement("div"); div.className = "list-item"; 
+                    div.innerHTML = `<span><i class="fas fa-map-marker-alt" style="color:var(--primary)"></i> ${s.name}</span>`;
+                    div.onclick = () => { saveSearchHistory(s.name); triggerSearch(s.name); }; sugBox.appendChild(div);
+                });
+            } else { sugBox.style.display = "none"; }
+        };
+
+        // --- Firebase 雲端同步與本地收藏 ---
+        const firebaseConfig = {
+            apiKey: "29945788628", // 填入後自動啟用雲端同步
+            authDomain: "ruifang689-max.firebaseapp.com",
+            projectId: "1:29945788628:web:274d5a74a728d5b4aa6341"
+        };
+        let db = null;
+        const userId = "user_001"; // 可自行替換成登入者的 UID
+
+        // 使用動態載入 Firebase (避免沒有填寫 API Key 時報錯)
+        if (firebaseConfig.apiKey !== "29945788628") {
+            import("https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js").then(module => {
+                const app = module.initializeApp(firebaseConfig);
+                import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js").then(fs => {
+                    db = fs.getFirestore(app);
+                    console.log("☁️ Firebase 雲端同步已啟用");
+                });
+            }).catch(e => console.log("Firebase 載入失敗", e));
+        }
+
+        async function saveFavToCloud(favList) {
+            if (!db) return; // 沒有設定 Firebase 就不做事
+            try {
+                const { doc, setDoc } = await import("https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js");
+                await setDoc(doc(db, "users", userId), { favorites: favList }, { merge: true });
+                console.log("已同步至雲端");
+            } catch(e) { console.error("雲端同步失敗", e); }
+        }
+
+        function toggleCurrentFav() {
+            if(!targetSpot) return; const idx = myFavs.indexOf(targetSpot.name);
+            if(idx === -1) myFavs.push(targetSpot.name); else myFavs.splice(idx, 1);
+            
+            // 1. 存入本地 LocalStorage
+            localStorage.setItem('ruifang_favs', JSON.stringify(myFavs)); 
+            updateHeartUI(targetSpot.name);
+            
+            // 2. 背景同步至 Firebase 雲端
+            saveFavToCloud(myFavs);
+        }
+
+        function updateHeartUI(name) { const icon = document.getElementById("card-fav-icon"); if(myFavs.includes(name)) icon.classList.add("active"); else icon.classList.remove("active"); }
+        
+        function toggleFavList() {
+            const p = document.getElementById("fav-list-panel");
+            if(p.style.display === "block") { p.style.display = "none"; } else {
+                p.innerHTML = "";
+                if(myFavs.length === 0) { p.innerHTML = `<div style="padding:15px; text-align:center; color:#888; font-size:13px;">尚無收藏景點<br>點擊卡片愛心加入！</div>`; }
+                else { myFavs.forEach(name => { const div = document.createElement("div"); div.className = "list-item"; div.innerHTML = `<span><i class="fas fa-heart" style="color:var(--danger); margin-right:5px;"></i> ${name}</span>`; div.onclick = () => triggerSearch(name); p.appendChild(div); }); }
+                p.style.display = "block";
+            }
+        }
+
+        function shareSpot() {
+            if(!targetSpot) return; const spotUrl = new URL(window.location.href); spotUrl.searchParams.set('spot', targetSpot.name);
+            const shareData = { title: `瑞芳導覽地圖 - ${targetSpot.name}`, text: `我在瑞芳地圖上發現了「${targetSpot.name}」！\n👉 亮點：${targetSpot.highlights}\n趕快點擊連結查看：`, url: spotUrl.toString() };
+            if (navigator.share) navigator.share(shareData).catch(()=>{}); else navigator.clipboard.writeText(`${shareData.text}\n${shareData.url}`).then(() => alert('✅ 已複製景點資訊與連結！'));
+        }
+
+        function resetNorth() { map.flyTo([25.1032, 121.8224], 14); } 
+        function goToUser() { if(userPos) map.flyTo(userPos, 16); } 
+        function drawThemeRoute() { if(currentRoute) map.removeLayer(currentRoute); currentRoute = L.polyline(themeRouteCoords, { color: '#8e44ad', weight: 6, dashArray: '10, 10' }).addTo(map); map.fitBounds(currentRoute.getBounds(), { padding: [50, 50] }); closeCard(); alert("🚀 推薦路線已載入！"); }
+        function goToStation() { const ruiIcon = document.querySelector('.rui-icon'); if(ruiIcon){ ruiIcon.classList.remove('stamped'); void ruiIcon.offsetWidth; ruiIcon.classList.add('stamped'); } map.flyTo([25.108, 121.805], 16); closeCard(); } 
+        function aiTrip() { if(!userPos) return alert("等待 GPS 定位..."); const sorted = [...spots].sort((a,b) => map.distance(userPos,[a.lat,a.lng]) - map.distance(userPos,[b.lat,b.lng])); alert("🤖 AI 推薦距離您最近的景點：\n" + sorted.slice(0,5).map((s,i) => `${i+1}. ${s.name}`).join("\n")); }
+
+        const cardEl = document.getElementById("card"); let touchStartY = 0, isSwiping = false; 
+        cardEl.addEventListener('touchstart', (e) => { if(cardEl.scrollTop===0){ touchStartY=e.touches[0].clientY; isSwiping=true; cardEl.style.transition='none'; }},{passive:true});
+        cardEl.addEventListener('touchmove', (e) => { if(isSwiping && e.touches[0].clientY > touchStartY){ cardEl.style.transform=`translateY(${e.touches[0].clientY - touchStartY}px)`; }});
+        cardEl.addEventListener('touchend', (e) => { if(isSwiping){ isSwiping=false; cardEl.style.transition='transform 0.4s'; if((e.changedTouches[0]?.clientY || 0) - touchStartY > 100) closeCard(); else cardEl.style.transform=''; }});
+
+        // --- 啟動初始化 ---
+        window.onload = () => {
+            const params = new URLSearchParams(window.location.search);
+            const spotQuery = params.get('spot');
+            if(spotQuery) {
+                const s = spots.find(x => x.name === spotQuery);
+                if(s) { setTimeout(() => { map.flyTo([s.lat, s.lng], 16); showCard(s); }, 1000); }
+            }
+            fetchWeather();
+            if(localStorage.getItem('ruifang_welcomed')) {
+                document.getElementById('splash-screen').style.display = 'none';
+                document.getElementById('startup-screen').style.display = 'none';
+            }
+        };
+    </script>
 </body>
 </html>
