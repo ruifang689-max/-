@@ -87,7 +87,7 @@
                     <li><span style="color: var(--primary);">●</span> <b data-i18n="tut_share">分享鍵</b>：快速分享景點連結給好友。</li>
                 </ul>
                 <div class="tutorial-btns">
-                    <button class="btn-outline" onclick="prevTutorial()" data-i18n="tut_prev">前一步</button>
+                    <button class="btn-outline" onclick="prevTutorial()" data-i18n="tut_prev">上一步</button>
                     <button class="btn-fill" onclick="finishTutorial()" data-i18n="tut_finish">開始使用</button>
                 </div>
             </div>
@@ -98,7 +98,7 @@
 
     <div id="top-ui">
         <div id="search-container" style="width: 100%; position: relative;">
-            <input id="search" placeholder="🔍 搜尋或長按新增..." data-i18n="search_ph">
+            <input id="search" placeholder="🔍 搜尋景點、以下推薦或長按新增..." data-i18n="search_ph">
             <i id="search-clear-btn" class="fas fa-times-circle" onclick="clearSearchInput()" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: #aaa; cursor: pointer; display: none;"></i>
         </div>
         <div id="category-chips">
@@ -108,9 +108,9 @@
             <div class="chip" onclick="filterSpots('自然', this)" data-i18n="chip_nature">⛰️ 自然</div>
             <div class="chip" onclick="filterSpots('自訂', this)" data-i18n="chip_custom">📍 標記</div>
         </div>
-        <div id="map-center-panel"><i class="fas fa-map-marker-alt" style="color:var(--primary)"></i><span id="addr-text" data-i18n="locating">定位中...</span></div>
+        <div id="map-center-panel"><i class="fas fa-map-marker-alt" style="color:var(--primary)"></i><span id="addr-text" data-i18n="locating">即時報幕定位中...</span></div>
         <div id="suggest">
-            <div class="suggest-header"><span style="font-size:12px; font-weight:bold; color:var(--text-sub);">推薦</span> <i class="fas fa-times" style="cursor:pointer;" onclick="closeSuggest()"></i></div>
+            <div class="suggest-header"><span style="font-size:12px; font-weight:bold; color:var(--text-sub);">搜尋與推薦</span> <i class="fas fa-times" style="cursor:pointer;" onclick="closeSuggest()"></i></div>
             <div id="suggest-content"></div>
         </div>
     </div>
@@ -280,6 +280,22 @@
         </div>
     </div>
 
+    <div id="ios-instruction-modal" class="modal-overlay" style="z-index: 99999;">
+        <div class="modal-box" style="text-align: center;">
+            <h3 style="color: #007aff; margin-bottom: 15px;"><i class="fab fa-apple"></i> 安裝至 iPhone 桌面</h3>
+            <p style="font-size: 15px; color: var(--text-main); line-height: 1.6;">
+                為了獲得最佳的全螢幕導覽體驗，請：<br><br>
+                1. 點擊瀏覽器下方的 <i class="fas fa-share-square" style="color:#007aff; font-size:18px;"></i> <b>分享按鈕</b><br><br>
+                2. 往下滑動並選擇 <i class="fas fa-plus-square" style="color:#007aff; font-size:18px;"></i> <b>「加入主畫面」</b>
+            </p>
+            <div class="modal-btns" style="margin-top: 20px;">
+                <button class="modal-save" style="background:#007aff;" onclick="closeIosInstruction()">我知道了</button>
+            </div>
+        </div>
+    </div>
+    <div id="edit-modal-overlay" class="modal-overlay">
+        </div>
+
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
     
@@ -299,6 +315,7 @@
     </script>
 </body>
 </html>
+
 
 
 
