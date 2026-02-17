@@ -1,7 +1,21 @@
-const CACHE_NAME = 'ruifang-app-v103'; 
+const CACHE_NAME = 'ruifang-app-v200'; // 版本號大升級
+
+const urlsToCache = [
+  './',
+  'index.html',
+  'style.css?v=200',
+  'data.js?v=200',  // 🌟 新增這一行
+  'app.js?v=200',
+  'manifest.json'
+];
 
 self.addEventListener('install', event => {
-  self.skipWaiting(); 
+  self.skipWaiting();
+  event.waitUntil(
+    caches.open(CACHE_NAME).then(cache => {
+      return cache.addAll(urlsToCache);
+    })
+  );
 });
 
 self.addEventListener('activate', event => {
@@ -19,16 +33,10 @@ self.addEventListener('activate', event => {
   );
 });
 
+// 網路優先策略
 self.addEventListener('fetch', event => {
-  // 🌟 關鍵修復：如果是外部 API (天氣、OpenStreetMap、維基百科)，直接放行，絕對不攔截！
-  if (!event.request.url.startsWith(self.location.origin)) {
-    return; 
-  }
-
-  // 內部檔案則採用「網路優先，失敗才讀快取」策略
+  if (!event.request.url.startsWith(self.location.origin)) return;
   event.respondWith(
-    fetch(event.request).catch(() => {
-      return caches.match(event.request);
-    })
+    fetch(event.request).catch(() => caches.match(event.request))
   );
 });
