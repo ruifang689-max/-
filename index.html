@@ -341,31 +341,14 @@
         setTimeout(() => {
             const splash = document.getElementById('splash-screen');
             const welcome = document.getElementById('welcome-screen');
-            
-            // 如果 4 秒後開場動畫還在，代表程式當掉了
             if (splash && splash.style.display !== 'none' && splash.style.opacity !== '0') {
                 console.warn("⚠️ 偵測到模組載入逾時，強制進入系統...");
                 splash.style.display = 'none';
-                
-                // 如果是首次進入，確保顯示歡迎頁
-                const isWelcomed = localStorage.getItem('ruifang_welcomed');
-                const skipIntro = localStorage.getItem('ruifang_skip_intro') === 'true';
-                
-                if (!isWelcomed && !skipIntro && welcome) {
-                    welcome.style.display = 'flex';
-                    welcome.style.opacity = '1';
+                if (!localStorage.getItem('ruifang_welcomed') && !localStorage.getItem('ruifang_skip_intro') === 'true' && welcome) {
+                    welcome.style.display = 'flex'; welcome.style.opacity = '1';
                 }
             }
-        }, 4000); // 4秒逾時設定
+        }, 4000);
     </script>
-
 </body>
-</html>>
-
-
-
-
-
-
-
-
+</html>
