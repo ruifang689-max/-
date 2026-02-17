@@ -4,7 +4,11 @@
     <meta charset="UTF-8">
     <meta name="referrer" content="strict-origin-when-cross-origin">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>瑞芳導覽地圖</title>
+    <title>瑞芳導覽地圖 App</title>
+
+    <meta property="og:title" content="瑞芳導覽地圖" />
+    <meta property="og:description" content="探索瑞芳秘境、在地美食與時空旅人路線的專屬智慧地圖！" />
+    <meta property="og:type" content="website" />
 
     <script>
         if ('serviceWorker' in navigator) {
@@ -13,10 +17,6 @@
             });
         }
     </script>
-
-    <meta property="og:title" content="瑞芳導覽地圖" />
-    <meta property="og:description" content="探索瑞芳秘境、在地美食與時空旅人路線的專屬智慧地圖！" />
-    <meta property="og:type" content="website" />
 
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
     <link rel="stylesheet" href="https://unpkg.com/leaflet.markercluster/dist/MarkerCluster.css"/>
@@ -94,6 +94,10 @@
         </div>
     </div>
 
+
+    <div id="map"></div>
+
+
     <div id="weather-box" title="即時天氣"><i class="fas fa-spinner fa-spin"></i><span id="weather-temp">--</span></div>
 
     <div id="top-ui">
@@ -115,7 +119,7 @@
         </div>
     </div>
 
-   <div class="map-controls">
+    <div class="map-controls">
         <div class="control-btn" onclick="openSettings()" title="系統設定"><i class="fas fa-cog" style="color: #555;"></i></div>
         <div class="control-btn compass-btn" onclick="resetNorth()" title="指北針"><i class="fas fa-compass" style="color: #27ae60;"></i></div>
         <div class="control-btn route-btn" onclick="openRouteMenu()" title="推薦路線"><i class="fas fa-route" style="color: #8e44ad;"></i></div>
@@ -128,7 +132,6 @@
 
     <div id="fav-list-panel"></div>
     <div id="gps-val-text" data-i18n="gps_locating">GPS: 定位中...</div>
-    <div id="map"></div>
 
     <div id="route-info-panel">
         <div class="route-modes">
@@ -159,6 +162,7 @@
         <div class="info-section"><span class="info-label"><i class="fas fa-bus"></i> <span data-i18n="transport">交通</span></span><span class="info-text" id="card-transport"></span></div>
         <div class="btn-group" id="card-btn-group"></div>
     </div>
+
 
     <div id="settings-modal-overlay" class="modal-overlay">
         <div class="modal-box">
@@ -191,7 +195,7 @@
             <div style="margin-top: 15px; border-top: 1px dashed var(--divider-color); padding-top: 15px;">
                 <label style="display: flex; align-items: center; gap: 10px; font-weight: bold; font-size: 15px; cursor: pointer; color: #111111;">
                     <input type="checkbox" id="skip-intro-toggle" onchange="toggleSkipIntro(this.checked)" style="width: 18px; height: 18px;">
-                    <span data-i18n="skip_intro">啟動時略過開場動畫與說明教學</span>
+                    <span data-i18n="skip_intro">啟動時略過開場動畫與教學</span>
                 </label>
             </div>
 
@@ -208,7 +212,7 @@
 
             <div style="text-align:center; margin-top: 10px;">
                 <button onclick="reopenTutorial()" style="background:transparent; border:1px solid #aaa; padding:8px 20px; border-radius:8px; color:#555; font-size:13px; cursor:pointer;">
-                    <i class="fas fa-info-circle"></i> <span data-i18n="tut_title">功能說明教學</span>
+                    <i class="fas fa-info-circle"></i> <span data-i18n="tut_title">重新查看功能教學</span>
                 </button>
             </div>
 
@@ -293,18 +297,18 @@
             </div>
         </div>
     </div>
-    <div id="edit-modal-overlay" class="modal-overlay">
-        </div>
+
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
     
-    <script type="module" src="./js/main.js?v=500"></script>
+    <script type="module" src="./js/main.js?v=501"></script>
 
     <script>
         setTimeout(() => {
             const splash = document.getElementById('splash-screen');
             if (splash && splash.style.display !== 'none' && splash.style.opacity !== '0') {
+                console.warn("⚠️ 啟動超時，已強制解除開場動畫");
                 splash.style.display = 'none';
                 const welcome = document.getElementById('welcome-screen');
                 if (!localStorage.getItem('ruifang_welcomed') && !localStorage.getItem('ruifang_skip_intro') === 'true' && welcome) {
@@ -313,12 +317,6 @@
             }
         }, 3000);
     </script>
+
 </body>
 </html>
-
-
-
-
-
-
-
