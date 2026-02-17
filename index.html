@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    
     <title>瑞芳導覽地圖 App</title>
 
     <script>
@@ -30,7 +31,7 @@
     <link rel="apple-touch-icon" href="icon-192.png">
     <link rel="icon" type="image/png" href="icon-192.png">
     
-    <link rel="stylesheet" href="style.css?v=106">
+    <link rel="stylesheet" href="style.css?v=107">
 </head>
 <body id="main-body">
 
@@ -126,7 +127,7 @@
     <div class="map-controls">
         <div class="control-btn" onclick="openSettings()" title="設定"><i class="fas fa-cog"></i></div>
         <div class="control-btn compass-btn" onclick="resetNorth()" title="回到全景"><i class="fas fa-compass"></i></div>
-        <div class="control-btn route-btn" onclick="drawThemeRoute()" title="熱門路線"><i class="fas fa-route"></i></div>
+        <div class="control-btn route-btn" onclick="openRouteMenu()" title="熱門路線"><i class="fas fa-route"></i></div>
         <div class="control-btn fav-btn" onclick="toggleFavList()" title="我的收藏"><i class="fas fa-folder-open"></i></div>
         <div class="control-btn" id="tour-btn" onclick="toggleGuidedTour()" title="自動導覽"><i class="fas fa-play" style="color: #e84393;"></i></div>
         <div class="control-btn station-btn" onclick="goToStation()" title="回到瑞芳中心"><span class="rui-icon">瑞</span></div>
@@ -154,6 +155,38 @@
         <div class="info-section"><span class="info-label"><i class="fas fa-history"></i> <span data-i18n="history">簡介歷史</span></span><span id="card-history" class="info-text"></span></div>
         <div class="info-section"><span class="info-label"><i class="fas fa-bus"></i> <span data-i18n="transport">交通方式</span></span><span id="card-transport" class="info-text"></span></div>
         <div class="btn-group" id="card-btn-group"></div>
+    </div>
+
+    <div id="route-select-modal" class="modal-overlay">
+        <div class="modal-box">
+            <h3><i class="fas fa-route"></i> 選擇熱門路線</h3>
+            <div class="route-list-container">
+                <div class="route-item" onclick="selectRoute('history')">
+                    <div class="route-info">
+                        <span class="route-name" style="color: #8e44ad;">🏛️ 歷史懷舊線</span>
+                        <span class="route-desc">九份老街 ➔ 黃金博物館</span>
+                    </div>
+                    <button class="route-action-btn" style="background:#8e44ad;">出發</button>
+                </div>
+                <div class="route-item" onclick="selectRoute('nature')">
+                    <div class="route-info">
+                        <span class="route-name" style="color: #27ae60;">⛰️ 山海自然線</span>
+                        <span class="route-desc">猴硐 ➔ 報時山 ➔ 陰陽海</span>
+                    </div>
+                    <button class="route-action-btn" style="background:#27ae60;">出發</button>
+                </div>
+                <div class="route-item" onclick="selectRoute('food')">
+                    <div class="route-info">
+                        <span class="route-name" style="color: #d35400;">🍜 饕客美食線</span>
+                        <span class="route-desc">車站美食 ➔ 芋圓 ➔ 礦工便當</span>
+                    </div>
+                    <button class="route-action-btn" style="background:#d35400;">出發</button>
+                </div>
+            </div>
+            <div class="modal-btns">
+                <button class="modal-cancel" onclick="closeRouteMenu()" data-i18n="close" style="width: 100%;">關閉</button>
+            </div>
+        </div>
     </div>
 
     <div id="settings-modal-overlay" class="modal-overlay">
@@ -245,9 +278,7 @@
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
-    <script src="./app.js?v=106"></script>
+    <script src="./app.js?v=107"></script>
 
 </body>
 </html>
-
-
