@@ -1,10 +1,26 @@
+// js/modules/search.js
 import { state, saveState } from '../core/store.js';
 import { spots } from '../data/spots.js';
 import { addMarkerToMap } from './markers.js';
 import { showCard, closeCard } from './cards.js';
 
+// 🌟 將 triggerSearch 獨立出來，並加上 export 讓 ui.js 可以引用
+export function triggerSearch(name) { 
+    const searchInput = document.getElementById("search"); 
+    const sugBox = document.getElementById("suggest");
+    if(searchInput) searchInput.value = name; 
+    if(sugBox) sugBox.style.display = "none"; 
+    
+    const s = spots.concat(state.savedCustomSpots).find(x => x.name === name); 
+    if(s) { 
+        state.mapInstance.flyTo([s.lat, s.lng], 16); 
+        setTimeout(() => showCard(s), 800); 
+    } 
+}
+
 export function initSearch() {
-    const searchInput = document.getElementById("search"); const sugBox = document.getElementById("suggest");
+    const searchInput = document.getElementById("search"); 
+    const sugBox = document.getElementById("suggest");
     
     window.closeSuggest = () => { sugBox.style.display = "none"; };
     
@@ -21,11 +37,8 @@ export function initSearch() {
 
     window.clearHistory = () => { state.searchHistory = []; saveState.history(); window.renderDefaultSearch(); };
 
-    window.triggerSearch = (name) => { 
-        searchInput.value = name; window.closeSuggest(); 
-        const s = spots.concat(state.savedCustomSpots).find(x => x.name === name); 
-        if(s) { state.mapInstance.flyTo([s.lat, s.lng], 16); setTimeout(() => showCard(s), 800); } 
-    };
+    // 🌟 將 triggerSearch 綁定到 window，讓 HTML 的 onClick 也能使用
+    window.triggerSearch = triggerSearch;
 
     searchInput.addEventListener('focus', () => { if(!searchInput.value.trim()) window.renderDefaultSearch(); });
     searchInput.addEventListener('input', function() { 
@@ -39,7 +52,7 @@ export function initSearch() {
                 div.innerHTML = `<span><i class="fas fa-map-marker-alt" style="color:var(--primary)"></i> ${s.name}</span>`; 
                 div.onclick = () => { 
                     state.searchHistory = state.searchHistory.filter(h => h !== s.name); state.searchHistory.unshift(s.name); if(state.searchHistory.length > 5) state.searchHistory.pop(); saveState.history();
-                    window.triggerSearch(s.name); 
+                    triggerSearch(s.name); 
                 }; c.appendChild(div); 
             }); 
         } else { sugBox.style.display = "none"; } 
