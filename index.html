@@ -191,14 +191,30 @@
             <div style="margin-top: 15px; border-top: 1px dashed var(--divider-color); padding-top: 15px;">
                 <label style="display: flex; align-items: center; gap: 10px; font-weight: bold; font-size: 15px; cursor: pointer; color: #111111;">
                     <input type="checkbox" id="skip-intro-toggle" onchange="toggleSkipIntro(this.checked)" style="width: 18px; height: 18px;">
-                    <span data-i18n="skip_intro">啟動時略過開場與教學</span>
+                    <span data-i18n="skip_intro">啟動時略過開場動畫與說明教學</span>
                 </label>
             </div>
-            
-            <div class="contact-section">
-                <a href="#" onclick="reopenTutorial()" class="contact-btn"><i class="fas fa-question-circle"></i> 重新查看教學</a>
+
+            <div id="install-btn-container" style="display:none; margin-top: 15px;">
+                <button class="install-pwa-btn" onclick="installPWA()"><i class="fas fa-download"></i> <span data-i18n="install_app">將 App 安裝至桌面</span></button>
             </div>
-            <button class="modal-cancel" style="width: 100%; margin-top: 10px;" onclick="closeSettings()">關閉</button>
+
+            <div class="contact-section">
+                <h3 class="settings-sub" style="width:100%; margin-bottom:10px;" data-i18n="feedback_title">測評問卷與聯絡</h3>
+                <a href="https://docs.google.com/forms/d/e/1FAIpQLSfi76mygYPT0XeWDkTVjy1F3NjWTW1qveFKTV2bC5TlJ6yybA/viewform?usp=header" target="_blank" class="contact-btn"><i class="fas fa-clipboard-list"></i> <span data-i18n="form_link">填寫意見問卷</span></a>
+                <a href="mailto:ruifang689@gmail.com" class="contact-btn"><i class="fas fa-envelope"></i> <span data-i18n="contact">聯絡開發團隊</span></a>
+                <div class="contact-btn" onclick="shareAppMap()"><i class="fas fa-share-alt"></i> <span data-i18n="share_map_title">推薦地圖給好友</span></div>
+            </div>
+
+            <div style="text-align:center; margin-top: 10px;">
+                <button onclick="reopenTutorial()" style="background:transparent; border:1px solid #aaa; padding:8px 20px; border-radius:8px; color:#555; font-size:13px; cursor:pointer;">
+                    <i class="fas fa-info-circle"></i> <span data-i18n="tut_title">功能說明教學</span>
+                </button>
+            </div>
+
+            <div class="modal-btns">
+                <button class="modal-cancel" onclick="closeSettings()" data-i18n="close">關閉</button>
+            </div>
         </div>
     </div>
 
@@ -272,6 +288,7 @@
     </script>
 </body>
 </html>
+
 
 
 
