@@ -69,7 +69,15 @@ function applyLanguage(lang) {
 // 3. UI 與教學流程切換
 // =========================================
 function openSettings() { document.getElementById('settings-modal-overlay').style.display = 'flex'; }
-function closeSettings() { document.getElementById('settings-modal-overlay').style.display = 'none'; }
+function changeTheme(color) { 
+    if (color === 'custom') { 
+        document.getElementById('custom-color-picker').style.display = 'block'; 
+        document.getElementById('custom-color-picker').click(); 
+    } else { 
+        document.getElementById('custom-color-picker').style.display = 'none'; 
+        applyCustomTheme(color, true); // 🌟 標記為手動儲存
+    } 
+}
 function toggleSkipIntro(isChecked) { localStorage.setItem('ruifang_skip_intro', isChecked ? 'true' : 'false'); }
 
 function enterMap() { document.getElementById('welcome-screen').style.opacity = '0'; setTimeout(() => { document.getElementById('welcome-screen').style.display = 'none'; document.getElementById('tutorial-overlay').style.display = 'flex'; setTimeout(() => { document.getElementById('tutorial-overlay').style.opacity = '1'; }, 50); }, 400); }
@@ -78,8 +86,18 @@ function prevTutorial() { document.getElementById('tut-step-2').style.display = 
 function finishTutorial() { document.getElementById('tutorial-overlay').style.opacity = '0'; setTimeout(() => { document.getElementById('tutorial-overlay').style.display = 'none'; localStorage.setItem('ruifang_welcomed', 'true'); if (typeof window.mapInstance !== 'undefined') window.mapInstance.invalidateSize(); }, 400); }
 
 function changeTheme(color) { if (color === 'custom') { document.getElementById('custom-color-picker').style.display = 'block'; document.getElementById('custom-color-picker').click(); } else { document.getElementById('custom-color-picker').style.display = 'none'; applyCustomTheme(color); } }
-function applyCustomTheme(color) { document.documentElement.style.setProperty('--primary', color); document.documentElement.style.setProperty('--logo-border', color); localStorage.setItem('ruifang_theme', color); const themeSelect = document.getElementById('theme-select'); if([...themeSelect.options].some(o => o.value === color)) themeSelect.value = color; else themeSelect.value = 'custom'; }
+function applyCustomTheme(color, save = true) { 
+    document.documentElement.style.setProperty('--primary', color); 
+    document.documentElement.style.setProperty('--logo-border', color); 
+    
+    if (save) {
+        document.documentElement.style.setProperty('--splash-color', color);
+        localStorage.setItem('ruifang_theme', color); 
+    }
 
+    const themeSelect = document.getElementById('theme-select'); 
+    if([...themeSelect.options].some(o => o.value === color)) themeSelect.value = color; else themeSelect.value = 'custom'; 
+}
 function shareSpot() { if(!targetSpot) return; const spotUrl = new URL(window.location.href.split('?')[0]); spotUrl.searchParams.set('spot', targetSpot.name); const shareData = { title: `瑞芳導覽地圖 - ${targetSpot.name}`, text: `我在瑞芳發現了「${targetSpot.name}」！\n點擊查看：`, url: spotUrl.toString() }; if (navigator.share) navigator.share(shareData).catch(()=>{}); else navigator.clipboard.writeText(`${shareData.text}\n${shareData.url}`).then(() => alert('✅ 已複製景點連結！')); }
 function shareAppMap() { const shareData = { title: '瑞芳導覽地圖 App', text: '快來看看這個瑞芳專屬的智慧導覽地圖！', url: 'https://ruifang689-max.github.io/-/' }; if (navigator.share) navigator.share(shareData).catch(()=>{}); else navigator.clipboard.writeText(shareData.url).then(() => alert('✅ 網址已複製！')); }
 
@@ -397,9 +415,16 @@ window.addEventListener('load', () => {
     if(spotQuery) { const s = spots.concat(savedCustomSpots).find(x => x.name === spotQuery); if(s) { setTimeout(() => { window.mapInstance.flyTo([s.lat, s.lng], 16); showCard(s); }, 1000); } }
     
     applyLanguage(currentLang); fetchWeather();
+    
+    // 🌟 判斷是否有儲存的主題。有就套用(開場跟著變)；沒有就預設藍色，但開場保留純黑！
     const savedTheme = localStorage.getItem('ruifang_theme'); 
-    if (savedTheme) { applyCustomTheme(savedTheme); } else { applyCustomTheme('#007bff'); }
+    if (savedTheme) { 
+        applyCustomTheme(savedTheme, true); 
+    } else { 
+        applyCustomTheme('#007bff', false); // false 代表不覆寫 --splash-color
+    }
 
+    // ... (以下的略過開場邏輯保持不變)
     const splash = document.getElementById('splash-screen');
     const welcome = document.getElementById('welcome-screen');
     const tutorial = document.getElementById('tutorial-overlay');
