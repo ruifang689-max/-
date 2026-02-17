@@ -3,7 +3,6 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    
     <title>瑞芳導覽地圖 App</title>
 
     <script>
@@ -31,7 +30,7 @@
     <link rel="apple-touch-icon" href="icon-192.png">
     <link rel="icon" type="image/png" href="icon-192.png">
     
-    <link rel="stylesheet" href="style.css?v=108">
+    <link rel="stylesheet" href="style.css?v=109">
 </head>
 <body id="main-body">
 
@@ -56,12 +55,6 @@
                     <option value="vi">Tiếng Việt (🇻🇳)</option>
                 </select>
             </div>
-
-            <div class="link-box">
-                <a href="mailto:ruifang689@gmail.com"><i class="fas fa-envelope"></i> ruifang689@gmail.com</a>
-                <a href="https://docs.google.com/forms/d/e/1FAIpQLSfi76mygYPT0XeWDkTVjy1F3NjWTW1qveFKTV2bC5TlJ6yybA/viewform?usp=header" target="_blank"><i class="fas fa-clipboard-list"></i> <span data-i18n="form_link">填寫意見問卷</span></a>
-            </div>
-
             <button class="btn-enter-map" onclick="enterMap()" data-i18n="enter_map">進入地圖</button>
         </div>
     </div>
@@ -159,27 +152,18 @@
 
     <div id="route-select-modal" class="modal-overlay">
         <div class="modal-box">
-            <h3><i class="fas fa-route"></i> 選擇熱門路線</h3>
+            <h3 class="modal-title route"><i class="fas fa-route"></i> 選擇熱門路線</h3>
             <div class="route-list-container">
                 <div class="route-item" onclick="selectRoute('history')">
-                    <div class="route-info">
-                        <span class="route-name" style="color: #8e44ad;">🏛️ 歷史懷舊線</span>
-                        <span class="route-desc">九份老街 ➔ 黃金博物館</span>
-                    </div>
+                    <div class="route-info"><span class="route-name" style="color: #8e44ad;">🏛️ 歷史懷舊線</span><span class="route-desc">九份老街 ➔ 黃金博物館</span></div>
                     <button class="route-action-btn" style="background:#8e44ad;">出發</button>
                 </div>
                 <div class="route-item" onclick="selectRoute('nature')">
-                    <div class="route-info">
-                        <span class="route-name" style="color: #27ae60;">⛰️ 山海自然線</span>
-                        <span class="route-desc">猴硐 ➔ 報時山 ➔ 陰陽海</span>
-                    </div>
+                    <div class="route-info"><span class="route-name" style="color: #27ae60;">⛰️ 山海自然線</span><span class="route-desc">猴硐 ➔ 報時山 ➔ 陰陽海</span></div>
                     <button class="route-action-btn" style="background:#27ae60;">出發</button>
                 </div>
                 <div class="route-item" onclick="selectRoute('food')">
-                    <div class="route-info">
-                        <span class="route-name" style="color: #d35400;">🍜 饕客美食線</span>
-                        <span class="route-desc">車站美食 ➔ 芋圓 ➔ 礦工便當</span>
-                    </div>
+                    <div class="route-info"><span class="route-name" style="color: #d35400;">🍜 饕客美食線</span><span class="route-desc">車站美食 ➔ 芋圓 ➔ 礦工便當</span></div>
                     <button class="route-action-btn" style="background:#d35400;">出發</button>
                 </div>
             </div>
@@ -191,9 +175,9 @@
 
     <div id="settings-modal-overlay" class="modal-overlay">
         <div class="modal-box">
-            <h2 data-i18n="settings"><i class="fas fa-cog"></i> 系統設定</h2>
+            <h2 class="settings-title" data-i18n="settings"><i class="fas fa-cog"></i> 系統設定</h2>
             
-            <h3 data-i18n="lang"><i class="fas fa-globe"></i> 語言 / Language</h3>
+            <h3 class="settings-sub" data-i18n="lang"><i class="fas fa-globe"></i> 語言 / Language</h3>
             <select id="lang-select-settings" onchange="applyLanguage(this.value)" class="modal-select">
                 <option value="zh">繁體中文 (🇹🇼)</option>
                 <option value="en">English (🇺🇸)</option>
@@ -202,10 +186,10 @@
                 <option value="vi">Tiếng Việt (🇻🇳)</option>
             </select>
 
-            <h3 data-i18n="theme"><i class="fas fa-palette"></i> 主題顏色</h3>
+            <h3 class="settings-sub" data-i18n="theme"><i class="fas fa-palette"></i> 主題顏色</h3>
             <select id="theme-select" onchange="changeTheme(this.value)" class="modal-select">
-                <option value="#333333">極簡黑 (預設)</option>
-                <option value="#007bff">活力藍</option>
+                <option value="#007bff">活力藍 (預設)</option>
+                <option value="#333333">極簡黑</option>
                 <option value="#f39c12">溫暖橘</option>
                 <option value="#28a745">自然綠</option>
                 <option value="#8e44ad">神秘紫</option>
@@ -214,21 +198,19 @@
             <input type="color" id="custom-color-picker" style="display:none; width:100%; margin-top:5px; height: 40px; border:none; border-radius:10px;" onchange="applyCustomTheme(this.value)">
 
             <div style="margin-top: 15px; border-top: 1px dashed var(--divider-color); padding-top: 15px;">
-                <label style="display: flex; align-items: center; gap: 10px; font-weight: bold; font-size: 15px; cursor: pointer; color: var(--text-main);">
+                <label style="display: flex; align-items: center; gap: 10px; font-weight: bold; font-size: 15px; cursor: pointer; color: #111111;">
                     <input type="checkbox" id="skip-intro-toggle" onchange="toggleSkipIntro(this.checked)" style="width: 18px; height: 18px;">
                     <span data-i18n="skip_intro">啟動時略過開場與教學</span>
                 </label>
             </div>
 
             <div id="install-btn-container" style="display:none; margin-top: 15px;">
-                <button class="install-pwa-btn" onclick="installPWA()">
-                    <i class="fas fa-download"></i> <span data-i18n="install_app">將 App 安裝至桌面</span>
-                </button>
+                <button class="install-pwa-btn" onclick="installPWA()"><i class="fas fa-download"></i> <span data-i18n="install_app">將 App 安裝至桌面</span></button>
             </div>
 
-            <div style="margin-top: 15px; text-align: center; display: flex; flex-direction: column; gap: 12px; border-top: 1px dashed var(--divider-color); padding-top: 15px;">
-                <div><span style="font-size: 12px; color: var(--text-sub);" data-i18n="contact">聯絡開發團隊</span><br><a href="mailto:ruifang689@gmail.com" style="color: var(--primary); font-size: 15px; text-decoration: none; font-weight: bold;">📧 ruifang689@gmail.com</a></div>
-                <div><span style="font-size: 12px; color: var(--text-sub);" data-i18n="share_map_title">推薦給好友</span><br><div onclick="shareAppMap()" style="color: var(--primary); font-size: 15px; text-decoration: none; font-weight: bold; cursor: pointer;">🔗 <span data-i18n="share_map">分享導覽地圖</span></div></div>
+            <div class="contact-section">
+                <a href="mailto:ruifang689@gmail.com" class="contact-btn"><i class="fas fa-envelope"></i> <span data-i18n="contact">聯絡開發團隊</span></a>
+                <div class="contact-btn" onclick="shareAppMap()"><i class="fas fa-share-alt"></i> <span data-i18n="share_map_title">推薦地圖給好友</span></div>
             </div>
 
             <div class="modal-btns">
@@ -239,7 +221,7 @@
 
     <div id="fav-manage-modal" class="modal-overlay">
         <div class="modal-box">
-            <h3><i class="fas fa-folder-open"></i> <span data-i18n="manage_fav">管理收藏夾</span></h3>
+            <h3 class="modal-title fav"><i class="fas fa-folder-open"></i> <span data-i18n="manage_fav">管理收藏夾</span></h3>
             <div id="fav-manage-list" style="max-height: 50vh; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding-right: 5px;"></div>
             <div class="modal-btns">
                 <button class="modal-cancel" onclick="closeFavManage()" data-i18n="close" style="width: 100%;">關閉</button>
@@ -249,7 +231,7 @@
 
     <div id="edit-modal-overlay" class="modal-overlay">
         <div class="modal-box">
-            <h3><i class="fas fa-edit"></i> 編輯標記</h3>
+            <h3 class="modal-title"><i class="fas fa-edit"></i> 編輯標記</h3>
             <input type="text" id="edit-name" class="modal-input" placeholder="名稱必填">
             <input type="text" id="edit-highlights" class="modal-input" placeholder="推薦亮點">
             <textarea id="edit-history" class="modal-textarea" placeholder="歷史簡介..."></textarea>
@@ -278,8 +260,7 @@
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
-    <script src="./app.js?v=108"></script>
+    <script src="./app.js?v=109"></script>
 
 </body>
 </html>
-
