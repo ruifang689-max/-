@@ -189,26 +189,53 @@
             <input type="color" id="custom-color-picker" style="display:none; width:100%; margin-top:10px; height:40px; border:none; cursor:pointer;" onchange="applyCustomTheme(this.value, true)">
     
             <div class="input-group" style="display: flex; align-items: center; justify-content: space-between; padding: 10px; background: var(--divider-color); border-radius: 8px;">
+                <label style="margin: 0;">啟動時略過開場動畫與說明教學</label>
                 <input type="checkbox" id="skip-intro-toggle" onchange="toggleSkipIntro(this.checked)" style="transform: scale(1.3); cursor: pointer;">
-                    <label style="margin: 0;">啟動時略過開場動畫與說明教學</label>
             </div>
             
-            <div class="contact-section">
-                <a href="#" onclick="reopenTutorial()" class="contact-btn"><i class="fas fa-question-circle"></i> 重新查看教學</a>
+            <div id="install-btn-container" style="display:none; margin-top: 15px;">
+                <button class="install-pwa-btn" onclick="installPWA()"><i class="fas fa-download"></i> <span data-i18n="install_app">將 App 安裝至桌面</span></button>
             </div>
-            <button class="modal-cancel" style="width: 100%; margin-top: 10px;" onclick="closeSettings()">關閉</button>
+
+            <div class="contact-section">
+                <h3 class="settings-sub" style="width:100%; margin-bottom:10px;" data-i18n="feedback_title">測評問卷與聯絡</h3>
+                <a href="https://docs.google.com/forms/d/e/1FAIpQLSfi76mygYPT0XeWDkTVjy1F3NjWTW1qveFKTV2bC5TlJ6yybA/viewform?usp=header" target="_blank" class="contact-btn"><i class="fas fa-clipboard-list"></i> <span data-i18n="form_link">填寫意見問卷</span></a>
+                <a href="mailto:ruifang689@gmail.com" class="contact-btn"><i class="fas fa-envelope"></i> <span data-i18n="contact">聯絡開發團隊</span></a>
+                <div class="contact-btn" onclick="shareAppMap()"><i class="fas fa-share-alt"></i> <span data-i18n="share_map_title">推薦地圖給好友</span></div>
+            </div>
+
+            <div style="text-align:center; margin-top: 10px;">
+                <button onclick="reopenTutorial()" style="background:transparent; border:1px solid #aaa; padding:8px 20px; border-radius:8px; color:#555; font-size:13px; cursor:pointer;">
+                    <i class="fas fa-info-circle"></i> <span data-i18n="tut_title">功能說明教學</span>
+                </button>
+            </div>
+
+            <div class="modal-btns">
+                <button class="modal-cancel" onclick="closeSettings()" data-i18n="close">關閉</button>
+            </div>
         </div>
     </div>
 
     <div id="route-select-modal" class="modal-overlay">
         <div class="modal-box">
-            <h3 class="modal-title route"><i class="fas fa-route"></i> 推薦行程路線</h3>
+            <h3 class="modal-title route"><i class="fas fa-route"></i> 選擇熱門路線</h3>
             <div class="route-list-container">
-                <div class="route-item" onclick="selectRoute('history')"><div class="route-info"><span class="route-name">🏛️ 歷史懷舊線</span><span class="route-desc">瑞芳車站 ➔ 後站老街 ➔ 九份老街 ➔ 黃金博物館</span></div></div>
-                <div class="route-item" onclick="selectRoute('nature')"><div class="route-info"><span class="route-name">⛰️ 山海自然線</span><span class="route-desc">瑞芳車站 ➔ 猴硐貓村 ➔ 報時山步道 ➔ 陰陽海</span></div></div>
-                <div class="route-item" onclick="selectRoute('food')"><div class="route-info"><span class="route-name">🍜 饕客美食線</span><span class="route-desc">瑞芳美食廣場 ➔ 芋圓 ➔ 礦工便當</span></div></div>
+                <div class="route-item" onclick="selectRoute('history')">
+                    <div class="route-info"><span class="route-name" style="color: #8e44ad;">🏛️ 歷史懷舊線</span><span class="route-desc">九份老街 ➔ 黃金博物館</span></div>
+                    <button class="route-action-btn" style="background:#8e44ad;">出發</button>
+                </div>
+                <div class="route-item" onclick="selectRoute('nature')">
+                    <div class="route-info"><span class="route-name" style="color: #27ae60;">⛰️ 山海自然線</span><span class="route-desc">猴硐 ➔ 報時山 ➔ 陰陽海</span></div>
+                    <button class="route-action-btn" style="background:#27ae60;">出發</button>
+                </div>
+                <div class="route-item" onclick="selectRoute('food')">
+                    <div class="route-info"><span class="route-name" style="color: #d35400;">🍜 饕客美食線</span><span class="route-desc">車站美食 ➔ 芋圓 ➔ 礦工便當</span></div>
+                    <button class="route-action-btn" style="background:#d35400;">出發</button>
+                </div>
             </div>
-            <button class="modal-cancel" style="width: 100%; margin-top: 15px;" onclick="closeRouteMenu()">關閉</button>
+            <div class="modal-btns">
+                <button class="modal-cancel" onclick="closeRouteMenu()" data-i18n="close" style="width: 100%;">關閉</button>
+            </div>
         </div>
     </div>
 
@@ -268,6 +295,7 @@
     </script>
 </body>
 </html>
+
 
 
 
