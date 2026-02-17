@@ -32,7 +32,7 @@ let savedCustomSpots = JSON.parse(localStorage.getItem('ruifang_custom_spots')) 
 let searchHistory = JSON.parse(localStorage.getItem('ruifang_search_history')) || []; 
 
 // =========================================
-// 2. 擴充資料庫與語言庫
+// 2. 擴充資料庫與路線資料
 // =========================================
 const spots = [
     { name: "瑞芳火車站", lat: 25.108, lng: 121.805, tags: ["交通", "美食"], keywords: ["車站", "龍鳳腿", "胡椒餅"], highlights: "瑞芳美食廣場", food: "龍鳳腿、胡椒餅", history: "平溪線與九份的交通轉運樞紐。", transport: "台鐵瑞芳站" },
@@ -44,7 +44,28 @@ const spots = [
     { name: "報時山步道", lat: 25.1118, lng: 121.8587, tags: ["自然"], keywords: ["觀景台", "步道"], highlights: "最輕鬆看海步道", food: "無", history: "日治時期設有警報器。", transport: "勸濟堂步行" },
     { name: "水湳洞陰陽海", lat: 25.1228, lng: 121.8647, tags: ["自然"], keywords: ["海景", "十三層遺址"], highlights: "黃藍交錯海景", food: "無", history: "礦物氧化形成的自然奇觀。", transport: "客運 856" }
 ];
-const themeRouteCoords = [[25.108, 121.805], [25.086, 121.828], [25.1099, 121.8452], [25.1091, 121.8576], [25.1228, 121.8647]];
+
+// 🌟 多條熱門路線定義
+const routesData = {
+    'history': { 
+        name: "🏛️ 歷史懷舊線", 
+        desc: "瑞芳車站 ➔ 後站老街 ➔ 九份老街 ➔ 黃金博物館",
+        coords: [[25.108, 121.805], [25.109, 121.806], [25.1099, 121.8452], [25.1091, 121.8576]],
+        color: '#8e44ad'
+    },
+    'nature': { 
+        name: "⛰️ 山海自然線", 
+        desc: "瑞芳車站 ➔ 猴硐貓村 ➔ 報時山步道 ➔ 陰陽海",
+        coords: [[25.108, 121.805], [25.086, 121.828], [25.1118, 121.8587], [25.1228, 121.8647]],
+        color: '#27ae60'
+    },
+    'food': { 
+        name: "🍜 饕客美食線", 
+        desc: "瑞芳美食廣場 ➔ 阿柑姨芋圓 ➔ 礦工便當",
+        coords: [[25.108, 121.805], [25.1099, 121.8452], [25.1091, 121.8576]],
+        color: '#d35400'
+    }
+};
 
 const translations = {
     'zh': { splash_title: "瑞芳導覽 App", splash_desc: "精準在地導覽，深度探索山城。", lang: "語言 / Language", enter_map: "進入地圖", form_link: "意見問卷", skip_intro: "啟動時略過開場", tut_step1_title: "功能說明 (1/2)", tut_search: "搜尋與標籤", tut_add: "長按新增", tut_weather: "天氣資訊", tut_compass: "指北針", tut_next: "下一步", tut_step2_title: "進階功能 (2/2)", tut_nav: "多模式導航", tut_tour: "自動導覽", tut_settings: "設定", tut_share: "分享", tut_prev: "前一步", tut_finish: "開始使用", settings: "系統設定", theme: "主題顏色", share_map_title: "推薦給好友", share_map: "分享地圖", close: "關閉", search_ph: "🔍 搜尋或長按新增...", locating: "定位中...", food: "在地飲食", highlights: "推薦亮點", history: "簡介歷史", transport: "交通方式", nav: " 導航", ai: " 智慧推薦", chip_all: "🌟 全部", chip_food: "🍜 美食", chip_history: "🏛️ 歷史", chip_nature: "⛰️ 自然", chip_custom: "📍 標記", contact: "聯絡開發團隊", install_app: "將 App 安裝至桌面", manage_fav: "管理收藏夾" },
@@ -93,14 +114,15 @@ async function fetchWeather() {
 }
 
 // =========================================
-// 5. 核心地圖與底圖 (恢復等高線圖)
+// 5. 核心地圖與底圖 (加入交通底圖)
 // =========================================
 window.mapInstance = L.map('map', { zoomControl: false, attributionControl: false }).setView([25.1032, 121.8224], 14);
 
-// 🌟 恢復 Arcade 等高線地形圖
+// 🌟 四種底圖：街道、交通、地形、夜間
 const mapLayers = [
     { url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', name: '街道', icon: 'fa-map', dark: false },
-    { url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', name: '等高線', icon: 'fa-mountain', dark: false },
+    { url: 'https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', name: '交通', icon: 'fa-bus', dark: false },
+    { url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', name: '地形', icon: 'fa-mountain', dark: false },
     { url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', name: '夜間', icon: 'fa-moon', dark: true }
 ];
 let currentLayerIdx = 0; let currentTileLayer = L.tileLayer(mapLayers[0].url).addTo(window.mapInstance);
@@ -137,7 +159,7 @@ window.mapInstance.on('moveend', function() {
 });
 
 // =========================================
-// 6. 圖釘與互動邏輯 (滑鼠游標經過顯示、點擊開啟大卡)
+// 6. 圖釘與互動邏輯
 // =========================================
 const cluster = L.markerClusterGroup(); window.mapInstance.addLayer(cluster);
 function calculateWalk(lat, lng) { if(!userPos) return "--"; const mins = Math.round(window.mapInstance.distance(userPos, [lat, lng]) / 80); return mins < 1 ? "1分內" : `約 ${mins} 分`; }
@@ -155,20 +177,16 @@ function addMarkerToMap(s) {
     if (!s.tags.includes('自訂') && !s.wikiImg) fetch(`https://zh.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(s.name)}`).then(r=>r.json()).then(d=>{s.wikiImg=d.thumbnail?.source;}).catch(()=>{});
     const m = L.marker([s.lat, s.lng], { icon: createCustomPin(s.tags, s.name) });
     
-    // 🌟 浮動小卡只做預覽顯示
     m.bindPopup(() => {
         const img = s.wikiImg || getPlaceholderImage(s.name);
         const foodIcon = s.tags.includes('自訂') ? 'fa-star' : 'fa-utensils'; const foodText = s.tags.includes('自訂') ? '自訂地點' : `美食：${s.food || '--'}`;
         return `<div class="preview-card"><img class="preview-img" src="${img}" onerror="this.src='${getPlaceholderImage(s.name)}'"><div class="preview-info"><div class="preview-header"><span class="preview-title">${s.name}</span><span class="walk-badge"><i class="fas fa-walking"></i> ${calculateWalk(s.lat, s.lng)}</span></div><div class="preview-tag-box">${s.tags.map(t=>`<span class="mini-tag">${t}</span>`).join('')}</div><div class="food-preview"><i class="fas ${foodIcon}"></i> ${foodText}</div></div></div>`;
     }, { closeButton: false, offset: [0, -5] });
 
-    // 🌟 滑鼠與手指互動邏輯
-    m.on('mouseover', function() { this.openPopup(); });   // 經過開啟預覽
-    m.on('mouseout', function() { this.closePopup(); });    // 離開關閉預覽
+    m.on('mouseover', function() { this.openPopup(); });
+    m.on('mouseout', function() { this.closePopup(); }); 
     m.on('click', function(e) { 
-        L.DomEvent.stopPropagation(e); 
-        this.closePopup(); // 點擊時關閉預覽，改開大卡
-        showCard(s); 
+        L.DomEvent.stopPropagation(e); this.closePopup(); showCard(s); 
     }); 
     
     s.markerObj = m; cluster.addLayer(m);
@@ -184,7 +202,7 @@ function showCard(s) {
     targetSpot = s; document.getElementById("card-fav-icon").className = myFavs.includes(s.name) ? "fas fa-heart active" : "fas fa-heart";
     document.getElementById("title").innerText = s.name; 
     const imgEl = document.getElementById("img"); imgEl.src = s.wikiImg || getPlaceholderImage(s.name); imgEl.onerror = () => { imgEl.src = getPlaceholderImage(s.name); }; 
-    document.getElementById("card-tags").innerHTML = s.tags.map(t => `<span class="mini-tag">${t}</span>`).join('');
+    document.getElementById("card-tags").innerHTML = s.tags.map(t => `<span class="info-tag">${t}</span>`).join('');
     document.getElementById("card-food").innerText = s.food || "--"; document.getElementById("card-highlights").innerText = s.highlights || "暫無介紹";
     document.getElementById("card-history").innerText = s.history || "無"; document.getElementById("card-transport").innerText = s.transport || "自行前往";
     renderCardButtons(s); document.getElementById("card").classList.add("open"); document.getElementById("card").style.transform = '';
@@ -256,13 +274,50 @@ function renderCardButtons(s, t = translations[currentLang]) {
 }
 
 // =========================================
-// 8. 側邊功能列與導覽
+// 8. 側邊功能列與導覽 (🌟 新增路線選單與關閉功能)
 // =========================================
 function resetNorth() { window.mapInstance.flyTo([25.1032, 121.8224], 14); } 
 function goToUser() { if(userPos) { window.mapInstance.flyTo(userPos, 16); } else { alert("📍 正在獲取定位...\n若無反應，請確認您已開啟手機與瀏覽器的 GPS 定位權限！"); window.mapInstance.locate({setView: false, watch: true, enableHighAccuracy: true}); } } 
-function drawThemeRoute() { if(currentRoute) window.mapInstance.removeLayer(currentRoute); currentRoute = L.polyline(themeRouteCoords, { color: '#8e44ad', weight: 6, dashArray: '10, 10' }).addTo(window.mapInstance); window.mapInstance.fitBounds(currentRoute.getBounds(), { padding: [50, 50] }); closeCard(); alert("🚀 熱門路線已載入！"); } 
 function goToStation() { const ruiIcon = document.querySelector('.rui-icon'); if(ruiIcon){ ruiIcon.classList.remove('stamped'); void ruiIcon.offsetWidth; ruiIcon.classList.add('stamped'); } window.mapInstance.flyTo([25.108, 121.805], 16); closeCard(); } 
 function aiTrip() { if(!userPos) return alert("等待 GPS 定位..."); const sorted = spots.concat(savedCustomSpots).sort((a,b) => window.mapInstance.distance(userPos,[a.lat,a.lng]) - window.mapInstance.distance(userPos,[b.lat,b.lng])); alert("🤖 AI 推薦最近景點：\n" + sorted.slice(0,5).map((s,i) => `${i+1}. ${s.name}`).join("\n")); }
+
+// 🌟 路線選單開啟
+function openRouteMenu() { document.getElementById('route-select-modal').style.display = 'flex'; }
+function closeRouteMenu() { document.getElementById('route-select-modal').style.display = 'none'; }
+
+// 🌟 繪製選擇的路線
+function selectRoute(routeKey) {
+    closeRouteMenu();
+    if(currentRoute) window.mapInstance.removeLayer(currentRoute); 
+    
+    const route = routesData[routeKey];
+    if(!route) return;
+
+    currentRoute = L.polyline(route.coords, { color: route.color, weight: 6, dashArray: '10, 10' }).addTo(window.mapInstance); 
+    window.mapInstance.fitBounds(currentRoute.getBounds(), { padding: [50, 50] }); 
+    
+    // 改變按鈕狀態為「啟動中」
+    const btn = document.querySelector('.route-btn');
+    btn.innerHTML = '<i class="fas fa-times"></i>'; // 變成關閉圖示
+    btn.onclick = clearRoute;
+    btn.classList.add('active');
+    
+    alert(`🚀 已啟動：${route.name}`);
+}
+
+// 🌟 清除路線
+function clearRoute() {
+    if(currentRoute) window.mapInstance.removeLayer(currentRoute); 
+    currentRoute = null;
+    
+    // 還原按鈕狀態
+    const btn = document.querySelector('.route-btn');
+    btn.innerHTML = '<i class="fas fa-route"></i>';
+    btn.onclick = openRouteMenu;
+    btn.classList.remove('active');
+    
+    alert('🏁 路線已關閉');
+}
 
 function closeNav() { if(currentRoute) window.mapInstance.removeLayer(currentRoute); document.getElementById('route-info-panel').style.display = 'none'; }
 function changeNavMode(mode) { navMode = mode; document.querySelectorAll('.route-mode-btn').forEach(btn => btn.classList.remove('active')); document.getElementById(`mode-${mode}`).classList.add('active'); startNav(); }
@@ -346,7 +401,7 @@ function toggleFavList() {
                 div.onclick = () => { triggerSearch(name); p.style.display = "none"; }; p.appendChild(div); 
             }); 
         } 
-        const manageBtn = document.createElement('div'); manageBtn.style.cssText = "padding:12px; text-align:center; background:var(--divider-color); font-weight:bold; cursor:pointer; font-size:13px; color:var(--primary);"; manageBtn.innerHTML = "<i class='fas fa-cog'></i> 管理收藏夾"; manageBtn.onclick = () => { p.style.display = "none"; openFavManage(); }; p.appendChild(manageBtn);
+        const manageBtn = document.createElement('div'); manageBtn.style.cssText = "padding:14px; text-align:center; background:var(--divider-color); font-weight:bold; cursor:pointer; font-size:13px; color:var(--primary);"; manageBtn.innerHTML = "<i class='fas fa-cog'></i> 管理收藏夾"; manageBtn.onclick = () => { p.style.display = "none"; openFavManage(); }; p.appendChild(manageBtn);
         p.style.display = "block"; 
     } 
 }
