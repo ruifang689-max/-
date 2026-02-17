@@ -1,7 +1,7 @@
-// js/main.js - 系統總司令 (v405)
+// js/main.js - 系統總司令 (v407)
 
 import { state } from './core/store.js';
-import { initMap, toggleLayer } from './core/map.js';
+import { initMap, toggleLayer } from './core/map.js'; // 🌟 現在 map.js 已經有 export 了，這行不會報錯了！
 import { fetchWeather } from './modules/weather.js';
 import { initGPS } from './modules/gps.js';
 import { initAnnouncer } from './modules/announcer.js';
@@ -11,10 +11,9 @@ import { initSearch } from './modules/search.js';
 import { initNavigation } from './modules/navigation.js';
 import { initUI } from './modules/ui.js';
 
-// 🌟 全域綁定 (只綁定從模組明確 import 進來的核心功能)
+// 全域綁定給 HTML onClick 使用
 window.toggleLayer = toggleLayer;
 window.closeCard = closeCard;
-// 注意：其他如 search, openSettings 等功能，皆已在各模組的 init() 中自動掛載，無須在此重複宣告。
 
 // 開場動畫解除邏輯
 function removeSplashScreen() {
@@ -44,7 +43,7 @@ function removeSplashScreen() {
     }
 }
 
-// 系統啟動主程式 (加入防崩潰機制)
+// 系統啟動主程式
 function bootstrapApp() {
     try {
         initMap();
@@ -60,11 +59,10 @@ function bootstrapApp() {
         removeSplashScreen();
     } catch (error) {
         console.error("❌ 系統啟動失敗，請檢查模組：", error);
-        removeSplashScreen(); // 就算報錯也要關閉動畫，以利除錯
+        removeSplashScreen(); 
     }
 }
 
-// 解決 ES6 模組時機問題
 if (document.readyState === 'complete' || document.readyState === 'interactive') {
     bootstrapApp();
 } else {
