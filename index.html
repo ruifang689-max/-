@@ -7,6 +7,19 @@
     <title>瑞芳導覽地圖 App</title>
 
     <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistrations().then(function(registrations) {
+                for(let registration of registrations) { 
+                    registration.unregister(); 
+                    console.log("🧹 舊版 Service Worker 已清除");
+                }
+            });
+        }
+        // 強制清除舊快取
+        caches.keys().then((keyList) => Promise.all(keyList.map((key) => caches.delete(key))));
+    </script>
+    
+    <script>
         if (!window.location.pathname.endsWith('/') && !window.location.pathname.endsWith('.html') && window.location.hostname.includes('github.io')) {
             window.location.replace(window.location.pathname + '/' + window.location.search + window.location.hash);
         }
@@ -31,7 +44,7 @@
     <link rel="apple-touch-icon" href="icon/icon-192.png">
     <link rel="icon" type="image/png" href="icon/icon-192.png">
     
-    <link rel="stylesheet" href="style.css?v=408">
+    <link rel="stylesheet" href="style.css?v=409">
 </head>
 <body id="main-body">
 
@@ -322,7 +335,7 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
     
-    <script type="module" src="./js/main.js?v=408"></script>
+    <script type="module" src="./js/main.js?v=409"></script>
 
     <script>
         setTimeout(() => {
@@ -348,6 +361,7 @@
 
 </body>
 </html>>
+
 
 
 
