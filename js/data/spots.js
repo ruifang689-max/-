@@ -1,15 +1,8 @@
-/**
- * spots.js - 景點與路線資料庫 (v400)
- * 包含：景點座標
- */
-
-// =========================================
-// 2. 景點資料庫 (Spots Database)
-// =========================================
+// js/data/spots.js (v408)
 export const spots = [
     // --- 瑞芳市區 ---
     { name: "瑞芳火車站", wikiTitle: "瑞芳車站", lat: 25.108, lng: 121.805, tags: ["交通", "美食"], keywords: ["車站", "龍鳳腿", "胡椒餅"], highlights: "交通轉運樞紐", food: "龍鳳腿、胡椒餅", history: "平溪線與九份的進出門戶。", transport: "台鐵瑞芳站", heat: 0.6 },
-    { name: "瑞芳老街", wikiTitle: "瑞芳老街", lat: 25.10958, lng: 121.80656, tags: ["歷史", "美食"], keywords: ["保雲芋圓", "老街", "古厝"], highlights: "後站古厝群", food: "保雲芋圓", history: "清領時期商店匯集處，早期礦工聚集地。", transport: "瑞芳車站後站步行", heat: 0.5 },
+    { name: "瑞芳老街", wikiTitle: "", lat: 25.10958, lng: 121.80656, tags: ["歷史", "美食"], keywords: ["保雲芋圓", "老街", "古厝"], highlights: "後站古厝群", food: "保雲芋圓", history: "清領時期商店匯集處，早期礦工聚集地。", transport: "瑞芳車站後站步行", heat: 0.5 },
     { name: "瑞芳美食廣場", wikiTitle: "", lat: 25.10685, lng: 121.80567, tags: ["美食"], keywords: ["室內", "小吃"], highlights: "在地美食匯集", food: "胡椒餅、牛肉麵", history: "瑞芳室內美食天堂。", transport: "瑞芳車站步行3分", heat: 0.9 },
     
     // --- 四腳亭 ---
@@ -18,7 +11,7 @@ export const spots = [
     // --- 猴硐地區 ---
     { name: "猴硐車站", wikiTitle: "猴硐車站", lat: 25.08732, lng: 121.82704, tags: ["交通", "歷史"], keywords: ["鐵道", "煤礦"], highlights: "貓咪與鐵道", food: "礦工麵", history: "昔日產煤第一鎮。", transport: "台鐵猴硐站", heat: 0.8 },
     { name: "猴硐貓村", wikiTitle: "猴硐貓村", lat: 25.08721, lng: 121.8268, tags: ["熱門打卡"], keywords: ["貓", "療癒"], highlights: "親近貓咪", food: "貓咪咖啡", history: "以貓咪與工業遺跡修復聞名的療癒貓街。", transport: "猴硐車站天橋過後", heat: 0.9 },
-    { name: "瑞三鑛業整煤場", wikiTitle: "瑞三鑛業", lat: 25.08649, lng: 121.82758, tags: ["古蹟"], keywords: ["煤礦", "遺址"], highlights: "整煤歷史", food: "無", history: "全台最大選煉煤遺址。", transport: "猴硐車站出口即達", heat: 0.9 },
+    { name: "瑞三鑛業整煤場", wikiTitle: "", lat: 25.08649, lng: 121.82758, tags: ["古蹟"], keywords: ["煤礦", "遺址"], highlights: "整煤歷史", food: "無", history: "全台最大選煉煤遺址。", transport: "猴硐車站出口即達", heat: 0.9 },
     { name: "猴硐煤礦博物園區", wikiTitle: "猴硐煤礦博物園區", lat: 25.08666, lng: 121.82781, tags: ["歷史"], keywords: ["導覽", "礦坑"], highlights: "礦坑導覽", food: "無", history: "保存礦工生活足跡。", transport: "猴硐車站步行", heat: 0.7 },
     { name: "猴硐舊隧道群", wikiTitle: "", lat: 25.09095, lng: 121.83089, tags: ["遺跡"], keywords: ["隧道", "鐵道"], highlights: "隧道光影", food: "無", history: "鐵道舊線隧道。", transport: "猴硐往三貂嶺步行", heat: 0.5 },
 
@@ -49,7 +42,7 @@ export const spots = [
 
     // --- 深澳與鼻頭角 ---
     { name: "深澳鐵道自行車", wikiTitle: "深澳線", lat: 25.12901, lng: 121.81439, tags: ["休閒", "交通"], keywords: ["單車", "海景"], highlights: "隧道光影", food: "無", history: "廢棄鐵道改建，最受歡迎的海景Rail Bike。", transport: "瑞芳站轉乘客運/公車", heat: 0.8 },
-    { name: "深澳象鼻岩", wikiTitle: "象鼻岩", lat: 25.133, lng: 121.824, tags: ["自然景觀"], keywords: ["海蝕", "奇岩"], highlights: "海蝕奇岩", food: "小卷米粉、鯊魚羹", history: "曾為重要煤礦輸出港，現以海蝕地形聞名。", transport: "瑞芳站轉公車T99、791", heat: 0.8 },
+    { name: "深澳象鼻岩", wikiTitle: "", lat: 25.133, lng: 121.824, tags: ["自然景觀"], keywords: ["海蝕", "奇岩"], highlights: "海蝕奇岩", food: "小卷米粉、鯊魚羹", history: "曾為重要煤礦輸出港，現以海蝕地形聞名。", transport: "瑞芳站轉公車T99、791", heat: 0.8 },
     { name: "鼻頭角步道", wikiTitle: "鼻頭角", lat: 25.12588, lng: 121.92028, tags: ["自然景觀", "休閒"], keywords: ["看海", "稜谷"], highlights: "台版萬里長城", food: "周邊海產", history: "瑞芳東北角的岬角。", transport: "客運 856 / 886", heat: 0.7 },
     { name: "鼻頭角燈塔", wikiTitle: "鼻頭角燈塔", lat: 25.12877, lng: 121.92346, tags: ["地標"], keywords: ["燈塔", "海景"], highlights: "燈塔海景", food: "無", history: "建於1896年，守護北台灣海域。", transport: "步行自鼻頭角步道", heat: 0.8 }
 ];
