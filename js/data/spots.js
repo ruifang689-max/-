@@ -6,7 +6,7 @@
 // =========================================
 // 2. 景點資料庫 (Spots Database)
 // =========================================
-const spots = [
+export const spots = [
     // --- 瑞芳市區 ---
     { name: "瑞芳火車站", wikiTitle: "瑞芳車站", lat: 25.108, lng: 121.805, tags: ["交通", "美食"], keywords: ["車站", "龍鳳腿", "胡椒餅"], highlights: "交通轉運樞紐", food: "龍鳳腿、胡椒餅", history: "平溪線與九份的進出門戶。", transport: "台鐵瑞芳站", heat: 0.6 },
     { name: "瑞芳老街", wikiTitle: "瑞芳老街", lat: 25.10958, lng: 121.80656, tags: ["歷史", "美食"], keywords: ["保雲芋圓", "老街", "古厝"], highlights: "後站古厝群", food: "保雲芋圓", history: "清領時期商店匯集處，早期礦工聚集地。", transport: "瑞芳車站後站步行", heat: 0.5 },
