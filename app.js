@@ -51,9 +51,10 @@ const routesData = {
     'food': { name: "🍜 饕客美食線", desc: "瑞芳美食廣場 ➔ 阿柑姨芋圓 ➔ 礦工便當", coords: [[25.108, 121.805], [25.1099, 121.8452], [25.1091, 121.8576]], color: '#d35400' }
 };
 
+// 🌟 加入了 feedback_title 的多國翻譯
 const translations = {
-    'zh': { splash_title: "瑞芳導覽 App", splash_desc: "精準在地導覽，深度探索山城。", lang: "語言 / Language", enter_map: "進入地圖", form_link: "意見問卷", skip_intro: "啟動時略過開場", tut_step1_title: "功能說明 (1/2)", tut_search: "搜尋與標籤", tut_add: "長按新增", tut_weather: "天氣資訊", tut_compass: "指北針", tut_next: "下一步", tut_step2_title: "進階功能 (2/2)", tut_nav: "多模式導航", tut_tour: "自動導覽", tut_settings: "設定", tut_share: "分享", tut_prev: "前一步", tut_finish: "開始使用", settings: "系統設定", theme: "主題顏色", share_map_title: "推薦給好友", share_map: "分享地圖", close: "關閉", search_ph: "🔍 搜尋或長按新增...", locating: "定位中...", food: "在地飲食", highlights: "推薦亮點", history: "簡介歷史", transport: "交通方式", nav: " 導航", ai: " 智慧推薦", chip_all: "🌟 全部", chip_food: "🍜 美食", chip_history: "🏛️ 歷史", chip_nature: "⛰️ 自然", chip_custom: "📍 標記", contact: "聯絡開發團隊", install_app: "將 App 安裝至桌面", manage_fav: "管理收藏夾" },
-    'en': { splash_title: "Ruifang Guide", splash_desc: "Accurate local guide in Ruifang.", lang: "Language", enter_map: "Enter Map", form_link: "Feedback", skip_intro: "Skip intro on startup", tut_step1_title: "Features (1/2)", tut_search: "Search & Tags", tut_add: "Long Press Add", tut_weather: "Weather", tut_compass: "Compass", tut_next: "Next", tut_step2_title: "Advanced (2/2)", tut_nav: "Navigation", tut_tour: "Guided Tour", tut_settings: "Settings", tut_share: "Share", tut_prev: "Back", tut_finish: "Start", settings: "Settings", theme: "Theme Color", share_map_title: "Recommend", share_map: "Share Map", close: "Close", search_ph: "🔍 Search or long press...", locating: "Locating...", food: "Food", highlights: "Highlights", history: "History", transport: "Transport", nav: " Navigate", ai: " AI Trip", chip_all: "🌟 All", chip_food: "🍜 Food", chip_history: "🏛️ History", chip_nature: "⛰️ Nature", chip_custom: "📍 Custom", contact: "Contact", install_app: "Install App", manage_fav: "Manage Favs" }
+    'zh': { splash_title: "瑞芳導覽 App", splash_desc: "精準在地導覽，深度探索山城。", lang: "語言 / Language", enter_map: "進入地圖", feedback_title: "測評問卷與聯絡 / Feedback", form_link: "填寫意見問卷", skip_intro: "啟動時略過開場", tut_step1_title: "功能說明 (1/2)", tut_search: "搜尋與標籤", tut_add: "長按新增", tut_weather: "天氣資訊", tut_compass: "指北針", tut_next: "下一步", tut_step2_title: "進階功能 (2/2)", tut_nav: "多模式導航", tut_tour: "自動導覽", tut_settings: "設定", tut_share: "分享", tut_prev: "前一步", tut_finish: "開始使用", settings: "系統設定", theme: "主題顏色", share_map_title: "推薦地圖給好友", share_map: "分享地圖", close: "關閉", search_ph: "🔍 搜尋或長按新增...", locating: "定位中...", food: "在地飲食", highlights: "推薦亮點", history: "簡介歷史", transport: "交通方式", nav: " 導航", ai: " 智慧推薦", chip_all: "🌟 全部", chip_food: "🍜 美食", chip_history: "🏛️ 歷史", chip_nature: "⛰️ 自然", chip_custom: "📍 標記", contact: "聯絡開發團隊", install_app: "將 App 安裝至桌面", manage_fav: "管理收藏夾" },
+    'en': { splash_title: "Ruifang Guide", splash_desc: "Accurate local guide in Ruifang.", lang: "Language", enter_map: "Enter Map", feedback_title: "Feedback & Contact", form_link: "Feedback Form", skip_intro: "Skip intro on startup", tut_step1_title: "Features (1/2)", tut_search: "Search & Tags", tut_add: "Long Press Add", tut_weather: "Weather", tut_compass: "Compass", tut_next: "Next", tut_step2_title: "Advanced (2/2)", tut_nav: "Navigation", tut_tour: "Guided Tour", tut_settings: "Settings", tut_share: "Share", tut_prev: "Back", tut_finish: "Start", settings: "Settings", theme: "Theme Color", share_map_title: "Recommend", share_map: "Share Map", close: "Close", search_ph: "🔍 Search or long press...", locating: "Locating...", food: "Food", highlights: "Highlights", history: "History", transport: "Transport", nav: " Navigate", ai: " AI Trip", chip_all: "🌟 All", chip_food: "🍜 Food", chip_history: "🏛️ History", chip_nature: "⛰️ Nature", chip_custom: "📍 Custom", contact: "Contact", install_app: "Install App", manage_fav: "Manage Favs" }
 };
 let currentLang = localStorage.getItem('ruifang_lang') || 'zh';
 function applyLanguage(lang) {
@@ -69,15 +70,7 @@ function applyLanguage(lang) {
 // 3. UI 與教學流程切換
 // =========================================
 function openSettings() { document.getElementById('settings-modal-overlay').style.display = 'flex'; }
-function changeTheme(color) { 
-    if (color === 'custom') { 
-        document.getElementById('custom-color-picker').style.display = 'block'; 
-        document.getElementById('custom-color-picker').click(); 
-    } else { 
-        document.getElementById('custom-color-picker').style.display = 'none'; 
-        applyCustomTheme(color, true); // 🌟 標記為手動儲存
-    } 
-}
+function closeSettings() { document.getElementById('settings-modal-overlay').style.display = 'none'; }
 function toggleSkipIntro(isChecked) { localStorage.setItem('ruifang_skip_intro', isChecked ? 'true' : 'false'); }
 
 function enterMap() { document.getElementById('welcome-screen').style.opacity = '0'; setTimeout(() => { document.getElementById('welcome-screen').style.display = 'none'; document.getElementById('tutorial-overlay').style.display = 'flex'; setTimeout(() => { document.getElementById('tutorial-overlay').style.opacity = '1'; }, 50); }, 400); }
@@ -85,19 +78,22 @@ function nextTutorial() { document.getElementById('tut-step-1').style.display = 
 function prevTutorial() { document.getElementById('tut-step-2').style.display = 'none'; document.getElementById('tut-step-1').style.display = 'block'; }
 function finishTutorial() { document.getElementById('tutorial-overlay').style.opacity = '0'; setTimeout(() => { document.getElementById('tutorial-overlay').style.display = 'none'; localStorage.setItem('ruifang_welcomed', 'true'); if (typeof window.mapInstance !== 'undefined') window.mapInstance.invalidateSize(); }, 400); }
 
-function changeTheme(color) { if (color === 'custom') { document.getElementById('custom-color-picker').style.display = 'block'; document.getElementById('custom-color-picker').click(); } else { document.getElementById('custom-color-picker').style.display = 'none'; applyCustomTheme(color); } }
-function applyCustomTheme(color, save = true) { 
+// 🌟 核心：只有手動更換主題時，才會覆寫開場色(--intro-color)
+function changeTheme(color) { 
+    if (color === 'custom') { document.getElementById('custom-color-picker').style.display = 'block'; document.getElementById('custom-color-picker').click(); } 
+    else { document.getElementById('custom-color-picker').style.display = 'none'; applyCustomTheme(color, true); } 
+}
+function applyCustomTheme(color, userSelected = false) { 
     document.documentElement.style.setProperty('--primary', color); 
     document.documentElement.style.setProperty('--logo-border', color); 
-    
-    if (save) {
-        document.documentElement.style.setProperty('--splash-color', color);
+    if(userSelected) {
+        document.documentElement.style.setProperty('--intro-color', color);
         localStorage.setItem('ruifang_theme', color); 
     }
-
     const themeSelect = document.getElementById('theme-select'); 
     if([...themeSelect.options].some(o => o.value === color)) themeSelect.value = color; else themeSelect.value = 'custom'; 
 }
+
 function shareSpot() { if(!targetSpot) return; const spotUrl = new URL(window.location.href.split('?')[0]); spotUrl.searchParams.set('spot', targetSpot.name); const shareData = { title: `瑞芳導覽地圖 - ${targetSpot.name}`, text: `我在瑞芳發現了「${targetSpot.name}」！\n點擊查看：`, url: spotUrl.toString() }; if (navigator.share) navigator.share(shareData).catch(()=>{}); else navigator.clipboard.writeText(`${shareData.text}\n${shareData.url}`).then(() => alert('✅ 已複製景點連結！')); }
 function shareAppMap() { const shareData = { title: '瑞芳導覽地圖 App', text: '快來看看這個瑞芳專屬的智慧導覽地圖！', url: 'https://ruifang689-max.github.io/-/' }; if (navigator.share) navigator.share(shareData).catch(()=>{}); else navigator.clipboard.writeText(shareData.url).then(() => alert('✅ 網址已複製！')); }
 
@@ -166,7 +162,6 @@ window.mapInstance.on('moveend', function() {
 const cluster = L.markerClusterGroup(); window.mapInstance.addLayer(cluster);
 function calculateWalk(lat, lng) { if(!userPos) return "--"; const mins = Math.round(window.mapInstance.distance(userPos, [lat, lng]) / 80); return mins < 1 ? "1分內" : `約 ${mins} 分`; }
 
-/* 🌟 圖釘分色邏輯：美食(橘) 歷史(紫) 自然(綠) 自訂(紅) */
 const createCustomPin = (tags, name) => { 
     let cls = 'fa-map-marker-alt', col = '#007bff'; 
     if (tags.includes('美食')) { cls = 'fa-utensils'; col = '#e67e22'; } 
@@ -189,7 +184,7 @@ function addMarkerToMap(s) {
     
     m.bindPopup(() => {
         const img = s.wikiImg || getPlaceholderImage(s.name);
-        const foodIcon = s.tags.includes('自訂') ? 'fa-star' : 'fa-utensils'; const foodText = s.tags.includes('自訂') ? '自訂地點' : `特色：${s.food || '--'}`;
+        const foodIcon = s.tags.includes('自訂') ? 'fa-star' : 'fa-utensils'; const foodText = s.tags.includes('自訂') ? '自訂地點' : `美食：${s.food || '--'}`;
         return `<div class="preview-card"><img class="preview-img" src="${img}" onerror="this.src='${getPlaceholderImage(s.name)}'"><div class="preview-info"><div class="preview-header"><span class="preview-title">${s.name}</span><span class="walk-badge"><i class="fas fa-walking"></i> ${calculateWalk(s.lat, s.lng)}</span></div><div class="preview-tag-box">${s.tags.map(t=>`<span class="mini-tag">${t}</span>`).join('')}</div><div class="food-preview"><i class="fas ${foodIcon}"></i> ${foodText}</div></div></div>`;
     }, { closeButton: false, offset: [0, -5] });
 
@@ -416,15 +411,10 @@ window.addEventListener('load', () => {
     
     applyLanguage(currentLang); fetchWeather();
     
-    // 🌟 判斷是否有儲存的主題。有就套用(開場跟著變)；沒有就預設藍色，但開場保留純黑！
+    // 🌟 預設主題改為藍色，但開場保留純黑
     const savedTheme = localStorage.getItem('ruifang_theme'); 
-    if (savedTheme) { 
-        applyCustomTheme(savedTheme, true); 
-    } else { 
-        applyCustomTheme('#007bff', false); // false 代表不覆寫 --splash-color
-    }
+    if (savedTheme) { applyCustomTheme(savedTheme, true); } else { applyCustomTheme('#007bff', false); }
 
-    // ... (以下的略過開場邏輯保持不變)
     const splash = document.getElementById('splash-screen');
     const welcome = document.getElementById('welcome-screen');
     const tutorial = document.getElementById('tutorial-overlay');
