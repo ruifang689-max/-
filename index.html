@@ -34,29 +34,66 @@
 
     <div id="splash-screen">
         <div class="logo-anim">瑞</div>
-        <div class="splash-title-text" data-i18n="splash_title">瑞芳導覽 App</div>
+        <h2 class="splash-title-text">瑞芳導覽</h2>
     </div>
-    
+
     <div id="welcome-screen">
         <div class="welcome-wrapper">
             <div class="logo-static">瑞</div>
             <h1 class="welcome-title" data-i18n="splash_title">瑞芳導覽 App</h1>
-            <p class="welcome-desc" data-i18n="splash_desc">精準在地導覽，深度探索山城。</p>
+            <p class="welcome-desc" data-i18n="splash_desc">致力於提供瑞芳地區最精準的在地導覽，帶領您深度探索山城之美。</p>
+            
             <div class="input-group">
                 <label data-i18n="lang">語言 / Language</label>
-                <select id="lang-select-startup" class="welcome-select" onchange="applyLanguage(this.value)">
-                    <option value="zh">繁體中文</option><option value="en">English</option>
-                    <option value="ja">日本語</option><option value="ko">한국어</option><option value="vi">Tiếng Việt</option>
+                <select id="lang-select-startup" onchange="applyLanguage(this.value)" class="welcome-select">
+                    <option value="zh">繁體中文 (🇹🇼)</option>
+                    <option value="en">English (🇺🇸)</option>
+                    <option value="ja">日本語 (🇯🇵)</option>
+                    <option value="ko">한국어 (🇰🇷)</option>
+                    <option value="vi">Tiếng Việt (🇻🇳)</option>
                 </select>
             </div>
-            <div class="link-box">
-                <a href="#" onclick="openSettings()"><i class="fas fa-cog"></i> <span data-i18n="settings">系統設定</span></a>
-                <a href="https://docs.google.com/forms/d/e/1FAIpQLSdX4uBvH_nN1fVzB-2j8P2_P9L1D-_E-_1T2O5S_g-_c-_6_w/viewform?usp=header" target="_blank"><i class="fas fa-edit"></i> <span data-i18n="feedback_title">測評問卷與聯絡</span></a>
+
+            <div class="input-group">
+                <label data-i18n="feedback_title">測評問卷與聯絡 / Feedback</label>
+                <div class="link-box">
+                    <a href="https://docs.google.com/forms/d/e/1FAIpQLSfi76mygYPT0XeWDkTVjy1F3NjWTW1qveFKTV2bC5TlJ6yybA/viewform?usp=header" target="_blank"><i class="fas fa-clipboard-list"></i> <span data-i18n="form_link">填寫意見問卷</span></a>
+                    <a href="mailto:ruifang689@gmail.com"><i class="fas fa-envelope"></i> <span data-i18n="contact">聯絡開發團隊</span></a>
+                </div>
             </div>
+
             <button class="btn-enter-map" onclick="enterMap()" data-i18n="enter_map">進入地圖</button>
         </div>
     </div>
 
+    <div id="tutorial-overlay">
+        <div class="tutorial-box">
+            <div id="tut-step-1">
+                <h3 data-i18n="tut_step1_title"><i class="fas fa-search"></i> 功能說明 (1/2)</h3>
+                <ul>
+                    <li>🔍 <b data-i18n="tut_search">搜尋與標籤</b>：上方可快速尋找與篩選景點。</li>
+                    <li>📍 <b data-i18n="tut_add">長按新增</b>：地圖長按可新增私房景點。</li>
+                    <li>🧭 <b data-i18n="tut_compass">指北針</b>：右下角綠色按鈕，指引方向。</li>
+                </ul>
+                <div class="tutorial-btns">
+                    <button class="btn-fill" style="width: 100%;" onclick="nextTutorial()" data-i18n="tut_next">下一步</button>
+                </div>
+            </div>
+            <div id="tut-step-2" style="display:none;">
+                <h3 data-i18n="tut_step2_title"><i class="fas fa-tools"></i> 進階功能 (2/2)</h3>
+                <ul>
+                    <li>🚗 <b data-i18n="tut_nav">多模式導航</b>：支援步行與開車路線計算。</li>
+                    <li>🎬 <b data-i18n="tut_tour">自動導覽</b>：點擊右下角播放鍵自動導覽。</li>
+                    <li><span style="color: var(--primary);">●</span> <b data-i18n="tut_share">分享鍵</b>：快速分享景點連結給好友。</li>
+                </ul>
+                <div class="tutorial-btns">
+                    <button class="btn-outline" onclick="prevTutorial()" data-i18n="tut_prev">前一步</button>
+                    <button class="btn-fill" onclick="finishTutorial()" data-i18n="tut_finish">開始使用</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
     <div id="map"></div>
     <div id="gps-val-text">GPS: --</div>
 
@@ -203,31 +240,6 @@
         </div>
     </div>
 
-    <div id="tutorial-overlay">
-        <div class="tutorial-box" id="tut-step-1">
-            <h3 data-i18n="tut_step1_title"><i class="fas fa-book-open"></i> 功能說明 (1/2)</h3>
-            <ul>
-                <li><b><i class="fas fa-search"></i> <span data-i18n="tut_search">搜尋與標籤</span></b>：找景點或切換主題。</li>
-                <li><b><i class="fas fa-hand-pointer"></i> <span data-i18n="tut_add">長按新增</span></b>：長按地圖可新增自訂景點。</li>
-                <li><b><i class="fas fa-cloud-sun"></i> <span data-i18n="tut_weather">天氣資訊</span></b>：右上角即時天氣。</li>
-            </ul>
-            <div class="tutorial-btns">
-                <button class="btn-fill" onclick="nextTutorial()" data-i18n="tut_next">下一步 <i class="fas fa-arrow-right"></i></button>
-            </div>
-        </div>
-        <div class="tutorial-box" id="tut-step-2" style="display: none;">
-            <h3 data-i18n="tut_step2_title"><i class="fas fa-rocket"></i> 進階功能 (2/2)</h3>
-            <ul>
-                <li><b><i class="fas fa-route"></i> <span data-i18n="tut_nav">路線與導航</span></b>：推薦路線及到達計算。</li>
-                <li><b><i class="fas fa-heart"></i> <span data-i18n="tut_settings">收藏與分享</span></b>：珍藏景點與發送連結。</li>
-            </ul>
-            <div class="tutorial-btns">
-                <button class="btn-outline" onclick="prevTutorial()" data-i18n="tut_prev"><i class="fas fa-arrow-left"></i> 前一步</button>
-                <button class="btn-fill" onclick="finishTutorial()" data-i18n="tut_finish"><i class="fas fa-check"></i> 開始使用</button>
-            </div>
-        </div>
-    </div>
-
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
     
@@ -247,4 +259,5 @@
     </script>
 </body>
 </html>
+
 
