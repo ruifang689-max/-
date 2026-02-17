@@ -31,7 +31,7 @@
     <link rel="apple-touch-icon" href="icon/icon-192.png">
     <link rel="icon" type="image/png" href="icon/icon-192.png">
     
-    <link rel="stylesheet" href="style.css?v=401">
+    <link rel="stylesheet" href="style.css?v=402">
 </head>
 <body id="main-body">
 
@@ -276,12 +276,37 @@
             </div>
         </div>
     </div>
+    <div id="edit-modal-overlay" class="modal-overlay">
+        </div>
+
+    <div id="custom-spot-modal" class="modal-overlay">
+        <div class="modal-box">
+            <h3 class="modal-title"><i class="fas fa-map-pin" style="color: var(--primary);"></i> 新增自訂景點</h3>
+            <div id="custom-spot-addr" style="font-size: 13px; color: var(--text-sub); margin-bottom: 5px; padding: 12px; background: var(--divider-color); border-radius: 8px; line-height: 1.6; border: 1px solid var(--border-color);">
+                📍 載入中...
+            </div>
+            
+            <input type="text" id="custom-spot-name" class="modal-input" placeholder="請為此秘境命名 (例：我的秘密基地)">
+            
+            <div class="modal-btns">
+                <button class="modal-cancel" onclick="closeCustomSpotModal()">取消</button>
+                <button class="modal-save" onclick="confirmCustomSpot()">儲存景點</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="ios-instruction-modal" class="modal-overlay" style="z-index: 99999;">
+        </div>
 
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
     
-    <script type="module" src="./js/main.js?v=401"></script>
+    <script src="./js/data/spots.js?v=402"></script>
+    <script src="./js/data/lang.js?v=402"></script>
+    <script src="./js/data/routes.js?v=402"></script>
     
+    <script type="module" src="./js/main.js?v=402"></script>
+
 </body>
 </html>
 
