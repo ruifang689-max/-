@@ -1,9 +1,10 @@
-// js/modules/search.js (v405)
+// js/modules/search.js (v406)
 import { state, saveState } from '../core/store.js';
 import { spots } from '../data/spots.js';
 import { addMarkerToMap } from './markers.js';
 import { showCard, closeCard } from './cards.js';
 
+// 🌟 確保這個函式有被 export，且沒有語法錯誤
 export function triggerSearch(name) { 
     const searchInput = document.getElementById("search"); 
     const clearBtn = document.getElementById("search-clear-btn");
@@ -11,7 +12,8 @@ export function triggerSearch(name) {
     if(searchInput) searchInput.value = name; 
     if(clearBtn) clearBtn.style.display = "block"; 
     
-    window.closeSuggest(); 
+    // 檢查 window.closeSuggest 是否存在，避免報錯
+    if (typeof window.closeSuggest === 'function') window.closeSuggest();
     
     const s = spots.concat(state.savedCustomSpots).find(x => x.name === name); 
     if(s) { 
@@ -27,7 +29,6 @@ export function initSearch() {
     
     window.closeSuggest = () => { if(sugBox) sugBox.style.display = "none"; };
     
-    // 清空搜尋欄與收起推薦
     window.clearSearchInput = () => {
         if(searchInput) { searchInput.value = ""; }
         if(clearBtn) clearBtn.style.display = "none";
@@ -35,13 +36,28 @@ export function initSearch() {
     };
     
     window.renderDefaultSearch = () => { 
-        const c = document.getElementById("suggest-content"); c.innerHTML = ""; 
+        const c = document.getElementById("suggest-content"); 
+        if(!c) return; // 防呆
+        c.innerHTML = ""; 
+        
         if(state.searchHistory.length > 0) { 
             c.innerHTML += `<div class="search-section-title"><span>🕒 歷史搜尋</span> <span class="clear-history-btn" onclick="clearHistory()"><i class="fas fa-trash"></i> 清除</span></div>`; 
-            state.searchHistory.forEach(h => { c.innerHTML += `<div class="list-item" onclick="triggerSearch('${h}')"><span><i class="fas fa-history" style="color:#aaa;"></i> ${h}</span></div>`; }); 
+            state.searchHistory.forEach(h => { 
+                const div = document.createElement("div"); div.className = "list-item"; 
+                div.innerHTML = `<span><i class="fas fa-history" style="color:#aaa;"></i> ${h}</span>`;
+                div.onclick = () => window.triggerSearch(h);
+                c.appendChild(div);
+            }); 
         } 
+        
         c.innerHTML += `<div class="search-section-title">⭐ 推薦景點</div>`; 
-        ["九份老街", "猴硐貓村", "水湳洞陰陽海"].forEach(r => { c.innerHTML += `<div class="list-item" onclick="triggerSearch('${r}')"><span><i class="fas fa-fire" style="color:#e74c3c;"></i> ${r}</span></div>`; }); 
+        ["九份老街", "猴硐貓村", "水湳洞陰陽海"].forEach(r => { 
+            const div = document.createElement("div"); div.className = "list-item";
+            div.innerHTML = `<span><i class="fas fa-fire" style="color:#e74c3c;"></i> ${r}</span>`;
+            div.onclick = () => window.triggerSearch(r);
+            c.appendChild(div);
+        }); 
+        
         if(sugBox) sugBox.style.display = "block"; 
     };
 
