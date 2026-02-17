@@ -30,7 +30,7 @@
     <link rel="apple-touch-icon" href="icon-192.png">
     <link rel="icon" type="image/png" href="icon-192.png">
     
-    <link rel="stylesheet" href="style.css?v=112">
+    <link rel="stylesheet" href="style.css?v=113">
 </head>
 <body id="main-body">
 
@@ -55,6 +55,15 @@
                     <option value="vi">Tiếng Việt (🇻🇳)</option>
                 </select>
             </div>
+
+            <div class="input-group">
+                <label data-i18n="feedback_title">測評問卷與聯絡 / Feedback</label>
+                <div class="link-box">
+                    <a href="https://docs.google.com/forms/d/e/1FAIpQLSfi76mygYPT0XeWDkTVjy1F3NjWTW1qveFKTV2bC5TlJ6yybA/viewform?usp=header" target="_blank"><i class="fas fa-clipboard-list"></i> <span data-i18n="form_link">填寫意見問卷</span></a>
+                    <a href="mailto:ruifang689@gmail.com"><i class="fas fa-envelope"></i> <span data-i18n="contact">聯絡開發團隊</span></a>
+                </div>
+            </div>
+
             <button class="btn-enter-map" onclick="enterMap()" data-i18n="enter_map">進入地圖</button>
         </div>
     </div>
@@ -209,6 +218,8 @@
             </div>
 
             <div class="contact-section">
+                <h3 class="settings-sub" style="width:100%; margin-bottom:10px;" data-i18n="feedback_title">測評問卷與聯絡</h3>
+                <a href="https://docs.google.com/forms/d/e/1FAIpQLSfi76mygYPT0XeWDkTVjy1F3NjWTW1qveFKTV2bC5TlJ6yybA/viewform?usp=header" target="_blank" class="contact-btn"><i class="fas fa-clipboard-list"></i> <span data-i18n="form_link">填寫意見問卷</span></a>
                 <a href="mailto:ruifang689@gmail.com" class="contact-btn"><i class="fas fa-envelope"></i> <span data-i18n="contact">聯絡開發團隊</span></a>
                 <div class="contact-btn" onclick="shareAppMap()"><i class="fas fa-share-alt"></i> <span data-i18n="share_map_title">推薦地圖給好友</span></div>
             </div>
@@ -244,25 +255,9 @@
         </div>
     </div>
 
-    <div id="ios-instruction-modal" class="modal-overlay" style="z-index: 99999;">
-        <div class="modal-box" style="text-align: center;">
-            <h3 style="color: #007aff; margin-bottom: 15px;"><i class="fab fa-apple"></i> 安裝至 iPhone 桌面</h3>
-            <p style="font-size: 15px; color: var(--text-main); line-height: 1.6;">
-                為了獲得最佳的全螢幕導覽體驗，請：<br><br>
-                1. 點擊瀏覽器下方的 <i class="fas fa-share-square" style="color:#007aff; font-size:18px;"></i> <b>分享按鈕</b><br><br>
-                2. 往下滑動並選擇 <i class="fas fa-plus-square" style="color:#007aff; font-size:18px;"></i> <b>「加入主畫面」</b>
-            </p>
-            <div class="modal-btns" style="margin-top: 20px;">
-                <button class="modal-save" style="background:#007aff;" onclick="closeIosInstruction()">我知道了</button>
-            </div>
-        </div>
-    </div>
-
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
-    <script src="./app.js?v=112"></script>
+    <script src="./app.js?v=113"></script>
 
 </body>
 </html>
-
-
