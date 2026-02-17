@@ -1,5 +1,5 @@
 /**
- * db_lang.js - 多國語言翻譯資料庫 (v300)
+ * db_lang.js - 多國語言翻譯資料庫 (v400)
  */
 
 const translations = {
