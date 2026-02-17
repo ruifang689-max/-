@@ -2,13 +2,13 @@
    1. 基礎變數與全局設定
    ========================================= */
 :root { 
-    --primary: #007bff;   /* 系統主色調(藍) */
-    --accent: #e67e22;    /* 強調色(橘) */
-    --danger: #ff4757;    /* 警告/收藏(紅) */
-    --success: #28a745;   /* 成功(綠) */
+    --primary: #007bff;   
+    --accent: #e67e22;    
+    --danger: #ff4757;    
+    --success: #28a745;   
     --card-shadow: 0 4px 20px rgba(0,0,0,0.12); 
     --bg-color: #ffffff;      
-    --text-main: #111111; /* 標題純黑 */
+    --text-main: #111111; 
     --text-sub: #555555;
     --border-color: #e0e0e0;
     --divider-color: #f5f5f5;
@@ -24,7 +24,7 @@ html, body { margin: 0; padding: 0; width: 100vw; height: 100dvh; overflow: hidd
 #map { position: absolute; top: 0; left: 0; right: 0; bottom: 0; z-index: 1; }
 
 /* =========================================
-   2. 開場與歡迎 (強制白底黑字)
+   2. 開場與歡迎 (白底黑字、中細黑框美化)
    ========================================= */
 #splash-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: #ffffff; z-index: 10005; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.5s ease-in-out; pointer-events: none; }
 .logo-anim { width: 100px; height: 100px; border: 4px solid #111111; color: #111111; display: flex; align-items: center; justify-content: center; font-size: 50px; font-weight: bold; border-radius: 20px; animation: scaleUp 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
@@ -35,15 +35,27 @@ html, body { margin: 0; padding: 0; width: 100vw; height: 100dvh; overflow: hidd
 #welcome-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: #ffffff; z-index: 10004; display: flex; flex-direction: column; align-items: center; padding: 15px; overflow-y: auto; transition: opacity 0.4s ease; }
 .welcome-wrapper { width: 100%; max-width: 320px; display: flex; flex-direction: column; align-items: center; padding-top: 5vh; padding-bottom: env(safe-area-inset-bottom, 20px); margin: auto; }
 .logo-static { width: 80px; height: 80px; border: 3px solid #111111; color: #111111; display: flex; align-items: center; justify-content: center; font-size: 40px; font-weight: bold; border-radius: 15px; }
-.welcome-title { color: #111111; margin-top: 15px; margin-bottom: 10px; text-align: center; letter-spacing: 2px; font-size: 20px; font-weight: 800; }
-.welcome-desc { text-align: center; color: #555555; line-height: 1.5; font-size: 13px; margin-bottom: 20px; width: 100%; }
+.welcome-title { color: #111111; margin-top: 15px; margin-bottom: 10px; text-align: center; letter-spacing: 2px; font-size: 22px; font-weight: 900; }
+
+/* 🌟 次標字體放大、微調顏色與行距 */
+.welcome-desc { text-align: center; color: #444444; line-height: 1.6; font-size: 15px; font-weight: 500; margin-bottom: 25px; width: 100%; }
+
 .input-group { width: 100%; margin-bottom: 20px; }
-.input-group label { font-weight: bold; display: block; margin-bottom: 8px; color: #111111; font-size: 13px; text-align: center; }
-.welcome-select { width: 100%; padding: 10px 15px; border: 1px solid #cccccc; border-radius: 8px; font-size: 14px; background: #fafafa; color: #111; outline: none; cursor: pointer; }
-.btn-enter-map { width: 100%; padding: 14px 20px; background: #111111; color: white; border: none; border-radius: 30px; font-size: 16px; font-weight: bold; letter-spacing: 1px; cursor: pointer; transition: transform 0.2s, opacity 0.3s; margin-top: 15px;}
+.input-group label { font-weight: bold; display: block; margin-bottom: 8px; color: #111111; font-size: 14px; text-align: center; }
+
+/* 🌟 語言選擇與問卷：統一白底、純黑文字、中細黑框 (2px) */
+.welcome-select { width: 100%; padding: 12px 15px; border: 2px solid #111111; border-radius: 8px; font-size: 15px; background: #ffffff; color: #111111; outline: none; cursor: pointer; font-weight: bold;}
+.link-box { display: flex; flex-direction: column; gap: 12px; width: 100%; margin-bottom: 10px; }
+.link-box a { display: flex; align-items: center; justify-content: center; padding: 12px; border-radius: 8px; text-decoration: none; color: #111111; font-weight: bold; font-size: 14px; border: 2px solid #111111; background: #ffffff; transition: all 0.2s; }
+.link-box a:active { background: #111111; color: #ffffff; }
+.link-box a:active i { color: #ffffff; }
+.link-box a i { margin-right: 8px; font-size: 16px; color: #111111; transition: color 0.2s; }
+
+/* 🌟 進入地圖：增加上方間距 (margin-top) 讓它獨立出來 */
+.btn-enter-map { width: 100%; padding: 16px 20px; background: #111111; color: white; border: none; border-radius: 30px; font-size: 18px; font-weight: bold; letter-spacing: 1px; cursor: pointer; transition: transform 0.2s, opacity 0.3s; margin-top: 35px;}
 .btn-enter-map:active { transform: scale(0.96); opacity: 0.8; }
 
-/* 教學 Overlay (藍色主題) */
+/* 教學 Overlay */
 #tutorial-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(3px); z-index: 10003; display: none; align-items: center; justify-content: center; padding: 15px; opacity: 0; transition: opacity 0.4s ease; }
 .tutorial-box { background: var(--bg-color); width: 90%; max-width: 340px; border-radius: 18px; padding: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.5); border: 2px solid var(--primary); }
 .tutorial-box h3 { color: var(--primary); margin-top: 0; border-bottom: 1px dashed var(--divider-color); padding-bottom: 8px; margin-bottom: 12px; font-size: 16px; display: flex; align-items: center; gap: 8px;}
@@ -57,7 +69,7 @@ html, body { margin: 0; padding: 0; width: 100vw; height: 100dvh; overflow: hidd
 .btn-fill { background: var(--primary); color: white; }
 
 /* =========================================
-   3. 地圖 UI (天氣、頂部、導航)
+   3. 地圖 UI
    ========================================= */
 #top-ui { position: absolute; top: calc(15px + env(safe-area-inset-top, 0px)); left: 50%; transform: translateX(-50%); z-index: 3000; width: 85%; max-width: 420px; display: flex; flex-direction: column; align-items: center; gap: 8px; pointer-events: none; }
 #search { width: 100%; padding: 12px 20px; border: none; border-radius: 30px; box-shadow: var(--card-shadow); outline: none; background: var(--glass); color: var(--text-main); font-size: 14px; text-align: center; pointer-events: auto; border: 1px solid var(--border-color); }
@@ -68,14 +80,10 @@ html, body { margin: 0; padding: 0; width: 100vw; height: 100dvh; overflow: hidd
 #map-center-panel { background: var(--glass); backdrop-filter: blur(8px); padding: 4px 14px; border-radius: 20px; box-shadow: 0 2px 8px var(--card-shadow); color: var(--primary); font-size: 12px; font-weight: bold; display: flex; justify-content: center; align-items: center; gap: 6px; max-width: 85%; pointer-events: none; border: 1px solid var(--border-color); }
 #addr-text { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: inline-block; transition: opacity 0.3s; }
 
-/* 🌟 天氣方塊：強制白底黑字 */
 #weather-box { position: absolute; top: calc(15px + env(safe-area-inset-top, 0px)); right: calc(15px + env(safe-area-inset-right, 0px)); z-index: 3000; width: 45px; height: 45px; background: #ffffff; border-radius: 12px; box-shadow: var(--card-shadow); border: 1px solid #eee; display: flex; flex-direction: column; justify-content: center; align-items: center; pointer-events: auto; }
 #weather-box i { font-size: 18px; margin-bottom: 2px; } 
 #weather-temp { font-size: 11px; font-weight: bold; color: #111111; }
-/* 天氣 Icon 顏色 */
-.weather-sun { color: #f39c12 !important; } 
-.weather-cloud { color: #bdc3c7 !important; } 
-.weather-rain { color: #7f8c8d !important; }
+.weather-sun { color: #f39c12 !important; } .weather-cloud { color: #bdc3c7 !important; } .weather-rain { color: #7f8c8d !important; }
 
 #route-info-panel { position: absolute; top: calc(125px + env(safe-area-inset-top, 0px)); left: 50%; transform: translateX(-50%); background: var(--glass); backdrop-filter: blur(10px); color: var(--text-main); padding: 8px 18px; border-radius: 30px; box-shadow: var(--card-shadow); display: none; align-items: center; gap: 12px; z-index: 3000; border: 2px solid var(--primary); pointer-events: auto; }
 .route-modes { display: flex; flex-direction: column; gap: 4px; }
@@ -105,7 +113,7 @@ html, body { margin: 0; padding: 0; width: 100vw; height: 100dvh; overflow: hidd
 .rui-icon.stamped { animation: stamp-press 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
 
 /* =========================================
-   4. 圖釘與浮動預覽小卡 (細包覆邊框)
+   4. 圖釘與浮動預覽小卡
    ========================================= */
 .custom-pin-wrap { position: relative; display: flex; flex-direction: column; align-items: center; } 
 .gmap-pin { width: 32px; height: 32px; border-radius: 50% 50% 50% 0; position: absolute; transform: rotate(-45deg); left: 50%; top: -16px; margin-left: -16px; box-shadow: -2px 2px 4px rgba(0,0,0,0.4); border: 2px solid #fff; display: flex; align-items: center; justify-content: center; } 
@@ -113,58 +121,41 @@ html, body { margin: 0; padding: 0; width: 100vw; height: 100dvh; overflow: hidd
 .pin-label { position: absolute; top: 18px; background: var(--bg-color); border: 1px solid var(--border-color); color: var(--text-main); font-size: 10px; font-weight: bold; padding: 1px 4px; border-radius: 4px; white-space: nowrap; pointer-events: none; box-shadow: 0 1px 2px var(--card-shadow); }
 .leaflet-popup { pointer-events: none !important; }
 
-/* 🌟 預覽小卡藍色細邊框 */
 .leaflet-popup-content-wrapper { border-radius: 12px; background: var(--glass); padding: 0; overflow: hidden; border: 1px solid var(--primary); box-shadow: var(--card-shadow); } 
 .leaflet-popup-content { margin: 0; width: 240px !important; color: var(--text-main); } 
 .preview-card { width: 100%; display: flex; flex-direction: column;} 
 .preview-img { width: 100%; height: 110px; object-fit: cover; background: var(--divider-color); border-bottom: 1px solid var(--border-color);} 
 .preview-info { padding: 10px; } 
 .preview-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; } 
-/* 景點名稱純黑 */
 .preview-title { font-weight: 800; font-size: 15px; color: #111111; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 140px;} 
 .preview-tag-box { display: flex; flex-wrap: wrap; gap: 4px;}
-/* 🌟 標籤與步行時間：淡藍毛玻璃底 + 藍字 */
 .mini-tag, .walk-badge { display: inline-flex; align-items: center; font-size: 10px; padding: 3px 6px; border-radius: 6px; background: rgba(0, 123, 255, 0.1); color: var(--primary); border: 1px solid rgba(0, 123, 255, 0.2); font-weight: bold; white-space: nowrap; } 
-/* 特色橘色 */
 .food-preview { font-size: 12px; color: var(--accent); font-weight: bold; border-top: 1px dashed var(--border-color); padding-top: 8px; margin-top: 8px; display: flex; align-items: center; gap: 5px;}
 
 /* =========================================
-   5. 資訊大卡 (細包覆邊框、圓角豎線)
+   5. 資訊大卡
    ========================================= */
-#card { 
-    position: absolute; bottom: 0; left: 0; width: 100%; transform: translateY(110%); max-height: 80vh; 
-    background: var(--bg-color); color: var(--text-main); 
-    transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1); z-index: 4000; 
-    padding: 20px; padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px)); box-sizing: border-box; 
-    border-radius: 20px 20px 0 0; box-shadow: 0 -8px 25px rgba(0,0,0,0.15); overflow-y: auto; will-change: transform; 
-    /* 🌟 藍色細包覆邊框 */
-    border: 1px solid var(--primary);
-    border-bottom: none;
-}
+#card { position: absolute; bottom: 0; left: 0; width: 100%; transform: translateY(110%); max-height: 80vh; background: var(--bg-color); color: var(--text-main); transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1); z-index: 4000; padding: 20px; padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px)); box-sizing: border-box; border-radius: 20px 20px 0 0; box-shadow: 0 -8px 25px rgba(0,0,0,0.15); overflow-y: auto; will-change: transform; border: 1px solid var(--primary); border-bottom: none; }
 #card.open { transform: translateY(0); } 
 .close-bar { width: 40px; height: 5px; background: #ccc; border-radius: 10px; margin: -5px auto 15px; cursor: pointer; }
 .card-header-row { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; position: relative; }
-/* 標題純黑 */
 #title { margin: 0; font-size: 24px; line-height: 1.2; padding-right: 60px; color: #111111; font-weight: 900;}
 .card-header-icons { position: absolute; right: 0; top: 0; display: flex; gap: 12px; align-items: center; margin-top: 4px; }
 .card-header-icons i { font-size: 20px; cursor: pointer; color: var(--text-sub); transition: all 0.2s; padding: 5px;}
 .card-header-icons i:active { transform: scale(0.8); }
-/* 分享鍵藍色 */
 #card-share-icon { color: var(--primary) !important; } 
 #card-fav-icon.active { color: var(--danger) !important; transform: scale(1.2); }
 
 #card-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 15px; }
-/* 大卡標籤同步淡藍色 */
 .info-tag { padding: 4px 8px; background: rgba(0, 123, 255, 0.1); border: 1px solid rgba(0, 123, 255, 0.2); border-radius: 6px; font-size: 12px; font-weight: bold; color: var(--primary); }
 
 #img { width: 100%; height: 180px; object-fit: cover; border-radius: 12px; margin-bottom: 15px; background: var(--divider-color); display: block; border: 1px solid var(--border-color);}
 
-.info-section { margin-bottom: 15px; } 
-/* 🌟 次標頭豎線變細＋圓角 */
+.info-section { margin-bottom: 12px; } 
 .info-label { font-weight: bold; color: var(--primary); display: flex; align-items: center; gap: 6px; margin-bottom: 4px; font-size: 14px; border-left: 3px solid var(--primary); border-radius: 2px; padding-left: 8px; } 
 .info-text { color: var(--text-sub); font-size: 13px; line-height: 1.6; display: block; padding-left: 18px; }
 
-.btn-group { display: flex; gap: 10px; margin-top: 20px; } .btn-group button { flex: 1; padding: 14px; border: none; border-radius: 10px; background: var(--primary); color: white; cursor: pointer; font-weight: bold; font-size: 15px; display: flex; align-items: center; justify-content: center; gap: 6px; transition: transform 0.1s;} .btn-group button:active{ transform: scale(0.96); } .btn-group button.secondary { background: #555; } .btn-group button.danger { background: var(--danger); } 
+.btn-group { display: flex; gap: 10px; margin-top: 20px; } .btn-group button { flex: 1; padding: 14px; border: none; border-radius: 12px; background: var(--primary); color: white; cursor: pointer; font-weight: bold; font-size: 15px; display: flex; align-items: center; justify-content: center; gap: 6px; transition: transform 0.1s;} .btn-group button:active{ transform: scale(0.96); } .btn-group button.secondary { background: #555; } .btn-group button.danger { background: var(--danger); } 
 
 /* =========================================
    6. 模態視窗 (設定、路線、收藏)
@@ -172,11 +163,9 @@ html, body { margin: 0; padding: 0; width: 100vw; height: 100dvh; overflow: hidd
 .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh; background: rgba(0,0,0,0.6); backdrop-filter: blur(3px); z-index: 6000; display: none; align-items: center; justify-content: center; padding: 15px;}
 .modal-box { background: var(--bg-color); width: 100%; max-width: 380px; max-height: 85vh; overflow-y: auto; border-radius: 18px; padding: 25px; display: flex; flex-direction: column; gap: 12px; color: var(--text-main); border: 1px solid var(--border-color); box-shadow: var(--card-shadow);}
 
-/* 🌟 設定介面標題：大標藍置中、次標橘置左 */
 .settings-title { color: var(--primary); text-align: center; margin: 0 0 10px 0; font-size: 20px; font-weight: 800;}
 .settings-sub { color: var(--accent); text-align: left; margin: 10px 0 0 0; font-size: 14px;}
 
-/* 模態視窗一般標題純黑，僅 Icon 上色 */
 .modal-title { color: #111111; margin: 0 0 10px 0; font-size: 18px; display: flex; align-items: center; gap: 8px;}
 .modal-title.route i { color: #8e44ad; }
 .modal-title.fav i { color: var(--danger); }
@@ -188,7 +177,6 @@ html, body { margin: 0; padding: 0; width: 100vw; height: 100dvh; overflow: hidd
 .modal-btns { display: flex; gap: 10px; margin-top: 15px; } .modal-btns button { flex: 1; padding: 14px; border: none; border-radius: 10px; font-weight: bold; font-size: 15px; cursor: pointer; color: white; transition: transform 0.1s;} .modal-save { background: var(--primary); } .modal-cancel { background: #888; }
 .install-pwa-btn { width: 100%; padding: 14px; background: linear-gradient(135deg, #28a745, #20c997); color: white; border: none; border-radius: 10px; font-size: 15px; font-weight: bold; cursor: pointer; transition: transform 0.2s; display: flex; justify-content: center; align-items: center; gap: 8px;}
 
-/* 🌟 設定介面底部按鈕框設計 */
 .contact-section { margin-top: 15px; border-top: 1px dashed var(--divider-color); padding-top: 20px; display: flex; flex-direction: column; gap: 15px; align-items: center;}
 .contact-btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 12px 25px; border: 1px solid #aaa; border-radius: 12px; color: #666; font-size: 15px; font-weight: bold; text-decoration: none; width: 100%; max-width: 280px; background: transparent; transition: all 0.2s; cursor: pointer;}
 .contact-btn:active { background: #eee; border-color: #888; }
