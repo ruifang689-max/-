@@ -3,7 +3,7 @@
    ========================================= */
 :root { 
     --primary: #007bff;   
-    --splash-color: #111111;  /* 🌟 新增：開場專用變數，預設純黑 */
+    --intro-color: #111111; /* 🌟 確保開場預設絕對為純黑 */
     --accent: #e67e22;    
     --danger: #ff4757;    
     --success: #28a745;   
@@ -25,34 +25,30 @@ html, body { margin: 0; padding: 0; width: 100vw; height: 100dvh; overflow: hidd
 #map { position: absolute; top: 0; left: 0; right: 0; bottom: 0; z-index: 1; }
 
 /* =========================================
-   2. 開場與歡迎 (預設白底黑字，連動主題)
+   2. 🌟 開場與歡迎 (強制綁定 intro-color，確保預設黑白)
    ========================================= */
 #splash-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: #ffffff; z-index: 10005; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.5s ease-in-out; pointer-events: none; }
-/* 🌟 綁定 splash-color */
-.logo-anim { width: 100px; height: 100px; border: 4px solid var(--splash-color); color: var(--splash-color); display: flex; align-items: center; justify-content: center; font-size: 50px; font-weight: bold; border-radius: 20px; animation: scaleUp 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
-.splash-title-text { color: var(--splash-color); margin-top: 20px; letter-spacing: 4px; font-size: 20px; opacity: 0; animation: fadeInText 0.8s ease-out 0.3s forwards; }
+.logo-anim { width: 100px; height: 100px; border: 4px solid var(--intro-color); color: var(--intro-color); display: flex; align-items: center; justify-content: center; font-size: 50px; font-weight: bold; border-radius: 20px; animation: scaleUp 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+.splash-title-text { color: var(--intro-color); margin-top: 20px; letter-spacing: 4px; font-size: 20px; opacity: 0; animation: fadeInText 0.8s ease-out 0.3s forwards; }
 @keyframes scaleUp { 0% { transform: scale(0.5); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
 @keyframes fadeInText { 0% { transform: translateY(10px); opacity: 0; } 100% { transform: translateY(0); opacity: 1; } }
 
 #welcome-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: #ffffff; z-index: 10004; display: flex; flex-direction: column; align-items: center; padding: 15px; overflow-y: auto; transition: opacity 0.4s ease; }
 .welcome-wrapper { width: 100%; max-width: 320px; display: flex; flex-direction: column; align-items: center; padding-top: 5vh; padding-bottom: env(safe-area-inset-bottom, 20px); margin: auto; }
-.logo-static { width: 80px; height: 80px; border: 3px solid var(--splash-color); color: var(--splash-color); display: flex; align-items: center; justify-content: center; font-size: 40px; font-weight: bold; border-radius: 15px; }
-.welcome-title { color: var(--splash-color); margin-top: 15px; margin-bottom: 10px; text-align: center; letter-spacing: 2px; font-size: 22px; font-weight: 900; }
-
+.logo-static { width: 80px; height: 80px; border: 3px solid var(--intro-color); color: var(--intro-color); display: flex; align-items: center; justify-content: center; font-size: 40px; font-weight: bold; border-radius: 15px; }
+.welcome-title { color: var(--intro-color); margin-top: 15px; margin-bottom: 10px; text-align: center; letter-spacing: 2px; font-size: 22px; font-weight: 900; }
 .welcome-desc { text-align: center; color: #444444; line-height: 1.6; font-size: 15px; font-weight: 500; margin-bottom: 25px; width: 100%; }
 
 .input-group { width: 100%; margin-bottom: 20px; }
-.input-group label { font-weight: bold; display: block; margin-bottom: 8px; color: var(--splash-color); font-size: 14px; text-align: center; }
-
-/* 🌟 選單與按鈕框綁定 splash-color */
-.welcome-select { width: 100%; padding: 12px 15px; border: 2px solid var(--splash-color); border-radius: 8px; font-size: 15px; background: #ffffff; color: var(--splash-color); outline: none; cursor: pointer; font-weight: bold;}
+.input-group label { font-weight: bold; display: block; margin-bottom: 8px; color: var(--intro-color); font-size: 14px; text-align: center; }
+.welcome-select { width: 100%; padding: 12px 15px; border: 2px solid var(--intro-color); border-radius: 8px; font-size: 15px; background: #ffffff; color: var(--intro-color); outline: none; cursor: pointer; font-weight: bold;}
 .link-box { display: flex; flex-direction: column; gap: 12px; width: 100%; margin-bottom: 10px; }
-.link-box a { display: flex; align-items: center; justify-content: center; padding: 12px; border-radius: 8px; text-decoration: none; color: var(--splash-color); font-weight: bold; font-size: 14px; border: 2px solid var(--splash-color); background: #ffffff; transition: all 0.2s; }
-.link-box a:active { background: var(--splash-color); color: #ffffff; }
+.link-box a { display: flex; align-items: center; justify-content: center; padding: 12px; border-radius: 8px; text-decoration: none; color: var(--intro-color); font-weight: bold; font-size: 14px; border: 2px solid var(--intro-color); background: #ffffff; transition: all 0.2s; }
+.link-box a:active { background: var(--intro-color); color: #ffffff; }
 .link-box a:active i { color: #ffffff; }
-.link-box a i { margin-right: 8px; font-size: 16px; color: var(--splash-color); transition: color 0.2s; }
+.link-box a i { margin-right: 8px; font-size: 16px; color: var(--intro-color); transition: color 0.2s; }
 
-.btn-enter-map { width: 100%; padding: 16px 20px; background: var(--splash-color); color: white; border: none; border-radius: 30px; font-size: 18px; font-weight: bold; letter-spacing: 1px; cursor: pointer; transition: transform 0.2s, opacity 0.3s; margin-top: 35px;}
+.btn-enter-map { width: 100%; padding: 16px 20px; background: var(--intro-color); color: #ffffff; border: none; border-radius: 30px; font-size: 18px; font-weight: bold; letter-spacing: 1px; cursor: pointer; transition: transform 0.2s, opacity 0.3s; margin-top: 35px;}
 .btn-enter-map:active { transform: scale(0.96); opacity: 0.8; }
 
 /* 教學 Overlay */
@@ -69,7 +65,7 @@ html, body { margin: 0; padding: 0; width: 100vw; height: 100dvh; overflow: hidd
 .btn-fill { background: var(--primary); color: white; }
 
 /* =========================================
-   3. 地圖 UI (天氣、頂部、導航)
+   3. 地圖 UI
    ========================================= */
 #top-ui { position: absolute; top: calc(15px + env(safe-area-inset-top, 0px)); left: 50%; transform: translateX(-50%); z-index: 3000; width: 85%; max-width: 420px; display: flex; flex-direction: column; align-items: center; gap: 8px; pointer-events: none; }
 #search { width: 100%; padding: 12px 20px; border: none; border-radius: 30px; box-shadow: var(--card-shadow); outline: none; background: var(--glass); color: var(--text-main); font-size: 14px; text-align: center; pointer-events: auto; border: 1px solid var(--border-color); }
