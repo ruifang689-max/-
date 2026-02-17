@@ -221,28 +221,27 @@ export function initUI() {
         window.closeCustomSpotModal();
     };
 
+    // (僅替換 ui.js 裡面的這段長按邏輯)
     state.mapInstance.on('contextmenu', function(e) {
         const lat = e.latlng.lat; const lng = e.latlng.lng;
-        
         const tempPopup = L.popup({ closeButton: false, autoClose: false, offset: [0, -10] })
             .setLatLng(e.latlng)
             .setContent("<div style='padding:8px; font-weight:bold; color:var(--primary); font-size:14px;'><i class='fas fa-spinner fa-spin'></i> 獲取詳細地址中...</div>")
             .openOn(state.mapInstance);
 
-        // 🌟 加入 email 參數
-        const apiUrl = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1&accept-language=zh-TW&email=ruifang689@gmail.com`;
+        const primaryUrl = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1&accept-language=zh-TW&email=ruifang689@gmail.com`;
+        const fallbackUrl = `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=zh-tw`;
 
-        fetch(apiUrl)
-        .then(res => res.json())
+        // 嘗試主 API
+        fetch(primaryUrl)
+        .then(res => { if(!res.ok) throw new Error(); return res.json(); })
         .then(data => {
             let addr = "未知詳細地址"; 
             if(data && data.address) { 
                 const a = data.address; 
                 addr = (a.city || a.county || "") + (a.town || a.suburb || a.district || "") + (a.village || "") + (a.road || "") + (a.house_number ? a.house_number + "號" : ""); 
             }
-            
             state.mapInstance.closePopup(tempPopup); 
-            
             setTimeout(() => { 
                 state.tempCustomSpot = { lat, lng, addr };
                 document.getElementById('custom-spot-addr').innerHTML = `<i class="fas fa-map-marker-alt"></i> ${addr}`;
@@ -251,13 +250,18 @@ export function initUI() {
             }, 150);
         })
         .catch(() => { 
-            state.mapInstance.closePopup(tempPopup); 
-            setTimeout(() => { 
-                state.tempCustomSpot = { lat, lng, addr: "無法連線獲取地址" };
-                document.getElementById('custom-spot-addr').innerHTML = `<i class="fas fa-exclamation-triangle"></i> 無法連線獲取地址`;
-                document.getElementById('custom-spot-name').value = ""; 
-                document.getElementById('custom-spot-modal').style.display = 'flex';
-            }, 150);
+            // 🌟 啟動備用 API
+            fetch(fallbackUrl).then(res => res.json()).then(data => {
+                let addr = "瑞芳秘境";
+                if(data) { addr = (data.principalSubdivision || "") + (data.city || "") + (data.locality || ""); }
+                state.mapInstance.closePopup(tempPopup); 
+                setTimeout(() => { 
+                    state.tempCustomSpot = { lat, lng, addr };
+                    document.getElementById('custom-spot-addr').innerHTML = `<i class="fas fa-map-marker-alt"></i> ${addr}`;
+                    document.getElementById('custom-spot-name').value = ""; 
+                    document.getElementById('custom-spot-modal').style.display = 'flex';
+                }, 150);
+            }).catch(() => state.mapInstance.closePopup(tempPopup));
         });
     });
 
