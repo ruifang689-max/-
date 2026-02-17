@@ -62,7 +62,12 @@ html, body { margin: 0; padding: 0; width: 100vw; height: 100dvh; overflow: hidd
 
 /* 地圖 UI */
 #top-ui { position: absolute; top: calc(15px + env(safe-area-inset-top, 0px)); left: 50%; transform: translateX(-50%); z-index: 3000; width: 85%; max-width: 420px; display: flex; flex-direction: column; align-items: center; gap: 8px; pointer-events: none; }
-#search { width: 100%; padding: 12px 20px; border: none; border-radius: 30px; box-shadow: var(--card-shadow); outline: none; background: var(--glass); color: var(--text-main); font-size: 14px; text-align: center; pointer-events: auto; border: 1px solid var(--border-color); }
+/* 🌟 新增：搜尋容器與清除按鈕 */
+#search-container { position: relative; width: 100%; pointer-events: auto; }
+#search { width: 100%; padding: 12px 38px 12px 20px; border: none; border-radius: 30px; box-shadow: var(--card-shadow); outline: none; background: var(--glass); color: var(--text-main); font-size: 14px; text-align: center; border: 1px solid var(--border-color); }
+#search-clear-btn { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: #aaa; cursor: pointer; font-size: 18px; display: none; transition: color 0.2s, transform 0.1s; padding: 5px; }
+#search-clear-btn:active { color: var(--danger); transform: translateY(-50%) scale(0.9); }
+
 #category-chips { display: flex; gap: 6px; overflow-x: auto; width: 100%; padding: 2px 5px; scrollbar-width: none; -ms-overflow-style: none; pointer-events: auto; }
 #category-chips::-webkit-scrollbar { display: none; }
 .chip { background: var(--glass); border: 1px solid var(--border-color); padding: 8px 16px; border-radius: 20px; font-size: 12px; font-weight: bold; color: var(--text-main); white-space: nowrap; cursor: pointer; box-shadow: 0 2px 5px var(--card-shadow); transition: all 0.2s; user-select: none; }
