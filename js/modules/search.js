@@ -1,4 +1,4 @@
-// js/modules/search.js
+// js/modules/search.js (v405)
 import { state, saveState } from '../core/store.js';
 import { spots } from '../data/spots.js';
 import { addMarkerToMap } from './markers.js';
@@ -9,7 +9,7 @@ export function triggerSearch(name) {
     const clearBtn = document.getElementById("search-clear-btn");
     
     if(searchInput) searchInput.value = name; 
-    if(clearBtn) clearBtn.style.display = "block"; // 有字就顯示清空鈕
+    if(clearBtn) clearBtn.style.display = "block"; 
     
     window.closeSuggest(); 
     
@@ -27,7 +27,7 @@ export function initSearch() {
     
     window.closeSuggest = () => { if(sugBox) sugBox.style.display = "none"; };
     
-    // 🌟 新增：清空搜尋欄與收起推薦
+    // 清空搜尋欄與收起推薦
     window.clearSearchInput = () => {
         if(searchInput) { searchInput.value = ""; }
         if(clearBtn) clearBtn.style.display = "none";
@@ -48,45 +48,44 @@ export function initSearch() {
     window.clearHistory = () => { state.searchHistory = []; saveState.history(); window.renderDefaultSearch(); };
     window.triggerSearch = triggerSearch;
 
-    // 點擊搜尋框
-    searchInput.addEventListener('focus', () => { 
-        if(!searchInput.value.trim()) {
-            window.renderDefaultSearch(); 
-        } else if (sugBox && sugBox.style.display === "none") {
-            searchInput.dispatchEvent(new Event('input')); // 再次觸發過濾
-        }
-    });
+    if(searchInput) {
+        searchInput.addEventListener('focus', () => { 
+            if(!searchInput.value.trim()) {
+                window.renderDefaultSearch(); 
+            } else if (sugBox && sugBox.style.display === "none") {
+                searchInput.dispatchEvent(new Event('input')); 
+            }
+        });
 
-    // 監聽輸入字元，動態顯示/隱藏Ｘ按鈕
-    searchInput.addEventListener('input', function() { 
-        const k = this.value.trim(); 
-        if(clearBtn) clearBtn.style.display = k ? "block" : "none"; // 🌟 有字才顯示
-        
-        const c = document.getElementById("suggest-content"); 
-        if(!k) { window.renderDefaultSearch(); return; } 
-        
-        c.innerHTML = ""; 
-        const matches = spots.concat(state.savedCustomSpots).filter(s => s.name.includes(k) || s.tags.some(t => t.includes(k)) || (s.keywords && s.keywords.some(kw => kw.includes(k)))); 
-        
-        if(matches.length > 0) { 
-            if(sugBox) sugBox.style.display = "block"; 
-            matches.forEach(s => { 
-                const div = document.createElement("div"); div.className = "list-item"; 
-                div.innerHTML = `<span><i class="fas fa-map-marker-alt" style="color:var(--primary)"></i> ${s.name}</span>`; 
-                div.onclick = () => { 
-                    state.searchHistory = state.searchHistory.filter(h => h !== s.name); state.searchHistory.unshift(s.name); if(state.searchHistory.length > 5) state.searchHistory.pop(); saveState.history();
-                    triggerSearch(s.name); 
-                }; c.appendChild(div); 
-            }); 
-        } else { 
-            if(sugBox) sugBox.style.display = "none"; 
-        } 
-    });
+        searchInput.addEventListener('input', function() { 
+            const k = this.value.trim(); 
+            if(clearBtn) clearBtn.style.display = k ? "block" : "none"; 
+            
+            const c = document.getElementById("suggest-content"); 
+            if(!k) { window.renderDefaultSearch(); return; } 
+            
+            c.innerHTML = ""; 
+            const matches = spots.concat(state.savedCustomSpots).filter(s => s.name.includes(k) || s.tags.some(t => t.includes(k)) || (s.keywords && s.keywords.some(kw => kw.includes(k)))); 
+            
+            if(matches.length > 0) { 
+                if(sugBox) sugBox.style.display = "block"; 
+                matches.forEach(s => { 
+                    const div = document.createElement("div"); div.className = "list-item"; 
+                    div.innerHTML = `<span><i class="fas fa-map-marker-alt" style="color:var(--primary)"></i> ${s.name}</span>`; 
+                    div.onclick = () => { 
+                        state.searchHistory = state.searchHistory.filter(h => h !== s.name); state.searchHistory.unshift(s.name); if(state.searchHistory.length > 5) state.searchHistory.pop(); saveState.history();
+                        triggerSearch(s.name); 
+                    }; c.appendChild(div); 
+                }); 
+            } else { 
+                if(sugBox) sugBox.style.display = "none"; 
+            } 
+        });
+    }
 
-    // 🌟 新增：點擊地圖他處時，自動關閉搜尋推薦
+    // 點擊地圖他處時，自動關閉搜尋推薦
     document.addEventListener('click', (e) => {
         const topUi = document.getElementById('top-ui');
-        // 如果點擊的地方不在頂部 UI 內，而且推薦框是打開的，就把它關掉
         if (topUi && !topUi.contains(e.target) && sugBox && sugBox.style.display === 'block') {
             window.closeSuggest();
         }
