@@ -1,4 +1,4 @@
-// js/modules/announcer.js (v409)
+// js/modules/announcer.js (v410)
 import { state } from '../core/store.js';
 
 const ruifangMap = {
@@ -15,8 +15,6 @@ const ruifangMap = {
 
 export function initAnnouncer() {
     let geocodeTimer = null;
-    
-    // 🌟 關鍵修正：改用 dragstart 和 dragend，避開 flyTo 動畫的頻繁觸發
     state.mapInstance.on('dragstart', () => { document.getElementById("addr-text").style.opacity = '0.5'; });
     
     state.mapInstance.on('dragend', function() {
@@ -26,9 +24,13 @@ export function initAnnouncer() {
         
         geocodeTimer = setTimeout(() => {
             const center = state.mapInstance.getCenter();
-            const apiUrl = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${center.lat}&lon=${center.lng}&zoom=18&addressdetails=1&accept-language=zh-TW&email=ruifang689@gmail.com`;
+            const lat = center.lat; const lng = center.lng;
             
-            fetch(apiUrl)
+            const primaryUrl = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1&accept-language=zh-TW&email=ruifang689@gmail.com`;
+            const fallbackUrl = `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=zh-tw`;
+
+            // 1. 先嘗試主 API
+            fetch(primaryUrl)
             .then(res => { if(!res.ok) throw new Error(); return res.json(); })
             .then(data => { 
                 let areaStr = "探索瑞芳中...";
@@ -41,14 +43,28 @@ export function initAnnouncer() {
                     let baseStr = city + dist + village;
                     if (!baseStr) baseStr = a.road || "";
                     
-                    if (dist === "瑞芳區" && village && ruifangMap[village]) {
-                        areaStr = `${baseStr} (${ruifangMap[village]})`;
-                    } else if (baseStr) {
-                        areaStr = baseStr;
-                    }
+                    if (dist === "瑞芳區" && village && ruifangMap[village]) areaStr = `${baseStr} (${ruifangMap[village]})`;
+                    else if (baseStr) areaStr = baseStr;
                 } 
                 document.getElementById("addr-text").innerText = areaStr; 
-            }).catch(()=>{ document.getElementById("addr-text").innerText = "探索瑞芳中..."; }); 
-        }, 1000); // 因為 dragend 頻率低，延遲縮短為 1 秒即可
+            })
+            .catch(() => { 
+                // 🌟 2. 主 API 被封鎖時，無縫啟動備用 API
+                fetch(fallbackUrl)
+                .then(res => res.json())
+                .then(data => {
+                    let areaStr = "探索瑞芳中...";
+                    if(data) {
+                        const city = data.principalSubdivision || "";
+                        const dist = data.city || "";
+                        const village = data.locality || "";
+                        let baseStr = city + dist + village;
+                        if (dist === "瑞芳區" && village && ruifangMap[village]) areaStr = `${baseStr} (${ruifangMap[village]})`;
+                        else if (baseStr) areaStr = baseStr;
+                    }
+                    document.getElementById("addr-text").innerText = areaStr; 
+                }).catch(() => document.getElementById("addr-text").innerText = "探索瑞芳中...");
+            }); 
+        }, 1000); 
     });
 }
