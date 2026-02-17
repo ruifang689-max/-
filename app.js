@@ -246,11 +246,26 @@ function toggleGuidedTour() {
 }
 
 // =========================================
-// 7. 搜尋歷史與推薦
+// 7. 搜尋歷史、推薦與收藏夾管理
 // =========================================
+// 🌟 關鍵修復：補上遺漏的 DOM 元素定義
+const searchInput = document.getElementById("search"); 
+const sugBox = document.getElementById("suggest");
+
+searchInput.addEventListener('focus', () => { if(!searchInput.value.trim()) renderDefaultSearch(); });
+
 function closeSuggest() { document.getElementById("suggest").style.display = "none"; }
+
+function saveSearchHistory(name) { 
+    searchHistory = searchHistory.filter(h => h !== name); 
+    searchHistory.unshift(name); 
+    if(searchHistory.length > 5) searchHistory.pop(); 
+    localStorage.setItem('ruifang_search_history', JSON.stringify(searchHistory)); 
+}
+
 function renderDefaultSearch() { 
-    const c = document.getElementById("suggest-content"); c.innerHTML = ""; 
+    const c = document.getElementById("suggest-content"); 
+    c.innerHTML = ""; 
     if(searchHistory.length > 0) { 
         c.innerHTML += `<div class="search-section-title"><span>🕒 歷史搜尋</span> <span class="clear-history-btn" onclick="clearHistory()">清除</span></div>`; 
         searchHistory.forEach(h => { c.innerHTML += `<div class="list-item" onclick="triggerSearch('${h}')"><span><i class="fas fa-history" style="color:#aaa;"></i> ${h}</span></div>`; }); 
@@ -259,33 +274,73 @@ function renderDefaultSearch() {
     ["九份老街", "猴硐貓村", "水湳洞陰陽海"].forEach(r => { c.innerHTML += `<div class="list-item" onclick="triggerSearch('${r}')"><span><i class="fas fa-fire" style="color:#e74c3c;"></i> ${r}</span></div>`; }); 
     document.getElementById("suggest").style.display = "block"; 
 }
-function clearHistory() { searchHistory = []; localStorage.setItem('ruifang_search_history', JSON.stringify([])); renderDefaultSearch(); }
-// (其餘搜尋觸發邏輯維持不變，綁定 suggest-content)
-searchInput.oninput = function() { const k = this.value.trim(); const c = document.getElementById("suggest-content"); if(!k) { renderDefaultSearch(); return; } c.innerHTML = ""; const matches = spots.concat(savedCustomSpots).filter(s => s.name.includes(k) || s.tags.some(t => t.includes(k)) || (s.keywords && s.keywords.some(kw => kw.includes(k)))); if(matches.length > 0) { document.getElementById("suggest").style.display = "block"; matches.forEach(s => { const div = document.createElement("div"); div.className = "list-item"; div.innerHTML = `<span><i class="fas fa-map-marker-alt" style="color:var(--primary)"></i> ${s.name}</span>`; div.onclick = () => { saveSearchHistory(s.name); triggerSearch(s.name); }; c.appendChild(div); }); } else { document.getElementById("suggest").style.display = "none"; } };
+
+function clearHistory() { 
+    searchHistory = []; 
+    localStorage.setItem('ruifang_search_history', JSON.stringify([])); 
+    renderDefaultSearch(); 
+}
+
+function triggerSearch(name) { 
+    searchInput.value = name; 
+    document.getElementById("suggest").style.display = "none"; 
+    const s = spots.concat(savedCustomSpots).find(x => x.name === name); 
+    if(s) { window.mapInstance.flyTo([s.lat, s.lng], 16); setTimeout(() => showCard(s), 800); } 
+}
+
+searchInput.oninput = function() { 
+    const k = this.value.trim(); 
+    const c = document.getElementById("suggest-content"); 
+    if(!k) { renderDefaultSearch(); return; } 
+    c.innerHTML = ""; 
+    const matches = spots.concat(savedCustomSpots).filter(s => s.name.includes(k) || s.tags.some(t => t.includes(k)) || (s.keywords && s.keywords.some(kw => kw.includes(k)))); 
+    if(matches.length > 0) { 
+        document.getElementById("suggest").style.display = "block"; 
+        matches.forEach(s => { 
+            const div = document.createElement("div"); 
+            div.className = "list-item"; 
+            div.innerHTML = `<span><i class="fas fa-map-marker-alt" style="color:var(--primary)"></i> ${s.name}</span>`; 
+            div.onclick = () => { saveSearchHistory(s.name); triggerSearch(s.name); }; 
+            c.appendChild(div); 
+        }); 
+    } else { 
+        document.getElementById("suggest").style.display = "none"; 
+    } 
+};
 
 // =========================================
-// 8. 系統初始化
+// 8. 系統初始化 (啟動邏輯)
 // =========================================
 window.addEventListener('load', () => {
     const params = new URLSearchParams(window.location.search); const spotQuery = params.get('spot');
-    if(spotQuery) { const s = spots.concat(savedCustomSpots).find(x => x.name === spotQuery); if(s) { setTimeout(() => { map.flyTo([s.lat, s.lng], 16); showCard(s); }, 1000); } }
+    if(spotQuery) { const s = spots.concat(savedCustomSpots).find(x => x.name === spotQuery); if(s) { setTimeout(() => { window.mapInstance.flyTo([s.lat, s.lng], 16); showCard(s); }, 1000); } }
     
-    applyLanguage(currentLang); fetchWeather();
-    const savedTheme = localStorage.getItem('ruifang_theme'); if (savedTheme) { applyCustomTheme(savedTheme); } else { applyCustomTheme('#333333'); }
+    applyLanguage(currentLang); 
+    fetchWeather(); // 天氣 API 會因為 sw.js 的修復而正常運作了！
+    
+    const savedTheme = localStorage.getItem('ruifang_theme'); 
+    if (savedTheme) { applyCustomTheme(savedTheme); } else { applyCustomTheme('#333333'); }
 
     const splash = document.getElementById('splash-screen');
     const welcome = document.getElementById('welcome-screen');
     const tutorial = document.getElementById('tutorial-overlay');
     const skipIntro = localStorage.getItem('ruifang_skip_intro') === 'true';
-    document.getElementById('skip-intro-toggle').checked = skipIntro;
+    
+    const skipToggle = document.getElementById('skip-intro-toggle');
+    if(skipToggle) skipToggle.checked = skipIntro;
 
     if(skipIntro) { 
         if(splash) splash.style.display = 'none'; 
         if(welcome) welcome.style.display = 'none'; 
         if(tutorial) tutorial.style.display = 'none';
-        map.invalidateSize(); 
+        if(window.mapInstance) window.mapInstance.invalidateSize(); 
     } else {
-        setTimeout(() => { if(splash) { splash.style.opacity = '0'; setTimeout(() => { splash.style.display = 'none'; }, 500); } }, 2500);
+        setTimeout(() => { 
+            if(splash) { 
+                splash.style.opacity = '0'; 
+                setTimeout(() => { splash.style.display = 'none'; }, 500); 
+            } 
+        }, 2500);
     }
 });
 
