@@ -74,3 +74,7 @@ if (document.readyState === 'complete' || document.readyState === 'interactive')
 // 🌟 4. 全域綁定區 (重要：讓 HTML 的 onclick 可以呼叫)
 window.closeCard = closeCard;
 // 如果您在 ui.js 等模組中有寫 window.openSettings = ...，它們會在這裡生效
+
+// js/main.js 的最下方，加入這兩行：
+window.closeCustomSpotModal = closeCustomSpotModal;
+window.confirmCustomSpot = confirmCustomSpot;
