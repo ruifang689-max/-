@@ -40,7 +40,7 @@
     <div id="welcome-screen">
         <div class="welcome-wrapper">
             <div class="logo-static">瑞</div>
-            <h1 class="welcome-title" data-i18n="splash_title">瑞芳導覽 App</h1>
+            <h1 class="welcome-title" data-i18n="splash_title">瑞芳導覽地圖</h1>
             <p class="welcome-desc" data-i18n="splash_desc">致力於提供瑞芳地區最精準的在地導覽，帶領您深度探索山城之美。</p>
             
             <div class="input-group">
@@ -220,13 +220,24 @@
 
     <div id="route-select-modal" class="modal-overlay">
         <div class="modal-box">
-            <h3 class="modal-title route"><i class="fas fa-route"></i> 推薦行程路線</h3>
+            <h3 class="modal-title route"><i class="fas fa-route"></i> 選擇熱門路線</h3>
             <div class="route-list-container">
-                <div class="route-item" onclick="selectRoute('history')"><div class="route-info"><span class="route-name">🏛️ 歷史懷舊線</span><span class="route-desc">瑞芳車站 ➔ 後站老街 ➔ 九份老街 ➔ 黃金博物館</span></div></div>
-                <div class="route-item" onclick="selectRoute('nature')"><div class="route-info"><span class="route-name">⛰️ 山海自然線</span><span class="route-desc">瑞芳車站 ➔ 猴硐貓村 ➔ 報時山步道 ➔ 陰陽海</span></div></div>
-                <div class="route-item" onclick="selectRoute('food')"><div class="route-info"><span class="route-name">🍜 饕客美食線</span><span class="route-desc">瑞芳美食廣場 ➔ 芋圓 ➔ 礦工便當</span></div></div>
+                <div class="route-item" onclick="selectRoute('history')">
+                    <div class="route-info"><span class="route-name" style="color: #8e44ad;">🏛️ 歷史懷舊線</span><span class="route-desc">九份老街 ➔ 黃金博物館</span></div>
+                    <button class="route-action-btn" style="background:#8e44ad;">出發</button>
+                </div>
+                <div class="route-item" onclick="selectRoute('nature')">
+                    <div class="route-info"><span class="route-name" style="color: #27ae60;">⛰️ 山海自然線</span><span class="route-desc">猴硐 ➔ 報時山 ➔ 陰陽海</span></div>
+                    <button class="route-action-btn" style="background:#27ae60;">出發</button>
+                </div>
+                <div class="route-item" onclick="selectRoute('food')">
+                    <div class="route-info"><span class="route-name" style="color: #d35400;">🍜 饕客美食線</span><span class="route-desc">車站美食 ➔ 芋圓 ➔ 礦工便當</span></div>
+                    <button class="route-action-btn" style="background:#d35400;">出發</button>
+                </div>
             </div>
-            <button class="modal-cancel" style="width: 100%; margin-top: 15px;" onclick="closeRouteMenu()">關閉</button>
+            <div class="modal-btns">
+                <button class="modal-cancel" onclick="closeRouteMenu()" data-i18n="close" style="width: 100%;">關閉</button>
+            </div>
         </div>
     </div>
 
@@ -288,6 +299,7 @@
     </script>
 </body>
 </html>
+
 
 
 
