@@ -1,4 +1,4 @@
-// js/modules/announcer.js (v408)
+// js/modules/announcer.js (v409)
 import { state } from '../core/store.js';
 
 const ruifangMap = {
@@ -15,17 +15,17 @@ const ruifangMap = {
 
 export function initAnnouncer() {
     let geocodeTimer = null;
-    state.mapInstance.on('movestart', () => { document.getElementById("addr-text").style.opacity = '0.5'; });
     
-    state.mapInstance.on('moveend', function() {
+    // 🌟 關鍵修正：改用 dragstart 和 dragend，避開 flyTo 動畫的頻繁觸發
+    state.mapInstance.on('dragstart', () => { document.getElementById("addr-text").style.opacity = '0.5'; });
+    
+    state.mapInstance.on('dragend', function() {
         clearTimeout(geocodeTimer); 
         document.getElementById("addr-text").innerText = "定位中..."; 
         document.getElementById("addr-text").style.opacity = '1';
         
-        // 🌟 防 425 錯誤：延遲改為 1500ms，確保不超過 1 request/sec 限制
         geocodeTimer = setTimeout(() => {
             const center = state.mapInstance.getCenter();
-            // 🌟 加入 email 參數，遵守 OSM Nominatim API 規範
             const apiUrl = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${center.lat}&lon=${center.lng}&zoom=18&addressdetails=1&accept-language=zh-TW&email=ruifang689@gmail.com`;
             
             fetch(apiUrl)
@@ -49,6 +49,6 @@ export function initAnnouncer() {
                 } 
                 document.getElementById("addr-text").innerText = areaStr; 
             }).catch(()=>{ document.getElementById("addr-text").innerText = "探索瑞芳中..."; }); 
-        }, 1500); // 🌟 延遲 1.5 秒
+        }, 1000); // 因為 dragend 頻率低，延遲縮短為 1 秒即可
     });
 }
