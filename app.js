@@ -2,9 +2,7 @@
 // 0. PWA 註冊與 iOS 教學處理
 // =========================================
 if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.getRegistrations().then(function(registrations) {
-        for(let registration of registrations) { registration.update(); }
-    });
+    navigator.serviceWorker.getRegistrations().then(function(registrations) { for(let registration of registrations) { registration.update(); } });
     window.addEventListener('load', () => { navigator.serviceWorker.register('sw.js'); });
 }
 
@@ -14,33 +12,21 @@ const isStandalone = () => { return ('standalone' in window.navigator) && (windo
 
 window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault(); deferredPrompt = e;
-    const installBtn = document.getElementById('install-btn-container');
-    if (installBtn) installBtn.style.display = 'block';
+    const installBtn = document.getElementById('install-btn-container'); if (installBtn) installBtn.style.display = 'block';
 });
 
 function installPWA() {
-    if (isIos() && !isStandalone()) {
-        document.getElementById('ios-instruction-modal').style.display = 'flex';
-        closeSettings();
-        return;
-    }
-    if (!deferredPrompt) return;
-    document.getElementById('install-btn-container').style.display = 'none';
-    deferredPrompt.prompt();
-    deferredPrompt.userChoice.then(() => { deferredPrompt = null; });
+    if (isIos() && !isStandalone()) { document.getElementById('ios-instruction-modal').style.display = 'flex'; closeSettings(); return; }
+    if (!deferredPrompt) return; document.getElementById('install-btn-container').style.display = 'none';
+    deferredPrompt.prompt(); deferredPrompt.userChoice.then(() => { deferredPrompt = null; });
 }
 function closeIosInstruction() { document.getElementById('ios-instruction-modal').style.display = 'none'; }
 
 // =========================================
 // 1. 全域變數宣告
 // =========================================
-let targetSpot = null; 
-let currentRoute = null; 
-let userPos = null;
-let userMarker = null;
-let currentEditingSpotName = "";
-let navMode = 'driving'; 
-let tourModeInterval = null; 
+let targetSpot = null; let currentRoute = null; let userPos = null; let userMarker = null; let currentEditingSpotName = "";
+let navMode = 'driving'; let tourModeInterval = null; 
 let myFavs = JSON.parse(localStorage.getItem('ruifang_favs')) || []; 
 let savedCustomSpots = JSON.parse(localStorage.getItem('ruifang_custom_spots')) || []; 
 let searchHistory = JSON.parse(localStorage.getItem('ruifang_search_history')) || []; 
@@ -64,22 +50,13 @@ const translations = {
     'zh': { splash_title: "瑞芳導覽 App", splash_desc: "精準在地導覽，深度探索山城。", lang: "語言 / Language", enter_map: "進入地圖", form_link: "意見問卷", skip_intro: "啟動時略過開場", tut_step1_title: "功能說明 (1/2)", tut_search: "搜尋與標籤", tut_add: "長按新增", tut_weather: "天氣資訊", tut_compass: "指北針", tut_next: "下一步", tut_step2_title: "進階功能 (2/2)", tut_nav: "多模式導航", tut_tour: "自動導覽", tut_settings: "設定", tut_share: "分享", tut_prev: "前一步", tut_finish: "開始使用", settings: "系統設定", theme: "主題顏色", share_map_title: "推薦給好友", share_map: "分享地圖", close: "關閉", search_ph: "🔍 搜尋或長按新增...", locating: "定位中...", food: "在地飲食", highlights: "推薦亮點", history: "簡介歷史", transport: "交通方式", nav: " 導航", ai: " 智慧推薦", chip_all: "🌟 全部", chip_food: "🍜 美食", chip_history: "🏛️ 歷史", chip_nature: "⛰️ 自然", chip_custom: "📍 標記", contact: "聯絡開發團隊", install_app: "將 App 安裝至桌面", manage_fav: "管理收藏夾" },
     'en': { splash_title: "Ruifang Guide", splash_desc: "Accurate local guide in Ruifang.", lang: "Language", enter_map: "Enter Map", form_link: "Feedback", skip_intro: "Skip intro on startup", tut_step1_title: "Features (1/2)", tut_search: "Search & Tags", tut_add: "Long Press Add", tut_weather: "Weather", tut_compass: "Compass", tut_next: "Next", tut_step2_title: "Advanced (2/2)", tut_nav: "Navigation", tut_tour: "Guided Tour", tut_settings: "Settings", tut_share: "Share", tut_prev: "Back", tut_finish: "Start", settings: "Settings", theme: "Theme Color", share_map_title: "Recommend", share_map: "Share Map", close: "Close", search_ph: "🔍 Search or long press...", locating: "Locating...", food: "Food", highlights: "Highlights", history: "History", transport: "Transport", nav: " Navigate", ai: " AI Trip", chip_all: "🌟 All", chip_food: "🍜 Food", chip_history: "🏛️ History", chip_nature: "⛰️ Nature", chip_custom: "📍 Custom", contact: "Contact", install_app: "Install App", manage_fav: "Manage Favs" }
 };
-
 let currentLang = localStorage.getItem('ruifang_lang') || 'zh';
 function applyLanguage(lang) {
     currentLang = lang; localStorage.setItem('ruifang_lang', lang);
     const t = translations[lang] || translations['zh']; 
-    document.getElementById('search').placeholder = t.search_ph;
-    document.getElementById('addr-text').innerText = t.locating;
-    document.querySelectorAll('[data-i18n]').forEach(el => {
-        const key = el.getAttribute('data-i18n');
-        if (t[key]) {
-            if(el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') el.placeholder = t[key];
-            else { const iconMatch = el.innerHTML.match(/<i[^>]*><\/i>/); el.innerHTML = iconMatch ? iconMatch[0] + ' ' + t[key] : t[key]; }
-        }
-    });
-    document.getElementById('lang-select-startup').value = lang;
-    document.getElementById('lang-select-settings').value = lang;
+    document.getElementById('search').placeholder = t.search_ph; document.getElementById('addr-text').innerText = t.locating;
+    document.querySelectorAll('[data-i18n]').forEach(el => { const key = el.getAttribute('data-i18n'); if (t[key]) { if(el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') el.placeholder = t[key]; else { const iconMatch = el.innerHTML.match(/<i[^>]*><\/i>/); el.innerHTML = iconMatch ? iconMatch[0] + ' ' + t[key] : t[key]; } } });
+    document.getElementById('lang-select-startup').value = lang; document.getElementById('lang-select-settings').value = lang;
     if(targetSpot && document.getElementById("card").classList.contains("open")) renderCardButtons(targetSpot, t);
 }
 
@@ -90,38 +67,16 @@ function openSettings() { document.getElementById('settings-modal-overlay').styl
 function closeSettings() { document.getElementById('settings-modal-overlay').style.display = 'none'; }
 function toggleSkipIntro(isChecked) { localStorage.setItem('ruifang_skip_intro', isChecked ? 'true' : 'false'); }
 
-function enterMap() {
-    document.getElementById('welcome-screen').style.opacity = '0';
-    setTimeout(() => { document.getElementById('welcome-screen').style.display = 'none'; document.getElementById('tutorial-overlay').style.display = 'flex'; setTimeout(() => { document.getElementById('tutorial-overlay').style.opacity = '1'; }, 50); }, 400);
-}
+function enterMap() { document.getElementById('welcome-screen').style.opacity = '0'; setTimeout(() => { document.getElementById('welcome-screen').style.display = 'none'; document.getElementById('tutorial-overlay').style.display = 'flex'; setTimeout(() => { document.getElementById('tutorial-overlay').style.opacity = '1'; }, 50); }, 400); }
 function nextTutorial() { document.getElementById('tut-step-1').style.display = 'none'; document.getElementById('tut-step-2').style.display = 'block'; }
 function prevTutorial() { document.getElementById('tut-step-2').style.display = 'none'; document.getElementById('tut-step-1').style.display = 'block'; }
-function finishTutorial() {
-    document.getElementById('tutorial-overlay').style.opacity = '0';
-    setTimeout(() => { document.getElementById('tutorial-overlay').style.display = 'none'; localStorage.setItem('ruifang_welcomed', 'true'); if (typeof window.mapInstance !== 'undefined') window.mapInstance.invalidateSize(); }, 400);
-}
+function finishTutorial() { document.getElementById('tutorial-overlay').style.opacity = '0'; setTimeout(() => { document.getElementById('tutorial-overlay').style.display = 'none'; localStorage.setItem('ruifang_welcomed', 'true'); if (typeof window.mapInstance !== 'undefined') window.mapInstance.invalidateSize(); }, 400); }
 
-function changeTheme(color) { 
-    if (color === 'custom') { document.getElementById('custom-color-picker').style.display = 'block'; document.getElementById('custom-color-picker').click(); } 
-    else { document.getElementById('custom-color-picker').style.display = 'none'; applyCustomTheme(color); } 
-}
-function applyCustomTheme(color) { 
-    document.documentElement.style.setProperty('--primary', color); document.documentElement.style.setProperty('--logo-border', color); 
-    localStorage.setItem('ruifang_theme', color); 
-    const themeSelect = document.getElementById('theme-select'); 
-    if([...themeSelect.options].some(o => o.value === color)) themeSelect.value = color; else themeSelect.value = 'custom'; 
-}
+function changeTheme(color) { if (color === 'custom') { document.getElementById('custom-color-picker').style.display = 'block'; document.getElementById('custom-color-picker').click(); } else { document.getElementById('custom-color-picker').style.display = 'none'; applyCustomTheme(color); } }
+function applyCustomTheme(color) { document.documentElement.style.setProperty('--primary', color); document.documentElement.style.setProperty('--logo-border', color); localStorage.setItem('ruifang_theme', color); const themeSelect = document.getElementById('theme-select'); if([...themeSelect.options].some(o => o.value === color)) themeSelect.value = color; else themeSelect.value = 'custom'; }
 
-function shareSpot() { 
-    if(!targetSpot) return; 
-    const spotUrl = new URL(window.location.href.split('?')[0]); spotUrl.searchParams.set('spot', targetSpot.name); 
-    const shareData = { title: `瑞芳導覽地圖 - ${targetSpot.name}`, text: `我在瑞芳發現了「${targetSpot.name}」！\n點擊查看：`, url: spotUrl.toString() }; 
-    if (navigator.share) navigator.share(shareData).catch(()=>{}); else navigator.clipboard.writeText(`${shareData.text}\n${shareData.url}`).then(() => alert('✅ 景點連結已複製！')); 
-}
-function shareAppMap() { 
-    const shareData = { title: '瑞芳導覽地圖 App', text: '快來看看這個瑞芳專屬的智慧導覽地圖！', url: 'https://ruifang689-max.github.io/-/' }; 
-    if (navigator.share) navigator.share(shareData).catch(()=>{}); else navigator.clipboard.writeText(shareData.url).then(() => alert('✅ 網址已複製！')); 
-}
+function shareSpot() { if(!targetSpot) return; const spotUrl = new URL(window.location.href.split('?')[0]); spotUrl.searchParams.set('spot', targetSpot.name); const shareData = { title: `瑞芳導覽地圖 - ${targetSpot.name}`, text: `我在瑞芳發現了「${targetSpot.name}」！\n點擊查看：`, url: spotUrl.toString() }; if (navigator.share) navigator.share(shareData).catch(()=>{}); else navigator.clipboard.writeText(`${shareData.text}\n${shareData.url}`).then(() => alert('✅ 已複製景點連結！')); }
+function shareAppMap() { const shareData = { title: '瑞芳導覽地圖 App', text: '快來看看這個瑞芳專屬的智慧導覽地圖！', url: 'https://ruifang689-max.github.io/-/' }; if (navigator.share) navigator.share(shareData).catch(()=>{}); else navigator.clipboard.writeText(shareData.url).then(() => alert('✅ 網址已複製！')); }
 
 // =========================================
 // 4. 天氣功能
@@ -132,25 +87,23 @@ async function fetchWeather() {
         const data = await res.json();
         const temp = Math.round(data.current_weather.temperature);
         const code = data.current_weather.weathercode;
-        let iconClass = 'fa-cloud-sun weather-cloud'; 
-        if(code === 0) iconClass = 'fa-sun weather-sun'; else if(code > 3) iconClass = 'fa-cloud-rain weather-rain'; 
-        document.getElementById('weather-temp').innerText = `${temp}°C`;
-        document.querySelector('#weather-box i').className = `fas ${iconClass}`; 
+        let iconClass = 'fa-cloud-sun weather-cloud'; if(code === 0) iconClass = 'fa-sun weather-sun'; else if(code > 3) iconClass = 'fa-cloud-rain weather-rain'; 
+        document.getElementById('weather-temp').innerText = `${temp}°C`; document.querySelector('#weather-box i').className = `fas ${iconClass}`; 
     } catch (e) { document.getElementById('weather-temp').innerText = "--"; }
 }
 
 // =========================================
-// 5. 核心地圖初始化與底圖
+// 5. 核心地圖與底圖 (恢復等高線圖)
 // =========================================
 window.mapInstance = L.map('map', { zoomControl: false, attributionControl: false }).setView([25.1032, 121.8224], 14);
 
+// 🌟 恢復 Arcade 等高線地形圖
 const mapLayers = [
     { url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', name: '街道', icon: 'fa-map', dark: false },
-    { url: 'https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', name: '交通', icon: 'fa-bus', dark: false },
+    { url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', name: '等高線', icon: 'fa-mountain', dark: false },
     { url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', name: '夜間', icon: 'fa-moon', dark: true }
 ];
-let currentLayerIdx = 0;
-let currentTileLayer = L.tileLayer(mapLayers[0].url).addTo(window.mapInstance);
+let currentLayerIdx = 0; let currentTileLayer = L.tileLayer(mapLayers[0].url).addTo(window.mapInstance);
 L.control.scale({ metric: true, imperial: false, position: 'bottomright' }).addTo(window.mapInstance);
 
 function toggleLayer() {
@@ -170,50 +123,54 @@ window.mapInstance.on('locationfound', e => {
     if(!userMarker) userMarker = L.marker(userPos, { icon: userPulseIcon }).addTo(window.mapInstance); else userMarker.setLatLng(userPos);
 });
 
-// 🌟 報幕文字平滑淡入淡出優化
 let geocodeTimer = null;
 window.mapInstance.on('movestart', () => { document.getElementById("addr-text").style.opacity = '0.5'; });
 window.mapInstance.on('moveend', function() {
-    clearTimeout(geocodeTimer);
-    document.getElementById("addr-text").innerText = "定位中...";
-    document.getElementById("addr-text").style.opacity = '1';
+    clearTimeout(geocodeTimer); document.getElementById("addr-text").innerText = "定位中..."; document.getElementById("addr-text").style.opacity = '1';
     geocodeTimer = setTimeout(() => {
         const center = window.mapInstance.getCenter();
         fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${center.lat}&lon=${center.lng}&zoom=18&addressdetails=1&accept-language=zh-TW&email=ruifang689@gmail.com`)
-        .then(res => { if (!res.ok) throw new Error('API Rate Limit'); return res.json(); })
+        .then(res => { if (!res.ok) throw new Error('Rate Limit'); return res.json(); })
         .then(data => { if (data && data.address) { const a = data.address; document.getElementById("addr-text").innerText = ((a.city||a.town||a.county||"") + (a.suburb||a.district||"") + (a.village||a.neighbourhood||a.road||"")) || "探索瑞芳中..."; } })
         .catch(()=>{ document.getElementById("addr-text").innerText = "探索瑞芳中..."; }); 
     }, 1200); 
 });
 
 // =========================================
-// 6. 圖釘生成與資訊卡顯示 (🌟 Canvas 終極防破圖)
+// 6. 圖釘與互動邏輯 (滑鼠游標經過顯示、點擊開啟大卡)
 // =========================================
 const cluster = L.markerClusterGroup(); window.mapInstance.addLayer(cluster);
 function calculateWalk(lat, lng) { if(!userPos) return "--"; const mins = Math.round(window.mapInstance.distance(userPos, [lat, lng]) / 80); return mins < 1 ? "1分內" : `約 ${mins} 分`; }
 
-const createCustomPin = (tags, name) => { let cls = 'fa-map-marker-alt', col = '#ea4335'; if (tags.includes('美食')) { cls = 'fa-utensils'; col = 'var(--primary)'; } else if (tags.includes('歷史')) { cls = 'fa-landmark'; col = '#7f8c8d'; } else if (tags.includes('自然')) { cls = 'fa-leaf'; col = '#2ecc71'; } else if (tags.includes('自訂')) { cls = 'fa-star'; col = 'var(--accent)'; } return L.divIcon({ className: 'custom-pin-wrap', html: `<div class="gmap-pin" style="background-color:${col}"><i class="fas ${cls}"></i></div><div class="pin-label">${name}</div>`, iconSize: [32,32], iconAnchor: [16,16], popupAnchor: [0,-20] }); };
+const createCustomPin = (tags, name) => { let cls = 'fa-map-marker-alt', col = '#ea4335'; if (tags.includes('美食')) { cls = 'fa-utensils'; col = 'var(--primary)'; } else if (tags.includes('歷史')) { cls = 'fa-landmark'; col = '#7f8c8d'; } else if (tags.includes('自然')) { cls = 'fa-leaf'; col = '#2ecc71'; } else if (tags.includes('自訂')) { cls = 'fa-star'; col = 'var(--accent)'; } return L.divIcon({ className: 'custom-pin-wrap', html: `<div class="gmap-pin" style="background-color:${col}"><i class="fas ${cls}"></i></div><div class="pin-label">${name}</div>`, iconSize: [32,32], iconAnchor: [16,16], popupAnchor: [0,-25] }); };
 
-// 🌟 Canvas 動態產生預設圖 (百分之百保證不破圖)
 function getPlaceholderImage(text) {
-    const canvas = document.createElement('canvas'); canvas.width = 400; canvas.height = 200;
-    const ctx = canvas.getContext('2d');
+    const canvas = document.createElement('canvas'); canvas.width = 400; canvas.height = 200; const ctx = canvas.getContext('2d');
     const color = getComputedStyle(document.documentElement).getPropertyValue('--primary').trim() || '#333333';
-    ctx.fillStyle = color; ctx.fillRect(0, 0, 400, 200);
-    ctx.fillStyle = '#ffffff'; ctx.font = 'bold 28px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    ctx.fillText(text, 200, 100);
+    ctx.fillStyle = color; ctx.fillRect(0, 0, 400, 200); ctx.fillStyle = '#ffffff'; ctx.font = 'bold 28px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(text, 200, 100);
     return canvas.toDataURL('image/jpeg', 0.8);
 }
 
 function addMarkerToMap(s) {
     if (!s.tags.includes('自訂') && !s.wikiImg) fetch(`https://zh.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(s.name)}`).then(r=>r.json()).then(d=>{s.wikiImg=d.thumbnail?.source;}).catch(()=>{});
     const m = L.marker([s.lat, s.lng], { icon: createCustomPin(s.tags, s.name) });
+    
+    // 🌟 浮動小卡只做預覽顯示
     m.bindPopup(() => {
         const img = s.wikiImg || getPlaceholderImage(s.name);
         const foodIcon = s.tags.includes('自訂') ? 'fa-star' : 'fa-utensils'; const foodText = s.tags.includes('自訂') ? '自訂地點' : `美食：${s.food || '--'}`;
-        return `<div class="preview-card" onclick="openCardByName('${s.name}')"><img class="preview-img" src="${img}" onerror="this.src='${getPlaceholderImage(s.name)}'"><div class="preview-info"><div class="preview-header"><span class="preview-title">${s.name}</span><span class="walk-badge"><i class="fas fa-walking"></i> ${calculateWalk(s.lat, s.lng)}</span></div><div class="preview-tag-box">${s.tags.map(t=>`<span class="mini-tag">${t}</span>`).join('')}</div><div class="food-preview"><i class="fas ${foodIcon}"></i> ${foodText}</div></div></div>`;
-    }, { closeButton: false });
-    m.on('mouseover', function() { this.openPopup(); }); m.on('click', (e) => { L.DomEvent.stopPropagation(e); showCard(s); });
+        return `<div class="preview-card"><img class="preview-img" src="${img}" onerror="this.src='${getPlaceholderImage(s.name)}'"><div class="preview-info"><div class="preview-header"><span class="preview-title">${s.name}</span><span class="walk-badge"><i class="fas fa-walking"></i> ${calculateWalk(s.lat, s.lng)}</span></div><div class="preview-tag-box">${s.tags.map(t=>`<span class="mini-tag">${t}</span>`).join('')}</div><div class="food-preview"><i class="fas ${foodIcon}"></i> ${foodText}</div></div></div>`;
+    }, { closeButton: false, offset: [0, -5] });
+
+    // 🌟 滑鼠與手指互動邏輯
+    m.on('mouseover', function() { this.openPopup(); });   // 經過開啟預覽
+    m.on('mouseout', function() { this.closePopup(); });    // 離開關閉預覽
+    m.on('click', function(e) { 
+        L.DomEvent.stopPropagation(e); 
+        this.closePopup(); // 點擊時關閉預覽，改開大卡
+        showCard(s); 
+    }); 
+    
     s.markerObj = m; cluster.addLayer(m);
 }
 spots.forEach(addMarkerToMap); savedCustomSpots.forEach(s => { spots.push(s); addMarkerToMap(s); });
@@ -226,10 +183,7 @@ function filterSpots(category, element) {
 function showCard(s) {
     targetSpot = s; document.getElementById("card-fav-icon").className = myFavs.includes(s.name) ? "fas fa-heart active" : "fas fa-heart";
     document.getElementById("title").innerText = s.name; 
-    const imgEl = document.getElementById("img");
-    imgEl.src = s.wikiImg || getPlaceholderImage(s.name);
-    imgEl.onerror = () => { imgEl.src = getPlaceholderImage(s.name); }; // 圖片如果壞掉，瞬間換成 Canvas
-
+    const imgEl = document.getElementById("img"); imgEl.src = s.wikiImg || getPlaceholderImage(s.name); imgEl.onerror = () => { imgEl.src = getPlaceholderImage(s.name); }; 
     document.getElementById("card-tags").innerHTML = s.tags.map(t => `<span class="mini-tag">${t}</span>`).join('');
     document.getElementById("card-food").innerText = s.food || "--"; document.getElementById("card-highlights").innerText = s.highlights || "暫無介紹";
     document.getElementById("card-history").innerText = s.history || "無"; document.getElementById("card-transport").innerText = s.transport || "自行前往";
@@ -392,7 +346,7 @@ function toggleFavList() {
                 div.onclick = () => { triggerSearch(name); p.style.display = "none"; }; p.appendChild(div); 
             }); 
         } 
-        const manageBtn = document.createElement('div'); manageBtn.style.cssText = "padding:14px; text-align:center; background:var(--divider-color); font-weight:bold; cursor:pointer; font-size:14px; color:var(--primary);"; manageBtn.innerHTML = "<i class='fas fa-cog'></i> 管理收藏夾"; manageBtn.onclick = () => { p.style.display = "none"; openFavManage(); }; p.appendChild(manageBtn);
+        const manageBtn = document.createElement('div'); manageBtn.style.cssText = "padding:12px; text-align:center; background:var(--divider-color); font-weight:bold; cursor:pointer; font-size:13px; color:var(--primary);"; manageBtn.innerHTML = "<i class='fas fa-cog'></i> 管理收藏夾"; manageBtn.onclick = () => { p.style.display = "none"; openFavManage(); }; p.appendChild(manageBtn);
         p.style.display = "block"; 
     } 
 }
@@ -403,8 +357,8 @@ function renderFavManageList() {
     const listEl = document.getElementById('fav-manage-list'); listEl.innerHTML = '';
     if (myFavs.length === 0) { listEl.innerHTML = '<p style="text-align:center; color:#888;">目前無收藏景點</p>'; return; }
     myFavs.forEach((name, idx) => {
-        const item = document.createElement('div'); item.style.cssText = "display:flex; justify-content:space-between; align-items:center; padding:12px; background:var(--glass); border:1px solid var(--border-color); border-radius:8px;";
-        item.innerHTML = `<span style="font-weight:bold; color:var(--text-main); font-size:15px;">${name}</span> <div style="display:flex; gap:6px;"> <button onclick="moveFav(${idx}, -1)" style="padding:6px 12px; cursor:pointer; background:var(--divider-color); border:none; border-radius:6px; color:var(--text-main);" ${idx===0?'disabled':''}><i class="fas fa-arrow-up"></i></button> <button onclick="moveFav(${idx}, 1)" style="padding:6px 12px; cursor:pointer; background:var(--divider-color); border:none; border-radius:6px; color:var(--text-main);" ${idx===myFavs.length-1?'disabled':''}><i class="fas fa-arrow-down"></i></button> <button onclick="removeFavManage('${name}')" style="padding:6px 12px; background:var(--danger); color:white; cursor:pointer; border:none; border-radius:6px;"><i class="fas fa-trash"></i></button> </div>`;
+        const item = document.createElement('div'); item.style.cssText = "display:flex; justify-content:space-between; align-items:center; padding:10px; background:var(--glass); border:1px solid var(--border-color); border-radius:8px;";
+        item.innerHTML = `<span style="font-weight:bold; color:var(--text-main); font-size:14px;">${name}</span> <div style="display:flex; gap:6px;"> <button onclick="moveFav(${idx}, -1)" style="padding:6px 10px; cursor:pointer; background:var(--divider-color); border:none; border-radius:6px; color:var(--text-main);" ${idx===0?'disabled':''}><i class="fas fa-arrow-up"></i></button> <button onclick="moveFav(${idx}, 1)" style="padding:6px 10px; cursor:pointer; background:var(--divider-color); border:none; border-radius:6px; color:var(--text-main);" ${idx===myFavs.length-1?'disabled':''}><i class="fas fa-arrow-down"></i></button> <button onclick="removeFavManage('${name}')" style="padding:6px 10px; background:var(--danger); color:white; cursor:pointer; border:none; border-radius:6px;"><i class="fas fa-trash"></i></button> </div>`;
         listEl.appendChild(item);
     });
 }
