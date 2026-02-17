@@ -11,18 +11,21 @@ const urlsToCache = [
   'icon/icon-512.png'  // 🌟 加上 icon/
 ];
 
-// ... (下方的 install, activate, fetch 邏輯完全不用動) ...
-self.addEventListener('install', event => {
-  self.skipWaiting();
-  event.waitUntil(caches.open(CACHE_NAME).then(cache => cache.addAll(urlsToCache)));
+// 🌟 sw.js - 終極快取清除版 (殺死所有舊快取)
+self.addEventListener('install', (e) => { 
+    self.skipWaiting(); // 強制立即接管
 });
 
-self.addEventListener('activate', event => {
-  event.waitUntil(clients.claim());
-  event.waitUntil(caches.keys().then(keys => Promise.all(keys.map(key => { if(key !== CACHE_NAME) return caches.delete(key); }))));
+self.addEventListener('activate', (e) => {
+    e.waitUntil(
+        caches.keys().then((keyList) => {
+            // 毫不留情地刪除所有快取
+            return Promise.all(keyList.map((key) => caches.delete(key)));
+        }).then(() => self.clients.claim())
+    );
 });
 
-self.addEventListener('fetch', event => {
-  if (!event.request.url.startsWith(self.location.origin)) return;
-  event.respondWith(fetch(event.request).catch(() => caches.match(event.request)));
+self.addEventListener('fetch', (e) => {
+    // 永遠從網路抓取最新檔案，絕對不使用舊快取
+    e.respondWith(fetch(e.request));
 });
