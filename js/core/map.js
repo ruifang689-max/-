@@ -1,7 +1,6 @@
-// js/core/map.js (v407)
+// js/core/map.js (v409)
 import { state } from './store.js';
 
-// 將變數拉到最外層，讓 toggleLayer 也能讀取到
 const mapLayers = [
     { url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', name: '街道', icon: 'fa-map', dark: false },
     { url: 'https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', name: '交通', icon: 'fa-bus', dark: false },
@@ -20,9 +19,16 @@ export function initMap() {
 
     state.cluster = L.markerClusterGroup(); 
     state.mapInstance.addLayer(state.cluster);
+
+    // 🌟 補回遺失的功能：點擊地圖空白處，關閉資訊卡與推薦搜尋
+    state.mapInstance.on('click', () => { 
+        if (typeof window.closeCard === 'function') window.closeCard(); 
+        if (typeof window.closeSuggest === 'function') window.closeSuggest(); 
+        const sug = document.getElementById("suggest");
+        if(sug) sug.style.display = "none";
+    });
 }
 
-// 🌟 加上 export 讓 main.js 可以正確引入
 export function toggleLayer() {
     currentLayerIdx = (currentLayerIdx + 1) % mapLayers.length; 
     const c = mapLayers[currentLayerIdx];
