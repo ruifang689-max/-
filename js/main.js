@@ -75,6 +75,10 @@ if (document.readyState === 'complete' || document.readyState === 'interactive')
 window.closeCard = closeCard;
 // 如果您在 ui.js 等模組中有寫 window.openSettings = ...，它們會在這裡生效
 
-// js/main.js 的最下方，加入這兩行：
+// ... 放在 main.js 檔案最下方 ...
+window.closeCard = closeCard;
 window.closeCustomSpotModal = closeCustomSpotModal;
 window.confirmCustomSpot = confirmCustomSpot;
+
+// 🌟 新增這行：將清空按鈕功能綁定到全域
+window.clearSearchInput = clearSearchInput;
