@@ -297,18 +297,38 @@
 
     <div id="ios-instruction-modal" class="modal-overlay" style="z-index: 99999;">
         </div>
+    
+    <div id="weather-box" title="即時天氣"><i class="fas fa-spinner fa-spin"></i><span id="weather-temp">--</span></div>
 
+    <div id="top-ui">
+        <div id="search-container">
+            <input id="search" placeholder="🔍 搜尋景點或長按新增..." data-i18n="search_ph">
+            <i id="search-clear-btn" class="fas fa-times-circle" onclick="clearSearchInput()"></i>
+        </div>
+        <div id="category-chips" onwheel="this.scrollLeft += event.deltaY">
+            <div class="chip active" onclick="filterSpots('all', this)" data-i18n="chip_all">🌟 全部</div>
+            <div class="chip" onclick="filterSpots('美食', this)" data-i18n="chip_food">🍜 美食</div>
+            <div class="chip" onclick="filterSpots('歷史', this)" data-i18n="chip_history">🏛️ 歷史</div>
+            <div class="chip" onclick="filterSpots('自然', this)" data-i18n="chip_nature">⛰️ 自然景觀</div>
+            <div class="chip" onclick="filterSpots('自訂', this)" data-i18n="chip_custom">📍 我的標記</div>
+        </div>
+        <div id="map-center-panel"><i class="fas fa-map-marker-alt" style="color:var(--primary)"></i><span id="addr-text" data-i18n="locating">定位中...</span></div>
+        <div id="suggest">
+            <div class="suggest-header"><span style="font-size:12px; font-weight:bold; color:var(--text-sub);">搜尋與推薦</span> <i class="fas fa-times" style="cursor:pointer;" onclick="closeSuggest()"></i></div>
+            <div id="suggest-content"></div>
+        </div>
+    </div>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
     
-    <script src="./js/data/spots.js?v=402"></script>
-    <script src="./js/data/lang.js?v=402"></script>
-    <script src="./js/data/routes.js?v=402"></script>
-    
-    <script type="module" src="./js/main.js?v=403"></script>
+    <script src="./js/data/spots.js?v=404"></script>
+    <script src="./js/data/lang.js?v=404"></script>
+    <script src="./js/data/routes.js?v=404"></script>
+    <script type="module" src="./js/main.js?v=404"></script>
 
 </body>
 </html>
+
 
 
 
