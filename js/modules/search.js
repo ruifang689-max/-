@@ -4,12 +4,14 @@ import { spots } from '../data/spots.js';
 import { addMarkerToMap } from './markers.js';
 import { showCard, closeCard } from './cards.js';
 
-// 🌟 將 triggerSearch 獨立出來，並加上 export 讓 ui.js 可以引用
 export function triggerSearch(name) { 
     const searchInput = document.getElementById("search"); 
-    const sugBox = document.getElementById("suggest");
+    const clearBtn = document.getElementById("search-clear-btn");
+    
     if(searchInput) searchInput.value = name; 
-    if(sugBox) sugBox.style.display = "none"; 
+    if(clearBtn) clearBtn.style.display = "block"; // 有字就顯示清空鈕
+    
+    window.closeSuggest(); 
     
     const s = spots.concat(state.savedCustomSpots).find(x => x.name === name); 
     if(s) { 
@@ -21,8 +23,16 @@ export function triggerSearch(name) {
 export function initSearch() {
     const searchInput = document.getElementById("search"); 
     const sugBox = document.getElementById("suggest");
+    const clearBtn = document.getElementById("search-clear-btn");
     
-    window.closeSuggest = () => { sugBox.style.display = "none"; };
+    window.closeSuggest = () => { if(sugBox) sugBox.style.display = "none"; };
+    
+    // 🌟 新增：清空搜尋欄與收起推薦
+    window.clearSearchInput = () => {
+        if(searchInput) { searchInput.value = ""; }
+        if(clearBtn) clearBtn.style.display = "none";
+        window.closeSuggest(); 
+    };
     
     window.renderDefaultSearch = () => { 
         const c = document.getElementById("suggest-content"); c.innerHTML = ""; 
@@ -32,21 +42,34 @@ export function initSearch() {
         } 
         c.innerHTML += `<div class="search-section-title">⭐ 推薦景點</div>`; 
         ["九份老街", "猴硐貓村", "水湳洞陰陽海"].forEach(r => { c.innerHTML += `<div class="list-item" onclick="triggerSearch('${r}')"><span><i class="fas fa-fire" style="color:#e74c3c;"></i> ${r}</span></div>`; }); 
-        sugBox.style.display = "block"; 
+        if(sugBox) sugBox.style.display = "block"; 
     };
 
     window.clearHistory = () => { state.searchHistory = []; saveState.history(); window.renderDefaultSearch(); };
-
-    // 🌟 將 triggerSearch 綁定到 window，讓 HTML 的 onClick 也能使用
     window.triggerSearch = triggerSearch;
 
-    searchInput.addEventListener('focus', () => { if(!searchInput.value.trim()) window.renderDefaultSearch(); });
+    // 點擊搜尋框
+    searchInput.addEventListener('focus', () => { 
+        if(!searchInput.value.trim()) {
+            window.renderDefaultSearch(); 
+        } else if (sugBox && sugBox.style.display === "none") {
+            searchInput.dispatchEvent(new Event('input')); // 再次觸發過濾
+        }
+    });
+
+    // 監聽輸入字元，動態顯示/隱藏Ｘ按鈕
     searchInput.addEventListener('input', function() { 
-        const k = this.value.trim(); const c = document.getElementById("suggest-content"); 
-        if(!k) { window.renderDefaultSearch(); return; } c.innerHTML = ""; 
+        const k = this.value.trim(); 
+        if(clearBtn) clearBtn.style.display = k ? "block" : "none"; // 🌟 有字才顯示
+        
+        const c = document.getElementById("suggest-content"); 
+        if(!k) { window.renderDefaultSearch(); return; } 
+        
+        c.innerHTML = ""; 
         const matches = spots.concat(state.savedCustomSpots).filter(s => s.name.includes(k) || s.tags.some(t => t.includes(k)) || (s.keywords && s.keywords.some(kw => kw.includes(k)))); 
+        
         if(matches.length > 0) { 
-            sugBox.style.display = "block"; 
+            if(sugBox) sugBox.style.display = "block"; 
             matches.forEach(s => { 
                 const div = document.createElement("div"); div.className = "list-item"; 
                 div.innerHTML = `<span><i class="fas fa-map-marker-alt" style="color:var(--primary)"></i> ${s.name}</span>`; 
@@ -55,7 +78,18 @@ export function initSearch() {
                     triggerSearch(s.name); 
                 }; c.appendChild(div); 
             }); 
-        } else { sugBox.style.display = "none"; } 
+        } else { 
+            if(sugBox) sugBox.style.display = "none"; 
+        } 
+    });
+
+    // 🌟 新增：點擊地圖他處時，自動關閉搜尋推薦
+    document.addEventListener('click', (e) => {
+        const topUi = document.getElementById('top-ui');
+        // 如果點擊的地方不在頂部 UI 內，而且推薦框是打開的，就把它關掉
+        if (topUi && !topUi.contains(e.target) && sugBox && sugBox.style.display === 'block') {
+            window.closeSuggest();
+        }
     });
 
     window.filterSpots = (category, element) => { 
