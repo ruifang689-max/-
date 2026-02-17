@@ -1,15 +1,14 @@
-const CACHE_NAME = 'ruifang-app-v300'; // 🌟 版本號更新
+const CACHE_NAME = 'ruifang-app-v400'; // 🌟 版本號更新
 
 const urlsToCache = [
   './',
   'index.html',
-  'style.css?v=202', // 樣式表沿用之前的 v=202 即可
-  'db_spots.js?v=300', // 🌟 新增
-  'db_lang.js?v=300',  // 🌟 新增
-  'app.js?v=300',      // 🌟 更新
+  'style.css?v=400',
+  'js/main.js?v=400', // 🌟 確認是抓 js 資料夾
+  // ... 其他模組 js ...
   'manifest.json',
-  'icon-192.png',
-  'icon-512.png'
+  'icon/icon-192.png', // 🌟 加上 icon/ 
+  'icon/icon-512.png'  // 🌟 加上 icon/
 ];
 
 // ... (下方的 install, activate, fetch 邏輯完全不用動) ...
