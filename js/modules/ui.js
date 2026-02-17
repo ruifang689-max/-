@@ -2,14 +2,14 @@
  * js/modules/ui.js (v401)
  * 負責：設定、教學、PWA、收藏夾、自訂景點編輯
  */
+// js/modules/ui.js
 import { state, saveState } from '../core/store.js';
 import { spots } from '../data/spots.js';
-import { addMarkerToMap, renderAllMarkers } from './markers.js';
-import { showCard, closeCard, getPlaceholderImage } from './cards.js';
-import { triggerSearch } from './search.js';
+import { addMarkerToMap } from './markers.js';
+import { showCard, closeCard } from './cards.js';
+import { triggerSearch } from './search.js'; // 🌟 現在這裡可以成功引用了！
 
 export function initUI() {
-    // --- 1. 基本 UI 功能綁定 ---
     window.resetNorth = () => { state.mapInstance.flyTo([25.1032, 121.8224], 14); };
     window.goToStation = () => { state.mapInstance.flyTo([25.108, 121.805], 16); closeCard(); };
     window.aiTrip = () => { 
@@ -18,12 +18,10 @@ export function initUI() {
         alert("🤖 AI 推薦最近景點：\n" + sorted.slice(0,5).map((s,i) => `${i+1}. ${s.name}`).join("\n")); 
     };
 
-    // --- 2. 設定 Modal 相關 ---
     window.openSettings = () => { document.getElementById('settings-modal-overlay').style.display = 'flex'; };
     window.closeSettings = () => { document.getElementById('settings-modal-overlay').style.display = 'none'; };
     window.toggleSkipIntro = (isChecked) => { localStorage.setItem('ruifang_skip_intro', isChecked ? 'true' : 'false'); };
     
-    // --- 3. 教學 Tutorial ---
     window.reopenTutorial = () => { 
         window.closeSettings(); 
         document.getElementById('tutorial-overlay').style.display = 'flex'; 
@@ -50,7 +48,6 @@ export function initUI() {
         }, 400); 
     };
 
-    // --- 4. PWA 安裝 ---
     let deferredPrompt;
     const isIos = () => /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
     const isStandalone = () => ('standalone' in window.navigator) && (window.navigator.standalone);
@@ -64,7 +61,6 @@ export function initUI() {
     };
     window.closeIosInstruction = () => { document.getElementById('ios-instruction-modal').style.display = 'none'; };
 
-    // --- 5. 分享功能 ---
     window.shareSpot = () => { 
         if(!state.targetSpot) return; 
         const spotUrl = new URL(window.location.href.split('?')[0]); spotUrl.searchParams.set('spot', state.targetSpot.name); 
@@ -76,7 +72,6 @@ export function initUI() {
         if (navigator.share) navigator.share(shareData).catch(()=>{}); else navigator.clipboard.writeText(shareData.url).then(() => alert('✅ 網址已複製！')); 
     };
 
-    // --- 6. 收藏夾管理 ---
     window.toggleCurrentFav = () => { 
         if(!state.targetSpot) return; 
         const idx = state.myFavs.indexOf(state.targetSpot.name); 
@@ -89,7 +84,14 @@ export function initUI() {
         if(p.style.display === "block") { p.style.display = "none"; } else { 
             p.innerHTML = ""; 
             if(state.myFavs.length === 0) { p.innerHTML = `<div style="padding:15px; text-align:center; color:#888; font-size:13px;">尚無收藏景點<br>點擊卡片愛心加入！</div>`; } 
-            else { state.myFavs.forEach(name => { const div = document.createElement("div"); div.className = "list-item"; div.innerHTML = `<span><i class="fas fa-heart" style="color:var(--danger); margin-right:5px;"></i> ${name}</span>`; div.onclick = () => { window.triggerSearch(name); p.style.display = "none"; }; p.appendChild(div); }); } 
+            else { 
+                state.myFavs.forEach(name => { 
+                    const div = document.createElement("div"); div.className = "list-item"; 
+                    div.innerHTML = `<span><i class="fas fa-heart" style="color:var(--danger); margin-right:5px;"></i> ${name}</span>`; 
+                    div.onclick = () => { triggerSearch(name); p.style.display = "none"; }; // 🌟 這裡呼叫 imported function
+                    p.appendChild(div); 
+                }); 
+            } 
             const manageBtn = document.createElement('div'); manageBtn.style.cssText = "padding:14px; text-align:center; background:var(--divider-color); font-weight:bold; cursor:pointer; font-size:13px; color:var(--primary);"; manageBtn.innerHTML = "<i class='fas fa-cog'></i> 管理收藏夾"; manageBtn.onclick = () => { p.style.display = "none"; window.openFavManage(); }; p.appendChild(manageBtn); p.style.display = "block"; 
         } 
     };
@@ -108,8 +110,6 @@ export function initUI() {
     window.moveFav = (idx, dir) => { if (idx + dir < 0 || idx + dir >= state.myFavs.length) return; const temp = state.myFavs[idx]; state.myFavs[idx] = state.myFavs[idx + dir]; state.myFavs[idx + dir] = temp; saveState.favs(); renderFavManageList(); };
     window.removeFavManage = (name) => { state.myFavs = state.myFavs.filter(fav => fav !== name); saveState.favs(); renderFavManageList(); if (state.targetSpot && state.targetSpot.name === name) document.getElementById("card-fav-icon").className = "fas fa-heart"; };
 
-    // --- 7. 自訂景點編輯 ---
-    // 綁定地圖長按事件 (新增自訂景點)
     state.mapInstance.on('contextmenu', function(e) {
         const lat = e.latlng.lat; const lng = e.latlng.lng;
         const tempPopup = L.popup({ closeButton: false, autoClose: false, offset: [0, -10] }).setLatLng(e.latlng).setContent("<div style='padding:8px;'><i class='fas fa-spinner fa-spin'></i> 獲取地址中...</div>").openOn(state.mapInstance);
@@ -117,13 +117,7 @@ export function initUI() {
         .then(res => res.json()).then(data => {
             let addr = "瑞芳秘境"; if(data && data.address) { const a = data.address; addr = (a.city || "") + (a.town || a.suburb || a.district || "") + (a.village || "") + (a.road || ""); }
             state.mapInstance.closePopup(tempPopup); 
-            setTimeout(() => { 
-                const spotName = prompt(`📍 找到地址：\n${addr}\n\n是否新增自訂景點？\n請為地點命名：`, "我的秘境"); 
-                if (spotName) { 
-                    const newSpot = { name: spotName, lat: lat, lng: lng, tags: ["自訂"], highlights: `詳細地址：${addr}`, food: "--", history: "自訂標記", transport: "自行前往", wikiImg: "" }; 
-                    state.savedCustomSpots.push(newSpot); saveState.customSpots(); addMarkerToMap(newSpot); showCard(newSpot); 
-                } 
-            }, 150);
+            setTimeout(() => { const spotName = prompt(`📍 找到地址：\n${addr}\n\n是否新增自訂景點？\n請為地點命名：`, "我的秘境"); if (spotName) { const newSpot = { name: spotName, lat: lat, lng: lng, tags: ["自訂"], highlights: `詳細地址：${addr}`, food: "--", history: "自訂標記", transport: "自行前往", wikiImg: "" }; state.savedCustomSpots.push(newSpot); saveState.customSpots(); addMarkerToMap(newSpot); showCard(newSpot); } }, 150);
         }).catch(()=>{ state.mapInstance.closePopup(tempPopup); });
     });
 
@@ -138,7 +132,6 @@ export function initUI() {
     };
     window.closeEditModal = () => { document.getElementById('edit-modal-overlay').style.display = "none"; };
     
-    // 綁定圖片上傳監聽
     const fileInput = document.getElementById('edit-image');
     if(fileInput) {
         fileInput.addEventListener('change', function(e) { 
