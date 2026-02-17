@@ -34,11 +34,254 @@
     <link rel="stylesheet" href="style.css?v=201">
 </head>
 <body id="main-body">
+
+    <div id="splash-screen">
+        <div class="logo-anim">瑞</div>
+        <h2 class="splash-title-text">瑞芳導覽</h2>
+    </div>
+
+    <div id="welcome-screen">
+        <div class="welcome-wrapper">
+            <div class="logo-static">瑞</div>
+            <h1 class="welcome-title" data-i18n="splash_title">瑞芳導覽 App</h1>
+            <p class="welcome-desc" data-i18n="splash_desc">致力於提供瑞芳地區最精準的在地導覽，帶領您深度探索山城之美。</p>
+            
+            <div class="input-group">
+                <label data-i18n="lang">語言 / Language</label>
+                <select id="lang-select-startup" onchange="applyLanguage(this.value)" class="welcome-select">
+                    <option value="zh">繁體中文 (🇹🇼)</option>
+                    <option value="en">English (🇺🇸)</option>
+                    <option value="ja">日本語 (🇯🇵)</option>
+                    <option value="ko">한국어 (🇰🇷)</option>
+                    <option value="vi">Tiếng Việt (🇻🇳)</option>
+                </select>
+            </div>
+
+            <div class="input-group">
+                <label data-i18n="feedback_title">測評問卷與聯絡 / Feedback</label>
+                <div class="link-box">
+                    <a href="https://docs.google.com/forms/d/e/1FAIpQLSfi76mygYPT0XeWDkTVjy1F3NjWTW1qveFKTV2bC5TlJ6yybA/viewform?usp=header" target="_blank"><i class="fas fa-clipboard-list"></i> <span data-i18n="form_link">填寫意見問卷</span></a>
+                    <a href="mailto:ruifang689@gmail.com"><i class="fas fa-envelope"></i> <span data-i18n="contact">聯絡開發團隊</span></a>
+                </div>
+            </div>
+
+            <button class="btn-enter-map" onclick="enterMap()" data-i18n="enter_map">進入地圖</button>
+        </div>
+    </div>
+
+    <div id="tutorial-overlay">
+        <div class="tutorial-box">
+            <div id="tut-step-1">
+                <h3 data-i18n="tut_step1_title"><i class="fas fa-search"></i> 功能說明 (1/2)</h3>
+                <ul>
+                    <li>🔍 <b data-i18n="tut_search">搜尋與標籤</b>：上方可快速尋找與篩選景點。</li>
+                    <li>📍 <b data-i18n="tut_add">長按新增</b>：地圖長按可新增私房景點。</li>
+                    <li>🧭 <b data-i18n="tut_compass">指北針</b>：右下角綠色按鈕，指引方向。</li>
+                </ul>
+                <div class="tutorial-btns">
+                    <button class="btn-fill" style="width: 100%;" onclick="nextTutorial()" data-i18n="tut_next">下一步</button>
+                </div>
+            </div>
+            <div id="tut-step-2" style="display:none;">
+                <h3 data-i18n="tut_step2_title"><i class="fas fa-tools"></i> 進階功能 (2/2)</h3>
+                <ul>
+                    <li>🚗 <b data-i18n="tut_nav">多模式導航</b>：支援步行與開車路線計算。</li>
+                    <li>🎬 <b data-i18n="tut_tour">自動導覽</b>：點擊右下角播放鍵自動導覽。</li>
+                    <li><span style="color: var(--primary);">●</span> <b data-i18n="tut_share">分享鍵</b>：快速分享景點連結給好友。</li>
+                </ul>
+                <div class="tutorial-btns">
+                    <button class="btn-outline" onclick="prevTutorial()" data-i18n="tut_prev">前一步</button>
+                    <button class="btn-fill" onclick="finishTutorial()" data-i18n="tut_finish">開始使用</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="weather-box" title="即時天氣"><i class="fas fa-spinner fa-spin"></i><span id="weather-temp">--</span></div>
+
+    <div id="top-ui">
+        <input id="search" placeholder="🔍 搜尋景點或長按新增..." data-i18n="search_ph">
+        <div id="category-chips" onwheel="this.scrollLeft += event.deltaY">
+            <div class="chip active" onclick="filterSpots('all', this)" data-i18n="chip_all">🌟 全部</div>
+            <div class="chip" onclick="filterSpots('美食', this)" data-i18n="chip_food">🍜 美食</div>
+            <div class="chip" onclick="filterSpots('歷史', this)" data-i18n="chip_history">🏛️ 歷史</div>
+            <div class="chip" onclick="filterSpots('自然', this)" data-i18n="chip_nature">⛰️ 自然景觀</div>
+            <div class="chip" onclick="filterSpots('自訂', this)" data-i18n="chip_custom">📍 我的標記</div>
+        </div>
+        <div id="map-center-panel"><i class="fas fa-map-marker-alt" style="color:var(--primary)"></i><span id="addr-text" data-i18n="locating">定位中...</span></div>
+        <div id="suggest">
+            <div class="suggest-header"><span style="font-size:12px; font-weight:bold; color:var(--text-sub);">搜尋與推薦</span> <i class="fas fa-times" style="cursor:pointer;" onclick="closeSuggest()"></i></div>
+            <div id="suggest-content"></div>
+        </div>
+    </div>
+
+    <div id="route-info-panel">
+        <div class="route-modes">
+            <div class="route-mode-btn active" id="mode-driving" onclick="changeNavMode('driving')"><i class="fas fa-car"></i></div>
+            <div class="route-mode-btn" id="mode-walking" onclick="changeNavMode('walking')"><i class="fas fa-walking"></i></div>
+        </div>
+        <div class="route-data">
+            <span id="route-time" class="route-time">-- 分鐘</span>
+            <span id="route-dist" class="route-dist">-- km</span>
+        </div>
+        <i class="fas fa-times-circle route-close" onclick="closeNav()"></i>
+    </div>
+
+    <div class="map-controls">
+        <div class="control-btn" onclick="openSettings()" title="設定"><i class="fas fa-cog"></i></div>
+        <div class="control-btn compass-btn" onclick="resetNorth()" title="回到全景"><i class="fas fa-compass"></i></div>
+        <div class="control-btn route-btn" onclick="openRouteMenu()" title="熱門路線"><i class="fas fa-route"></i></div>
+        <div class="control-btn fav-btn" onclick="toggleFavList()" title="我的收藏"><i class="fas fa-folder-open"></i></div>
+        <div class="control-btn" id="tour-btn" onclick="toggleGuidedTour()" title="自動導覽"><i class="fas fa-play" style="color: #e84393;"></i></div>
+        <div class="control-btn station-btn" onclick="goToStation()" title="回到瑞芳中心"><span class="rui-icon">瑞</span></div>
+        <div class="control-btn" id="layer-btn" onclick="toggleLayer()" title="切換底圖"><i class="fas fa-map"></i></div>
+        <div class="control-btn active" onclick="goToUser()" title="我的位置"><i class="fas fa-location-crosshairs" style="color: var(--primary);"></i></div>
+    </div>
+
+    <div id="fav-list-panel"></div>
+    <div id="gps-val-text" data-i18n="gps_locating">GPS: 定位中...</div>
+    <div id="map"></div>
+
+    <div id="card">
+        <div class="close-bar" onclick="closeCard()"></div>
+        <div class="card-header-row">
+            <h2 id="title"></h2>
+            <div class="card-header-icons">
+                <i id="card-share-icon" class="fas fa-share-nodes" onclick="shareSpot()"></i>
+                <i id="card-fav-icon" class="fas fa-heart" onclick="toggleCurrentFav()"></i>
+            </div>
+        </div>
+        <div id="card-tags"></div>
+        <img id="img">
+        <div class="info-section"><span class="info-label"><i class="fas fa-utensils"></i> <span data-i18n="food">在地飲食</span></span><span id="card-food" class="info-text"></span></div>
+        <div class="info-section"><span class="info-label"><i class="fas fa-star"></i> <span data-i18n="highlights">推薦亮點</span></span><span id="card-highlights" class="info-text"></span></div>
+        <div class="info-section"><span class="info-label"><i class="fas fa-history"></i> <span data-i18n="history">簡介歷史</span></span><span id="card-history" class="info-text"></span></div>
+        <div class="info-section"><span class="info-label"><i class="fas fa-bus"></i> <span data-i18n="transport">交通方式</span></span><span id="card-transport" class="info-text"></span></div>
+        <div class="btn-group" id="card-btn-group"></div>
+    </div>
+
+    <div id="route-select-modal" class="modal-overlay">
+        <div class="modal-box">
+            <h3 class="modal-title route"><i class="fas fa-route"></i> 選擇熱門路線</h3>
+            <div class="route-list-container">
+                <div class="route-item" onclick="selectRoute('history')">
+                    <div class="route-info"><span class="route-name" style="color: #8e44ad;">🏛️ 歷史懷舊線</span><span class="route-desc">九份老街 ➔ 黃金博物館</span></div>
+                    <button class="route-action-btn" style="background:#8e44ad;">出發</button>
+                </div>
+                <div class="route-item" onclick="selectRoute('nature')">
+                    <div class="route-info"><span class="route-name" style="color: #27ae60;">⛰️ 山海自然線</span><span class="route-desc">猴硐 ➔ 報時山 ➔ 陰陽海</span></div>
+                    <button class="route-action-btn" style="background:#27ae60;">出發</button>
+                </div>
+                <div class="route-item" onclick="selectRoute('food')">
+                    <div class="route-info"><span class="route-name" style="color: #d35400;">🍜 饕客美食線</span><span class="route-desc">車站美食 ➔ 芋圓 ➔ 礦工便當</span></div>
+                    <button class="route-action-btn" style="background:#d35400;">出發</button>
+                </div>
+            </div>
+            <div class="modal-btns">
+                <button class="modal-cancel" onclick="closeRouteMenu()" data-i18n="close" style="width: 100%;">關閉</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="settings-modal-overlay" class="modal-overlay">
+        <div class="modal-box">
+            <h2 class="settings-title" data-i18n="settings"><i class="fas fa-cog"></i> 系統設定</h2>
+            
+            <h3 class="settings-sub" data-i18n="lang"><i class="fas fa-globe"></i> 語言 / Language</h3>
+            <select id="lang-select-settings" onchange="applyLanguage(this.value)" class="modal-select">
+                <option value="zh">繁體中文 (🇹🇼)</option>
+                <option value="en">English (🇺🇸)</option>
+                <option value="ja">日本語 (🇯🇵)</option>
+                <option value="ko">한국어 (🇰🇷)</option>
+                <option value="vi">Tiếng Việt (🇻🇳)</option>
+            </select>
+
+            <h3 class="settings-sub" data-i18n="theme"><i class="fas fa-palette"></i> 主題顏色</h3>
+            <select id="theme-select" onchange="changeTheme(this.value)" class="modal-select">
+                <option value="default">系統主題色 (預設)</option>
+                <option value="#007bff">活力藍</option>
+                <option value="#333333">極簡黑</option>
+                <option value="#f39c12">溫暖橘</option>
+                <option value="#28a745">自然綠</option>
+                <option value="#8e44ad">神秘紫</option>
+                <option value="custom">自訂顏色...</option>
+            </select>
+            <input type="color" id="custom-color-picker" style="display:none; width:100%; margin-top:5px; height: 40px; border:none; border-radius:10px;" onchange="applyCustomTheme(this.value)">
+
+            <div style="margin-top: 15px; border-top: 1px dashed var(--divider-color); padding-top: 15px;">
+                <label style="display: flex; align-items: center; gap: 10px; font-weight: bold; font-size: 15px; cursor: pointer; color: #111111;">
+                    <input type="checkbox" id="skip-intro-toggle" onchange="toggleSkipIntro(this.checked)" style="width: 18px; height: 18px;">
+                    <span data-i18n="skip_intro">啟動時略過開場與教學</span>
+                </label>
+            </div>
+
+            <div id="install-btn-container" style="display:none; margin-top: 15px;">
+                <button class="install-pwa-btn" onclick="installPWA()"><i class="fas fa-download"></i> <span data-i18n="install_app">將 App 安裝至桌面</span></button>
+            </div>
+
+            <div class="contact-section">
+                <h3 class="settings-sub" style="width:100%; margin-bottom:10px;" data-i18n="feedback_title">測評問卷與聯絡</h3>
+                <a href="https://docs.google.com/forms/d/e/1FAIpQLSfi76mygYPT0XeWDkTVjy1F3NjWTW1qveFKTV2bC5TlJ6yybA/viewform?usp=header" target="_blank" class="contact-btn"><i class="fas fa-clipboard-list"></i> <span data-i18n="form_link">填寫意見問卷</span></a>
+                <a href="mailto:ruifang689@gmail.com" class="contact-btn"><i class="fas fa-envelope"></i> <span data-i18n="contact">聯絡開發團隊</span></a>
+                <div class="contact-btn" onclick="shareAppMap()"><i class="fas fa-share-alt"></i> <span data-i18n="share_map_title">推薦地圖給好友</span></div>
+            </div>
+
+            <div style="text-align:center; margin-top: 10px;">
+                <button onclick="reopenTutorial()" style="background:transparent; border:1px solid #aaa; padding:8px 20px; border-radius:8px; color:#555; font-size:13px; cursor:pointer;">
+                    <i class="fas fa-info-circle"></i> <span data-i18n="tut_title">功能說明教學</span>
+                </button>
+            </div>
+
+            <div class="modal-btns">
+                <button class="modal-cancel" onclick="closeSettings()" data-i18n="close">關閉</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="fav-manage-modal" class="modal-overlay">
+        <div class="modal-box">
+            <h3 class="modal-title fav"><i class="fas fa-folder-open"></i> <span data-i18n="manage_fav">管理收藏夾</span></h3>
+            <div id="fav-manage-list" style="max-height: 50vh; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding-right: 5px;"></div>
+            <div class="modal-btns">
+                <button class="modal-cancel" onclick="closeFavManage()" data-i18n="close" style="width: 100%;">關閉</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="edit-modal-overlay" class="modal-overlay">
+        <div class="modal-box">
+            <h3 class="modal-title"><i class="fas fa-edit"></i> 編輯標記</h3>
+            <input type="text" id="edit-name" class="modal-input" placeholder="名稱必填">
+            <input type="text" id="edit-highlights" class="modal-input" placeholder="推薦亮點">
+            <textarea id="edit-history" class="modal-textarea" placeholder="歷史簡介..."></textarea>
+            <label class="modal-file-label"><i class="fas fa-camera"></i> <span>上傳照片</span><input type="file" id="edit-image" accept="image/*" style="display:none;"></label>
+            <img id="edit-image-preview">
+            <div class="modal-btns">
+                <button class="modal-cancel" onclick="closeEditModal()">取消</button>
+                <button class="modal-save" onclick="saveEditSpot()">儲存</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="ios-instruction-modal" class="modal-overlay" style="z-index: 99999;">
+        <div class="modal-box" style="text-align: center;">
+            <h3 style="color: #007aff; margin-bottom: 15px;"><i class="fab fa-apple"></i> 安裝至 iPhone 桌面</h3>
+            <p style="font-size: 15px; color: var(--text-main); line-height: 1.6;">
+                為了獲得最佳的全螢幕導覽體驗，請：<br><br>
+                1. 點擊瀏覽器下方的 <i class="fas fa-share-square" style="color:#007aff; font-size:18px;"></i> <b>分享按鈕</b><br><br>
+                2. 往下滑動並選擇 <i class="fas fa-plus-square" style="color:#007aff; font-size:18px;"></i> <b>「加入主畫面」</b>
+            </p>
+            <div class="modal-btns" style="margin-top: 20px;">
+                <button class="modal-save" style="background:#007aff;" onclick="closeIosInstruction()">我知道了</button>
+            </div>
+        </div>
+    </div>
+
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
-    
     <script src="./data.js?v=201"></script>
     <script src="./app.js?v=201"></script>
 
 </body>
 </html>
+
