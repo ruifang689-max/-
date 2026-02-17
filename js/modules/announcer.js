@@ -1,7 +1,6 @@
-// js/modules/announcer.js
+// js/modules/announcer.js (v408)
 import { state } from '../core/store.js';
 
-// 🌟 瑞芳區「村里」對應「大範圍區域」的在地字典
 const ruifangMap = {
     "龍潭里": "瑞芳市區", "龍鎮里": "瑞芳市區", "龍安里": "瑞芳市區", "龍川里": "瑞芳市區", "龍山里": "瑞芳市區", 
     "爪峰里": "瑞芳市區", "新峰里": "瑞芳市區", "東和里": "瑞芳車站",
@@ -23,9 +22,13 @@ export function initAnnouncer() {
         document.getElementById("addr-text").innerText = "定位中..."; 
         document.getElementById("addr-text").style.opacity = '1';
         
+        // 🌟 防 425 錯誤：延遲改為 1500ms，確保不超過 1 request/sec 限制
         geocodeTimer = setTimeout(() => {
             const center = state.mapInstance.getCenter();
-            fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${center.lat}&lon=${center.lng}&zoom=18&addressdetails=1&accept-language=zh-TW`)
+            // 🌟 加入 email 參數，遵守 OSM Nominatim API 規範
+            const apiUrl = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${center.lat}&lon=${center.lng}&zoom=18&addressdetails=1&accept-language=zh-TW&email=ruifang689@gmail.com`;
+            
+            fetch(apiUrl)
             .then(res => { if(!res.ok) throw new Error(); return res.json(); })
             .then(data => { 
                 let areaStr = "探索瑞芳中...";
@@ -38,7 +41,6 @@ export function initAnnouncer() {
                     let baseStr = city + dist + village;
                     if (!baseStr) baseStr = a.road || "";
                     
-                    // 🌟 核心邏輯：如果是瑞芳區且在字典內，加上括號說明
                     if (dist === "瑞芳區" && village && ruifangMap[village]) {
                         areaStr = `${baseStr} (${ruifangMap[village]})`;
                     } else if (baseStr) {
@@ -47,6 +49,6 @@ export function initAnnouncer() {
                 } 
                 document.getElementById("addr-text").innerText = areaStr; 
             }).catch(()=>{ document.getElementById("addr-text").innerText = "探索瑞芳中..."; }); 
-        }, 600); 
+        }, 1500); // 🌟 延遲 1.5 秒
     });
 }
