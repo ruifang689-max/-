@@ -94,16 +94,48 @@ window.mapInstance.locate({setView: false, watch: true, enableHighAccuracy: true
 window.mapInstance.on('locationfound', e => { userPos = e.latlng; document.getElementById("gps-val-text").innerText = `GPS: ${e.latlng.lat.toFixed(4)}, ${e.latlng.lng.toFixed(4)}`; if(!userMarker) userMarker = L.marker(userPos, { icon: userPulseIcon }).addTo(window.mapInstance); else userMarker.setLatLng(userPos); });
 
 let geocodeTimer = null;
-window.mapInstance.on('movestart', () => { document.getElementById("addr-text").style.opacity = '0.5'; });
+let isFetching = false; // 加入鎖定狀態，防止重複請求
+
+window.mapInstance.on('movestart', () => { 
+    document.getElementById("addr-text").style.opacity = '0.5'; 
+});
+
 window.mapInstance.on('moveend', function() {
-    clearTimeout(geocodeTimer); document.getElementById("addr-text").innerText = "定位中..."; document.getElementById("addr-text").style.opacity = '1';
+    clearTimeout(geocodeTimer); 
+    document.getElementById("addr-text").innerText = "定位中..."; 
+    document.getElementById("addr-text").style.opacity = '1';
+    
+    // 🌟 延遲增加到 1.5 秒，並檢查是否正在請求中
     geocodeTimer = setTimeout(() => {
+        if(isFetching) return;
+        isFetching = true;
+
         const center = window.mapInstance.getCenter();
-        fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${center.lat}&lon=${center.lng}&zoom=18&addressdetails=1&accept-language=zh-TW&email=ruifang689@gmail.com`)
-        .then(res => { if (!res.ok) throw new Error('Rate Limit'); return res.json(); })
-        .then(data => { if (data && data.address) { const a = data.address; document.getElementById("addr-text").innerText = ((a.city||a.town||a.county||"") + (a.suburb||a.district||"") + (a.village||a.neighbourhood||a.road||"")) || "探索瑞芳中..."; } })
-        .catch(()=>{ document.getElementById("addr-text").innerText = "探索瑞芳中..."; }); 
-    }, 1200); 
+        // 加入 Accept-Language 標頭嘗試改善
+        fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${center.lat}&lon=${center.lng}&zoom=18&addressdetails=1&accept-language=zh-TW&email=ruifang689@gmail.com`, {
+            headers: { 'Accept-Language': 'zh-TW' } 
+        })
+        .then(res => { 
+            if (!res.ok) throw new Error('Network response was not ok'); 
+            return res.json(); 
+        })
+        .then(data => { 
+            if (data && data.address) { 
+                const a = data.address; 
+                // 優先顯示順序：路名 > 村里 > 區域
+                const text = (a.road || a.village || a.suburb || a.hamlet || "瑞芳山城");
+                document.getElementById("addr-text").innerText = text; 
+            }
+        })
+        .catch((e) => { 
+            // 🌟 失敗時優雅降級，顯示預設文字，不報紅字
+            console.warn("地理編碼暫時無法使用 (流量限制)"); 
+            document.getElementById("addr-text").innerText = "探索瑞芳中..."; 
+        })
+        .finally(() => {
+            isFetching = false; // 解除鎖定
+        });
+    }, 1500); 
 });
 
 // =========================================
