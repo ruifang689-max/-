@@ -203,7 +203,7 @@ html, body { margin: 0; padding: 0; width: 100vw; height: 100dvh; overflow: hidd
 .settings-title { color: var(--primary); text-align: center; margin: 0 0 10px 0; font-size: 20px; font-weight: 800;}
 /* 替換這一段 */
 .settings-sub { 
-    color: var(--primary); /* 🌟 綁定主題色，黑暗模式下也不會變成純白 */
+    color: var(--accent); /* 🌟 改綁定為次要強調色 (預設為橘色 #e67e22) */
     text-align: left; 
     margin: 10px 0 0 0; 
     font-size: 14px;
