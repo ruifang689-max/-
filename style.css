@@ -82,7 +82,25 @@ html, body { margin: 0; padding: 0; width: 100vw; height: 100dvh; overflow: hidd
 #weather-temp { font-size: 11px; font-weight: bold; color: var(--text-main); }
 .weather-sun { color: #f39c12 !important; } .weather-cloud { color: #bdc3c7 !important; } .weather-rain { color: #7f8c8d !important; }
 
-#route-info-panel { position: absolute; top: calc(125px + env(safe-area-inset-top, 0px)); left: 50%; transform: translateX(-50%); background: var(--glass); backdrop-filter: blur(10px); color: var(--text-main); padding: 8px 18px; border-radius: 30px; box-shadow: var(--card-shadow); display: none; align-items: center; gap: 12px; z-index: 3000; border: 2px solid var(--primary); pointer-events: auto; }
+#route-info-panel { 
+    position: absolute; 
+    /* 🌟 從 125px 改為 160px，完美避開上方的報幕 UI */
+    top: calc(160px + env(safe-area-inset-top, 0px)); 
+    left: 50%; 
+    transform: translateX(-50%); 
+    background: var(--glass); 
+    backdrop-filter: blur(10px); 
+    color: var(--text-main); 
+    padding: 8px 18px; 
+    border-radius: 30px; 
+    box-shadow: var(--card-shadow); 
+    display: none; 
+    align-items: center; 
+    gap: 12px; 
+    z-index: 3000; 
+    border: 2px solid var(--primary); 
+    pointer-events: auto; 
+}
 .route-modes { display: flex; flex-direction: column; gap: 4px; }
 .route-mode-btn { width: 28px; height: 28px; border-radius: 50%; display: flex; justify-content: center; align-items: center; background: var(--bg-color); border: 1px solid var(--border-color); cursor: pointer; color: var(--text-sub); transition: 0.2s; font-size: 12px;}
 .route-mode-btn.active { background: var(--primary); color: #fff; border-color: var(--primary); }
@@ -98,7 +116,21 @@ html, body { margin: 0; padding: 0; width: 100vw; height: 100dvh; overflow: hidd
 
 .leaflet-bottom.leaflet-right { bottom: calc(20px + env(safe-area-inset-bottom, 0px)) !important; right: calc(15px + env(safe-area-inset-right, 0px)) !important; }
 .leaflet-control-scale-line { background: rgba(255, 255, 255, 0.8) !important; border: 2px solid #333 !important; font-weight: bold; padding: 2px 5px; color: #333 !important; font-size: 10px;}
-#gps-val-text { position: absolute; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); right: calc(125px + env(safe-area-inset-right, 0px)); left: auto; z-index: 3000; font-family: monospace; font-size: 11px; font-weight: bold; color: var(--primary); pointer-events: none; text-shadow: -1px -1px 0 var(--bg-color), 1px -1px 0 var(--bg-color), -1px 1px 0 var(--bg-color), 1px 1px 0 var(--bg-color); }
+#gps-val-text { 
+    position: absolute; 
+    /* 🌟 水平線切齊：跟比例尺的底線保持完美的視覺水平 */
+    bottom: calc(22px + env(safe-area-inset-bottom, 0px)); 
+    /* 🌟 電腦版間距：比例尺在右邊，我們讓 GPS 也在右邊，但退後 130px 保持舒服的距離 */
+    right: calc(130px + env(safe-area-inset-right, 0px)); 
+    left: auto; 
+    z-index: 3000; 
+    font-family: monospace; 
+    font-size: 11px; 
+    font-weight: bold; 
+    color: var(--primary); 
+    pointer-events: none; 
+    text-shadow: -1px -1px 0 var(--bg-color), 1px -1px 0 var(--bg-color), -1px 1px 0 var(--bg-color), 1px 1px 0 var(--bg-color); 
+}
 
 .map-controls { position: absolute; bottom: calc(85px + env(safe-area-inset-bottom, 0px)); right: calc(12px + env(safe-area-inset-right, 0px)); z-index: 3000; display: flex; flex-direction: column; gap: 12px; pointer-events: auto; }
 .control-btn { background: var(--glass); backdrop-filter: blur(8px); width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: var(--card-shadow); cursor: pointer; color: var(--text-main); font-size: 20px; border: 1px solid var(--border-color); transition: transform 0.1s; }
@@ -170,7 +202,13 @@ html, body { margin: 0; padding: 0; width: 100vw; height: 100dvh; overflow: hidd
 
 .settings-title { color: var(--primary); text-align: center; margin: 0 0 10px 0; font-size: 20px; font-weight: 800;}
 /* 替換這一段 */
-.settings-sub { color: var(--text-main); text-align: left; margin: 10px 0 0 0; font-size: 14px;font-weight: bold;}
+.settings-sub { 
+    color: var(--primary); /* 🌟 綁定主題色，黑暗模式下也不會變成純白 */
+    text-align: left; 
+    margin: 10px 0 0 0; 
+    font-size: 14px;
+    font-weight: bold;
+}
 
 /* 將 .modal-title 替換為以下： */
 .modal-title { color: var(--text-main); margin: 0 0 10px 0; font-size: 20px; font-weight: 900; display: flex; align-items: center; gap: 8px;}
@@ -212,21 +250,40 @@ body.dark-mode .route-name { color: #e0e0e0 !important; }
 .user-pulse-icon .pulse { width: 40px; height: 40px; background: var(--primary); border-radius: 50%; position: absolute; top: 0; left: 0; opacity: 0.2; animation: user-pulse 1.8s infinite; }
 @keyframes user-pulse { 0% { transform: scale(0.5); opacity: 0.6; } 100% { transform: scale(1.1); opacity: 0; } }
 
-/* RWD */
+/* RWD 手機版適應 */
 @media (min-width: 768px) { 
     .welcome-wrapper { max-width: 400px; padding-top: 10vh; } .logo-static { width: 100px; height: 100px; font-size: 50px; } .btn-enter-map { padding: 16px 80px; font-size: 18px; } 
     #category-chips { overflow-x: auto; padding-bottom: 5px; } #category-chips::-webkit-scrollbar { display: block; height: 6px; } #category-chips::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 10px; }
     #card { width: 400px; left: 20px; bottom: 20px; border-radius: 20px; max-height: 85vh; border: 2px solid var(--primary); transform: translateX(-120%); padding-bottom: 20px;}
     #card.open { transform: translateX(0); }
 }
-@media (max-width: 768px) and (orientation: portrait) { #top-ui { left: 15px; transform: none; width: calc(100% - 75px); } #gps-val-text { left: 15px; right: auto; } }
+
+@media (max-width: 768px) and (orientation: portrait) { 
+    #top-ui { left: 15px; transform: none; width: calc(100% - 75px); } 
+    #route-info-panel { top: calc(140px + env(safe-area-inset-top, 0px)); }
+    /* 🌟 手機直式：把 GPS 移到左邊，但高度 (bottom: 22px) 依然跟右邊的比例尺切齊 */
+    #gps-val-text { left: 15px; right: auto; bottom: calc(22px + env(safe-area-inset-bottom, 0px)); } 
+}
+
 @media (max-height: 500px) and (orientation: landscape) { 
     .welcome-wrapper { padding-top: 10px; padding-bottom: 10px; } .logo-static { width: 50px; height: 50px; font-size: 24px; margin-top: 0; } .welcome-title { margin-top: 8px; font-size: 18px; } .welcome-desc { margin-bottom: 10px; font-size: 12px; } .btn-enter-map { padding: 8px 30px; font-size: 14px; }
     .tutorial-box { padding: 15px; max-height: 90vh; overflow-y: auto; } .tutorial-box h3 { padding-bottom: 5px; margin-bottom: 5px; } .tutorial-box ul li { margin: 5px 0; } .tutorial-btns { margin-top: 10px; }
-    #top-ui { width: 260px; left: 15px; transform: none; top: 10px; gap: 4px; } #search { padding: 8px 15px; font-size: 13px; } #category-chips .chip { padding: 4px 10px; font-size: 11px; } #suggest { max-height: 35vh; } #route-info-panel { top: 90px; } .map-controls { flex-direction: row; bottom: 15px; left: 50%; transform: translateX(-50%); right: auto; gap: 8px; } .control-btn { width: 40px; height: 40px; font-size: 16px; } #gps-val-text { left: 15px; right: auto; bottom: 65px; z-index: 4000; } 
+    #top-ui { width: 260px; left: 15px; transform: none; top: 10px; gap: 4px; } #search { padding: 8px 15px; font-size: 13px; } #category-chips .chip { padding: 4px 10px; font-size: 11px; } #suggest { max-height: 35vh; } #route-info-panel { top: 90px; } .map-controls { flex-direction: row; bottom: 15px; left: 50%; transform: translateX(-50%); right: auto; gap: 8px; } .control-btn { width: 40px; height: 40px; font-size: 16px; } 
+    /* 🌟 手機橫式：把 GPS 移到左邊，高度保持切齊 */
+    #gps-val-text { left: 15px; right: auto; bottom: calc(22px + env(safe-area-inset-bottom, 0px)); z-index: 4000; } 
     #card { max-height: 75vh; padding: 15px; } #img { height: 130px; margin-bottom: 10px; }
 }
 
 /* 黑暗模式專屬細節覆蓋 */
 body.dark-mode .leaflet-popup-tip { background: var(--glass); }
-body.dark-mode .leaflet-control-scale-line { background: rgba(0, 0, 0, 0.5) !important; color: #fff !important; border-color: #888 !important; }
+body.dark-mode .leaflet-control-scale-line { 
+    background: rgba(0, 0, 0, 0.6) !important; 
+    color: #fff !important; 
+    border-color: #888 !important; 
+    text-shadow: none !important; /* 🌟 徹底殺死重影 */
+    box-shadow: none !important;  /* 🌟 拔除多餘光暈 */
+}
+/* 確保 GPS 文字在黑暗模式下的描邊也變換為深色，防止白邊突兀 */
+body.dark-mode #gps-val-text {
+    text-shadow: -1px -1px 0 #121212, 1px -1px 0 #121212, -1px 1px 0 #121212, 1px 1px 0 #121212 !important;
+}
