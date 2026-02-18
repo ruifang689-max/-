@@ -139,13 +139,13 @@
     </div>
 
     <div class="map-controls">
-        <div class="control-btn" onclick="openSettings()" title="系統設定"><i class="fas fa-cog" style="color: #555;"></i></div>
+        <div class="control-btn" onclick="openSettings()" title="系統設定"><i class="fas fa-cog"></i></div>
         <div class="control-btn compass-btn" onclick="resetNorth()" title="指北針"><i class="fas fa-compass" style="color: #27ae60;"></i></div>
         <div class="control-btn route-btn" onclick="openRouteMenu()" title="推薦路線"><i class="fas fa-route" style="color: #8e44ad;"></i></div>
         <div class="control-btn fav-btn" onclick="toggleFavList()" title="我的收藏"><i class="fas fa-folder" style="color: #ff4757;"></i></div>
         <div class="control-btn" id="tour-btn" onclick="toggleGuidedTour()" title="自動導覽"><i class="fas fa-play" style="color: #e84393;"></i></div>
         <div class="control-btn" onclick="goToStation()" title="回到瑞芳中心" style="background:var(--bg-color);"><span class="rui-icon">瑞</span></div>
-        <div id="layer-btn" class="control-btn" onclick="toggleLayer()" title="切換底圖"><i class="fas fa-map" style="color: #333;"></i></div>
+        <div id="layer-btn" class="control-btn" onclick="toggleLayer()" title="切換底圖"><i class="fas fa-map"></i></div>
         <div class="control-btn active" onclick="goToUser()" title="我的位置"><i class="fas fa-location-crosshairs" style="color: var(--primary);"></i></div>
     </div>
 
@@ -212,7 +212,7 @@
             <input type="color" id="custom-color-picker" style="display:none; width:100%; margin-top:10px; height:40px; border:none; cursor:pointer;" onchange="applyCustomTheme(this.value, true)">
     
             <div style="margin-top: 15px; border-top: 1px dashed var(--divider-color); padding-top: 15px;">
-                <label style="display: flex; align-items: center; gap: 10px; font-weight: bold; font-size: 15px; cursor: pointer; color: #111111;">
+                <label style="display: flex; align-items: center; gap: 10px; font-weight: bold; font-size: 15px; cursor: pointer; color: var(--text-main);">
                     <input type="checkbox" id="skip-intro-toggle" onchange="toggleSkipIntro(this.checked)" style="width: 18px; height: 18px;">
                     <span data-i18n="skip_intro">啟動時略過開場動畫與教學</span>
                 </label>
@@ -339,6 +339,7 @@
 
 </body>
 </html>
+
 
 
 
