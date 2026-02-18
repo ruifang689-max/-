@@ -53,48 +53,66 @@ export function initUI() {
     };
 
     // =========================================
-    // 2. 🌟 主題顏色 (Theme)
+    // 2. 🌟 主題顏色 (Theme) & 客製化下拉選單
     // =========================================
+    window.toggleThemeDropdown = () => {
+        const list = document.getElementById('theme-options-list');
+        list.classList.toggle('open');
+    };
+
+    // 點擊空白處自動關閉下拉選單
+    document.addEventListener('click', (e) => {
+        const wrapper = document.getElementById('theme-custom-select');
+        const list = document.getElementById('theme-options-list');
+        if (wrapper && !wrapper.contains(e.target) && list && list.classList.contains('open')) {
+            list.classList.remove('open');
+        }
+    });
+
+    window.selectThemeOption = (value, colorHex, text) => {
+        document.getElementById('theme-options-list').classList.remove('open');
+        window.changeTheme(value);
+    };
+
     window.changeTheme = (color) => { 
         if (color === 'custom') { 
             document.getElementById('custom-color-picker').style.display = 'block'; 
             document.getElementById('custom-color-picker').click(); 
         } else if (color === 'default') {
             document.getElementById('custom-color-picker').style.display = 'none'; 
-            window.applyCustomTheme('#007bff', false); // 預設藍，不蓋過開場黑白
+            window.applyCustomTheme('#007bff', false);
             localStorage.setItem('ruifang_theme', 'default');
         } else { 
             document.getElementById('custom-color-picker').style.display = 'none'; 
-            window.applyCustomTheme(color, true); // 其他色，同步開場色
+            window.applyCustomTheme(color, true);
         } 
     };
 
-    // 🌟 替換 ui.js 裡面的這個函式
     window.applyCustomTheme = (color, syncIntro = false) => { 
         document.documentElement.style.setProperty('--primary', color); 
         document.documentElement.style.setProperty('--logo-border', color); 
         
-        // 🌟 核心動態邏輯：
-        // 如果是「預設主題」，次標維持橘色 (--accent)
-        // 如果是「其他主題」，次標跟隨主題色變動
         if (color === '#007bff' && !syncIntro) {
-            document.documentElement.style.setProperty('--accent', '#e67e22'); // 預設恢復橘色
+            document.documentElement.style.setProperty('--accent', '#e67e22'); 
         } else {
-            document.documentElement.style.setProperty('--accent', color); // 其他主題色，次標跟著變
+            document.documentElement.style.setProperty('--accent', color); 
         }
 
         if (syncIntro) {
             document.documentElement.style.setProperty('--intro-color', color);
             if(color !== '#007bff') localStorage.setItem('ruifang_theme', color); 
         } else {
-            document.documentElement.style.setProperty('--intro-color', '#111111'); // 強制黑白
+            document.documentElement.style.setProperty('--intro-color', '#111111'); 
         }
 
-        const themeSelect = document.getElementById('theme-select'); 
-        if(themeSelect) {
-            if(color === '#007bff' && !syncIntro) themeSelect.value = 'default';
-            else if([...themeSelect.options].some(o => o.value === color)) themeSelect.value = color; 
-            else themeSelect.value = 'custom'; 
+        // 🌟 核心同步：即時更新外層按鈕的「白框色塊」與「文字」
+        const colorSwatch = document.getElementById('current-theme-color');
+        const textSpan = document.getElementById('current-theme-text');
+        if (colorSwatch && textSpan) {
+            colorSwatch.style.background = color;
+            const themeMap = { '#007bff': '活力藍', '#333333': '極簡黑', '#28a745': '自然綠', '#27ae60': '森林綠', '#f39c12': '溫暖橘', '#e67e22': '夕陽橘', '#8e44ad': '神秘紫', '#e84393': '櫻花粉' };
+            if (color === '#007bff' && !syncIntro) textSpan.innerText = '系統主題色 (預設)';
+            else textSpan.innerText = themeMap[color] || `自訂顏色 (${color})`;
         }
     };
 
@@ -287,14 +305,11 @@ export function initUI() {
     // =========================================
     // 9. 🌟 系統啟動時的初始化 (Apply Init Config)
     // =========================================
-    // 套用已儲存的語言
     window.applyLanguage(state.currentLang);
 
-    // 套用已儲存的主題
     const savedTheme = localStorage.getItem('ruifang_theme'); 
     if (!savedTheme || savedTheme === 'default') { 
         window.applyCustomTheme('#007bff', false); 
     } else { 
         window.applyCustomTheme(savedTheme, true); 
     }
-}
