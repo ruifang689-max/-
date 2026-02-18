@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+
+# 請將下方網址替換成您實際的網站網址
+Sitemap: https://https://ruifang689-max.github.io/-//sitemap.xml
