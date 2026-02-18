@@ -9,13 +9,14 @@
     --success: #28a745;   
     --card-shadow: 0 8px 30px rgba(0,0,0,0.15); 
     --bg-color: #ffffff;      
-    --text-main: #111111; 
+    --text-main: #111111; /* 🌟 白天是深灰色/黑色 */
     --text-sub: #555555;
     --border-color: #e0e0e0;
     --divider-color: #f5f5f5;
     --glass: rgba(255, 255, 255, 0.98); /* 提高不透明度，增強質感 */
 }
 
+/* 黑暗模式切換 */
 @media (prefers-color-scheme: dark) {
     :root { --bg-color: #121212; --text-main: #e0e0e0; --text-sub: #aaaaaa; --border-color: #333; --divider-color: #222; --glass: rgba(30, 30, 30, 0.98); --card-shadow: 0 8px 30px rgba(0,0,0,0.6); }
 }
@@ -168,7 +169,8 @@ html, body { margin: 0; padding: 0; width: 100vw; height: 100dvh; overflow: hidd
 }
 
 .settings-title { color: var(--primary); text-align: center; margin: 0 0 10px 0; font-size: 20px; font-weight: 800;}
-.settings-sub { color: var(--accent); text-align: left; margin: 10px 0 0 0; font-size: 14px;}
+/* 替換這一段 */
+.settings-sub { color: var(--text-main); text-align: left; margin: 10px 0 0 0; font-size: 14px;font-weight: bold;}
 
 /* 將 .modal-title 替換為以下： */
 .modal-title { color: var(--text-main); margin: 0 0 10px 0; font-size: 20px; font-weight: 900; display: flex; align-items: center; gap: 8px;}
@@ -198,7 +200,10 @@ html, body { margin: 0; padding: 0; width: 100vw; height: 100dvh; overflow: hidd
 .route-item { display: flex; align-items: center; justify-content: space-between; padding: 12px; border: 1px solid var(--border-color); border-radius: 12px; cursor: pointer; transition: background 0.2s; background: var(--input-bg); }
 .route-item:active { background: var(--divider-color); }
 .route-info { display: flex; flex-direction: column; }
-.route-name { font-weight: bold; font-size: 15px; color: var(--text-main); margin-bottom: 4px; }
+/* 將這段加到 .route-name 的定義後面 */
+.route-name { font-weight: bold; font-size: 15px; margin-bottom: 4px; }
+/* 🌟 強制讓路線名稱在黑暗模式下變為白色或亮色 */
+body.dark-mode .route-name { color: #e0e0e0 !important; }
 .route-desc { font-size: 12px; color: var(--text-sub); }
 .route-action-btn { padding: 8px 16px; border-radius: 8px; border: none; background: var(--primary); color: white; font-weight: bold; font-size: 13px; cursor: pointer; }
 
