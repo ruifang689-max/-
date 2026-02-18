@@ -69,10 +69,20 @@ export function initUI() {
         } 
     };
 
+    // 🌟 替換 ui.js 裡面的這個函式
     window.applyCustomTheme = (color, syncIntro = false) => { 
         document.documentElement.style.setProperty('--primary', color); 
         document.documentElement.style.setProperty('--logo-border', color); 
         
+        // 🌟 核心動態邏輯：
+        // 如果是「預設主題」，次標維持橘色 (--accent)
+        // 如果是「其他主題」，次標跟隨主題色變動
+        if (color === '#007bff' && !syncIntro) {
+            document.documentElement.style.setProperty('--accent', '#e67e22'); // 預設恢復橘色
+        } else {
+            document.documentElement.style.setProperty('--accent', color); // 其他主題色，次標跟著變
+        }
+
         if (syncIntro) {
             document.documentElement.style.setProperty('--intro-color', color);
             if(color !== '#007bff') localStorage.setItem('ruifang_theme', color); 
