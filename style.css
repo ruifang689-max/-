@@ -538,74 +538,75 @@ body.dark-mode .region-label-text {
 }
 
 /* =========================================
-   🌟 沉浸模式：功能列專屬側收區 (Side Panel Collapse)
+   🌟 沉浸模式：貼邊玻璃功能列 (Side Glass Panel)
    ========================================= */
 #side-function-zone {
     position: fixed;
-    right: 15px;
-    bottom: 90px; /* 避開右下角的比例尺，您可以依需求微調高度 */
+    right: 0; /* 🌟 核心修改：緊緊貼齊右側螢幕邊緣 */
+    top: 55%; /* 🌟 核心修改：放在畫面中偏下，完美避開上方所有的資訊與搜尋區 */
+    transform: translateY(-50%); /* 垂直置中對齊 */
     display: flex;
     flex-direction: column;
-    padding: 15px 10px;
-    border-radius: 12px;
+    padding: 15px 12px 15px 15px;
+    border-radius: 16px 0 0 16px; /* 🌟 左側圓角，右側平齊貼邊 */
     z-index: 9998;
     transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
-    /* 預設背景全透明，完美融入地圖 */
-    background: transparent; 
-}
-
-/* 🌟 核心設計：當滑鼠或手指觸及此區域時，浮現透明玻璃背景 */
-#side-function-zone:hover, #side-function-zone:active {
-    background: var(--glass);
-    backdrop-filter: blur(10px);
-    box-shadow: var(--card-shadow);
+    
+    /* 🌟 永久保持高質感透明玻璃效果 */
+    background: rgba(255, 255, 255, 0.3); /* 高透光度 */
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow: -4px 0 15px rgba(0,0,0,0.05); /* 左側淡淡的陰影增加立體感 */
     border: 1px solid var(--border-color);
+    border-right: none; /* 貼邊處不需要邊線 */
 }
 
-/* 側收開關「〉〉」(預設隱藏，觸及範圍時才出現於正中間左側) */
+/* 黑暗模式下的玻璃質感適配 */
+body.dark-mode #side-function-zone {
+    background: rgba(30, 30, 30, 0.4);
+}
+
+/* 側收開關「〉〉」(永久顯示在玻璃列的左側邊緣) */
 #zone-collapse-btn {
     position: absolute;
-    left: -24px;
+    left: -24px; /* 剛好凸出在玻璃列的左邊 */
     top: 50%;
     transform: translateY(-50%);
     width: 24px;
-    height: 50px;
-    background: var(--glass);
+    height: 60px; /* 稍微拉長，讓手指更容易點擊 */
+    background: rgba(255, 255, 255, 0.4); /* 跟隨玻璃質感 */
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     border: 1px solid var(--border-color);
     border-right: none;
-    border-radius: 8px 0 0 8px;
+    border-radius: 12px 0 0 12px;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: var(--primary);
+    color: var(--primary); /* 箭頭使用您的主題色 */
     cursor: pointer;
-    opacity: 0; /* 預設隱藏 */
     transition: 0.3s;
+    box-shadow: -2px 0 8px rgba(0,0,0,0.05);
 }
 
-/* 觸及熱區時，顯示開關 */
-#side-function-zone:hover #zone-collapse-btn,
-#side-function-zone:active #zone-collapse-btn {
-    opacity: 1;
+body.dark-mode #zone-collapse-btn {
+    background: rgba(30, 30, 30, 0.5);
 }
 
-/* 🌟 收合狀態：整個區塊向右滑出螢幕 */
+/* 🌟 收合狀態：整個區塊向右滑出螢幕 (100% 剛好把主體藏起來，只留按鈕) */
 #side-function-zone.collapsed {
-    transform: translateX(130%); 
+    transform: translate(100%, -50%); 
 }
 
-/* 收合時，開關必須強制顯示在螢幕邊緣，且變成主題色、方向朝左「〈〈」 */
+/* 收合時，按鈕變成實心的主題色，視覺更明顯 */
 #side-function-zone.collapsed #zone-collapse-btn {
-    opacity: 1;
     background: var(--primary);
     color: white;
-    left: -32px;
-    width: 32px;
+    box-shadow: -3px 0 12px rgba(0,0,0,0.2);
     border: none;
-    box-shadow: -2px 0 8px rgba(0,0,0,0.3);
 }
 
-/* 將原本的按鈕在這個區域內垂直排好 */
+/* 內部按鈕的間隔微調 */
 .zone-buttons {
     display: flex;
     flex-direction: column;
