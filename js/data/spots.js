@@ -40,9 +40,13 @@ export const spots = [
     { name: "長仁亭", wikiTitle: "", lat: 25.11918, lng: 121.86606, tags: ["觀景台"], keywords: ["俯瞰", "攝影"], highlights: "俯瞰十三層", food: "無", history: "最佳十三層攝影點。", transport: "長仁社區步行", heat: 0.6 },
     { name: "水湳洞長階梯", wikiTitle: "", lat: 25.12187, lng: 121.86056, tags: ["打卡"], keywords: ["階梯", "日系"], highlights: "日系美照點", food: "無", history: "濂洞國小旁階梯。", transport: "水湳洞步行", heat: 0.7 },
 
-    // --- 深澳與鼻頭角 ---
+    // --- 深澳 ---
+    { name: "深澳", wikiTitle: "", lat: 25.133, lng: 121.824, tags: ["象鼻岩", "海景鐵道"], coverImg: "./assets/images/spots/深澳漁港.jpg", keywords: ["海景", "深澳"], highlights: "象鼻岩、酋長岩、深澳鐵道自行車",food: "鯊魚羹、小卷米粉、現撈海鮮",history: "曾為重要煤礦輸出港，現以海蝕奇岩與現撈海鮮聞名，Rail Bike 是最受歡迎景點。",transport: "瑞芳站轉公車T99、791",heat: 0.8},
     { name: "深澳鐵道自行車", wikiTitle: "深澳線", lat: 25.12901, lng: 121.81439, tags: ["休閒", "交通"], keywords: ["單車", "海景"], highlights: "隧道光影", food: "無", history: "廢棄鐵道改建，最受歡迎的海景Rail Bike。", transport: "瑞芳站轉乘客運/公車", heat: 0.8 },
     { name: "深澳象鼻岩", wikiTitle: "", lat: 25.133, lng: 121.824, tags: ["自然景觀"], keywords: ["海蝕", "奇岩"], highlights: "海蝕奇岩", food: "小卷米粉、鯊魚羹", history: "曾為重要煤礦輸出港，現以海蝕地形聞名。", transport: "瑞芳站轉公車T99、791", heat: 0.8 },
+
+    // --- 鼻頭角 ---
     { name: "鼻頭角步道", wikiTitle: "鼻頭角", lat: 25.12588, lng: 121.92028, tags: ["自然景觀", "休閒"], keywords: ["看海", "稜谷"], highlights: "台版萬里長城", food: "周邊海產", history: "瑞芳東北角的岬角。", transport: "客運 856 / 886", heat: 0.7 },
     { name: "鼻頭角燈塔", wikiTitle: "鼻頭角燈塔", lat: 25.12877, lng: 121.92346, tags: ["地標"], keywords: ["燈塔", "海景"], highlights: "燈塔海景", food: "無", history: "建於1896年，守護北台灣海域。", transport: "步行自鼻頭角步道", heat: 0.8 }
+    
 ];
