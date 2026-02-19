@@ -214,7 +214,30 @@
                 <option value="custom">自訂顏色...</option>
             </select>
             <input type="color" id="custom-color-picker" style="display:none; width:100%; margin-top:10px; height:40px; border:none; cursor:pointer;" onchange="applyCustomTheme(this.value, true)">
-    
+
+            <h3 class="settings-sub" data-i18n="font"><i class="fas fa-font"></i> 字體選擇</h3>
+            
+            <div class="custom-select-wrapper" id="font-custom-select">
+                <div class="custom-select-trigger" onclick="toggleFontDropdown()">
+                    <div class="left-content">
+                        <span id="current-font-text">系統預設 (黑體)</span>
+                    </div>
+                    <i class="fas fa-chevron-down" style="color: var(--text-sub);"></i>
+                </div>
+                
+                <div class="custom-select-options" id="font-options-list">
+                    <div class="custom-option" onclick="selectFontOption('default', '系統預設 (黑體)')">
+                        <span style="font-family: sans-serif;">系統預設 (黑體)</span>
+                    </div>
+                    <div class="custom-option" onclick="selectFontOption('iansui', '芫荽')">
+                        <span style="font-family: 'Iansui', sans-serif; font-size: 16px;">芫荽</span>
+                    </div>
+                    <div class="custom-option" onclick="selectFontOption('huninn', '粉圓')">
+                        <span style="font-family: 'jf-openhuninn', sans-serif; font-size: 15px;">粉圓</span>
+                    </div>
+                </div>
+            </div>
+            
             <div style="margin-top: 15px; border-top: 1px dashed var(--divider-color); padding-top: 15px;">
                 <label style="display: flex; align-items: center; gap: 10px; font-weight: bold; font-size: 15px; cursor: pointer; color: var(--text-main);">
                     <input type="checkbox" id="skip-intro-toggle" onchange="toggleSkipIntro(this.checked)" style="width: 18px; height: 18px;">
@@ -343,6 +366,7 @@
 
 </body>
 </html>
+
 
 
 
