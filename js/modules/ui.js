@@ -242,13 +242,29 @@ export function initUI() {
         if(welcome) welcome.style.opacity = '0'; 
         setTimeout(() => { 
             if(welcome) welcome.style.display = 'none'; 
-            if(tutorial && localStorage.getItem('ruifang_skip_intro') !== 'true') {
+            if(tutorial && localStorage.getItem('ruifang_skip_intro') !== 'true' && localStorage.getItem('ruifang_welcomed') !== 'true') {
                 tutorial.style.display = 'flex'; 
                 setTimeout(() => { tutorial.style.opacity = '1'; }, 50); 
+            } else {
+                // 如果不需要顯示圖文教學，則啟動聚光燈指引
+                window.startFeatureTour();
             }
         }, 400); 
     };
-
+    
+        window.finishTutorial = () => { 
+        const tut = document.getElementById('tutorial-overlay');
+        if(tut) tut.style.opacity = '0'; 
+        setTimeout(() => { 
+            if(tut) tut.style.display = 'none'; 
+            localStorage.setItem('ruifang_welcomed', 'true'); 
+            if (state.mapInstance) state.mapInstance.invalidateSize(); 
+            
+            // 🌟 圖文教學結束後，緊接著啟動聚光燈指引！
+            window.startFeatureTour();
+        }, 400); 
+    };
+    
     window.resetNorth = () => { state.mapInstance.flyTo([25.1032, 121.8224], 14); };
     window.goToStation = () => { state.mapInstance.flyTo([25.108, 121.805], 16); closeCard(); };
 
