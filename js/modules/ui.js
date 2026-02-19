@@ -32,34 +32,47 @@ export function initUI() {
 
         const searchInput = document.getElementById('search');
         if(searchInput) searchInput.placeholder = t.search_ph;
-        
         const addrText = document.getElementById('addr-text');
         if(addrText && addrText.innerText.includes("...")) addrText.innerText = t.locating;
 
-        const startupSelect = document.getElementById('lang-select-startup');
-        const settingsSelect = document.getElementById('lang-select-settings');
-        if(startupSelect) startupSelect.value = lang;
-        if(settingsSelect) settingsSelect.value = lang;
+        // 🌟 更新全新客製化語言選單的顯示文字
+        const langMap = { 'zh': '繁體中文 (🇹🇼)', 'en': 'English (🇺🇸)', 'ja': '日本語 (🇯🇵)', 'ko': '한국어 (🇰🇷)', 'vi': 'Tiếng Việt (🇻🇳)' };
+        const startupSpan = document.getElementById('current-lang-text-startup');
+        const settingsSpan = document.getElementById('current-lang-text-settings');
+        if(startupSpan) startupSpan.innerText = langMap[lang] || langMap['zh'];
+        if(settingsSpan) settingsSpan.innerText = langMap[lang] || langMap['zh'];
 
-        if(state.targetSpot && document.getElementById("card").classList.contains("open")) {
-            showCard(state.targetSpot);
-        }
+        if(state.targetSpot && document.getElementById("card").classList.contains("open")) { showCard(state.targetSpot); }
     };
 
+    // =========================================
+    // 🌟 全域客製化下拉選單控制器 (通用邏輯)
+    // =========================================
+    window.toggleDropdown = (listId) => {
+        // 開啟新的之前，先關閉其他已開啟的下拉選單
+        document.querySelectorAll('.custom-select-options').forEach(list => {
+            if (list.id !== listId) list.classList.remove('open');
+        });
+        const targetList = document.getElementById(listId);
+        if(targetList) targetList.classList.toggle('open');
+    };
+
+    // 點擊空白處，自動關閉所有下拉選單
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('.custom-select-wrapper')) {
+            document.querySelectorAll('.custom-select-options').forEach(list => list.classList.remove('open'));
+        }
+    });
+
+    // 語言選擇事件
+    window.selectLangOption = (lang) => {
+        document.querySelectorAll('.custom-select-options').forEach(el => el.classList.remove('open'));
+        window.applyLanguage(lang);
+    };
+    
     // =========================================
     // 2. 主題顏色 (Theme)
     // =========================================
-    window.toggleThemeDropdown = () => {
-        const list = document.getElementById('theme-options-list');
-        if(list) list.classList.toggle('open');
-    };
-
-    window.selectThemeOption = (value, colorHex, text) => {
-        const list = document.getElementById('theme-options-list');
-        if(list) list.classList.remove('open');
-        window.changeTheme(value);
-    };
-
     window.changeTheme = (color) => { 
         if (color === 'custom') { 
             document.getElementById('custom-color-picker').style.display = 'block'; 
@@ -109,11 +122,6 @@ export function initUI() {
     // =========================================
     // 3. 字體選擇 (Font)
     // =========================================
-    window.toggleFontDropdown = () => {
-        const list = document.getElementById('font-options-list');
-        if(list) list.classList.toggle('open');
-    };
-
     window.selectFontOption = (value, text) => {
         const list = document.getElementById('font-options-list');
         if(list) list.classList.remove('open');
