@@ -231,6 +231,38 @@ export function initUI() {
         });
     }
 
+    // =========================================
+    // 🌟 補回：九大區域地圖浮水印標籤
+    // =========================================
+    if (state.mapInstance) {
+        const ruifangRegions = [
+            { name: "四腳亭", lat: 25.1020, lng: 121.7610 },
+            { name: "瑞芳市區", lat: 25.1080, lng: 121.8050 },
+            { name: "九份", lat: 25.1090, lng: 121.8440 },
+            { name: "金瓜石", lat: 25.1050, lng: 121.8580 },
+            { name: "水湳洞", lat: 25.1220, lng: 121.8640 },
+            { name: "鼻頭角", lat: 25.1270, lng: 121.9180 },
+            { name: "深澳", lat: 25.1310, lng: 121.8190 },
+            { name: "猴硐", lat: 25.0860, lng: 121.8260 },
+            { name: "三貂嶺", lat: 25.0590, lng: 121.8240 }
+        ];
+
+        ruifangRegions.forEach(region => {
+            const regionIcon = L.divIcon({
+                className: 'region-label',
+                html: `<div class="region-label-text">${region.name}</div>`,
+                iconSize: [120, 40],
+                iconAnchor: [60, 20]
+            });
+
+            L.marker([region.lat, region.lng], {
+                icon: regionIcon,
+                interactive: false,  // 關閉互動，讓滑鼠可以穿透點擊
+                zIndexOffset: -1000  // 沉在最底層
+            }).addTo(state.mapInstance);
+        });
+    }
+    
     window.closeCustomSpotModal = () => { document.getElementById('custom-spot-modal').style.display = 'none'; };
     window.confirmCustomSpot = () => { const spotName = document.getElementById('custom-spot-name').value.trim() || "我的秘境"; if (state.tempCustomSpot) { const newSpot = { name: spotName, lat: state.tempCustomSpot.lat, lng: state.tempCustomSpot.lng, tags: ["自訂"], highlights: `詳細地址：${state.tempCustomSpot.addr}`, food: "--", history: "自訂標記", transport: "自行前往", wikiImg: "" }; state.savedCustomSpots.push(newSpot); saveState.customSpots(); addMarkerToMap(newSpot); showCard(newSpot); } window.closeCustomSpotModal(); };
     window.openEditModal = (name) => { state.currentEditingSpotName = name; const s = state.savedCustomSpots.find(x => x.name === name); if(!s) return; document.getElementById('edit-name').value = s.name; document.getElementById('edit-highlights').value = s.highlights; document.getElementById('edit-history').value = s.history; document.getElementById('edit-image-preview').style.display = s.wikiImg ? "block" : "none"; document.getElementById('edit-image-preview').src = s.wikiImg || ""; document.getElementById('edit-modal-overlay').style.display = "flex"; };
