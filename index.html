@@ -420,7 +420,7 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
     
-    <script type="module" src="./js/main.js?v=533"></script>
+    <script type="module" src="./js/main.js?v=534"></script>
 
     <script>
         setTimeout(() => {
@@ -436,12 +436,22 @@
         }, 3000);
     </script>
 
-    <button id="ui-toggle-btn" onclick="toggleUIPanels()" title="隱藏/顯示功能列">
-        <i class="fas fa-expand-arrows-alt"></i>
-    </button>
+    <div id="side-function-zone">
+        <div id="zone-collapse-btn" onclick="toggleSidePanel()">
+            <i class="fas fa-angle-double-right" id="side-panel-icon"></i>
+        </div>
+        
+        <div class="zone-buttons">
+            <button class="您的按鈕class" onclick="openSettings()"><i class="fas fa-cog"></i></button>
+            <button class="您的按鈕class" onclick="goToStation()"><i class="fas fa-train"></i></button>
+            <button class="您的按鈕class" onclick="resetNorth()"><i class="fas fa-compass"></i></button>
+            <button class="您的按鈕class" id="layer-btn" onclick="toggleLayer()"><i class="fas fa-map"></i></button>
+        </div>
+    </div>
     
 </body>
 </html>
+
 
 
 
