@@ -2,7 +2,6 @@
 import { initFirebase } from './modules/firebase-sync.js';// 我們剛剛新增的雲端模組
 import { state } from './core/store.js';
 import { initMap, toggleLayer } from './core/map.js';
-import { renderAllMarkers } from './modules/markers.js'; // 👈 就是少了這一行！
 import { fetchWeather } from './modules/weather.js';
 import { initGPS } from './modules/gps.js';
 import { initAnnouncer } from './modules/announcer.js';
