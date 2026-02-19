@@ -265,11 +265,38 @@
                 </div>
             </div>
             
-            <div style="margin-top: 15px; border-top: 1px dashed var(--divider-color); padding-top: 15px;">
-                <label style="display: flex; align-items: center; gap: 10px; font-weight: bold; font-size: 15px; cursor: pointer; color: var(--text-main);">
-                    <input type="checkbox" id="skip-intro-toggle" onchange="toggleSkipIntro(this.checked)" style="width: 18px; height: 18px;">
-                    <span data-i18n="skip_intro">啟動時略過開場動畫與教學</span>
-                </label>
+            <div style="margin-top: 20px; border-top: 1px dashed var(--divider-color); padding-top: 15px;">
+                <h3 class="settings-sub" style="margin-top: 0; margin-bottom: 15px;"><i class="fas fa-forward"></i> 啟動略過設定</h3>
+                <div class="settings-grid">
+                    <label class="toggle-label">
+                        <span>開場動畫</span>
+                        <div class="toggle-switch">
+                            <input type="checkbox" id="toggle-skip-anim" onchange="saveSkipSettings()">
+                            <span class="toggle-slider"></span>
+                        </div>
+                    </label>
+                    <label class="toggle-label">
+                        <span>開幕介面</span>
+                        <div class="toggle-switch">
+                            <input type="checkbox" id="toggle-skip-welcome" onchange="saveSkipSettings()">
+                            <span class="toggle-slider"></span>
+                        </div>
+                    </label>
+                    <label class="toggle-label">
+                        <span>功能說明</span>
+                        <div class="toggle-switch">
+                            <input type="checkbox" id="toggle-skip-tour" onchange="saveSkipSettings()">
+                            <span class="toggle-slider"></span>
+                        </div>
+                    </label>
+                    <label class="toggle-label">
+                        <span>指引教學</span>
+                        <div class="toggle-switch">
+                            <input type="checkbox" id="toggle-skip-tutorial" onchange="saveSkipSettings()">
+                            <span class="toggle-slider"></span>
+                        </div>
+                    </label>
+                </div>
             </div>
 
             <div id="install-btn-container" style="display:none; margin-top: 15px;">
@@ -403,3 +430,4 @@
 
 </body>
 </html>
+
