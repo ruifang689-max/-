@@ -208,8 +208,9 @@
                 </div>
             </div>
         
-<h3 class="settings-sub" data-i18n="theme"><i class="fas fa-palette"></i> 主題顏色</h3>
+            <h3 class="settings-sub" data-i18n="theme"><i class="fas fa-palette"></i> 主題顏色</h3>
             <div class="custom-select-wrapper" id="theme-custom-select">
+                
                 <div class="custom-select-trigger" onclick="toggleDropdown('theme-options-list')">
                     <div class="left-content">
                         <div class="color-swatch" id="current-theme-color" style="background: #007bff;"></div>
@@ -219,55 +220,23 @@
                 </div>
                 
                 <div class="custom-select-options" id="theme-options-list">
-                    <div class="custom-option" onclick="selectThemeOption('default', '#007bff', '系統主題色 (預設)')">
-                        <div class="color-swatch" style="background: #007bff;"></div>系統主題色 (預設)
-                    </div>
-                    
-                    <div class="custom-option" onclick="selectThemeOption('#007bff', '#007bff', '活力藍')">
-                        <div class="color-swatch" style="background: #007bff;"></div>活力藍
-                    </div>
-                    <div class="custom-option" onclick="selectThemeOption('#34495e', '#34495e', '夜幕藍')">
-                        <div class="color-swatch" style="background: #34495e;"></div>夜幕藍
-                    </div>
-
-                    <div class="custom-option" onclick="selectThemeOption('#333333', '#333333', '極簡黑')">
-                        <div class="color-swatch" style="background: #333333;"></div>極簡黑
-                    </div>
-                    <div class="custom-option" onclick="selectThemeOption('#95a5a6', '#95a5a6', '現代灰')">
-                        <div class="color-swatch" style="background: #95a5a6;"></div>現代灰
-                    </div>
-
-                    <div class="custom-option" onclick="selectThemeOption('#28a745', '#28a745', '自然綠')">
-                        <div class="color-swatch" style="background: #28a745;"></div>自然綠
-                    </div>
-                    <div class="custom-option" onclick="selectThemeOption('#27ae60', '#27ae60', '森林綠')">
-                        <div class="color-swatch" style="background: #27ae60;"></div>森林綠
-                    </div>
-
-                    <div class="custom-option" onclick="selectThemeOption('#f39c12', '#f39c12', '溫暖橘')">
-                        <div class="color-swatch" style="background: #f39c12;"></div>溫暖橘
-                    </div>
-                    <div class="custom-option" onclick="selectThemeOption('#e67e22', '#e67e22', '夕陽橘')">
-                        <div class="color-swatch" style="background: #e67e22;"></div>夕陽橘
-                    </div>
-                    <div class="custom-option" onclick="selectThemeOption('#FF0000', '#FF0000', '喜慶紅')">
-                        <div class="color-swatch" style="background: #FF0000;"></div>喜慶紅
-                    </div>
-                    <div class="custom-option" onclick="selectThemeOption('#f1c40f', '#f1c40f', '陽光黃')">
-                        <div class="color-swatch" style="background: #f1c40f;"></div>陽光黃
-                    </div>
-
-                    <div class="custom-option" onclick="selectThemeOption('#8e44ad', '#8e44ad', '神秘紫')">
-                        <div class="color-swatch" style="background: #8e44ad;"></div>神秘紫
-                    </div>
-                    <div class="custom-option" onclick="selectThemeOption('#e84393', '#e84393', '櫻花粉')">
-                        <div class="color-swatch" style="background: #e84393;"></div>櫻花粉
-                    </div>
-
-                    <div class="custom-option" onclick="selectThemeOption('custom', 'linear-gradient(135deg, #ff9a9e, #fecfef)', '自訂顏色...')">
-                        <div class="color-swatch" style="background: linear-gradient(135deg, #ff9a9e, #fecfef);"></div>自訂顏色...
-                    </div>
+                    <div class="custom-option" onclick="selectThemeOption('default', '#007bff', '系統主題色 (預設)')"><div class="color-swatch" style="background: #007bff;"></div>系統主題色 (預設)</div>
+                    <div class="custom-option" onclick="selectThemeOption('#007bff', '#007bff', '活力藍')"><div class="color-swatch" style="background: #007bff;"></div>活力藍</div>
+                    <div class="custom-option" onclick="selectThemeOption('#34495e', '#34495e', '夜幕藍')"><div class="color-swatch" style="background: #34495e;"></div>夜幕藍</div>
+                    <div class="custom-option" onclick="selectThemeOption('#333333', '#333333', '極簡黑')"><div class="color-swatch" style="background: #333333;"></div>極簡黑</div>
+                    <div class="custom-option" onclick="selectThemeOption('#95a5a6', '#95a5a6', '現代灰')"><div class="color-swatch" style="background: #95a5a6;"></div>現代灰</div>
+                    <div class="custom-option" onclick="selectThemeOption('#28a745', '#28a745', '自然綠')"><div class="color-swatch" style="background: #28a745;"></div>自然綠</div>
+                    <div class="custom-option" onclick="selectThemeOption('#27ae60', '#27ae60', '森林綠')"><div class="color-swatch" style="background: #27ae60;"></div>森林綠</div>
+                    <div class="custom-option" onclick="selectThemeOption('#f39c12', '#f39c12', '溫暖橘')"><div class="color-swatch" style="background: #f39c12;"></div>溫暖橘</div>
+                    <div class="custom-option" onclick="selectThemeOption('#e67e22', '#e67e22', '夕陽橘')"><div class="color-swatch" style="background: #e67e22;"></div>夕陽橘</div>
+                    <div class="custom-option" onclick="selectThemeOption('#FF0000', '#FF0000', '喜慶紅')"><div class="color-swatch" style="background: #FF0000;"></div>喜慶紅</div>
+                    <div class="custom-option" onclick="selectThemeOption('#f1c40f', '#f1c40f', '陽光黃')"><div class="color-swatch" style="background: #f1c40f;"></div>陽光黃</div>
+                    <div class="custom-option" onclick="selectThemeOption('#8e44ad', '#8e44ad', '神秘紫')"><div class="color-swatch" style="background: #8e44ad;"></div>神秘紫</div>
+                    <div class="custom-option" onclick="selectThemeOption('#e84393', '#e84393', '櫻花粉')"><div class="color-swatch" style="background: #e84393;"></div>櫻花粉</div>
+                    <div class="custom-option" onclick="selectThemeOption('custom', 'linear-gradient(135deg, #ff9a9e, #fecfef)', '自訂顏色...')"><div class="color-swatch" style="background: linear-gradient(135deg, #ff9a9e, #fecfef);"></div>自訂顏色...</div>
                 </div>
+            </div>
+            
             <input type="color" id="custom-color-picker" style="display:none; width:100%; margin-top:10px; height:40px; border:none; cursor:pointer;" onchange="applyCustomTheme(this.value, true)">
 
 
@@ -424,4 +393,5 @@
 
 </body>
 </html>
+
 
