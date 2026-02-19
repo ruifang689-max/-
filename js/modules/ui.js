@@ -236,6 +236,19 @@ export function initUI() {
     // =========================================
     // 4. 畫面切換與基本按鈕
     // =========================================
+        window.enterMap = () => { 
+        const welcome = document.getElementById('welcome-screen');
+        const tutorial = document.getElementById('tutorial-overlay');
+        if(welcome) welcome.style.opacity = '0'; 
+        setTimeout(() => { 
+            if(welcome) welcome.style.display = 'none'; 
+            if(tutorial && localStorage.getItem('ruifang_skip_intro') !== 'true') {
+                tutorial.style.display = 'flex'; 
+                setTimeout(() => { tutorial.style.opacity = '1'; }, 50); 
+            }
+        }, 400); 
+    };
+    
     window.enterMap = () => { 
         const welcome = document.getElementById('welcome-screen');
         const tutorial = document.getElementById('tutorial-overlay');
