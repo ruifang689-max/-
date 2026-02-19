@@ -23,6 +23,21 @@ export function initUI() {
     });
 
     // =========================================
+    // 🌟 功能列側收 (沉浸模式) 切換邏輯
+    // =========================================
+    window.toggleUIPanels = () => {
+        document.body.classList.toggle('ui-collapsed');
+        const icon = document.querySelector('#ui-toggle-btn i');
+        if (document.body.classList.contains('ui-collapsed')) {
+            // 收起時，圖示變成「向內縮」
+            icon.className = 'fas fa-compress-arrows-alt';
+        } else {
+            // 展開時，圖示變成「向外擴」
+            icon.className = 'fas fa-expand-arrows-alt';
+        }
+    };
+    
+    // =========================================
     // 1. 語言、主題、字體切換
     // =========================================
     window.applyLanguage = (lang) => {
