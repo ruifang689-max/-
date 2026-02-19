@@ -1,5 +1,5 @@
 /**
- * js/modules/ui.js (v511)
+ * js/modules/ui.js (v516)
  * 負責：UI 介面交互、設定、主題、字體、教學、PWA、收藏夾、自訂景點編輯
  */
 import { state, saveState } from '../core/store.js';
@@ -10,6 +10,25 @@ import { showCard, closeCard } from './cards.js';
 import { triggerSearch } from './search.js';
 
 export function initUI() {
+
+    // =========================================
+    // 🌟 全域客製化下拉選單控制器 (通用邏輯)
+    // =========================================
+    window.toggleDropdown = (listId) => {
+        // 開啟新的之前，先關閉其他已開啟的下拉選單
+        document.querySelectorAll('.custom-select-options').forEach(list => {
+            if (list.id !== listId) list.classList.remove('open');
+        });
+        const targetList = document.getElementById(listId);
+        if(targetList) targetList.classList.toggle('open');
+    };
+
+    // 點擊空白處，自動關閉所有下拉選單
+    document.addEventListener('click', (e) => {
+        if (!e.target.closest('.custom-select-wrapper')) {
+            document.querySelectorAll('.custom-select-options').forEach(list => list.classList.remove('open'));
+        }
+    });
 
     // =========================================
     // 1. 語言設定 (Language)
@@ -35,7 +54,6 @@ export function initUI() {
         const addrText = document.getElementById('addr-text');
         if(addrText && addrText.innerText.includes("...")) addrText.innerText = t.locating;
 
-        // 🌟 更新全新客製化語言選單的顯示文字
         const langMap = { 'zh': '繁體中文 (🇹🇼)', 'en': 'English (🇺🇸)', 'ja': '日本語 (🇯🇵)', 'ko': '한국어 (🇰🇷)', 'vi': 'Tiếng Việt (🇻🇳)' };
         const startupSpan = document.getElementById('current-lang-text-startup');
         const settingsSpan = document.getElementById('current-lang-text-settings');
@@ -45,26 +63,6 @@ export function initUI() {
         if(state.targetSpot && document.getElementById("card").classList.contains("open")) { showCard(state.targetSpot); }
     };
 
-    // =========================================
-    // 🌟 全域客製化下拉選單控制器 (通用邏輯)
-    // =========================================
-    window.toggleDropdown = (listId) => {
-        // 開啟新的之前，先關閉其他已開啟的下拉選單
-        document.querySelectorAll('.custom-select-options').forEach(list => {
-            if (list.id !== listId) list.classList.remove('open');
-        });
-        const targetList = document.getElementById(listId);
-        if(targetList) targetList.classList.toggle('open');
-    };
-
-    // 點擊空白處，自動關閉所有下拉選單
-    document.addEventListener('click', (e) => {
-        if (!e.target.closest('.custom-select-wrapper')) {
-            document.querySelectorAll('.custom-select-options').forEach(list => list.classList.remove('open'));
-        }
-    });
-
-    // 語言選擇事件
     window.selectLangOption = (lang) => {
         document.querySelectorAll('.custom-select-options').forEach(el => el.classList.remove('open'));
         window.applyLanguage(lang);
@@ -73,6 +71,12 @@ export function initUI() {
     // =========================================
     // 2. 主題顏色 (Theme)
     // =========================================
+    window.selectThemeOption = (value, colorHex, text) => {
+        const list = document.getElementById('theme-options-list');
+        if(list) list.classList.remove('open');
+        window.changeTheme(value);
+    };
+
     window.changeTheme = (color) => { 
         if (color === 'custom') { 
             document.getElementById('custom-color-picker').style.display = 'block'; 
@@ -91,7 +95,6 @@ export function initUI() {
         document.documentElement.style.setProperty('--primary', color); 
         document.documentElement.style.setProperty('--logo-border', color); 
         
-        // 核心動態邏輯判斷 (系統藍 #007bff)
         if (color === '#007bff' && !syncIntro) {
             document.documentElement.style.setProperty('--accent', '#e67e22'); 
             document.documentElement.style.setProperty('--dynamic-border', 'var(--text-main)'); 
@@ -100,7 +103,6 @@ export function initUI() {
             document.documentElement.style.setProperty('--dynamic-border', color); 
         }
 
-        // 開幕動畫顏色同步邏輯
         if (syncIntro) {
             document.documentElement.style.setProperty('--intro-color', color);
             if(color !== '#007bff') localStorage.setItem('ruifang_theme', color); 
@@ -108,7 +110,6 @@ export function initUI() {
             document.documentElement.style.setProperty('--intro-color', '#111111'); 
         }
 
-        // 更新色塊 UI
         const colorSwatch = document.getElementById('current-theme-color');
         const textSpan = document.getElementById('current-theme-text');
         if (colorSwatch && textSpan) {
@@ -129,10 +130,8 @@ export function initUI() {
     };
 
     window.changeFont = (fontValue, fontText) => {
-        // 移除所有字體 Class
         document.body.classList.remove('font-iansui', 'font-wenkai', 'font-huninn');
         
-        // 加入對應的字體 Class
         if (fontValue === 'iansui') {
             document.body.classList.add('font-iansui');
         } else if (fontValue === 'wenkai') {
@@ -146,21 +145,6 @@ export function initUI() {
         const textSpan = document.getElementById('current-font-text');
         if (textSpan) textSpan.innerText = fontText || '系統預設 (黑體)';
     };
-
-    // 點擊空白處自動關閉所有下拉選單
-    document.addEventListener('click', (e) => {
-        const themeWrapper = document.getElementById('theme-custom-select');
-        const themeList = document.getElementById('theme-options-list');
-        if (themeWrapper && !themeWrapper.contains(e.target) && themeList && themeList.classList.contains('open')) {
-            themeList.classList.remove('open');
-        }
-        
-        const fontWrapper = document.getElementById('font-custom-select');
-        const fontList = document.getElementById('font-options-list');
-        if (fontWrapper && !fontWrapper.contains(e.target) && fontList && fontList.classList.contains('open')) {
-            fontList.classList.remove('open');
-        }
-    });
 
     // =========================================
     // 4. 畫面切換與基本按鈕
@@ -280,7 +264,7 @@ export function initUI() {
     window.removeFavManage = (name) => { state.myFavs = state.myFavs.filter(fav => fav !== name); saveState.favs(); renderFavManageList(); if (state.targetSpot && state.targetSpot.name === name) document.getElementById("card-fav-icon").className = "fas fa-heart"; };
 
     // =========================================
-    // 🌟 補回：長按地圖新增標記與雙 API 地址查詢
+    // 8. 🌟 雙 API 長按查詢地址防護機制
     // =========================================
     if (state.mapInstance) {
         state.mapInstance.on('contextmenu', function(e) {
@@ -310,7 +294,6 @@ export function initUI() {
                 }, 150);
             })
             .catch(() => { 
-                // 主 API 被封鎖 CORS 時，自動切換至 BigDataCloud 備用 API
                 fetch(fallbackUrl).then(res => res.json()).then(data => {
                     let addr = "瑞芳秘境";
                     if(data) { addr = (data.principalSubdivision || "") + (data.city || "") + (data.locality || ""); }
@@ -325,9 +308,9 @@ export function initUI() {
             });
         });
     }
-    
+
     // =========================================
-    // 8. 自訂景點編輯與新增
+    // 9. 自訂景點編輯與新增
     // =========================================
     window.closeCustomSpotModal = () => { document.getElementById('custom-spot-modal').style.display = 'none'; };
     window.confirmCustomSpot = () => {
@@ -394,11 +377,10 @@ export function initUI() {
     };
 
     // =========================================
-    // 9. 🌟 系統啟動時的初始化 (Apply Init Config)
+    // 10. 🌟 系統啟動時的初始化 (Apply Init Config)
     // =========================================
     window.applyLanguage(state.currentLang);
 
-    // 載入主題
     const savedTheme = localStorage.getItem('ruifang_theme'); 
     if (!savedTheme || savedTheme === 'default') { 
         window.applyCustomTheme('#007bff', false); 
@@ -406,7 +388,6 @@ export function initUI() {
         window.applyCustomTheme(savedTheme, true); 
     }
 
-    // 載入字體
     const savedFont = localStorage.getItem('ruifang_font') || 'default';
     const fontMap = { 'default': '系統預設 (黑體)', 'iansui': '芫荽', 'wenkai': '文楷', 'huninn': '粉圓' };
     window.changeFont(savedFont, fontMap[savedFont]);
