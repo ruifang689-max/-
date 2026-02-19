@@ -327,6 +327,38 @@ export function initUI() {
     }
 
     // =========================================
+    // 🌟 插入：九大區域地圖浮水印標籤
+    // =========================================
+    if (state.mapInstance) {
+        const ruifangRegions = [
+            { name: "四腳亭", lat: 25.1020, lng: 121.7610 },
+            { name: "瑞芳市區", lat: 25.1080, lng: 121.8050 },
+            { name: "九份", lat: 25.1090, lng: 121.8440 },
+            { name: "金瓜石", lat: 25.1050, lng: 121.8580 },
+            { name: "水湳洞", lat: 25.1220, lng: 121.8640 },
+            { name: "鼻頭角", lat: 25.1270, lng: 121.9180 },
+            { name: "深澳", lat: 25.1310, lng: 121.8190 },
+            { name: "猴硐", lat: 25.0860, lng: 121.8260 },
+            { name: "三貂嶺", lat: 25.0590, lng: 121.8240 }
+        ];
+
+        ruifangRegions.forEach(region => {
+            const regionIcon = L.divIcon({
+                className: 'region-label',
+                html: `<div class="region-label-text">${region.name}</div>`,
+                iconSize: [120, 40],
+                iconAnchor: [60, 20] // 確保文字正中心對準座標
+            });
+
+            L.marker([region.lat, region.lng], {
+                icon: regionIcon,
+                interactive: false,  // 關閉互動，滑鼠可直接穿透點擊下方景點
+                zIndexOffset: -1000  // 讓文字沉在地圖最底層，不會遮擋景點 Marker
+            }).addTo(state.mapInstance);
+        });
+    }
+    
+    // =========================================
     // 9. 自訂景點編輯與新增
     // =========================================
     window.closeCustomSpotModal = () => { document.getElementById('custom-spot-modal').style.display = 'none'; };
