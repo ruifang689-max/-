@@ -223,16 +223,19 @@ html, body { margin: 0; padding: 0; width: 100vw; height: 100dvh; overflow: hidd
 .modal-input:focus, .modal-textarea:focus { border-color: var(--primary); }
 .modal-textarea { height: 90px; resize: none; }
 
-/* 🌟 為語言選擇下拉清單加上「主題色外框」與陰影 */
+/* 🌟 修改 1：語言/原生下拉選單 (改為黑色外框) */
 .modal-select, .welcome-select {
-    border: 2px solid var(--primary) !important; /* 加粗主題色外框 */
-    box-shadow: 0 4px 12px rgba(0,0,0,0.08); /* 微微浮起的按鈕感 */
+    border: 2px solid var(--text-main) !important; /* 🌟 改為跟隨文字顏色 (白天黑/晚上白) */
+    box-shadow: none; /* 移除陰影，更像開場按鈕的平面風格 */
     appearance: none; -webkit-appearance: none; cursor: pointer;
-    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23555555' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23111111' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e"); /* 箭頭改純黑 */
     background-repeat: no-repeat; background-position: right 15px center; background-size: 16px;
     padding-right: 40px;
 }
+
+/* 黑暗模式適配 */
 body.dark-mode .modal-select, body.dark-mode .welcome-select {
+    border-color: var(--text-main) !important; /* 確保黑暗模式下變白，不然看不到 */
     background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23e0e0e0' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
 }
 
@@ -240,10 +243,12 @@ body.dark-mode .modal-select, body.dark-mode .welcome-select {
    🌟 客製化「主題顏色」下拉組件 UI
    ========================================= */
 .custom-select-wrapper { position: relative; width: 100%; user-select: none; }
+
+/* 🌟 修改 2：客製化主題選單按鈕 (改為黑色外框) */
 .custom-select-trigger {
     display: flex; align-items: center; justify-content: space-between; width: 100%; padding: 12px 15px;
-    border: 2px solid var(--primary); /* 🌟 加粗主題色外框 */
-    box-shadow: 0 4px 12px rgba(0,0,0,0.08); /* 微微浮起的按鈕感 */
+    border: 2px solid var(--text-main); /* 🌟 改為跟隨文字顏色 (白天黑/晚上白) */
+    box-shadow: none; /* 移除陰影，扁平化風格 */
     border-radius: 10px; font-size: 14px; font-weight: bold;
     background: var(--input-bg); color: var(--text-main); cursor: pointer; transition: 0.2s;
 }
