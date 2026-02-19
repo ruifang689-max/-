@@ -427,3 +427,58 @@ body.dark-mode .region-label-text {
         -1px  0px 0 #121212,
          0px  1px 4px rgba(0,0,0,0.8);
 }
+
+/* =========================================
+   🌟 功能指引 (Feature Tour Spotlight)
+   ========================================= */
+#tour-focus-ring {
+    position: fixed;
+    border: 3px solid var(--primary);
+    /* 🌟 黑科技：利用無限大、半透明的陰影來當作全螢幕遮罩，中間自然簍空！ */
+    box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.65); 
+    z-index: 9998;
+    pointer-events: none;
+    transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+    display: none;
+}
+#tour-overlay {
+    position: fixed;
+    top: 0; left: 0; width: 100vw; height: 100dvh;
+    z-index: 9999;
+    pointer-events: auto; /* 阻擋使用者亂點下方的東西 */
+}
+.tour-tooltip {
+    position: absolute;
+    background: var(--glass);
+    backdrop-filter: blur(15px);
+    color: var(--text-main);
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: var(--card-shadow);
+    border: 2px solid var(--primary);
+    width: 85%;
+    max-width: 320px;
+    transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+    line-height: 1.6;
+    font-size: 15px;
+}
+.tour-buttons {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 15px;
+    border-top: 1px dashed var(--divider-color);
+    padding-top: 15px;
+}
+.tour-buttons button {
+    padding: 8px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    border: none;
+    transition: 0.2s;
+}
+#tour-next-btn { background: var(--primary); color: #fff; }
+#tour-next-btn:active { transform: scale(0.95); }
+.tour-skip { background: transparent; color: var(--text-sub); }
