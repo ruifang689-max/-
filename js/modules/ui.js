@@ -23,17 +23,19 @@ export function initUI() {
     });
 
     // =========================================
-    // 🌟 功能列側收 (沉浸模式) 切換邏輯
+    // 🌟 地圖功能列側收邏輯
     // =========================================
-    window.toggleUIPanels = () => {
-        document.body.classList.toggle('ui-collapsed');
-        const icon = document.querySelector('#ui-toggle-btn i');
-        if (document.body.classList.contains('ui-collapsed')) {
-            // 收起時，圖示變成「向內縮」
-            icon.className = 'fas fa-compress-arrows-alt';
+    window.toggleSidePanel = () => {
+        const zone = document.getElementById('side-function-zone');
+        zone.classList.toggle('collapsed');
+        
+        const icon = document.getElementById('side-panel-icon');
+        if (zone.classList.contains('collapsed')) {
+            // 收起來時，箭頭朝左，提示使用者可以拉出來
+            icon.className = 'fas fa-angle-double-left'; 
         } else {
-            // 展開時，圖示變成「向外擴」
-            icon.className = 'fas fa-expand-arrows-alt';
+            // 展開時，箭頭朝右
+            icon.className = 'fas fa-angle-double-right'; 
         }
     };
     
