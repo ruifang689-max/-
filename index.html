@@ -217,26 +217,17 @@
 
             <h3 class="settings-sub" data-i18n="font"><i class="fas fa-font"></i> 字體選擇</h3>
             
-            <div class="custom-select-wrapper" id="font-custom-select">
-                <div class="custom-select-trigger" onclick="toggleFontDropdown()">
-                    <div class="left-content">
-                        <span id="current-font-text">系統預設 (黑體)</span>
-                    </div>
-                    <i class="fas fa-chevron-down" style="color: var(--text-sub);"></i>
-                </div>
-                
-                <div class="custom-select-options" id="font-options-list">
+            <div class="custom-select-options" id="font-options-list">
                     <div class="custom-option" onclick="selectFontOption('default', '系統預設 (黑體)')">
                         <span style="font-family: sans-serif;">系統預設 (黑體)</span>
                     </div>
                     <div class="custom-option" onclick="selectFontOption('iansui', '芫荽')">
                         <span style="font-family: 'Iansui', sans-serif; font-size: 16px;">芫荽</span>
                     </div>
-                    <div class="custom-option" onclick="selectFontOption('huninn', '粉圓')">
-                        <span style="font-family: 'jf-openhuninn', sans-serif; font-size: 15px;">粉圓</span>
+                    <div class="custom-option" onclick="selectFontOption('wenkai', '文楷')">
+                        <span style="font-family: 'LXGW WenKai TC', sans-serif; font-size: 15px;">文楷</span>
                     </div>
                 </div>
-            </div>
             
             <div style="margin-top: 15px; border-top: 1px dashed var(--divider-color); padding-top: 15px;">
                 <label style="display: flex; align-items: center; gap: 10px; font-weight: bold; font-size: 15px; cursor: pointer; color: var(--text-main);">
@@ -348,7 +339,7 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
     
-    <script type="module" src="./js/main.js?v=511"></script>
+    <script type="module" src="./js/main.js?v=512"></script>
 
     <script>
         setTimeout(() => {
@@ -366,6 +357,7 @@
 
 </body>
 </html>
+
 
 
 
