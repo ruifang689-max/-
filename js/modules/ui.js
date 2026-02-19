@@ -121,12 +121,12 @@ export function initUI() {
     };
 
     window.changeFont = (fontValue, fontText) => {
-        document.body.classList.remove('font-iansui', 'font-huninn');
+        document.body.classList.remove('font-iansui', 'font-wenkai'); // 改為 wenkai
         
         if (fontValue === 'iansui') {
             document.body.classList.add('font-iansui');
-        } else if (fontValue === 'huninn') {
-            document.body.classList.add('font-huninn');
+        } else if (fontValue === 'wenkai') {
+            document.body.classList.add('font-wenkai'); // 套用文楷
         }
         
         localStorage.setItem('ruifang_font', fontValue);
@@ -268,6 +268,53 @@ export function initUI() {
     window.removeFavManage = (name) => { state.myFavs = state.myFavs.filter(fav => fav !== name); saveState.favs(); renderFavManageList(); if (state.targetSpot && state.targetSpot.name === name) document.getElementById("card-fav-icon").className = "fas fa-heart"; };
 
     // =========================================
+    // 🌟 補回：長按地圖新增標記與雙 API 地址查詢
+    // =========================================
+    if (state.mapInstance) {
+        state.mapInstance.on('contextmenu', function(e) {
+            const lat = e.latlng.lat; const lng = e.latlng.lng;
+            const tempPopup = L.popup({ closeButton: false, autoClose: false, offset: [0, -10] })
+                .setLatLng(e.latlng)
+                .setContent("<div style='padding:8px; font-weight:bold; color:var(--primary); font-size:14px;'><i class='fas fa-spinner fa-spin'></i> 獲取詳細地址中...</div>")
+                .openOn(state.mapInstance);
+
+            const primaryUrl = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1&accept-language=zh-TW&email=ruifang689@gmail.com`;
+            const fallbackUrl = `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=zh-tw`;
+
+            fetch(primaryUrl)
+            .then(res => { if(!res.ok) throw new Error(); return res.json(); })
+            .then(data => {
+                let addr = "未知詳細地址"; 
+                if(data && data.address) { 
+                    const a = data.address; 
+                    addr = (a.city || a.county || "") + (a.town || a.suburb || a.district || "") + (a.village || "") + (a.road || "") + (a.house_number ? a.house_number + "號" : ""); 
+                }
+                state.mapInstance.closePopup(tempPopup); 
+                setTimeout(() => { 
+                    state.tempCustomSpot = { lat, lng, addr };
+                    document.getElementById('custom-spot-addr').innerHTML = `<i class="fas fa-map-marker-alt"></i> ${addr}`;
+                    document.getElementById('custom-spot-name').value = ""; 
+                    document.getElementById('custom-spot-modal').style.display = 'flex';
+                }, 150);
+            })
+            .catch(() => { 
+                // 主 API 被封鎖 CORS 時，自動切換至 BigDataCloud 備用 API
+                fetch(fallbackUrl).then(res => res.json()).then(data => {
+                    let addr = "瑞芳秘境";
+                    if(data) { addr = (data.principalSubdivision || "") + (data.city || "") + (data.locality || ""); }
+                    state.mapInstance.closePopup(tempPopup); 
+                    setTimeout(() => { 
+                        state.tempCustomSpot = { lat, lng, addr };
+                        document.getElementById('custom-spot-addr').innerHTML = `<i class="fas fa-map-marker-alt"></i> ${addr}`;
+                        document.getElementById('custom-spot-name').value = ""; 
+                        document.getElementById('custom-spot-modal').style.display = 'flex';
+                    }, 150);
+                }).catch(() => state.mapInstance.closePopup(tempPopup));
+            });
+        });
+    }
+    
+    // =========================================
     // 8. 自訂景點編輯與新增
     // =========================================
     window.closeCustomSpotModal = () => { document.getElementById('custom-spot-modal').style.display = 'none'; };
@@ -349,6 +396,6 @@ export function initUI() {
 
     // 載入字體
     const savedFont = localStorage.getItem('ruifang_font') || 'default';
-    const fontMap = { 'default': '系統預設 (黑體)', 'iansui': '芫荽', 'huninn': '粉圓' };
+    const fontMap = { 'default': '系統預設 (黑體)', 'iansui': '芫荽', 'wenkai': '文楷' }; // 更新這行
     window.changeFont(savedFont, fontMap[savedFont]);
 }
