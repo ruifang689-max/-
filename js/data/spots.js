@@ -22,10 +22,10 @@ export const spots = [
 
     // --- 九份商圈 ---
     { name: "九份老街", wikiTitle: "九份", lat: 25.10988, lng: 121.84523, tags: ["熱門打卡", "歷史"], keywords: ["基山街", "夜景"], highlights: "黃金山城", food: "草仔粿、魚丸湯", history: "採金時期的繁華山城，建築依山而建。", transport: "瑞芳轉客運 788/965", heat: 1.0 },
-    { name: "昇平戲院", wikiTitle: "昇平戲院", lat: 25.10862, lng: 121.84337, tags: ["古蹟"], keywords: ["電影", "懷舊"], highlights: "懷舊戲院", food: "無", history: "曾為全台最大戲院，見證九份繁華。", transport: "九份老街步行", heat: 0.7 },
-    { name: "阿妹茶樓", wikiTitle: "", lat: 25.10856, lng: 121.8436, tags: ["地標", "美食"], keywords: ["紅燈籠", "茶"], highlights: "紅燈籠景觀", food: "茶飲", history: "九份極具代表性的地景建築。", transport: "豎崎路階梯旁", heat: 1.0 },
-    { name: "阿柑姨芋圓", wikiTitle: "", lat: 25.10765, lng: 121.84365, tags: ["美食"], keywords: ["芋圓", "海景"], highlights: "景觀座位區", food: "芋圓", history: "九份代表性美食。", transport: "九份老街上方", heat: 0.9 },
-    { name: "金枝紅糟肉圓", wikiTitle: "", lat: 25.10855, lng: 121.84391, tags: ["美食"], keywords: ["肉圓", "老店"], highlights: "傳統美食", food: "紅糟肉圓", history: "老街必吃老店。", transport: "九份老街內", heat: 0.8 },
+        { name: "昇平戲院", wikiTitle: "昇平戲院", lat: 25.10862, lng: 121.84337, tags: ["古蹟"], keywords: ["電影", "懷舊"], highlights: "懷舊戲院", food: "無", history: "曾為全台最大戲院，見證九份繁華。", transport: "九份老街步行", heat: 0.7 },
+        { name: "阿妹茶樓", wikiTitle: "", lat: 25.10856, lng: 121.8436, tags: ["地標", "美食"], keywords: ["紅燈籠", "茶"], highlights: "紅燈籠景觀", food: "茶飲", history: "九份極具代表性的地景建築。", transport: "豎崎路階梯旁", heat: 1.0 },
+        { name: "阿柑姨芋圓", wikiTitle: "", lat: 25.10765, lng: 121.84365, tags: ["美食"], keywords: ["芋圓", "海景"], highlights: "景觀座位區", food: "芋圓", history: "九份代表性美食。", transport: "九份老街上方", heat: 0.9 },
+        { name: "金枝紅糟肉圓", wikiTitle: "", lat: 25.10855, lng: 121.84391, tags: ["美食"], keywords: ["肉圓", "老店"], highlights: "傳統美食", food: "紅糟肉圓", history: "老街必吃老店。", transport: "九份老街內", heat: 0.8 },
 
     // --- 金瓜石地區 ---
     { name: "金瓜石黃金博物館", wikiTitle: "新北市立黃金博物館", lat: 25.10617, lng: 121.85961, tags: ["歷史", "礦業"], keywords: ["金礦", "本山五坑"], highlights: "摸大金磚", food: "礦工便當", history: "亞洲第一金礦山，展示採金歷史遺址。", transport: "客運 788/856", heat: 0.9 },
@@ -41,9 +41,15 @@ export const spots = [
     { name: "水湳洞長階梯", wikiTitle: "", lat: 25.12187, lng: 121.86056, tags: ["打卡"], keywords: ["階梯", "日系"], highlights: "日系美照點", food: "無", history: "濂洞國小旁階梯。", transport: "水湳洞步行", heat: 0.7 },
 
     // --- 深澳 ---
-    { name: "深澳", wikiTitle: "", lat: 25.133, lng: 121.824, tags: ["象鼻岩", "海景鐵道"], coverImg: "./assets/images/spots/深澳漁港.jpg", keywords: ["海景", "深澳"], highlights: "象鼻岩、酋長岩、深澳鐵道自行車",food: "鯊魚羹、小卷米粉、現撈海鮮",history: "曾為重要煤礦輸出港，現以海蝕奇岩與現撈海鮮聞名，Rail Bike 是最受歡迎景點。",transport: "瑞芳站轉公車T99、791",heat: 0.8},
-    { name: "深澳鐵道自行車", wikiTitle: "深澳線", lat: 25.12901, lng: 121.81439, tags: ["休閒", "交通"], keywords: ["單車", "海景"], highlights: "隧道光影", food: "無", history: "廢棄鐵道改建，最受歡迎的海景Rail Bike。", transport: "瑞芳站轉乘客運/公車", heat: 0.8 },
-    { name: "深澳象鼻岩", wikiTitle: "", lat: 25.133, lng: 121.824, tags: ["自然景觀"], keywords: ["海蝕", "奇岩"], highlights: "海蝕奇岩", food: "小卷米粉、鯊魚羹", history: "曾為重要煤礦輸出港，現以海蝕地形聞名。", transport: "瑞芳站轉公車T99、791", heat: 0.8 },
+    { name: "深澳漁港", wikiTitle: "", lat: 25.13280, lng: 121.82068, tags: ["象鼻岩", "海景鐵道"], coverImg: "./assets/images/spots/深澳漁港.jpg", keywords: ["海景", "深澳"], highlights: "象鼻岩、酋長岩、深澳鐵道自行車",food: "鯊魚羹、小卷米粉、現撈海鮮",history: "曾為重要煤礦輸出港，現以海蝕奇岩與現撈海鮮聞名，Rail Bike 是最受歡迎景點。",transport: "瑞芳站轉公車T99、791",heat: 0.8},
+        // --- 深澳(自然) ---
+        { name: "酋長岩", wikiTitle: "", lat: 25.13498, lng: 121.82195, tags: ["自然景觀"], keywords: ["自然", "奇岩"], highlights: "奇岩", food: "小卷米粉、鯊魚羹", history: "由大自然雕塑而成，外觀形似印地安酋長得名。", transport: "自深澳漁港遠眺即可", heat: 0.8 },
+        { name: "番仔澳海岸", wikiTitle: "", lat: 25.13454, lng: 121.82433, tags: ["自然景觀"], keywords: ["海蝕", "奇岩"], highlights: "海蝕奇岩", food: "小卷米粉、鯊魚羹", history: "以海蝕地形聞名，遠眺可見九份、金瓜石山城美景。", transport: "自象鼻岩收費停車場進入", heat: 0.8 },
+        { name: "深澳象鼻岩(水豚岩)", wikiTitle: "", lat: 25.13577, lng: 121.82430, tags: ["自然景觀"], keywords: ["海蝕", "奇岩"], highlights: "海蝕奇岩", food: "小卷米粉、鯊魚羹", history: "曾經形狀酷似象鼻而得名，後因象鼻斷裂形似水豚又得名。", transport: "自象鼻岩收費停車場進入", heat: 0.8 },
+        // --- 深澳(飲食) ---
+        { name: "長榮小吃", wikiTitle: "", lat: 25.13372, lng: 121.82033, tags: ["美食", "海鮮"], keywords: ["美食", "海鮮"], highlights: "熱炒海鮮小吃", food: "小卷米粉、鯊魚羹", history: "深澳漁港必吃店家。", transport: "瑞芳站轉公車T99、791", heat: 0.8 },
+        // --- 深澳(休閒) ---
+        { name: "深澳鐵道自行車", wikiTitle: "深澳線", lat: 25.12901, lng: 121.81439, tags: ["休閒", "交通"], keywords: ["單車", "海景"], highlights: "隧道光影", food: "無", history: "廢棄鐵道改建，最受歡迎的海景Rail Bike。", transport: "臺鐵深澳線、瑞芳站轉乘客運/公車", heat: 0.8 },
 
     // --- 鼻頭角 ---
     { name: "鼻頭角步道", wikiTitle: "鼻頭角", lat: 25.12588, lng: 121.92028, tags: ["自然景觀", "休閒"], keywords: ["看海", "稜谷"], highlights: "台版萬里長城", food: "周邊海產", history: "瑞芳東北角的岬角。", transport: "客運 856 / 886", heat: 0.7 },
