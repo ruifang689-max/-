@@ -538,66 +538,64 @@ body.dark-mode .region-label-text {
 }
 
 /* =========================================
-   🌟 沉浸模式：貼邊玻璃功能列 (修復重影版)
+   🌟 沉浸模式：開關按鈕 (純透明玻璃版)
    ========================================= */
-#side-function-zone {
-    position: fixed;
-    right: 0; 
-    top: 55%; 
-    transform: translateY(-50%); 
-    display: flex;
-    flex-direction: column;
-    padding: 15px 12px 15px 15px;
-    border-radius: 16px 0 0 16px; 
-    z-index: 9998;
-    transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
-    
-    /* 玻璃背板，加強一點不透明度避免底圖線條干擾 */
-    background: rgba(255, 255, 255, 0.6); 
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    box-shadow: -2px 0 10px rgba(0,0,0,0.05); 
-    border: 1px solid rgba(255,255,255,0.4);
-    border-right: none; 
-}
-
-body.dark-mode #side-function-zone {
-    background: rgba(30, 30, 30, 0.6);
-    border-color: rgba(255,255,255,0.1);
-}
-
-/* 🌟 側收開關標籤 (改為主題實心色，徹底消滅毛玻璃重影 bug) */
 #zone-collapse-btn {
     position: absolute;
-    left: -24px; 
+    left: -24px; /* 緊貼功能列左側 */
     top: 50%;
     transform: translateY(-50%);
     width: 24px;
-    height: 60px; 
-    background: var(--primary); /* 直接使用主題色 */
-    color: white;               /* 白色箭頭 */
-    border: none;
+    height: 60px;
+    
+    /* 🌟 極致玻璃感：拿掉實色，改為高透光材質 */
+    background: rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.5); /* 邊緣高光，增加立體感 */
+    border-right: none;
     border-radius: 12px 0 0 12px;
+    
     display: flex;
     align-items: center;
     justify-content: center;
+    
+    color: white; /* 🌟 白色箭頭 */
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.3); /* 確保白色箭頭在淺色地圖上依然清晰 */
     cursor: pointer;
-    transition: 0.3s;
-    box-shadow: -2px 0 8px rgba(0,0,0,0.15); /* 乾淨的單層陰影 */
+    
+    opacity: 0; /* 🌟 平常時完全隱藏 */
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
-/* 收合狀態：整個區塊向右滑出螢幕 */
+/* 黑暗模式下的玻璃材質微調 */
+body.dark-mode #zone-collapse-btn {
+    background: rgba(30, 30, 30, 0.3);
+    border-color: rgba(255, 255, 255, 0.15);
+}
+
+/* 🌟 觸碰/點擊功能列區域時，浮現玻璃按鈕 */
+#side-function-zone:hover #zone-collapse-btn,
+#side-function-zone:active #zone-collapse-btn {
+    opacity: 1;
+}
+
+/* =========================================
+   🌟 收起時的狀態 (Collapsed)
+   ========================================= */
 #side-function-zone.collapsed {
-    transform: translate(100%, -50%); 
+    transform: translate(100%, -50%); /* 100% 收進右側螢幕 */
 }
 
+/* 收起時，玻璃按鈕永久顯現，並稍微變寬方便點擊拉出 */
 #side-function-zone.collapsed #zone-collapse-btn {
-    width: 28px; /* 收起來時拉環稍微變寬一點，更好點擊 */
-    left: -28px;
+    opacity: 1; 
+    left: -32px; 
+    width: 32px;
+    background: rgba(255, 255, 255, 0.4); /* 收起時玻璃稍微變亮一點，吸引視覺 */
+    box-shadow: -4px 0 15px rgba(0, 0, 0, 0.1);
 }
 
-.zone-buttons {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
+body.dark-mode #side-function-zone.collapsed #zone-collapse-btn {
+    background: rgba(40, 40, 40, 0.6);
 }
