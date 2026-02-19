@@ -5,7 +5,7 @@
 /* 🌟 載入本地字體：粉圓 (指向您 GitHub 上的 fonts 資料夾) */
 @font-face {
     font-family: 'jf-openhuninn';
-    src: url('./fonts/jf-openhuninn.woff2') format('woff2'); /* 請確認檔名與您上傳的一致 */
+    src: url('./fonts/jf-openhuninn-2.1.woff2') format('woff2'); /* 請確認檔名與您上傳的一致 */
     font-display: swap;
 }
 
