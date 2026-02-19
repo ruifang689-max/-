@@ -1,6 +1,6 @@
 /**
- * js/modules/ui.js (v504)
- * 負責：UI 介面交互、設定、教學、PWA、收藏夾、自訂景點編輯
+ * js/modules/ui.js (v511)
+ * 負責：UI 介面交互、設定、主題、字體、教學、PWA、收藏夾、自訂景點編輯
  */
 import { state, saveState } from '../core/store.js';
 import { spots } from '../data/spots.js';
@@ -54,92 +54,35 @@ export function initUI() {
         if(list) list.classList.toggle('open');
     };
 
-    // 點擊空白處自動關閉下拉選單 (支援多個客製化選單)
-    document.addEventListener('click', (e) => {
-        // 主題選單
-        const themeWrapper = document.getElementById('theme-custom-select');
-        const themeList = document.getElementById('theme-options-list');
-        if (themeWrapper && !themeWrapper.contains(e.target) && themeList && themeList.classList.contains('open')) {
-            themeList.classList.remove('open');
-        }
-        
-        // 字體選單
-        const fontWrapper = document.getElementById('font-custom-select');
-        const fontList = document.getElementById('font-options-list');
-        if (fontWrapper && !fontWrapper.contains(e.target) && fontList && fontList.classList.contains('open')) {
-            fontList.classList.remove('open');
-        }
-    });
-    
     window.selectThemeOption = (value, colorHex, text) => {
         const list = document.getElementById('theme-options-list');
         if(list) list.classList.remove('open');
         window.changeTheme(value);
     };
 
-    // 🌟 1. 切換主題邏輯(藍色判斷)
     window.changeTheme = (color) => { 
         if (color === 'custom') { 
             document.getElementById('custom-color-picker').style.display = 'block'; 
             document.getElementById('custom-color-picker').click(); 
         } else if (color === 'default') {
             document.getElementById('custom-color-picker').style.display = 'none'; 
-            window.applyCustomTheme('#007bff', false);
+            window.applyCustomTheme('#007bff', false); 
             localStorage.setItem('ruifang_theme', 'default');
         } else { 
             document.getElementById('custom-color-picker').style.display = 'none'; 
-            window.applyCustomTheme(color, true);
+            window.applyCustomTheme(color, true); 
         } 
     };
 
-    // =========================================
-    // 🌟 新增：字體選擇 (Font)
-    // =========================================
-    window.toggleFontDropdown = () => {
-        const list = document.getElementById('font-options-list');
-        if(list) list.classList.toggle('open');
-    };
-
-    window.selectFontOption = (value, text) => {
-        const list = document.getElementById('font-options-list');
-        if(list) list.classList.remove('open');
-        window.changeFont(value, text);
-    };
-
-    window.changeFont = (fontValue, fontText) => {
-        // 移除所有字體 Class
-        document.body.classList.remove('font-iansui', 'font-huninn');
-        
-        // 加入對應的字體 Class
-        if (fontValue === 'iansui') {
-            document.body.classList.add('font-iansui');
-        } else if (fontValue === 'huninn') {
-            document.body.classList.add('font-huninn');
-        }
-        
-        // 儲存設定
-        localStorage.setItem('ruifang_font', fontValue);
-        
-        // 更新 UI 顯示文字
-        const textSpan = document.getElementById('current-font-text');
-        if (textSpan) textSpan.innerText = fontText || '系統預設 (黑體)';
-    };
-
-    // 🌟 2. 套用主題邏輯
     window.applyCustomTheme = (color, syncIntro = false) => { 
         document.documentElement.style.setProperty('--primary', color); 
         document.documentElement.style.setProperty('--logo-border', color); 
         
-        // 核心動態邏輯判斷
+        // 核心動態邏輯判斷 (系統藍 #007bff)
         if (color === '#007bff' && !syncIntro) {
-            // 【系統預設狀態】：
-            // 主題色：藍色
-            // 次標題：橘色
-            // 下拉框外框：🌟 綠色 (#27ae60) <--- 這裡改成您指定的綠色！
             document.documentElement.style.setProperty('--accent', '#e67e22'); 
-            document.documentElement.style.setProperty('--dynamic-border', '#27ae60'); 
+            document.documentElement.style.setProperty('--dynamic-border', 'var(--text-main)'); 
         } else {
-            // 【使用者換色狀態】：全部跟隨主題色
             document.documentElement.style.setProperty('--accent', color); 
             document.documentElement.style.setProperty('--dynamic-border', color); 
         }
@@ -164,7 +107,51 @@ export function initUI() {
     };
 
     // =========================================
-    // 3. 畫面切換與基本按鈕 (修復卡在開幕畫面的關鍵)
+    // 3. 字體選擇 (Font)
+    // =========================================
+    window.toggleFontDropdown = () => {
+        const list = document.getElementById('font-options-list');
+        if(list) list.classList.toggle('open');
+    };
+
+    window.selectFontOption = (value, text) => {
+        const list = document.getElementById('font-options-list');
+        if(list) list.classList.remove('open');
+        window.changeFont(value, text);
+    };
+
+    window.changeFont = (fontValue, fontText) => {
+        document.body.classList.remove('font-iansui', 'font-huninn');
+        
+        if (fontValue === 'iansui') {
+            document.body.classList.add('font-iansui');
+        } else if (fontValue === 'huninn') {
+            document.body.classList.add('font-huninn');
+        }
+        
+        localStorage.setItem('ruifang_font', fontValue);
+        
+        const textSpan = document.getElementById('current-font-text');
+        if (textSpan) textSpan.innerText = fontText || '系統預設 (黑體)';
+    };
+
+    // 點擊空白處自動關閉所有下拉選單
+    document.addEventListener('click', (e) => {
+        const themeWrapper = document.getElementById('theme-custom-select');
+        const themeList = document.getElementById('theme-options-list');
+        if (themeWrapper && !themeWrapper.contains(e.target) && themeList && themeList.classList.contains('open')) {
+            themeList.classList.remove('open');
+        }
+        
+        const fontWrapper = document.getElementById('font-custom-select');
+        const fontList = document.getElementById('font-options-list');
+        if (fontWrapper && !fontWrapper.contains(e.target) && fontList && fontList.classList.contains('open')) {
+            fontList.classList.remove('open');
+        }
+    });
+
+    // =========================================
+    // 4. 畫面切換與基本按鈕
     // =========================================
     window.enterMap = () => { 
         const welcome = document.getElementById('welcome-screen');
@@ -172,7 +159,7 @@ export function initUI() {
         if(welcome) welcome.style.opacity = '0'; 
         setTimeout(() => { 
             if(welcome) welcome.style.display = 'none'; 
-            if(tutorial) {
+            if(tutorial && localStorage.getItem('ruifang_skip_intro') !== 'true') {
                 tutorial.style.display = 'flex'; 
                 setTimeout(() => { tutorial.style.opacity = '1'; }, 50); 
             }
@@ -183,7 +170,7 @@ export function initUI() {
     window.goToStation = () => { state.mapInstance.flyTo([25.108, 121.805], 16); closeCard(); };
 
     // =========================================
-    // 4. 設定 Modal 與教學
+    // 5. 設定 Modal 與教學
     // =========================================
     window.openSettings = () => { document.getElementById('settings-modal-overlay').style.display = 'flex'; };
     window.closeSettings = () => { document.getElementById('settings-modal-overlay').style.display = 'none'; };
@@ -210,7 +197,7 @@ export function initUI() {
     };
 
     // =========================================
-    // 5. PWA 安裝與分享
+    // 6. PWA 安裝與分享
     // =========================================
     let deferredPrompt;
     const isIos = () => /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
@@ -237,7 +224,7 @@ export function initUI() {
     };
 
     // =========================================
-    // 6. 收藏夾管理
+    // 7. 收藏夾管理
     // =========================================
     window.toggleCurrentFav = () => { 
         if(!state.targetSpot) return; 
@@ -281,7 +268,7 @@ export function initUI() {
     window.removeFavManage = (name) => { state.myFavs = state.myFavs.filter(fav => fav !== name); saveState.favs(); renderFavManageList(); if (state.targetSpot && state.targetSpot.name === name) document.getElementById("card-fav-icon").className = "fas fa-heart"; };
 
     // =========================================
-    // 7. 自訂景點編輯與新增
+    // 8. 自訂景點編輯與新增
     // =========================================
     window.closeCustomSpotModal = () => { document.getElementById('custom-spot-modal').style.display = 'none'; };
     window.confirmCustomSpot = () => {
@@ -348,19 +335,6 @@ export function initUI() {
     };
 
     // =========================================
-    // 8. 系統啟動套用設定
-    // =========================================
-    window.applyLanguage(state.currentLang);
-
-    const savedTheme = localStorage.getItem('ruifang_theme'); 
-    if (!savedTheme || savedTheme === 'default') { 
-        window.applyCustomTheme('#007bff', false); 
-    } else { 
-        window.applyCustomTheme(savedTheme, true); 
-    }
-}
-
-    // =========================================
     // 9. 🌟 系統啟動時的初始化 (Apply Init Config)
     // =========================================
     window.applyLanguage(state.currentLang);
@@ -373,7 +347,8 @@ export function initUI() {
         window.applyCustomTheme(savedTheme, true); 
     }
 
-    // 🌟 載入字體
+    // 載入字體
     const savedFont = localStorage.getItem('ruifang_font') || 'default';
     const fontMap = { 'default': '系統預設 (黑體)', 'iansui': '芫荽', 'huninn': '粉圓' };
     window.changeFont(savedFont, fontMap[savedFont]);
+}
