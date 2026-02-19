@@ -482,3 +482,59 @@ body.dark-mode .region-label-text {
 #tour-next-btn { background: var(--primary); color: #fff; }
 #tour-next-btn:active { transform: scale(0.95); }
 .tour-skip { background: transparent; color: var(--text-sub); }
+
+/* =========================================
+   🌟 設定面板：雙欄滑動開關 (Toggle Switches)
+   ========================================= */
+.settings-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr; /* 併排為兩欄 */
+    gap: 15px 10px;
+}
+.toggle-label {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 14px;
+    font-weight: bold;
+    color: var(--text-main);
+    cursor: pointer;
+}
+.toggle-switch {
+    position: relative;
+    width: 44px;
+    height: 24px;
+    flex-shrink: 0;
+}
+.toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+    margin: 0;
+}
+.toggle-slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background-color: var(--border-color);
+    transition: .3s;
+    border-radius: 24px;
+}
+.toggle-slider:before {
+    position: absolute;
+    content: "";
+    height: 18px;
+    width: 18px;
+    left: 3px;
+    bottom: 3px;
+    background-color: white;
+    transition: .3s;
+    border-radius: 50%;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+.toggle-switch input:checked + .toggle-slider {
+    background-color: var(--primary); /* 打勾時顯示主題色 */
+}
+.toggle-switch input:checked + .toggle-slider:before {
+    transform: translateX(20px);
+}
