@@ -68,6 +68,7 @@ export function initUI() {
         window.changeTheme(value);
     };
 
+    // 🌟 1. 切換主題邏輯(藍色判斷)
     window.changeTheme = (color) => { 
         if (color === 'custom') { 
             document.getElementById('custom-color-picker').style.display = 'block'; 
@@ -82,22 +83,26 @@ export function initUI() {
         } 
     };
 
-    // 🌟 替換 ui.js 裡面的這段主題切換邏輯
+    // 🌟 2. 套用主題邏輯
     window.applyCustomTheme = (color, syncIntro = false) => { 
         document.documentElement.style.setProperty('--primary', color); 
         document.documentElement.style.setProperty('--logo-border', color); 
         
-        // 🌟 核心動態邏輯判斷
+        // 核心動態邏輯判斷
         if (color === '#007bff' && !syncIntro) {
-            // 【系統預設狀態】：次標維持橘色，下拉框邊框維持黑/白
+            // 【系統預設狀態】：
+            // 主題色：藍色
+            // 次標題：橘色
+            // 下拉框外框：🌟 綠色 (#27ae60) <--- 這裡改成您指定的綠色！
             document.documentElement.style.setProperty('--accent', '#e67e22'); 
-            document.documentElement.style.setProperty('--dynamic-border', 'var(--text-main)'); 
+            document.documentElement.style.setProperty('--dynamic-border', '#27ae60'); 
         } else {
-            // 【使用者換色狀態】：次標跟隨主題色，下拉框邊框也跟隨主題色！
+            // 【使用者換色狀態】：全部跟隨主題色
             document.documentElement.style.setProperty('--accent', color); 
             document.documentElement.style.setProperty('--dynamic-border', color); 
         }
 
+        // 開幕動畫顏色同步邏輯
         if (syncIntro) {
             document.documentElement.style.setProperty('--intro-color', color);
             if(color !== '#007bff') localStorage.setItem('ruifang_theme', color); 
@@ -105,6 +110,7 @@ export function initUI() {
             document.documentElement.style.setProperty('--intro-color', '#111111'); 
         }
 
+        // 更新色塊 UI
         const colorSwatch = document.getElementById('current-theme-color');
         const textSpan = document.getElementById('current-theme-text');
         if (colorSwatch && textSpan) {
