@@ -538,52 +538,76 @@ body.dark-mode .region-label-text {
 }
 
 /* =========================================
-   🌟 沉浸模式：功能列側收 (UI Collapse)
+   🌟 沉浸模式：功能列專屬側收區 (Side Panel Collapse)
    ========================================= */
-/* 讓所有主要的 UI 元件具備滑順的過渡動畫 */
-#search, #category-chips, .custom-select-wrapper, 
-button[onclick^="openSettings"], button[onclick^="goToStation"], 
-button[onclick^="resetNorth"], button[onclick^="toggleLayer"] {
-    transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1) !important;
-}
-
-/* 當 body 被加上 ui-collapsed 類別時，隱藏所有功能列 */
-body.ui-collapsed #search,
-body.ui-collapsed #category-chips,
-body.ui-collapsed .custom-select-wrapper,
-body.ui-collapsed button[onclick^="openSettings"],
-body.ui-collapsed button[onclick^="goToStation"],
-body.ui-collapsed button[onclick^="resetNorth"],
-body.ui-collapsed button[onclick^="toggleLayer"] {
-    opacity: 0 !important;
-    pointer-events: none !important; /* 確保隱藏後不會被誤點 */
-    transform: scale(0.9) translateY(-15px) !important; /* 縮小並往上飄走 */
-}
-
-/* 🌟 側收開關按鈕專屬樣式 */
-#ui-toggle-btn {
+#side-function-zone {
     position: fixed;
-    right: 15px;      /* 靠右側 */
-    top: 50%;         /* 垂直置中 */
-    transform: translateY(-50%);
+    right: 15px;
+    bottom: 90px; /* 避開右下角的比例尺，您可以依需求微調高度 */
+    display: flex;
+    flex-direction: column;
+    padding: 15px 10px;
+    border-radius: 12px;
     z-index: 9998;
+    transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+    /* 預設背景全透明，完美融入地圖 */
+    background: transparent; 
+}
+
+/* 🌟 核心設計：當滑鼠或手指觸及此區域時，浮現透明玻璃背景 */
+#side-function-zone:hover, #side-function-zone:active {
     background: var(--glass);
     backdrop-filter: blur(10px);
-    border: 2px solid var(--primary);
-    color: var(--primary);
-    width: 45px;
-    height: 45px;
-    border-radius: 50%;
-    cursor: pointer;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.15);
-    transition: 0.3s;
-    display: flex; justify-content: center; align-items: center;
-    font-size: 18px;
+    box-shadow: var(--card-shadow);
+    border: 1px solid var(--border-color);
 }
-#ui-toggle-btn:hover {
+
+/* 側收開關「〉〉」(預設隱藏，觸及範圍時才出現於正中間左側) */
+#zone-collapse-btn {
+    position: absolute;
+    left: -24px;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 24px;
+    height: 50px;
+    background: var(--glass);
+    border: 1px solid var(--border-color);
+    border-right: none;
+    border-radius: 8px 0 0 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--primary);
+    cursor: pointer;
+    opacity: 0; /* 預設隱藏 */
+    transition: 0.3s;
+}
+
+/* 觸及熱區時，顯示開關 */
+#side-function-zone:hover #zone-collapse-btn,
+#side-function-zone:active #zone-collapse-btn {
+    opacity: 1;
+}
+
+/* 🌟 收合狀態：整個區塊向右滑出螢幕 */
+#side-function-zone.collapsed {
+    transform: translateX(130%); 
+}
+
+/* 收合時，開關必須強制顯示在螢幕邊緣，且變成主題色、方向朝左「〈〈」 */
+#side-function-zone.collapsed #zone-collapse-btn {
+    opacity: 1;
     background: var(--primary);
     color: white;
+    left: -32px;
+    width: 32px;
+    border: none;
+    box-shadow: -2px 0 8px rgba(0,0,0,0.3);
 }
-.toggle-switch input:checked + .toggle-slider:before {
-    transform: translateX(20px);
+
+/* 將原本的按鈕在這個區域內垂直排好 */
+.zone-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
 }
