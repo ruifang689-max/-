@@ -538,21 +538,61 @@ body.dark-mode .region-label-text {
 }
 
 /* =========================================
-   🌟 沉浸模式：開關按鈕 (純透明玻璃版)
+   🌟 沉浸模式：無邊界懸浮按鈕 (Hover 才顯示玻璃底板)
+   ========================================= */
+#side-function-zone {
+    position: fixed;
+    right: 0;
+    top: 55%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    padding: 15px 12px 15px 15px;
+    border-radius: 16px 0 0 16px;
+    z-index: 9998;
+    transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+    
+    /* 🌟 平常時：底板完全透明無邊框，讓按鈕看起來像直接浮在地圖上 */
+    background: transparent; 
+    backdrop-filter: blur(0px);
+    -webkit-backdrop-filter: blur(0px);
+    border: 1px solid transparent;
+    box-shadow: none;
+}
+
+/* 🌟 當滑鼠靠近 (或手指觸碰) 時：平滑浮現高質感的透明玻璃底板 */
+#side-function-zone:hover,
+#side-function-zone:active {
+    background: rgba(255, 255, 255, 0.25);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    border-right: none;
+    box-shadow: -4px 0 15px rgba(0,0,0,0.05);
+}
+
+/* 黑暗模式適配 */
+body.dark-mode #side-function-zone:hover,
+body.dark-mode #side-function-zone:active {
+    background: rgba(30, 30, 30, 0.3);
+    border-color: rgba(255, 255, 255, 0.15);
+}
+
+/* =========================================
+   🌟 側收玻璃小耳朵 (開關按鈕)
    ========================================= */
 #zone-collapse-btn {
     position: absolute;
-    left: -24px; /* 緊貼功能列左側 */
+    left: -24px;
     top: 50%;
     transform: translateY(-50%);
     width: 24px;
     height: 60px;
     
-    /* 🌟 極致玻璃感：拿掉實色，改為高透光材質 */
     background: rgba(255, 255, 255, 0.25);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.5); /* 邊緣高光，增加立體感 */
+    border: 1px solid rgba(255, 255, 255, 0.5);
     border-right: none;
     border-radius: 12px 0 0 12px;
     
@@ -560,21 +600,16 @@ body.dark-mode .region-label-text {
     align-items: center;
     justify-content: center;
     
-    color: white; /* 🌟 白色箭頭 */
-    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.3); /* 確保白色箭頭在淺色地圖上依然清晰 */
+    color: white; 
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
     cursor: pointer;
     
-    opacity: 0; /* 🌟 平常時完全隱藏 */
+    /* 🌟 平常時隱藏 */
+    opacity: 0; 
     transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
-/* 黑暗模式下的玻璃材質微調 */
-body.dark-mode #zone-collapse-btn {
-    background: rgba(30, 30, 30, 0.3);
-    border-color: rgba(255, 255, 255, 0.15);
-}
-
-/* 🌟 觸碰/點擊功能列區域時，浮現玻璃按鈕 */
+/* 觸碰功能區時，小耳朵跟著浮現 */
 #side-function-zone:hover #zone-collapse-btn,
 #side-function-zone:active #zone-collapse-btn {
     opacity: 1;
@@ -584,18 +619,9 @@ body.dark-mode #zone-collapse-btn {
    🌟 收起時的狀態 (Collapsed)
    ========================================= */
 #side-function-zone.collapsed {
-    transform: translate(100%, -50%); /* 100% 收進右側螢幕 */
+    transform: translate(100%, -50%); /* 按鈕群 100% 收進螢幕外 */
 }
 
-/* 收起時，玻璃按鈕永久顯現，並稍微變寬方便點擊拉出 */
-#side-function-zone.collapsed #zone-collapse-btn {
-    opacity: 1; 
-    left: -32px; 
-    width: 32px;
-    background: rgba(255, 255, 255, 0.4); /* 收起時玻璃稍微變亮一點，吸引視覺 */
-    box-shadow: -4px 0 15px rgba(0, 0, 0, 0.1);
-}
-
-body.dark-mode #side-function-zone.collapsed #zone-collapse-btn {
+/* 🌟 收起時：小耳朵必須永久顯現，one.collapsed #zone-collapse-btn {
     background: rgba(40, 40, 40, 0.6);
 }
