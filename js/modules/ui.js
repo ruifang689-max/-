@@ -110,11 +110,28 @@ export function initUI() {
             document.documentElement.style.setProperty('--intro-color', '#111111'); 
         }
 
+        // 更新色塊 UI
         const colorSwatch = document.getElementById('current-theme-color');
         const textSpan = document.getElementById('current-theme-text');
         if (colorSwatch && textSpan) {
             colorSwatch.style.background = color;
-            const themeMap = { '#007bff': '活力藍', '#333333': '極簡黑', '#28a745': '自然綠', '#27ae60': '森林綠', '#f39c12': '溫暖橘', '#e67e22': '夕陽橘', '#8e44ad': '神秘紫', '#e84393': '櫻花粉' };
+            
+            // 🌟 請替換為這個包含所有新顏色的完整對照表
+            const themeMap = { 
+                '#007bff': '活力藍', 
+                '#34495e': '夜幕藍', 
+                '#333333': '極簡黑', 
+                '#95a5a6': '現代灰',
+                '#28a745': '自然綠', 
+                '#27ae60': '森林綠', 
+                '#f39c12': '溫暖橘', 
+                '#e67e22': '夕陽橘', 
+                '#FF0000': '喜慶紅',
+                '#f1c40f': '陽光黃',
+                '#8e44ad': '神秘紫', 
+                '#e84393': '櫻花粉' 
+            };
+            
             if (color === '#007bff' && !syncIntro) textSpan.innerText = '系統主題色 (預設)';
             else textSpan.innerText = themeMap[color] || `自訂顏色 (${color})`;
         }
