@@ -54,14 +54,23 @@ export function initUI() {
         if(list) list.classList.toggle('open');
     };
 
+    // 點擊空白處自動關閉下拉選單 (支援多個客製化選單)
     document.addEventListener('click', (e) => {
-        const wrapper = document.getElementById('theme-custom-select');
-        const list = document.getElementById('theme-options-list');
-        if (wrapper && !wrapper.contains(e.target) && list && list.classList.contains('open')) {
-            list.classList.remove('open');
+        // 主題選單
+        const themeWrapper = document.getElementById('theme-custom-select');
+        const themeList = document.getElementById('theme-options-list');
+        if (themeWrapper && !themeWrapper.contains(e.target) && themeList && themeList.classList.contains('open')) {
+            themeList.classList.remove('open');
+        }
+        
+        // 字體選單
+        const fontWrapper = document.getElementById('font-custom-select');
+        const fontList = document.getElementById('font-options-list');
+        if (fontWrapper && !fontWrapper.contains(e.target) && fontList && fontList.classList.contains('open')) {
+            fontList.classList.remove('open');
         }
     });
-
+    
     window.selectThemeOption = (value, colorHex, text) => {
         const list = document.getElementById('theme-options-list');
         if(list) list.classList.remove('open');
@@ -81,6 +90,39 @@ export function initUI() {
             document.getElementById('custom-color-picker').style.display = 'none'; 
             window.applyCustomTheme(color, true);
         } 
+    };
+
+    // =========================================
+    // 🌟 新增：字體選擇 (Font)
+    // =========================================
+    window.toggleFontDropdown = () => {
+        const list = document.getElementById('font-options-list');
+        if(list) list.classList.toggle('open');
+    };
+
+    window.selectFontOption = (value, text) => {
+        const list = document.getElementById('font-options-list');
+        if(list) list.classList.remove('open');
+        window.changeFont(value, text);
+    };
+
+    window.changeFont = (fontValue, fontText) => {
+        // 移除所有字體 Class
+        document.body.classList.remove('font-iansui', 'font-huninn');
+        
+        // 加入對應的字體 Class
+        if (fontValue === 'iansui') {
+            document.body.classList.add('font-iansui');
+        } else if (fontValue === 'huninn') {
+            document.body.classList.add('font-huninn');
+        }
+        
+        // 儲存設定
+        localStorage.setItem('ruifang_font', fontValue);
+        
+        // 更新 UI 顯示文字
+        const textSpan = document.getElementById('current-font-text');
+        if (textSpan) textSpan.innerText = fontText || '系統預設 (黑體)';
     };
 
     // 🌟 2. 套用主題邏輯
@@ -317,3 +359,21 @@ export function initUI() {
         window.applyCustomTheme(savedTheme, true); 
     }
 }
+
+    // =========================================
+    // 9. 🌟 系統啟動時的初始化 (Apply Init Config)
+    // =========================================
+    window.applyLanguage(state.currentLang);
+
+    // 載入主題
+    const savedTheme = localStorage.getItem('ruifang_theme'); 
+    if (!savedTheme || savedTheme === 'default') { 
+        window.applyCustomTheme('#007bff', false); 
+    } else { 
+        window.applyCustomTheme(savedTheme, true); 
+    }
+
+    // 🌟 載入字體
+    const savedFont = localStorage.getItem('ruifang_font') || 'default';
+    const fontMap = { 'default': '系統預設 (黑體)', 'iansui': '芫荽', 'huninn': '粉圓' };
+    window.changeFont(savedFont, fontMap[savedFont]);
