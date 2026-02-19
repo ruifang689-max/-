@@ -121,12 +121,16 @@ export function initUI() {
     };
 
     window.changeFont = (fontValue, fontText) => {
-        document.body.classList.remove('font-iansui', 'font-wenkai'); // 改為 wenkai
+        // 移除所有字體 Class
+        document.body.classList.remove('font-iansui', 'font-wenkai', 'font-huninn');
         
+        // 加入對應的字體 Class
         if (fontValue === 'iansui') {
             document.body.classList.add('font-iansui');
         } else if (fontValue === 'wenkai') {
-            document.body.classList.add('font-wenkai'); // 套用文楷
+            document.body.classList.add('font-wenkai');
+        } else if (fontValue === 'huninn') {
+            document.body.classList.add('font-huninn');
         }
         
         localStorage.setItem('ruifang_font', fontValue);
@@ -396,6 +400,6 @@ export function initUI() {
 
     // 載入字體
     const savedFont = localStorage.getItem('ruifang_font') || 'default';
-    const fontMap = { 'default': '系統預設 (黑體)', 'iansui': '芫荽', 'wenkai': '文楷' }; // 更新這行
+    const fontMap = { 'default': '系統預設 (黑體)', 'iansui': '芫荽', 'wenkai': '文楷', 'huninn': '粉圓' };
     window.changeFont(savedFont, fontMap[savedFont]);
 }
