@@ -291,11 +291,14 @@ body.dark-mode .modal-select, body.dark-mode .welcome-select {
 body.dark-mode .custom-select-options { box-shadow: 0 10px 30px rgba(0,0,0,0.8); }
 .custom-select-options.open { display: flex; animation: slideDown 0.2s ease-out; }
 
+/* 🌟 找到 .custom-option 並替換為以下設定 (加入淺灰分隔線) */
 .custom-option {
     display: flex; align-items: center; gap: 10px; padding: 12px 15px;
     font-size: 14px; font-weight: bold; color: var(--text-main); cursor: pointer; transition: background 0.2s;
+    border-bottom: 1px solid var(--divider-color); /* 🌟 淺灰分隔線 (黑暗模式會自動變深灰) */
 }
 .custom-option:hover, .custom-option:active { background: var(--divider-color); }
+.custom-option:last-child { border-bottom: none; } /* 🌟 最後一個選項不顯示底線 */
 
 /* 🌟 前置白框正方形小色塊 */
 .color-swatch {
