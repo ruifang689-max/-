@@ -12,6 +12,14 @@ let currentLayerIdx = 0;
 let currentTileLayer = null;
 
 export function initMap() {
+    // ==========================================
+    // 🌟 終極防護罩：檢查地圖容器是否已經被初始化過
+    // ==========================================
+    const mapContainer = document.getElementById('map');
+    if (mapContainer && mapContainer._leaflet_id) {
+        console.warn("地圖已經存在，已攔截重複建立的指令！");
+        return; // 直接中斷，不讓 Leaflet 報錯崩潰
+    }
     state.mapInstance = L.map('map', { zoomControl: false, attributionControl: false }).setView([25.1032, 121.8224], 14);
     
     currentTileLayer = L.tileLayer(mapLayers[0].url).addTo(state.mapInstance);
