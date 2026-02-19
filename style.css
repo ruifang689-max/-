@@ -378,3 +378,41 @@ body.dark-mode .leaflet-control-scale-line {
 body.dark-mode #gps-val-text {
     text-shadow: -1px -1px 0 #121212, 1px -1px 0 #121212, -1px 1px 0 #121212, 1px 1px 0 #121212 !important;
 }
+
+/* =========================================
+   🌟 地區大標籤 (Regional Watermark Labels)
+   ========================================= */
+.region-label {
+    background: transparent;
+    border: none;
+    box-shadow: none;
+}
+.region-label-text {
+    font-size: 22px; /* 字體放大，適合全覽 */
+    font-weight: 900;
+    color: var(--primary); /* 文字顏色跟隨您設定的主題色！ */
+    /* 🌟 強烈的邊緣描邊與陰影，確保在複雜地圖背景下依然清晰 */
+    text-shadow:
+        -2px -2px 0 var(--glass),
+         2px -2px 0 var(--glass),
+        -2px  2px 0 var(--glass),
+         2px  2px 0 var(--glass),
+         0px  4px 10px rgba(0,0,0,0.4);
+    white-space: nowrap;
+    letter-spacing: 4px; /* 字距拉開更有地區廣闊感 */
+    pointer-events: none; /* 🌟 關鍵：讓滑鼠點擊「穿透」文字，不干擾下方地圖操作 */
+    opacity: 0.85; /* 微透視感，像地圖本身的浮水印 */
+    text-align: center;
+    transition: color 0.3s;
+}
+
+/* 黑暗模式下的完美適配 */
+body.dark-mode .region-label-text {
+    color: var(--text-main); /* 黑暗模式改為淺色字 */
+    text-shadow:
+        -2px -2px 0 #121212,
+         2px -2px 0 #121212,
+        -2px  2px 0 #121212,
+         2px  2px 0 #121212,
+         0px  4px 10px rgba(0,0,0,0.9);
+}
