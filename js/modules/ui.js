@@ -23,7 +23,7 @@ export function initUI() {
     });
 
     // =========================================
-    // 🌟 地圖功能列側收邏輯
+    // 🌟 地圖功能列側收邏輯 (修正箭頭方向)
     // =========================================
     window.toggleSidePanel = () => {
         const zone = document.getElementById('side-function-zone');
@@ -31,11 +31,11 @@ export function initUI() {
         
         const icon = document.getElementById('side-panel-icon');
         if (zone.classList.contains('collapsed')) {
-            // 收起來時，箭頭朝左，提示使用者可以拉出來
-            icon.className = 'fas fa-angle-double-left'; 
+            // 收合狀態時，提示使用者「向左拉開」
+            icon.className = 'fas fa-chevron-left'; 
         } else {
-            // 展開時，箭頭朝右
-            icon.className = 'fas fa-angle-double-right'; 
+            // 展開狀態時，提示使用者「向右收合」
+            icon.className = 'fas fa-chevron-right'; 
         }
     };
     
