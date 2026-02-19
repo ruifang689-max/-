@@ -381,7 +381,7 @@ body.dark-mode #gps-val-text {
 }
 
 /* =========================================
-   🌟 地區大標籤 (Regional Watermark Labels)
+   🌟 地區大標籤 (Regional Watermark Labels) - 優化版
    ========================================= */
 .region-label {
     background: transparent;
@@ -389,31 +389,41 @@ body.dark-mode #gps-val-text {
     box-shadow: none;
 }
 .region-label-text {
-    font-size: 22px; /* 字體放大，適合全覽 */
+    font-size: 22px;
     font-weight: 900;
-    color: var(--primary); /* 文字顏色跟隨您設定的主題色！ */
-    /* 🌟 強烈的邊緣描邊與陰影，確保在複雜地圖背景下依然清晰 */
-    text-shadow:
-        -2px -2px 0 var(--glass),
-         2px -2px 0 var(--glass),
-        -2px  2px 0 var(--glass),
-         2px  2px 0 var(--glass),
-         0px  4px 10px rgba(0,0,0,0.4);
+    color: var(--primary);
+    /* 🌟 優化重點：改用 8 方向、1px 精細描邊，消除厚重白底感 */
+    text-shadow: 
+         1px  1px 0 var(--glass),
+        -1px  1px 0 var(--glass),
+         1px -1px 0 var(--glass),
+        -1px -1px 0 var(--glass),
+         0px  1px 0 var(--glass),
+         0px -1px 0 var(--glass),
+         1px  0px 0 var(--glass),
+        -1px  0px 0 var(--glass),
+        /* 最後一層陰影改為緊實的立體感，而非暈開的重影 */
+         0px  1px 3px rgba(0,0,0,0.2);
     white-space: nowrap;
-    letter-spacing: 4px; /* 字距拉開更有地區廣闊感 */
-    pointer-events: none; /* 🌟 關鍵：讓滑鼠點擊「穿透」文字，不干擾下方地圖操作 */
-    opacity: 0.85; /* 微透視感，像地圖本身的浮水印 */
+    letter-spacing: 4px;
+    pointer-events: none;
+    opacity: 0.9; /* 稍微提高不透明度，讓文字更實 */
     text-align: center;
-    transition: color 0.3s;
+    transition: color 0.3s, text-shadow 0.3s; /* 加入 shadow 的過渡動畫 */
 }
 
 /* 黑暗模式下的完美適配 */
 body.dark-mode .region-label-text {
-    color: var(--text-main); /* 黑暗模式改為淺色字 */
-    text-shadow:
-        -2px -2px 0 #121212,
-         2px -2px 0 #121212,
-        -2px  2px 0 #121212,
-         2px  2px 0 #121212,
-         0px  4px 10px rgba(0,0,0,0.9);
+    color: var(--text-main);
+    /* 黑暗模式同樣採用 8 方向精細描邊 */
+    text-shadow: 
+         1px  1px 0 #121212,
+        -1px  1px 0 #121212,
+         1px -1px 0 #121212,
+        -1px -1px 0 #121212,
+         0px  1px 0 #121212,
+         0px -1px 0 #121212,
+         1px  0px 0 #121212,
+        -1px  0px 0 #121212,
+         0px  1px 4px rgba(0,0,0,0.8);
 }
