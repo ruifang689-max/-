@@ -19,7 +19,7 @@ export function initMap() {
     }
 
     // 2. 建立地圖實體
-    state.mapInstance = L.map('map', { zoomControl: false, attributionControl: false }).setView([25.1032, 121.8224], 14);
+    state.mapInstance = L.map('map', { zoomControl: false, attributionControl: false }).setView([25.1032, 121.8224], 13);
     
     // 3. 載入動態底圖與比例尺
     currentTileLayer = L.tileLayer(mapLayers[0].url).addTo(state.mapInstance);
