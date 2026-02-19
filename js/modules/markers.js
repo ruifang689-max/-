@@ -12,8 +12,27 @@ const createCustomPin = (tags, name) => {
 
 export function addMarkerToMap(s) {
     const queryTitle = s.wikiTitle !== undefined ? s.wikiTitle : s.name;
-    if (!s.tags.includes('自訂') && !s.wikiImg && queryTitle !== "") { fetch(`https://zh.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(queryTitle)}`).then(r=>r.json()).then(d=>{s.wikiImg=d.thumbnail?.source;}).catch(()=>{}); }
     
+    // =========================================
+    // 🌟 圖資庫邏輯：自建高清圖庫優先 -> 維基百科(強制放大版) -> 預設佔位圖
+    // =========================================
+    if (s.coverImg) {
+        // 1. 如果有設定專屬高清圖，直接採用！
+        s.wikiImg = s.coverImg; 
+    } else if (!s.tags.includes('自訂') && !s.wikiImg && queryTitle !== "") { 
+        // 2. 如果沒有，才去呼叫維基百科 API
+        fetch(`https://zh.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(queryTitle)}`)
+            .then(r => r.json())
+            .then(d => { 
+                let imgUrl = d.thumbnail?.source;
+                if (imgUrl) {
+                    // 🌟 畫質升級黑科技：維基預設給 320px，我們利用正則表達式，把網址裡的尺寸強制改成 640px！
+                    imgUrl = imgUrl.replace(/\/\d+px-/, '/640px-');
+                }
+                s.wikiImg = imgUrl; 
+            })
+            .catch(() => {}); 
+    }
     const m = L.marker([s.lat, s.lng], { icon: createCustomPin(s.tags, s.name) });
     m.bindPopup(() => {
         const img = s.wikiImg || getPlaceholderImage(s.name);
