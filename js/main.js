@@ -1,4 +1,5 @@
 // js/main.js (v410)
+import { initFirebase } from './modules/firebase-sync.js';
 import { state } from './core/store.js';
 import { initMap, toggleLayer } from './core/map.js';
 import { fetchWeather } from './modules/weather.js';
@@ -62,3 +63,12 @@ if (document.readyState === 'complete' || document.readyState === 'interactive')
 } else {
     document.addEventListener('DOMContentLoaded', bootstrapApp);
 }
+
+document.addEventListener('DOMContentLoaded', () => {
+    initMap();
+    initMarkers();
+    initUI();
+    
+    // 🌟 啟動 Firebase 雲端模組
+    initFirebase();
+});
