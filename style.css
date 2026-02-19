@@ -226,9 +226,8 @@ html, body { margin: 0; padding: 0; width: 100vw; height: 100dvh; overflow: hidd
 .modal-input:focus, .modal-textarea:focus { border-color: var(--primary); }
 .modal-textarea { height: 90px; resize: none; }
 
-/* 🌟 原生下拉選單 (語言) */
+/* 🌟 共同樣式：拔除陰影與預設箭頭，換上自訂箭頭 */
 .modal-select, .welcome-select {
-    border: 2px solid var(--dynamic-border) !important; /* 🌟 改為動態變數 */
     box-shadow: none; 
     appearance: none; -webkit-appearance: none; cursor: pointer;
     background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23111111' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
@@ -236,9 +235,18 @@ html, body { margin: 0; padding: 0; width: 100vw; height: 100dvh; overflow: hidd
     padding-right: 40px;
 }
 
+/* 🌟 分家！設定選單內的語言：吃動態變數 (預設綠色) */
+.modal-select {
+    border: 2px solid var(--dynamic-border) !important; 
+}
+
+/* 🌟 分家！開幕畫面的語言：吃開幕專屬變數 (預設黑色) */
+.welcome-select {
+    border: 2px solid var(--intro-color) !important; 
+}
+
 /* 黑暗模式適配 */
 body.dark-mode .modal-select, body.dark-mode .welcome-select {
-    /* 這裡不用再寫 border-color 了，因為 --dynamic-border 會自動處理 */
     background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23e0e0e0' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
 }
 
@@ -250,7 +258,7 @@ body.dark-mode .modal-select, body.dark-mode .welcome-select {
 /* 🌟 客製化下拉組件 (主題顏色) */
 .custom-select-trigger {
     display: flex; align-items: center; justify-content: space-between; width: 100%; padding: 12px 15px;
-    border: 2px solid var(--dynamic-border); /* 🌟 改為動態變數 */
+    border: 2px solid var(--dynamic-border); /* 設定內的主題選單維持動態綠色 */
     box-shadow: none;
     border-radius: 10px; font-size: 14px; font-weight: bold;
     background: var(--input-bg); color: var(--text-main); cursor: pointer; transition: 0.2s;
