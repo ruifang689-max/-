@@ -51,6 +51,9 @@ export const spots = [
         // --- 深澳(休閒) ---
         { name: "深澳鐵道自行車", wikiTitle: "深澳線", lat: 25.12901, lng: 121.81439, tags: ["休閒", "交通"], keywords: ["單車", "海景"], highlights: "隧道光影", food: "無", history: "廢棄鐵道改建，最受歡迎的海景Rail Bike。", transport: "臺鐵深澳線、瑞芳站轉乘客運/公車", heat: 0.8 },
 
+    // --- 南雅 ---
+    { name: "南雅奇岩", wikiTitle: "", lat: 25.12122, lng: 121.89317, tags: ["自然景觀", "休閒"], keywords: ["看海", "海蝕", "奇岩"], highlights: "珊瑚沿海岸", food: "無", history: "走在海岸邊，看著霜淇淋岩，感受海風。。", transport: "客運 856 / 886", heat: 0.7 },
+    
     // --- 鼻頭角 ---
     { name: "鼻頭角步道", wikiTitle: "鼻頭角", lat: 25.12588, lng: 121.92028, tags: ["自然景觀", "休閒"], keywords: ["看海", "稜谷"], highlights: "台版萬里長城", food: "周邊海產", history: "瑞芳東北角的岬角。", transport: "客運 856 / 886", heat: 0.7 },
     { name: "鼻頭角燈塔", wikiTitle: "鼻頭角燈塔", lat: 25.12877, lng: 121.92346, tags: ["地標"], keywords: ["燈塔", "海景"], highlights: "燈塔海景", food: "無", history: "建於1896年，守護北台灣海域。", transport: "步行自鼻頭角步道", heat: 0.8 }
