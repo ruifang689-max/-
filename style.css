@@ -9,11 +9,14 @@
     --success: #28a745;   
     --card-shadow: 0 8px 30px rgba(0,0,0,0.15); 
     --bg-color: #ffffff;      
-    --text-main: #111111; /* 🌟 白天是深灰色/黑色 */
+    --text-main: #111111; 
     --text-sub: #555555;
     --border-color: #e0e0e0;
     --divider-color: #f5f5f5;
-    --glass: rgba(255, 255, 255, 0.98); /* 提高不透明度，增強質感 */
+    --glass: rgba(255, 255, 255, 0.98);
+    
+    /* 🌟 新增這行：動態邊框變數 (預設綁定文字顏色，即白天黑/晚上白) */
+    --dynamic-border: var(--text-main); 
 }
 
 /* 黑暗模式切換 */
@@ -223,19 +226,19 @@ html, body { margin: 0; padding: 0; width: 100vw; height: 100dvh; overflow: hidd
 .modal-input:focus, .modal-textarea:focus { border-color: var(--primary); }
 .modal-textarea { height: 90px; resize: none; }
 
-/* 🌟 修改 1：語言/原生下拉選單 (改為黑色外框) */
+/* 🌟 原生下拉選單 (語言) */
 .modal-select, .welcome-select {
-    border: 2px solid var(--text-main) !important; /* 🌟 改為跟隨文字顏色 (白天黑/晚上白) */
-    box-shadow: none; /* 移除陰影，更像開場按鈕的平面風格 */
+    border: 2px solid var(--dynamic-border) !important; /* 🌟 改為動態變數 */
+    box-shadow: none; 
     appearance: none; -webkit-appearance: none; cursor: pointer;
-    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23111111' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e"); /* 箭頭改純黑 */
+    background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23111111' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
     background-repeat: no-repeat; background-position: right 15px center; background-size: 16px;
     padding-right: 40px;
 }
 
 /* 黑暗模式適配 */
 body.dark-mode .modal-select, body.dark-mode .welcome-select {
-    border-color: var(--text-main) !important; /* 確保黑暗模式下變白，不然看不到 */
+    /* 這裡不用再寫 border-color 了，因為 --dynamic-border 會自動處理 */
     background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23e0e0e0' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
 }
 
@@ -244,14 +247,15 @@ body.dark-mode .modal-select, body.dark-mode .welcome-select {
    ========================================= */
 .custom-select-wrapper { position: relative; width: 100%; user-select: none; }
 
-/* 🌟 修改 2：客製化主題選單按鈕 (改為黑色外框) */
+/* 🌟 客製化下拉組件 (主題顏色) */
 .custom-select-trigger {
     display: flex; align-items: center; justify-content: space-between; width: 100%; padding: 12px 15px;
-    border: 2px solid var(--text-main); /* 🌟 改為跟隨文字顏色 (白天黑/晚上白) */
-    box-shadow: none; /* 移除陰影，扁平化風格 */
+    border: 2px solid var(--dynamic-border); /* 🌟 改為動態變數 */
+    box-shadow: none;
     border-radius: 10px; font-size: 14px; font-weight: bold;
     background: var(--input-bg); color: var(--text-main); cursor: pointer; transition: 0.2s;
 }
+
 .custom-select-trigger:active { background: var(--divider-color); transform: scale(0.98); }
 .custom-select-trigger .left-content { display: flex; align-items: center; gap: 10px; }
 
