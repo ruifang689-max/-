@@ -494,7 +494,8 @@ body.dark-mode .region-label-text {
 .toggle-label {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: center; /* 🌟 核心修改：從 space-between 改為置中對齊 */
+    gap: 10px;               /* 🌟 核心修改：加上文字與開關之間的固定舒適間距 */
     font-size: 14px;
     font-weight: bold;
     color: var(--text-main);
