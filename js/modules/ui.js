@@ -82,14 +82,20 @@ export function initUI() {
         } 
     };
 
+    // 🌟 替換 ui.js 裡面的這段主題切換邏輯
     window.applyCustomTheme = (color, syncIntro = false) => { 
         document.documentElement.style.setProperty('--primary', color); 
         document.documentElement.style.setProperty('--logo-border', color); 
         
+        // 🌟 核心動態邏輯判斷
         if (color === '#007bff' && !syncIntro) {
+            // 【系統預設狀態】：次標維持橘色，下拉框邊框維持黑/白
             document.documentElement.style.setProperty('--accent', '#e67e22'); 
+            document.documentElement.style.setProperty('--dynamic-border', 'var(--text-main)'); 
         } else {
+            // 【使用者換色狀態】：次標跟隨主題色，下拉框邊框也跟隨主題色！
             document.documentElement.style.setProperty('--accent', color); 
+            document.documentElement.style.setProperty('--dynamic-border', color); 
         }
 
         if (syncIntro) {
