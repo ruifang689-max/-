@@ -624,3 +624,25 @@ body.dark-mode .warning-banner {
         vertical-align: top;
     }
 }
+
+/* =========================================
+   🌟 保證功能列正常顯現的防呆樣式
+   ========================================= */
+#side-panel {
+    display: block; 
+    transition: transform 0.3s ease-out !important;
+}
+
+@media (max-width: 768px), (max-height: 500px) {
+    #side-panel {
+        display: flex !important; /* 強制橫向排列 */
+        transform: translateY(0) !important; /* 確保停留在畫面上 */
+        opacity: 1 !important;
+        visibility: visible !important;
+    }
+    
+    /* 只有被加上 collapsed 才會往下收 */
+    #side-panel.collapsed {
+        transform: translateY(110%) !important;
+    }
+}
