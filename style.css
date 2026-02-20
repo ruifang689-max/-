@@ -646,3 +646,58 @@ body.dark-mode .warning-banner {
         transform: translateY(110%) !important;
     }
 }
+
+/* =========================================
+   🌟 終極防護：確保圖釘原貌與功能列絕對顯現
+   ========================================= */
+
+/* 1. 恢復您熟悉的經典圖釘外觀 (帶陰影與圓角) */
+.custom-marker div {
+    width: 32px !important;
+    height: 32px !important;
+    border-radius: 50% 50% 50% 0 !important; /* 經典水滴狀 */
+    transform: rotate(-45deg) !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    color: white !important;
+    border: 2px solid white !important;
+    box-shadow: 2px 2px 5px rgba(0,0,0,0.4) !important;
+}
+
+/* 將圖標轉正 */
+.custom-marker i {
+    transform: rotate(45deg) !important;
+    font-size: 14px !important;
+}
+
+/* 2. 手機版功能列強制置底、橫列且絕對可見 */
+@media (max-width: 768px), (max-height: 500px) {
+    #side-panel {
+        display: flex !important;
+        position: fixed !important;
+        bottom: 0 !important;
+        left: 0 !important;
+        width: 100vw !important;
+        height: auto !important;
+        z-index: 9999 !important; /* 確保浮在最上層，不被地圖蓋住 */
+        background-color: var(--bg-color, #ffffff) !important;
+        
+        /* 橫向滑動設定 */
+        flex-direction: row !important;
+        overflow-x: auto !important;
+        overflow-y: hidden !important;
+        padding: 15px !important;
+        
+        /* 動畫與可見度 */
+        opacity: 1 !important;
+        visibility: visible !important;
+        transform: translateY(0) !important;
+        transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1) !important;
+    }
+    
+    /* 當觸發收合時，往正下方隱藏 */
+    #side-panel.collapsed {
+        transform: translateY(110%) !important;
+    }
+}
