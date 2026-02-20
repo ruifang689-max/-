@@ -628,3 +628,40 @@ body.dark-mode .region-label-text {
     border-right: none;
     text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
 }
+
+/* =========================================
+   🌟 景點資訊卡進階樣式 (支援警告橫幅)
+   ========================================= */
+.warning-banner {
+    background-color: rgba(255, 59, 48, 0.1); /* 微透紅色底 */
+    color: #d32f2f;
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: bold;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    border: 1px solid rgba(255, 59, 48, 0.3);
+}
+
+.spot-detail-info {
+    font-size: 14px;
+    color: var(--text-light);
+    margin-bottom: 15px;
+    line-height: 1.6;
+}
+
+.spot-detail-info i {
+    width: 20px;
+    text-align: center;
+    color: var(--primary);
+    margin-right: 6px;
+}
+
+body.dark-mode .warning-banner {
+    background-color: rgba(255, 69, 58, 0.15);
+    color: #ff6b6b;
+    border-color: rgba(255, 69, 58, 0.4);
+}
