@@ -15,37 +15,45 @@ import { triggerSearch } from './search.js';
 export function initPanelGestures() {
     let startX = 0, startY = 0;
 
-    // 監聽全域觸控，專門處理「手機版」邊緣滑動
+    // 🌟 加上 capture: true 強制突破地圖封鎖
     document.addEventListener('touchstart', (e) => {
-        if (window.innerWidth > 768) return; // 電腦版不啟用滑動
+        if (window.innerWidth > 768 && window.innerHeight > 600) return; 
         startX = e.touches[0].clientX;
         startY = e.touches[0].clientY;
-    }, { passive: true });
+    }, { passive: true, capture: true });
 
     document.addEventListener('touchend', (e) => {
-        if (window.innerWidth > 768) return; // 電腦版不啟用滑動
+        if (window.innerWidth > 768 && window.innerHeight > 600) return; 
         
         const endX = e.changedTouches[0].clientX;
+        const endY = e.changedTouches[0].clientY;
         const diffX = endX - startX;
-        const diffY = Math.abs(e.changedTouches[0].clientY - startY);
+        const diffY = endY - startY;
         
-        // 必須是橫向滑動 (上下偏移不能太大)
-        if (diffY > 50) return;
-
         const panel = document.getElementById("side-function-zone");
         if (!panel) return;
 
-        // 【收合】向右滑動 (且起始點在螢幕右半部)
-        if (diffX > 40 && startX > window.innerWidth * 0.5) {
-            panel.classList.add("collapsed");
-            if(window.updateToggleIcon) window.updateToggleIcon();
-        } 
-        // 【展開】向左滑動 (起始點必須在螢幕最右側邊緣 60px 內)
-        else if (diffX < -40 && startX > window.innerWidth - 60) {
-            panel.classList.remove("collapsed");
-            if(window.updateToggleIcon) window.updateToggleIcon();
+        // 判斷是否為橫式模式 (高度較小)
+        const isLandscape = window.innerHeight <= 600 && window.innerWidth > window.innerHeight;
+
+        if (isLandscape) {
+            // 【橫式模式：置底】左右滑動不理會，判斷「上下滑動」
+            if (Math.abs(diffX) > 50) return; 
+            if (diffY > 40 && startY > window.innerHeight * 0.5) {
+                panel.classList.add("collapsed"); // 往下滑隱藏
+            } else if (diffY < -40 && startY > window.innerHeight - 60) {
+                panel.classList.remove("collapsed"); // 往上滑展開
+            }
+        } else {
+            // 【直式模式：靠右】上下滑動不理會，判斷「左右滑動」
+            if (Math.abs(diffY) > 50) return; 
+            if (diffX > 40 && startX > window.innerWidth * 0.5) {
+                panel.classList.add("collapsed"); // 往右滑隱藏
+            } else if (diffX < -40 && startX > window.innerWidth - 60) {
+                panel.classList.remove("collapsed"); // 往左滑展開
+            }
         }
-    }, { passive: true });
+    }, { passive: true, capture: true }); // 🌟 capture: true 是關鍵
 }
 
 // 🌟 更新電腦版點擊按鈕的箭頭方向
