@@ -392,6 +392,10 @@ body.dark-mode #gps-val-text {
     font-size: 22px;
     font-weight: 900;
     color: var(--primary);
+
+    /* 🌟 核心修正：把置中位移寫在 CSS 裡，保持 HTML 結構純淨 */
+    transform: translate(-50%, -50%);
+    
     /* 🌟 優化重點：改用 8 方向、1px 精細描邊，消除厚重白底感 */
     text-shadow: 
          1px  1px 0 var(--glass),
