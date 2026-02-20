@@ -65,8 +65,14 @@ export function initUI() {
         const welcome = document.getElementById('welcome-screen');
         if(welcome) { welcome.style.opacity = '0'; setTimeout(() => { welcome.style.display = 'none'; }, 400); }
 
+        // 🌟 確保功能列強制浮現，不被任何舊設定卡住
         const panel = document.getElementById("side-panel");
-        if(panel) panel.classList.remove("collapsed");
+        if(panel) {
+            panel.style.display = ''; // 洗掉可能殘留的 display: none
+            panel.style.opacity = '1';
+            panel.style.visibility = 'visible';
+            panel.classList.remove("collapsed");
+        }
         
         const sug = document.getElementById("suggest");
         if(sug) sug.style.display = "none";
@@ -81,7 +87,7 @@ export function initUI() {
             else if (!skipTutorial) window.startTutorialOverlay();
         }, 400); 
     };
-
+    
     // 1. 語言、主題、字體切換
     window.applyLanguage = (lang) => {
         state.currentLang = lang; localStorage.setItem('ruifang_lang', lang); const t = translations[lang] || translations['zh'];
