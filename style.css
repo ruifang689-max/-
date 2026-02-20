@@ -595,17 +595,6 @@ body.dark-mode .warning-banner {
     pointer-events: none; /* 空白處穿透 */
 }
 
-#side-function-zone > * {
-    pointer-events: auto; /* 讓按鈕可點擊 */
-}
-
-.zone-buttons {
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    margin-left: 5px;
-}
-
 /* =========================================
    🌟 修正 3：功能列介面優化 (刪拉環、定位修正)
    ========================================= */
