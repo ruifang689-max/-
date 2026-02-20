@@ -538,7 +538,7 @@ body.dark-mode .region-label-text {
 }
 
 /* =========================================
-   🌟 沉浸模式：無邊界懸浮按鈕 (Hover 才顯示玻璃底板)
+   🌟 沉浸模式：玻璃功能列 (內建箭頭版)
    ========================================= */
 #side-function-zone {
     position: fixed;
@@ -547,22 +547,13 @@ body.dark-mode .region-label-text {
     transform: translateY(-50%);
     display: flex;
     flex-direction: column;
-    padding: 15px 12px 15px 15px;
-    border-radius: 16px 0 0 16px;
+    /* 🌟 左側 padding 留出 24px 的空間給箭頭放置 */
+    padding: 20px 15px 20px 24px; 
+    border-radius: 20px 0 0 20px;
     z-index: 9998;
-    transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+    transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
     
-    /* 🌟 平常時：底板完全透明無邊框，讓按鈕看起來像直接浮在地圖上 */
-    background: transparent; 
-    backdrop-filter: blur(0px);
-    -webkit-backdrop-filter: blur(0px);
-    border: 1px solid transparent;
-    box-shadow: none;
-}
-
-/* 🌟 當滑鼠靠近 (或手指觸碰) 時：平滑浮現高質感的透明玻璃底板 */
-#side-function-zone:hover,
-#side-function-zone:active {
+    /* 🌟 恢復常駐的高質感玻璃底板 */
     background: rgba(255, 255, 255, 0.25);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
@@ -571,57 +562,68 @@ body.dark-mode .region-label-text {
     box-shadow: -4px 0 15px rgba(0,0,0,0.05);
 }
 
-/* 黑暗模式適配 */
-body.dark-mode #side-function-zone:hover,
-body.dark-mode #side-function-zone:active {
-    background: rgba(30, 30, 30, 0.3);
+body.dark-mode #side-function-zone {
+    background: rgba(30, 30, 30, 0.35);
     border-color: rgba(255, 255, 255, 0.15);
 }
 
 /* =========================================
-   🌟 側收玻璃小耳朵 (開關按鈕)
+   🌟 收合箭頭：平常隱藏，在功能列內部
    ========================================= */
 #zone-collapse-btn {
     position: absolute;
-    left: -24px;
+    left: 4px; /* 🌟 核心：箭頭在玻璃列「上面」，不凸出去 */
     top: 50%;
     transform: translateY(-50%);
-    width: 24px;
+    width: 20px;
     height: 60px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     
-    background: rgba(255, 255, 255, 0.25);
+    color: white; /* 白色箭頭 */
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+    cursor: pointer;
+    
+    background: transparent; /* 展開時沒有背景底框 */
+    border: none;
+    
+    opacity: 0; /* 平常時隱藏 */
+    transition: all 0.3s ease;
+}
+
+/* 滑鼠靠近功能列時，浮現白色箭頭 */
+#side-function-zone:hover #zone-collapse-btn {
+    opacity: 1;
+}
+
+/* =========================================
+   🌟 收起時的狀態 (變換為外掛玻璃拉環)
+   ========================================= */
+#side-function-zone.collapsed {
+    transform: translate(100%, -50%); /* 往右收進螢幕 */
+}
+
+/* 🌟 收起時，箭頭往左凸出，並加上玻璃背板永遠顯現 */
+#side-function-zone.collapsed #zone-collapse-btn {
+    opacity: 1; 
+    left: -32px; 
+    width: 32px;
+    background: rgba(255, 255, 255, 0.35); /* 玻璃質感 */
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border: 1px solid rgba(255, 255, 255, 0.5);
     border-right: none;
     border-radius: 12px 0 0 12px;
-    
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    
-    color: white; 
-    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
-    cursor: pointer;
-    
-    /* 🌟 平常時隱藏 */
-    opacity: 0; 
-    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    box-shadow: -4px 0 15px rgba(0,0,0,0.1);
 }
 
-/* 觸碰功能區時，小耳朵跟著浮現 */
-#side-function-zone:hover #zone-collapse-btn,
-#side-function-zone:active #zone-collapse-btn {
-    opacity: 1;
-}
-
-/* =========================================
-   🌟 收起時的狀態 (Collapsed)
-   ========================================= */
-#side-function-zone.collapsed {
-    transform: translate(100%, -50%); /* 按鈕群 100% 收進螢幕外 */
-}
-
-/* 🌟 收起時：小耳朵必須永久顯現，one.collapsed #zone-collapse-btn {
+body.dark-mode #side-function-zone.collapsed #zone-collapse-btn {
     background: rgba(40, 40, 40, 0.6);
+}
+
+.zone-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 24px; /* 保持舒適拉開的間距 */
 }
