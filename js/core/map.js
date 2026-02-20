@@ -62,23 +62,30 @@ export function initMap() {
     });
 
     // ==========================================
-    // 🌟 終極優化：0 毫秒本地端載入「瑞芳區行政界線」
+    // 🌟 穩健修復版：瑞芳區行政界線 (快取機制)
     // ==========================================
-    if (ruifangBoundary) {
-        L.geoJSON(ruifangBoundary, {
-            style: {
-                color: 'var(--primary)', 
-                weight: 3, 
-                dashArray: '8, 12',
-                fillColor: 'var(--primary)', 
-                fillOpacity: 0.04            
-            },
+    const cacheKey = 'ruifang_boundary';
+    const cachedData = localStorage.getItem(cacheKey);
+
+    const drawBoundary = (geojsonData) => {
+        L.geoJSON(geojsonData, {
+            style: { color: 'var(--primary)', weight: 3, dashArray: '8, 12', fillColor: 'var(--primary)', fillOpacity: 0.04 },
             interactive: false 
         }).addTo(state.mapInstance);
+    };
+
+    if (cachedData) {
+        drawBoundary(JSON.parse(cachedData));
     } else {
-        console.error("找不到邊界資料，請確認 js/data/boundary.js 檔案設定！");
+        fetch('https://nominatim.openstreetmap.org/search?q=瑞芳區,新北市,台灣&format=json&polygon_geojson=1&limit=1')
+        .then(res => res.json())
+        .then(data => {
+            if (data && data.length > 0 && data[0].geojson) {
+                localStorage.setItem(cacheKey, JSON.stringify(data[0].geojson));
+                drawBoundary(data[0].geojson);
+            }
+        }).catch(err => console.log("界線載入中...", err));
     }
-}
 
 export function toggleLayer() {
     currentLayerIdx = (currentLayerIdx + 1) % mapLayers.length; 
