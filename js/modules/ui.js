@@ -244,46 +244,35 @@ export function initUI() {
     function renderFavManageList() { const listEl = document.getElementById('fav-manage-list'); if(!listEl) return; listEl.innerHTML = ''; if (state.myFavs.length === 0) { listEl.innerHTML = '<p style="text-align:center; color:#888;">目前無收藏景點</p>'; return; } state.myFavs.forEach((name, idx) => { const item = document.createElement('div'); item.style.cssText = "display:flex; justify-content:space-between; align-items:center; padding:10px; background:var(--glass); border:1px solid var(--border-color); border-radius:8px;"; item.innerHTML = `<span style="font-weight:bold; color:var(--text-main); font-size:14px;">${name}</span> <div style="display:flex; gap:6px;"> <button onclick="moveFav(${idx}, -1)" style="padding:6px 10px; cursor:pointer; background:var(--divider-color); border:none; border-radius:6px; color:var(--text-main);" ${idx===0?'disabled':''}><i class="fas fa-arrow-up"></i></button> <button onclick="moveFav(${idx}, 1)" style="padding:6px 10px; cursor:pointer; background:var(--divider-color); border:none; border-radius:6px; color:var(--text-main);" ${idx===state.myFavs.length-1?'disabled':''}><i class="fas fa-arrow-down"></i></button> <button onclick="removeFavManage('${name}')" style="padding:6px 10px; background:var(--danger); color:white; cursor:pointer; border:none; border-radius:6px;"><i class="fas fa-trash"></i></button> </div>`; listEl.appendChild(item); }); }
     window.moveFav = (idx, dir) => { if (idx + dir < 0 || idx + dir >= state.myFavs.length) return; const temp = state.myFavs[idx]; state.myFavs[idx] = state.myFavs[idx + dir]; state.myFavs[idx + dir] = temp; saveState.favs(); renderFavManageList(); };
     window.removeFavManage = (name) => { state.myFavs = state.myFavs.filter(fav => fav !== name); saveState.favs(); renderFavManageList(); if (state.targetSpot && state.targetSpot.name === name) document.getElementById("card-fav-icon").className = "fas fa-heart"; };
-
+    
+    // 🌟 修正 1：改用穩定的 BigDataCloud 逆向地址 API，解決 OSM 封鎖問題
     if (state.mapInstance) {
         state.mapInstance.on('contextmenu', function(e) {
             const lat = e.latlng.lat; const lng = e.latlng.lng;
-            const tempPopup = L.popup({ closeButton: false, autoClose: false, offset: [0, -10] }).setLatLng(e.latlng).setContent("<div style='padding:8px; font-weight:bold; color:var(--primary); font-size:14px;'><i class='fas fa-spinner fa-spin'></i> 獲取詳細地址中...</div>").openOn(state.mapInstance);
-            const primaryUrl = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1&accept-language=zh-TW&email=ruifang689@gmail.com`;
-            const fallbackUrl = `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=zh-tw`;
-            fetch(primaryUrl).then(res => { if(!res.ok) throw new Error(); return res.json(); }).then(data => { let addr = "未知詳細地址"; if(data && data.address) { const a = data.address; addr = (a.city || a.county || "") + (a.town || a.suburb || a.district || "") + (a.village || "") + (a.road || "") + (a.house_number ? a.house_number + "號" : ""); } state.mapInstance.closePopup(tempPopup); setTimeout(() => { state.tempCustomSpot = { lat, lng, addr }; document.getElementById('custom-spot-addr').innerHTML = `<i class="fas fa-map-marker-alt"></i> ${addr}`; document.getElementById('custom-spot-name').value = ""; document.getElementById('custom-spot-modal').style.display = 'flex'; }, 150); }).catch(() => { fetch(fallbackUrl).then(res => res.json()).then(data => { let addr = "瑞芳秘境"; if(data) { addr = (data.principalSubdivision || "") + (data.city || "") + (data.locality || ""); } state.mapInstance.closePopup(tempPopup); setTimeout(() => { state.tempCustomSpot = { lat, lng, addr }; document.getElementById('custom-spot-addr').innerHTML = `<i class="fas fa-map-marker-alt"></i> ${addr}`; document.getElementById('custom-spot-name').value = ""; document.getElementById('custom-spot-modal').style.display = 'flex'; }, 150); }).catch(() => state.mapInstance.closePopup(tempPopup)); });
+            const tempPopup = L.popup({ closeButton: false, autoClose: false, offset: [0, -10] })
+                .setLatLng(e.latlng)
+                .setContent("<div style='padding:8px; font-weight:bold; color:var(--primary); font-size:14px;'><i class='fas fa-spinner fa-spin'></i> 獲取地址中...</div>")
+                .openOn(state.mapInstance);
+            
+            // 直接使用穩定版 API 作為主力
+            const apiUrl = `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=zh-tw`;
+            
+            fetch(apiUrl).then(res => res.json()).then(data => { 
+                let addr = "瑞芳秘境"; 
+                if(data) addr = (data.principalSubdivision || "") + (data.city || "") + (data.locality || ""); 
+                state.mapInstance.closePopup(tempPopup); 
+                setTimeout(() => { 
+                    state.tempCustomSpot = { lat, lng, addr }; 
+                    document.getElementById('custom-spot-addr').innerHTML = `<i class="fas fa-map-marker-alt"></i> ${addr}`; 
+                    document.getElementById('custom-spot-name').value = ""; 
+                    document.getElementById('custom-spot-modal').style.display = 'flex'; 
+                }, 150); 
+            }).catch(() => state.mapInstance.closePopup(tempPopup));
         });
     }
 
-    if (state.mapInstance) {
-        const ruifangRegions = [
-            { name: "四腳亭", lat: 25.1020, lng: 121.7610 },
-            { name: "瑞芳市區", lat: 25.1080, lng: 121.8050 },
-            { name: "九份", lat: 25.1090, lng: 121.8440 },
-            { name: "金瓜石", lat: 25.1050, lng: 121.8580 },
-            { name: "水湳洞", lat: 25.1220, lng: 121.8640 },
-            { name: "鼻頭角", lat: 25.1270, lng: 121.9180 },
-            { name: "深澳", lat: 25.1310, lng: 121.8190 },
-            { name: "猴硐", lat: 25.0860, lng: 121.8260 },
-            { name: "三貂嶺", lat: 25.0590, lng: 121.8240 }
-        ];
+    // 🌟 修正 2：已將重複的「九大區域浮水印」從此處徹底刪除，統一由 map.js 負責！
 
-        ruifangRegions.forEach(region => {
-            const regionIcon = L.divIcon({
-                className: 'region-label',
-                html: `<div class="region-label-text">${region.name}</div>`,
-                iconSize: [120, 40],
-                iconAnchor: [60, 20]
-            });
-
-            L.marker([region.lat, region.lng], {
-                icon: regionIcon,
-                interactive: false,
-                zIndexOffset: -1000
-            }).addTo(state.mapInstance);
-        });
-    }
-    
     window.closeCustomSpotModal = () => { document.getElementById('custom-spot-modal').style.display = 'none'; };
     window.confirmCustomSpot = () => { const spotName = document.getElementById('custom-spot-name').value.trim() || "我的秘境"; if (state.tempCustomSpot) { const newSpot = { name: spotName, lat: state.tempCustomSpot.lat, lng: state.tempCustomSpot.lng, tags: ["自訂"], highlights: `詳細地址：${state.tempCustomSpot.addr}`, food: "--", history: "自訂標記", transport: "自行前往", wikiImg: "" }; state.savedCustomSpots.push(newSpot); saveState.customSpots(); addMarkerToMap(newSpot); showCard(newSpot); } window.closeCustomSpotModal(); };
     window.openEditModal = (name) => { state.currentEditingSpotName = name; const s = state.savedCustomSpots.find(x => x.name === name); if(!s) return; document.getElementById('edit-name').value = s.name; document.getElementById('edit-highlights').value = s.highlights; document.getElementById('edit-history').value = s.history; document.getElementById('edit-image-preview').style.display = s.wikiImg ? "block" : "none"; document.getElementById('edit-image-preview').src = s.wikiImg || ""; document.getElementById('edit-modal-overlay').style.display = "flex"; };
