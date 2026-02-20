@@ -10,37 +10,65 @@ import { showCard, closeCard } from './cards.js';
 import { triggerSearch } from './search.js';
 
 // =========================================
-// 🌟 地圖功能列：側收、隱藏與智慧滑動手勢
+// 🌟 地圖功能列：手機滑動 / 電腦點擊 雙軌制
 // =========================================
 export function initPanelGestures() {
-    const panel = document.getElementById("side-function-zone"); 
-    if (!panel) return;
-
     let startX = 0, startY = 0;
 
-    panel.addEventListener('touchstart', (e) => {
+    // 監聽全域觸控，專門處理「手機版」邊緣滑動
+    document.addEventListener('touchstart', (e) => {
+        if (window.innerWidth > 768) return; // 電腦版不啟用滑動
         startX = e.touches[0].clientX;
         startY = e.touches[0].clientY;
     }, { passive: true });
 
-    panel.addEventListener('touchend', (e) => {
-        const diffX = e.changedTouches[0].clientX - startX;
-        const diffY = e.changedTouches[0].clientY - startY;
+    document.addEventListener('touchend', (e) => {
+        if (window.innerWidth > 768) return; // 電腦版不啟用滑動
+        
+        const endX = e.changedTouches[0].clientX;
+        const diffX = endX - startX;
+        const diffY = Math.abs(e.changedTouches[0].clientY - startY);
+        
+        // 必須是橫向滑動 (上下偏移不能太大)
+        if (diffY > 50) return;
 
-        // 判斷當下是否為「手機橫式 (高度小於寬度且為行動裝置尺寸)」
-        const isLandscape = window.innerHeight <= 600 && window.innerWidth > window.innerHeight;
+        const panel = document.getElementById("side-function-zone");
+        if (!panel) return;
 
-        if (isLandscape) {
-            // 手機橫式 (置底模式)：向「下」滑動大於 40px 收起，向「上」滑動展開
-            if (diffY > 40) panel.classList.add("collapsed");
-            else if (diffY < -40) panel.classList.remove("collapsed");
-        } else {
-            // 直式或電腦版 (靠右模式)：向「右」滑動大於 40px 收起，向「左」滑動展開
-            if (diffX > 40) panel.classList.add("collapsed");
-            else if (diffX < -40) panel.classList.remove("collapsed");
+        // 【收合】向右滑動 (且起始點在螢幕右半部)
+        if (diffX > 40 && startX > window.innerWidth * 0.5) {
+            panel.classList.add("collapsed");
+            if(window.updateToggleIcon) window.updateToggleIcon();
+        } 
+        // 【展開】向左滑動 (起始點必須在螢幕最右側邊緣 60px 內)
+        else if (diffX < -40 && startX > window.innerWidth - 60) {
+            panel.classList.remove("collapsed");
+            if(window.updateToggleIcon) window.updateToggleIcon();
         }
     }, { passive: true });
 }
+
+// 🌟 更新電腦版點擊按鈕的箭頭方向
+window.updateToggleIcon = () => {
+    const panel = document.getElementById("side-function-zone");
+    const icon = document.getElementById("side-panel-icon");
+    if (panel && icon) {
+        if (panel.classList.contains("collapsed")) {
+            icon.className = "fas fa-angle-double-left"; 
+        } else {
+            icon.className = "fas fa-angle-double-right";
+        }
+    }
+};
+
+// 🌟 點擊收展功能列 (專供電腦版使用)
+window.toggleSidePanel = () => {
+    const panel = document.getElementById("side-function-zone");
+    if (panel) {
+        panel.classList.toggle("collapsed");
+        window.updateToggleIcon();
+    }
+};
 
 // =========================================
 // 🌟 進入地圖：解鎖動畫與強制顯示功能列
