@@ -579,76 +579,77 @@ body.dark-mode .warning-banner {
 }
 
 /* =========================================
-   🌟 終極修正：功能列 (side-function-zone) 智慧排版
+   🌟 終極修正：透明漂浮功能列 (電腦點擊 / 手機滑動)
    ========================================= */
 
-/* 1. 徹底刪除拉環/收展按鈕 (改用全區滑動) */
-#zone-collapse-btn {
-    display: none !important;
-}
-
-/* 2. 預設排版 (電腦版 & 手機直式 Portrait)：右側直列 */
+/* 1. 容器隱形化、位置置中靠右，絕對不遮擋上下左右資訊 */
 #side-function-zone {
     position: fixed !important;
     right: 15px !important;
     top: 50% !important;
-    transform: translateY(-50%) translateX(0) !important;
-    z-index: 9999 !important;
+    transform: translateY(-50%) !important;
+    z-index: 8000 !important;
     display: flex !important;
     flex-direction: column !important;
-    background: rgba(255, 255, 255, 0.85) !important;
-    backdrop-filter: blur(8px) !important;
-    padding: 15px 10px !important;
-    border-radius: 20px !important;
-    box-shadow: -4px 0 15px rgba(0,0,0,0.1) !important;
-    transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1) !important;
+    align-items: flex-end !important; /* 按鈕靠右對齊 */
+    
+    /* 徹底透明化 */
+    background: transparent !important;
+    backdrop-filter: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    
+    /* 讓透明區域穿透點擊，不會擋住地圖 */
+    pointer-events: none !important; 
+}
+
+/* 讓按鈕本身恢復點擊能力 */
+.zone-buttons, #zone-collapse-btn {
+    pointer-events: auto !important;
 }
 
 .zone-buttons {
     display: flex !important;
     flex-direction: column !important;
     gap: 12px !important;
+    transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.3s ease !important;
+    transform: translateX(0) !important;
+    opacity: 1 !important;
 }
 
+/* 漂浮按鈕加上立體陰影 */
 .control-btn {
-    margin: 0 !important; /* 確保直式時不偏移 */
+    box-shadow: 0 3px 8px rgba(0,0,0,0.3) !important; 
+    margin: 0 !important;
 }
 
-/* 預設直欄的收合動作 (往右隱藏) */
-#side-function-zone.collapsed {
-    transform: translateY(-50%) translateX(120%) !important;
+/* 2. 雙箭頭點擊收展按鈕 (電腦版專屬) */
+#zone-collapse-btn {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background: var(--bg-color, #ffffff);
+    border-radius: 50%;
+    cursor: pointer;
+    box-shadow: 0 3px 8px rgba(0,0,0,0.3);
+    margin-bottom: 15px;
+    color: var(--text-main);
+    transition: background 0.2s;
 }
 
-/* 3. 僅限手機橫式 (Landscape)：強制置底橫躺 */
-@media (orientation: landscape) and (max-height: 600px), (max-height: 450px) {
-    #side-function-zone {
-        top: auto !important;
-        bottom: 0px !important;
-        left: 0px !important;
-        right: 0px !important;
-        width: 100vw !important;
-        flex-direction: row !important;
-        padding: 10px 15px 15px 15px !important;
-        border-radius: 20px 20px 0 0 !important;
-        box-shadow: 0 -4px 15px rgba(0,0,0,0.1) !important;
-        transform: translateY(0) translateX(0) !important; 
-    }
-    
-    .zone-buttons {
-        flex-direction: row !important; /* 強制橫向排列 */
-        overflow-x: auto !important;    /* 超出螢幕可左右滑動按鈕 */
-        white-space: nowrap !important;
-        gap: 0 !important;
-    }
-    
-    .control-btn {
-        flex-shrink: 0 !important; 
-        margin-right: 12px !important;
-    }
+/* 3. 收合狀態：將下方按鈕群往右推出畫面並隱藏 */
+#side-function-zone.collapsed .zone-buttons {
+    transform: translateX(150%) !important;
+    opacity: 0 !important;
+    pointer-events: none !important;
+}
 
-    /* 橫式的收合動作 (往下隱藏) */
-    #side-function-zone.collapsed {
-        transform: translateY(110%) translateX(0) !important;
+/* 4. 手機版分流：隱藏點擊按鈕，強迫使用滑動 */
+@media (max-width: 768px) {
+    #zone-collapse-btn {
+        display: none !important; 
     }
 }
 
