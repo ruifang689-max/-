@@ -579,51 +579,46 @@ body.dark-mode .warning-banner {
 }
 
 /* =========================================
-   🌟 終極修正：透明漂浮功能列 (電腦點擊 / 手機滑動)
+   🌟 終極修正：漂浮功能列 (直式靠右偏下 / 橫式置底置中)
    ========================================= */
 
-/* 1. 容器隱形化、位置置中靠右，絕對不遮擋上下左右資訊 */
+/* 1. 電腦版 & 手機直式：靠右，且位置往下移一些 (top: 65%) */
 #side-function-zone {
     position: fixed !important;
     right: 15px !important;
-    top: 50% !important;
+    top: 65% !important; /* 🌟 往下挪，避開正中央 */
     transform: translateY(-50%) !important;
     z-index: 8000 !important;
     display: flex !important;
     flex-direction: column !important;
-    align-items: flex-end !important; /* 按鈕靠右對齊 */
+    align-items: flex-end !important; 
     
-    /* 徹底透明化 */
     background: transparent !important;
     backdrop-filter: none !important;
     box-shadow: none !important;
     padding: 0 !important;
-    
-    /* 讓透明區域穿透點擊，不會擋住地圖 */
     pointer-events: none !important; 
 }
 
-/* 讓按鈕本身恢復點擊能力 */
 .zone-buttons, #zone-collapse-btn {
     pointer-events: auto !important;
 }
 
 .zone-buttons {
     display: flex !important;
-    flex-direction: column !important;
+    flex-direction: column !important; /* 預設直列 */
     gap: 12px !important;
     transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1), opacity 0.3s ease !important;
     transform: translateX(0) !important;
     opacity: 1 !important;
 }
 
-/* 漂浮按鈕加上立體陰影 */
 .control-btn {
     box-shadow: 0 3px 8px rgba(0,0,0,0.3) !important; 
     margin: 0 !important;
 }
 
-/* 2. 雙箭頭點擊收展按鈕 (電腦版專屬) */
+/* 雙箭頭點擊按鈕 (電腦版) */
 #zone-collapse-btn {
     display: flex !important;
     align-items: center;
@@ -639,17 +634,52 @@ body.dark-mode .warning-banner {
     transition: background 0.2s;
 }
 
-/* 3. 收合狀態：將下方按鈕群往右推出畫面並隱藏 */
+/* 直式收合狀態：往右推 */
 #side-function-zone.collapsed .zone-buttons {
     transform: translateX(150%) !important;
     opacity: 0 !important;
     pointer-events: none !important;
 }
 
-/* 4. 手機版分流：隱藏點擊按鈕，強迫使用滑動 */
+/* 隱藏手機版點擊按鈕 */
 @media (max-width: 768px) {
     #zone-collapse-btn {
         display: none !important; 
+    }
+}
+
+/* =========================================
+   🌟 2. 僅限手機橫式：置底、橫列、置中
+   ========================================= */
+@media (orientation: landscape) and (max-height: 600px), (max-height: 450px) {
+    #side-function-zone {
+        top: auto !important;
+        bottom: 20px !important; /* 置底 */
+        left: 0 !important;
+        right: 0 !important; /* 撐開寬度 */
+        transform: translateY(0) !important;
+        flex-direction: row !important;
+        justify-content: center !important; /* 🌟 整個容器水平置中 */
+        align-items: center !important;
+        width: 100vw !important;
+    }
+    
+    .zone-buttons {
+        flex-direction: row !important; /* 🌟 強制橫列 */
+        justify-content: center !important; /* 🌟 按鈕群置中 */
+        flex-wrap: nowrap !important;
+        overflow-x: auto !important; /* 裝不下可滑動 */
+        width: 100% !important;
+        padding: 0 15px !important;
+    }
+    
+    .control-btn {
+        flex-shrink: 0 !important;
+    }
+
+    /* 橫式收合狀態：往下推 */
+    #side-function-zone.collapsed .zone-buttons {
+        transform: translateY(150%) translateX(0) !important;
     }
 }
 
