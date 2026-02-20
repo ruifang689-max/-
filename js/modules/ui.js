@@ -58,6 +58,7 @@ export function initUI() {
     });
 
     // 🌟 進入地圖：完美融合動畫解除、強制展開功能列與新手教學
+    // 🌟 進入地圖：暴力解鎖功能列
     window.enterMap = () => { 
         const intro = document.getElementById('intro');
         if(intro) { intro.style.opacity = '0'; setTimeout(() => { intro.style.display = 'none'; }, 400); }
@@ -65,13 +66,25 @@ export function initUI() {
         const welcome = document.getElementById('welcome-screen');
         if(welcome) { welcome.style.opacity = '0'; setTimeout(() => { welcome.style.display = 'none'; }, 400); }
 
-        // 🌟 確保功能列強制浮現，不被任何舊設定卡住
+        // ==========================================
+        // 🌟 終極暴力解法：直接用 JS 覆蓋所有 CSS 隱藏屬性
+        // ==========================================
         const panel = document.getElementById("side-panel");
         if(panel) {
-            panel.style.display = ''; // 洗掉可能殘留的 display: none
-            panel.style.opacity = '1';
-            panel.style.visibility = 'visible';
             panel.classList.remove("collapsed");
+            // 強制寫入 Style，確保絕對置底、浮在最上層、完全可見
+            panel.style.cssText = `
+                display: flex !important; 
+                position: fixed !important; 
+                bottom: 0px !important; 
+                left: 0px !important;
+                width: 100vw !important;
+                z-index: 99999 !important; 
+                transform: translateY(0) !important; 
+                visibility: visible !important; 
+                opacity: 1 !important;
+                background-color: var(--bg-color, #ffffff) !important;
+            `;
         }
         
         const sug = document.getElementById("suggest");
