@@ -86,7 +86,55 @@ export function initUI() {
         }, { passive: true });
     }
 }
+
+// 在 ui.js 中，進入地圖的按鈕或初始邏輯
+export function enterMap() {
+    // 隱藏開場動畫...
+    document.getElementById("intro").style.display = "none";
     
+    // 🌟 修正 4：進入地圖時，確保功能列是「展開」的狀態，避免莫名消失
+    const panel = document.getElementById("side-panel");
+    if(panel) panel.classList.remove("collapsed"); 
+    
+    // 初始化地圖...
+}
+
+// 🌟 修正 5：功能列滑動手勢 (左右/下滑隱藏)
+export function initPanelGestures() {
+    const panel = document.getElementById("side-panel");
+    if (!panel) return;
+
+    let touchStartX = 0;
+    let touchStartY = 0;
+
+    panel.addEventListener('touchstart', (e) => {
+        touchStartX = e.touches[0].clientX;
+        touchStartY = e.touches[0].clientY;
+    }, { passive: true });
+
+    panel.addEventListener('touchend', (e) => {
+        const touchEndX = e.changedTouches[0].clientX;
+        const touchEndY = e.changedTouches[0].clientY;
+        const diffX = touchEndX - touchStartX;
+        const diffY = touchEndY - touchStartY;
+
+        // 手機版在下方時：向下滑動收起功能列
+        if (window.innerWidth <= 768) {
+            if (diffY > 50) { 
+                panel.classList.add("collapsed"); 
+            }
+        } 
+        // 桌面/直式側邊欄時：向左滑動收起功能列
+        else {
+            if (diffX < -50) {
+                panel.classList.add("collapsed");
+            } else if (diffX > 50) {
+                panel.classList.remove("collapsed");
+            }
+        }
+    }, { passive: true });
+}
+
     // =========================================
     // 1. 語言、主題、字體切換
     // =========================================
