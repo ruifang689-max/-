@@ -21,11 +21,12 @@ export function addMarkerToMap(spot) {
     }
 
     const marker = L.marker([spot.lat, spot.lng], {
-        icon: L.divIcon({
-            className: 'custom-marker',
-            html: `<div style="background-color: ${markerColor}; box-shadow: 0 2px 5px rgba(0,0,0,0.3);"><i class="fas ${iconClass}"></i></div>`
-        })
-    });
+            icon: L.divIcon({
+                className: 'custom-marker',
+                // 🌟 修正 4：加入完美的圓形圖釘樣式 (白邊 + 圓角 + 陰影 + 置中)
+                html: `<div style="background-color: ${markerColor}; width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; border: 2.5px solid white; box-shadow: 0 3px 8px rgba(0,0,0,0.4); font-size: 14px;"><i class="fas ${iconClass}"></i></div>`
+            })
+        });
 
     marker.on('click', () => showCard(spot));
     
