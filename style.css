@@ -586,7 +586,7 @@ body.dark-mode .warning-banner {
 #side-function-zone {
     position: fixed !important;
     right: 15px !important;
-    top: 65% !important; /* 🌟 往下挪，避開正中央 */
+    top: 55% !important; /* 🌟 往下挪，避開正中央 */
     transform: translateY(-50%) !important;
     z-index: 8000 !important;
     display: flex !important;
