@@ -26,115 +26,42 @@ export function initUI() {
     // =========================================
     // 🌟 地圖功能列：側收、隱藏與手機手勢 (修復版)
     // =========================================
-    // 1. 必須先宣告 zone，後面的程式才認得它！
-    const zone = document.getElementById('side-function-zone');
-    window.collapseTimer = null; 
-
-    window.toggleSidePanel = () => {
-        if (!zone) return;
-        const icon = document.getElementById('side-panel-icon');
-        
-        if (zone.classList.contains('collapsed')) {
-            // 👉 執行展開
-            zone.classList.remove('collapsed', 'sleep');
-            icon.className = 'fas fa-angle-double-right'; // 準備收合的 〉〉
-            clearTimeout(window.collapseTimer);
-        } else {
-            // 👉 執行收合
-            zone.classList.add('collapsed');
-            zone.classList.remove('sleep');
-            icon.className = 'fas fa-angle-double-left'; // 準備展開的 〈〈
-            
-            // 👉 倒數 2.5 秒後進入隱藏睡眠模式
-            clearTimeout(window.collapseTimer);
-            window.collapseTimer = setTimeout(() => {
-                if (zone.classList.contains('collapsed')) {
-                    zone.classList.add('sleep');
-                }
-            }, 2500);
-        }
-    };
-
-    // 📱 2. 手機觸控與滑動偵測 (Swipe)
-    if (zone) {
-        let startX = 0;
-
-        zone.addEventListener('touchstart', (e) => {
-            startX = e.touches[0].clientX;
-            // 如果在睡眠狀態，手指一碰到就喚醒
-            if (zone.classList.contains('collapsed') && zone.classList.contains('sleep')) {
-                zone.classList.remove('sleep');
-                clearTimeout(window.collapseTimer);
-                window.collapseTimer = setTimeout(() => {
-                    if (zone.classList.contains('collapsed')) zone.classList.add('sleep');
-                }, 2500);
-            }
-        }, { passive: true });
-
-        zone.addEventListener('touchend', (e) => {
-            let endX = e.changedTouches[0].clientX;
-            let diffX = endX - startX;
-
-            // 向右滑動 (收合)
-            if (diffX > 40 && !zone.classList.contains('collapsed')) {
-                window.toggleSidePanel(); 
-            } 
-            // 向左滑動 (展開)
-            else if (diffX < -40 && zone.classList.contains('collapsed')) {
-                window.toggleSidePanel(); 
-            }
-        }, { passive: true });
-    }
-}
-
-// 在 ui.js 中，進入地圖的按鈕或初始邏輯
-export function enterMap() {
-    // 隱藏開場動畫...
-    document.getElementById("intro").style.display = "none";
-    
-    // 🌟 修正 4：進入地圖時，確保功能列是「展開」的狀態，避免莫名消失
-    const panel = document.getElementById("side-panel");
-    if(panel) panel.classList.remove("collapsed"); 
-    
-    // 初始化地圖...
-}
-
-// 🌟 修正 5：功能列滑動手勢 (左右/下滑隱藏)
-export function initPanelGestures() {
+    export function initPanelGestures() {
     const panel = document.getElementById("side-panel");
     if (!panel) return;
 
-    let touchStartX = 0;
-    let touchStartY = 0;
+    let startX = 0, startY = 0;
 
+    // 監聽整個功能列的觸控
     panel.addEventListener('touchstart', (e) => {
-        touchStartX = e.touches[0].clientX;
-        touchStartY = e.touches[0].clientY;
+        startX = e.touches[0].clientX;
+        startY = e.touches[0].clientY;
     }, { passive: true });
 
     panel.addEventListener('touchend', (e) => {
-        const touchEndX = e.changedTouches[0].clientX;
-        const touchEndY = e.changedTouches[0].clientY;
-        const diffX = touchEndX - touchStartX;
-        const diffY = touchEndY - touchStartY;
+        const diffX = e.changedTouches[0].clientX - startX;
+        const diffY = e.changedTouches[0].clientY - startY;
 
-        // 手機版在下方時：向下滑動收起功能列
-        if (window.innerWidth <= 768) {
-            if (diffY > 50) { 
-                panel.classList.add("collapsed"); 
-            }
+        // 如果是手機版 (置底)：向「下」滑動大於 40px 就收起
+        if (window.innerWidth <= 768 || window.innerHeight <= 500) {
+            if (diffY > 40) panel.classList.add("collapsed");
         } 
-        // 桌面/直式側邊欄時：向左滑動收起功能列
+        // 如果是電腦版 (靠左)：向「左」滑動大於 40px 就收起
         else {
-            if (diffX < -50) {
-                panel.classList.add("collapsed");
-            } else if (diffX > 50) {
-                panel.classList.remove("collapsed");
-            }
+            if (diffX < -40) panel.classList.add("collapsed");
         }
     }, { passive: true });
 }
 
+// 確保進入地圖時，其他介面(如推薦清單)會乖乖關閉，避免重疊
+export function enterMap() {
+    document.getElementById("intro").style.display = "none";
+    document.getElementById("side-panel").classList.remove("collapsed");
+    const sug = document.getElementById("suggest");
+    if(sug) sug.style.display = "none";
+    if (typeof window.closeCard === 'function') window.closeCard();
+}
+    
     // =========================================
     // 1. 語言、主題、字體切換
     // =========================================
