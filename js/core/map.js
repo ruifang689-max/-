@@ -53,7 +53,7 @@ export function initMap() {
             icon: L.divIcon({
                 className: 'region-label', // 👈 換回您的外框 class
                 // 👇 換回您的文字 class，並加上一點位移確保座標正中對齊
-                html: `<div class="region-label-text" style="transform: translate(-50%, -50%);">${r.name}</div>`, 
+                html: `<div class="region-label-text">${r.name}</div>`, 
                 iconSize: [0, 0] 
             }),
             interactive: false // 依然保持滑鼠穿透
