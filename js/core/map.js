@@ -51,8 +51,8 @@ export function initMap() {
     ruifangRegions.forEach(r => {
         L.marker([r.lat, r.lng], {
             icon: L.divIcon({
-                className: 'region-label', // 👈 換回您的外框 class
-                // 👇 換回您的文字 class，並加上一點位移確保座標正中對齊
+                className: 'region-label', 
+                // 👇 已經將 inline style 移除，完全交給您的 CSS 控制
                 html: `<div class="region-label-text">${r.name}</div>`, 
                 iconSize: [0, 0] 
             }),
