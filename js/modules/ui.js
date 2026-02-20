@@ -22,11 +22,12 @@ export function initUI() {
         if (!e.target.closest('.custom-select-wrapper')) { document.querySelectorAll('.custom-select-options').forEach(list => list.classList.remove('open')); }
     });
 
-    window.collapseTimer = null; // 放在全域避免重複觸發
 
     // =========================================
     // 🌟 地圖功能列：側收、隱藏與手機手勢
     // =========================================
+    window.collapseTimer = null; // 放在全域避免重複觸發
+    
     window.toggleSidePanel = () => {
         const zone = document.getElementById('side-function-zone');
         if (!zone) return;
