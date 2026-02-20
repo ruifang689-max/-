@@ -29,7 +29,6 @@ export function initUI() {
     export function initPanelGestures() {
     const panel = document.getElementById("side-panel");
     if (!panel) return;
-    }
         
     let startX = 0, startY = 0;
 
