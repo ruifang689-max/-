@@ -60,7 +60,8 @@ export function initMap() {
         }
     })
     .catch(err => console.error("區界線載入失敗", err));
-
+} // 👈 🌟 就是這個重要的大括號！它保護了後面的 export
+    
 // 7. 切換底圖功能
 export function toggleLayer() {
     currentLayerIdx = (currentLayerIdx + 1) % mapLayers.length; 
