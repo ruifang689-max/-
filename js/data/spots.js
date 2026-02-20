@@ -56,11 +56,11 @@ export const spots = [
     
     // --- 鼻頭角 ---
     { name: "鼻頭角步道", wikiTitle: "鼻頭角", lat: 25.12588, lng: 121.92028, tags: ["自然景觀", "休閒"], keywords: ["看海", "稜谷"], highlights: "台版萬里長城", food: "周邊海產", history: "瑞芳東北角的岬角。", transport: "客運 856 / 886", heat: 0.7 },
-    { name: "鼻頭角燈塔", wikiTitle: "鼻頭角燈塔", lat: 25.12877, lng: 121.92346, tags: ["地標"], keywords: ["燈塔", "海景"], highlights: "燈塔海景", food: "無", history: "建於1896年，守護北台灣海域。", transport: "步行自鼻頭角步道", heat: 0.8 }
+    { name: "鼻頭角燈塔", wikiTitle: "鼻頭角燈塔", lat: 25.12877, lng: 121.92346, tags: ["地標"], keywords: ["燈塔", "海景"], highlights: "燈塔海景", food: "無", history: "建於1896年，守護北台灣海域。", transport: "步行自鼻頭角步道", heat: 0.8 },
 
 
     
-    {    
+    {   
         "id": "C1_382000000A_112420",
         "name": "三個磅空自行車道",
         "lat": 25.08833,
