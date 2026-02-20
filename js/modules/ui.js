@@ -29,7 +29,8 @@ export function initUI() {
     export function initPanelGestures() {
     const panel = document.getElementById("side-panel");
     if (!panel) return;
-
+    }
+        
     let startX = 0, startY = 0;
 
     // 監聽整個功能列的觸控
