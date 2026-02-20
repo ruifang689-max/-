@@ -10,10 +10,9 @@ import { showCard, closeCard } from './cards.js';
 import { triggerSearch } from './search.js';
 
 // =========================================
-// 🌟 地圖功能列：側收、隱藏與手機手勢
+// 🌟 地圖功能列：側收、隱藏與智慧滑動手勢
 // =========================================
 export function initPanelGestures() {
-    // 🎯 換成正確的目標 ID！
     const panel = document.getElementById("side-function-zone"); 
     if (!panel) return;
 
@@ -28,16 +27,17 @@ export function initPanelGestures() {
         const diffX = e.changedTouches[0].clientX - startX;
         const diffY = e.changedTouches[0].clientY - startY;
 
-        // 手機版 (置底)：向「下」滑動大於 40px 收起，向「上」滑動展開
-        if (window.innerWidth <= 768 || window.innerHeight <= 500) {
+        // 判斷當下是否為「手機橫式 (高度小於寬度且為行動裝置尺寸)」
+        const isLandscape = window.innerHeight <= 600 && window.innerWidth > window.innerHeight;
+
+        if (isLandscape) {
+            // 手機橫式 (置底模式)：向「下」滑動大於 40px 收起，向「上」滑動展開
             if (diffY > 40) panel.classList.add("collapsed");
             else if (diffY < -40) panel.classList.remove("collapsed");
-        } 
-        // 電腦版 (靠側邊)：判斷左右滑動收展
-        else {
-            if (diffX > 40 || diffX < -40) {
-                panel.classList.toggle("collapsed");
-            }
+        } else {
+            // 直式或電腦版 (靠右模式)：向「右」滑動大於 40px 收起，向「左」滑動展開
+            if (diffX > 40) panel.classList.add("collapsed");
+            else if (diffX < -40) panel.classList.remove("collapsed");
         }
     }, { passive: true });
 }
