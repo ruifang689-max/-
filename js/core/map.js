@@ -1,6 +1,4 @@
 import { state } from '../core/store.js';
-// 🌟 匯入我們剛剛建立的 0 毫秒極速邊界資料
-import { ruifangBoundary } from '../data/boundary.js';
 
 const mapLayers = [
     { url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', name: '街道', icon: 'fa-map', dark: false },
@@ -48,7 +46,7 @@ export function initMap() {
     });
 
     // ==========================================
-    // 🌟 繪製九大區域浮水印 (完美對接您的 8 方向精細描邊)
+    // 🌟 繪製九大區域浮水印
     // ==========================================
     ruifangRegions.forEach(r => {
         L.marker([r.lat, r.lng], {
@@ -57,7 +55,7 @@ export function initMap() {
                 html: `<div class="region-label-text">${r.name}</div>`, 
                 iconSize: [0, 0] 
             }),
-            interactive: false // 絕對關鍵：讓滑鼠穿透浮水印，不干擾景點點擊！
+            interactive: false 
         }).addTo(state.mapInstance);
     });
 
@@ -86,6 +84,7 @@ export function initMap() {
             }
         }).catch(err => console.log("界線載入中...", err));
     }
+} // 👈 就是這個救命的右大括號，這次我幫您確實補上了！
 
 export function toggleLayer() {
     currentLayerIdx = (currentLayerIdx + 1) % mapLayers.length; 
