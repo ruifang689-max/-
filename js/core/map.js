@@ -91,7 +91,6 @@ export function initMap() {
         })
         .catch(err => console.error("界線載入失敗", err));
     }
-}
 
 export function toggleLayer() {
     currentLayerIdx = (currentLayerIdx + 1) % mapLayers.length; 
