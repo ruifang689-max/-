@@ -13,20 +13,6 @@ export function showCard(s) {
     document.getElementById("card-fav-icon").className = state.myFavs.includes(s.name) ? "fas fa-heart active" : "fas fa-heart"; 
     document.getElementById("title").innerText = s.name; 
     
-    // 1. 圖片處理
-    const imgEl = document.getElementById("img"); 
-    imgEl.src = s.wikiImg || s.brochureUrl || getPlaceholderImage(s.name); 
-    imgEl.onerror = () => { imgEl.src = getPlaceholderImage(s.name); }; 
-    
-    // 2. 標籤處理 (相容舊版自訂 tags 陣列，或新版官方 category 字串)
-    const tags = s.tags ? s.tags : (s.category ? [s.category] : []);
-    document.getElementById("card-tags").innerHTML = tags.map(t => `<span class="info-tag">${t}</span>`).join(''); 
-    
-    export function showCard(s) { 
-    state.targetSpot = s; 
-    document.getElementById("card-fav-icon").className = state.myFavs.includes(s.name) ? "fas fa-heart active" : "fas fa-heart"; 
-    document.getElementById("title").innerText = s.name; 
-    
     // 圖片處理
     const imgEl = document.getElementById("img"); 
     imgEl.src = s.wikiImg || s.brochureUrl || getPlaceholderImage(s.name); 
@@ -37,7 +23,7 @@ export function showCard(s) {
     document.getElementById("card-tags").innerHTML = tags.map(t => `<span class="info-tag">${t}</span>`).join(''); 
     
     // =========================================
-    // 🌟 修正 1：保留舊版模樣，並優雅匯入新版官方資訊
+    // 🌟 保留舊版模樣，並優雅匯入新版官方資訊
     // =========================================
     const warningHtml = s.warning ? `<div class="warning-banner"><i class="fas fa-exclamation-triangle"></i><span>${s.warning}</span></div>` : '';
     const officialDetails = (s.address || s.openTime || (s.tel && s.tel !== '無')) ? `
@@ -53,7 +39,7 @@ export function showCard(s) {
     const highlightsEl = document.getElementById("card-highlights");
     if (highlightsEl) highlightsEl.innerHTML = warningHtml + officialDetails + `<div>${desc}</div>`;
     
-    // 🌟 修正 2：解封舊版的專屬欄位！(美食、歷史、交通)
+    // 🌟 解封舊版的專屬欄位！(美食、歷史、交通)
     const foodEl = document.getElementById("card-food"); 
     if(foodEl) { foodEl.style.display = "block"; foodEl.innerText = s.food || "--"; }
     
@@ -75,24 +61,6 @@ export function showCard(s) {
         btnGroup.innerHTML = `<button onclick="startNav()"><i class="fas fa-location-arrow"></i> ${t.nav}</button><button class="secondary" onclick="aiTrip()"><i class="fas fa-magic"></i> ${t.ai}</button>`; 
     }
     
-    document.getElementById("card").classList.add("open"); 
-    document.getElementById("card").style.transform = ''; 
-    }
-    
-    // =========================================
-    // 4. 渲染按鈕
-    // =========================================
-    const t = translations[state.currentLang] || translations['zh'];
-    const btnGroup = document.getElementById("card-btn-group");
-    
-    // 判斷是否為使用者自訂景點
-    if (tags.includes('自訂')) { 
-        btnGroup.innerHTML = `<button onclick="startNav()" style="flex: 1.2;"><i class="fas fa-location-arrow"></i> ${t.nav}</button><button class="secondary" onclick="openEditModal('${s.name}')"><i class="fas fa-edit"></i> 編輯</button><button class="danger" onclick="deleteCustomSpot('${s.name}')"><i class="fas fa-trash-alt"></i> 刪除</button>`; 
-    } else { 
-        btnGroup.innerHTML = `<button onclick="startNav()"><i class="fas fa-location-arrow"></i> ${t.nav}</button><button class="secondary" onclick="aiTrip()"><i class="fas fa-magic"></i> ${t.ai}</button>`; 
-    }
-    
-    // 5. 展開卡片
     document.getElementById("card").classList.add("open"); 
     document.getElementById("card").style.transform = ''; 
 }
