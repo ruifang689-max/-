@@ -27,8 +27,6 @@ export function initUI() {
     // =========================================
     // 🌟 地圖功能列：側收、隱藏與手機手勢
     // =========================================
-    window.collapseTimer = null; // 放在全域避免重複觸發
-
     window.toggleSidePanel = () => {
         const zone = document.getElementById('side-function-zone');
         if (!zone) return;
