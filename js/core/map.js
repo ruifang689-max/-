@@ -46,16 +46,17 @@ export function initMap() {
     });
 
     // ==========================================
-    // 🌟 修復 1：繪製九大區域浮水印 (完全不干擾點擊)
+    // 🌟 修復 1：繪製九大區域浮水印 (完美對接您的 8 方向精細描邊 CSS)
     // ==========================================
     ruifangRegions.forEach(r => {
         L.marker([r.lat, r.lng], {
             icon: L.divIcon({
-                className: 'region-watermark-wrap',
-                html: `<div class="region-text">${r.name}</div>`,
-                iconSize: [0, 0] // 讓 CSS 完全接管大小
+                className: 'region-label', // 👈 換回您的外框 class
+                // 👇 換回您的文字 class，並加上一點位移確保座標正中對齊
+                html: `<div class="region-label-text" style="transform: translate(-50%, -50%);">${r.name}</div>`, 
+                iconSize: [0, 0] 
             }),
-            interactive: false // 🌟 絕對關鍵：讓滑鼠穿透浮水印，避免干擾景點點擊！
+            interactive: false // 依然保持滑鼠穿透
         }).addTo(state.mapInstance);
     });
 
