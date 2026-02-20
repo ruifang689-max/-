@@ -22,30 +22,32 @@ export function initUI() {
         if (!e.target.closest('.custom-select-wrapper')) { document.querySelectorAll('.custom-select-options').forEach(list => list.classList.remove('open')); }
     });
 
+    window.collapseTimer = null; // 放在全域避免重複觸發
+
     // =========================================
-    // 🌟 地圖功能列：側收、2.5秒隱藏、手機滑動手勢
+    // 🌟 地圖功能列：側收、隱藏與手機手勢
     // =========================================
-    let collapseTimer = null;
-    const zone = document.getElementById('side-function-zone');
+    window.collapseTimer = null; // 放在全域避免重複觸發
 
     window.toggleSidePanel = () => {
+        const zone = document.getElementById('side-function-zone');
         if (!zone) return;
         const icon = document.getElementById('side-panel-icon');
         
         if (zone.classList.contains('collapsed')) {
             // 👉 執行展開
             zone.classList.remove('collapsed', 'sleep');
-            icon.className = 'fas fa-angle-double-right'; // 準備下次收合的 〉〉
-            clearTimeout(collapseTimer); // 清除定時器
+            icon.className = 'fas fa-angle-double-right'; // 換成準備收合的 〉〉
+            clearTimeout(window.collapseTimer);
         } else {
             // 👉 執行收合
             zone.classList.add('collapsed');
             zone.classList.remove('sleep');
-            icon.className = 'fas fa-angle-double-left'; // 準備下次展開的 〈〈
+            icon.className = 'fas fa-angle-double-left'; // 換成準備展開的 〈〈
             
             // 👉 倒數 2.5 秒後進入隱藏睡眠模式
-            clearTimeout(collapseTimer);
-            collapseTimer = setTimeout(() => {
+            clearTimeout(window.collapseTimer);
+            window.collapseTimer = setTimeout(() => {
                 if (zone.classList.contains('collapsed')) {
                     zone.classList.add('sleep');
                 }
