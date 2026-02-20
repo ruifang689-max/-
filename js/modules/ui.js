@@ -14,8 +14,11 @@ import { triggerSearch } from './search.js';
 // =========================================
 export function initPanelGestures() {
     const panel = document.getElementById("side-panel");
-    if (!panel) return;
-
+        if(panel) {
+            panel.style.display = 'flex'; // 確保不是 none
+            panel.classList.remove("collapsed"); // 解除隱藏狀態
+        }
+    
     let startX = 0, startY = 0;
 
     panel.addEventListener('touchstart', (e) => {
