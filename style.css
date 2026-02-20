@@ -538,7 +538,7 @@ body.dark-mode .region-label-text {
 }
 
 /* =========================================
-   🌟 沉浸模式：玻璃功能列 (內建箭頭版)
+   🌟 沉浸模式：非霧態玻璃功能列 (手勢滑動版)
    ========================================= */
 #side-function-zone {
     position: fixed;
@@ -546,84 +546,90 @@ body.dark-mode .region-label-text {
     top: 55%;
     transform: translateY(-50%);
     display: flex;
-    flex-direction: column;
-    /* 🌟 左側 padding 留出 24px 的空間給箭頭放置 */
-    padding: 20px 15px 20px 24px; 
-    border-radius: 20px 0 0 20px;
+    align-items: center; /* 讓左側箭頭與右側按鈕垂直置中對齊 */
+    padding: 10px 8px 10px 0; /* 🌟 功能區寬度收窄 */
     z-index: 9998;
     transition: transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
     
-    /* 🌟 恢復常駐的高質感玻璃底板 */
-    background: rgba(255, 255, 255, 0.25);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.5);
-    border-right: none;
-    box-shadow: -4px 0 15px rgba(0,0,0,0.05);
+    background: transparent; /* 平常無底板 */
+    pointer-events: none; /* 讓空白處可以穿透點擊地圖 */
 }
 
-body.dark-mode #side-function-zone {
-    background: rgba(30, 30, 30, 0.35);
-    border-color: rgba(255, 255, 255, 0.15);
+/* 讓功能區內的元素恢復可點擊狀態 */
+#side-function-zone > * {
+    pointer-events: auto; 
+}
+
+/* 🌟 按鈕間距收合 */
+.zone-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 12px; /* 間距縮小 */
+    margin-left: 5px; /* 給箭頭留點呼吸空間 */
 }
 
 /* =========================================
-   🌟 收合箭頭：平常隱藏，在功能列內部
+   🌟 箭頭把手：白色透明玻璃感 (非霧態)
    ========================================= */
 #zone-collapse-btn {
-    position: absolute;
-    left: 4px; /* 🌟 核心：箭頭在玻璃列「上面」，不凸出去 */
-    top: 50%;
-    transform: translateY(-50%);
-    width: 20px;
-    height: 60px;
+    width: 24px;   /* 寬度不變 */
+    height: 90px;  /* 🌟 長度拉為兩個按鍵的長度 */
+    
+    /* 純透光，非霧態 (移除 backdrop-filter) */
+    background: rgba(255, 255, 255, 0.25); 
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    border-right: none;
+    border-radius: 8px 0 0 8px;
+    
     display: flex;
     align-items: center;
     justify-content: center;
     
-    color: white; /* 白色箭頭 */
-    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+    color: white; 
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5); /* 確保箭頭清晰 */
     cursor: pointer;
     
-    background: transparent; /* 展開時沒有背景底框 */
-    border: none;
-    
-    opacity: 0; /* 平常時隱藏 */
+    opacity: 0; /* 🌟 平常時不顯現 */
     transition: all 0.3s ease;
 }
 
-/* 滑鼠靠近功能列時，浮現白色箭頭 */
+/* 喚出：電腦點擊或滑過該區時顯現 */
 #side-function-zone:hover #zone-collapse-btn {
     opacity: 1;
 }
 
 /* =========================================
-   🌟 收起時的狀態 (變換為外掛玻璃拉環)
+   🌟 收合狀態 (往右收出螢幕)
    ========================================= */
 #side-function-zone.collapsed {
-    transform: translate(100%, -50%); /* 往右收進螢幕 */
+    transform: translate(100%, -50%); 
 }
 
-/* 🌟 收起時，箭頭往左凸出，並加上玻璃背板永遠顯現 */
+/* 剛收合時，把手固定在螢幕最右側邊緣，並強制顯示 */
 #side-function-zone.collapsed #zone-collapse-btn {
+    position: absolute;
+    left: -24px; /* 凸出螢幕的寬度 */
     opacity: 1; 
-    left: -32px; 
-    width: 32px;
-    background: rgba(255, 255, 255, 0.35); /* 玻璃質感 */
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
+    background: rgba(255, 255, 255, 0.35); /* 收合時稍微明顯一點 */
+}
+
+/* =========================================
+   🌟 收合後的睡眠狀態 (2.5秒後觸發)
+   ========================================= */
+#side-function-zone.collapsed.sleep #zone-collapse-btn {
+    opacity: 0; /* 完全隱藏 */
+    background: transparent;
+    border-color: transparent;
+    color: transparent;
+    text-shadow: none;
+}
+
+/* 喚出：電腦鼠標觸及該範圍時，解除隱藏 */
+#side-function-zone.collapsed.sleep #zone-collapse-btn:hover {
+    opacity: 1;
+    background: rgba(255, 255, 255, 0.35);
     border: 1px solid rgba(255, 255, 255, 0.5);
     border-right: none;
-    border-radius: 12px 0 0 12px;
-    box-shadow: -4px 0 15px rgba(0,0,0,0.1);
-}
-
-body.dark-mode #side-function-zone.collapsed #zone-collapse-btn {
-    background: rgba(40, 40, 40, 0.6);
-}
-
-.zone-buttons {
-    display: flex;
-    flex-direction: column;
-    gap: 24px; /* 保持舒適拉開的間距 */
+    color: white;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
 }
