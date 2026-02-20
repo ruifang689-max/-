@@ -27,42 +27,49 @@ export function initUI() {
     // 🌟 地圖功能列：側收、隱藏與手機手勢 (修復版)
     // =========================================
     export function initPanelGestures() {
-    const panel = document.getElementById("side-panel");
-    if (!panel) return;
+        const panel = document.getElementById("side-panel");
+        if (!panel) return;
+    
+        let startX = 0, startY = 0;
+    
+        // 監聽整個功能列的觸控
+        panel.addEventListener('touchstart', (e) => {
+            startX = e.touches[0].clientX;
+            startY = e.touches[0].clientY;
+        }, { passive: true });
+    
+        panel.addEventListener('touchend', (e) => {
+            const diffX = e.changedTouches[0].clientX - startX;
+            const diffY = e.changedTouches[0].clientY - startY;
+    
+            // 手機版 (置底)：向「下」滑動大於 40px 收起，向「上」滑動展開
+            if (window.innerWidth <= 768 || window.innerHeight <= 500) {
+                if (diffY > 40) panel.classList.add("collapsed");
+                else if (diffY < -40) panel.classList.remove("collapsed");
+            } 
+            // 電腦版 (靠左)：向「左」滑動大於 40px 收起，向「右」滑動展開
+            else {
+                if (diffX < -40) panel.classList.add("collapsed");
+                else if (diffX > 40) panel.classList.remove("collapsed");
+            }
+        }, { passive: true });
+    } // 🌟 👈 剛剛就是少了這個救命的右大括號！現在已經牢牢補上了！
+    
+    // =========================================
+    // 🌟 進入地圖：隱藏開場、強制展開功能列、關閉其他卡片
+    // =========================================
+    export function enterMap() {
+        const intro = document.getElementById("intro");
+        if(intro) intro.style.display = "none";
         
-    let startX = 0, startY = 0;
-
-    // 監聽整個功能列的觸控
-    panel.addEventListener('touchstart', (e) => {
-        startX = e.touches[0].clientX;
-        startY = e.touches[0].clientY;
-    }, { passive: true });
-
-    panel.addEventListener('touchend', (e) => {
-        const diffX = e.changedTouches[0].clientX - startX;
-        const diffY = e.changedTouches[0].clientY - startY;
-
-        // 手機版 (置底)：向「下」滑動大於 40px 收起，向「上」滑動展開
-        if (window.innerWidth <= 768 || window.innerHeight <= 500) {
-            if (diffY > 40) panel.classList.add("collapsed");
-            else if (diffY < -40) panel.classList.remove("collapsed");
-        } 
-        // 電腦版 (靠左)：向「左」滑動大於 40px 收起，向「右」滑動展開
-        else {
-            if (diffX < -40) panel.classList.add("collapsed");
-            else if (diffX > 40) panel.classList.remove("collapsed");
-        }
-    }, { passive: true });
-}
-
-// 確保進入地圖時，其他介面(如推薦清單)會乖乖關閉，避免重疊
-export function enterMap() {
-    document.getElementById("intro").style.display = "none";
-    document.getElementById("side-panel").classList.remove("collapsed");
-    const sug = document.getElementById("suggest");
-    if(sug) sug.style.display = "none";
-    if (typeof window.closeCard === 'function') window.closeCard();
-}
+        const panel = document.getElementById("side-panel");
+        if(panel) panel.classList.remove("collapsed");
+        
+        const sug = document.getElementById("suggest");
+        if(sug) sug.style.display = "none";
+        
+        if (typeof window.closeCard === 'function') window.closeCard();
+    }
     
     // =========================================
     // 1. 語言、主題、字體切換
