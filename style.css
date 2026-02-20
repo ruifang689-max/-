@@ -542,6 +542,43 @@ body.dark-mode .region-label-text {
 }
 
 /* =========================================
+   🌟 景點資訊卡進階樣式 (支援警告橫幅)
+   ========================================= */
+.warning-banner {
+    background-color: rgba(255, 59, 48, 0.1); /* 微透紅色底 */
+    color: #d32f2f;
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: bold;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    border: 1px solid rgba(255, 59, 48, 0.3);
+}
+
+.spot-detail-info {
+    font-size: 14px;
+    color: var(--text-light);
+    margin-bottom: 15px;
+    line-height: 1.6;
+}
+
+.spot-detail-info i {
+    width: 20px;
+    text-align: center;
+    color: var(--primary);
+    margin-right: 6px;
+}
+
+body.dark-mode .warning-banner {
+    background-color: rgba(255, 69, 58, 0.15);
+    color: #ff6b6b;
+    border-color: rgba(255, 69, 58, 0.4);
+}
+
+/* =========================================
    🌟 沉浸模式：非霧態玻璃功能列 (完美防重疊版)
    ========================================= */
 #side-function-zone {
@@ -630,38 +667,37 @@ body.dark-mode .region-label-text {
 }
 
 /* =========================================
-   🌟 景點資訊卡進階樣式 (支援警告橫幅)
+   🌟 修正 3：功能列介面優化 (刪拉環、定位修正)
    ========================================= */
-.warning-banner {
-    background-color: rgba(255, 59, 48, 0.1); /* 微透紅色底 */
-    color: #d32f2f;
-    padding: 10px 12px;
-    border-radius: 8px;
-    font-size: 14px;
-    font-weight: bold;
-    margin-bottom: 12px;
-    display: flex;
-    align-items: flex-start;
-    gap: 8px;
-    border: 1px solid rgba(255, 59, 48, 0.3);
+/* 徹底隱藏拉環 */
+.drag-handle, .pull-ring { 
+    display: none !important; 
 }
 
-.spot-detail-info {
-    font-size: 14px;
-    color: var(--text-light);
-    margin-bottom: 15px;
-    line-height: 1.6;
-}
-
-.spot-detail-info i {
-    width: 20px;
-    text-align: center;
-    color: var(--primary);
-    margin-right: 6px;
-}
-
-body.dark-mode .warning-banner {
-    background-color: rgba(255, 69, 58, 0.15);
-    color: #ff6b6b;
-    border-color: rgba(255, 69, 58, 0.4);
+/* 手機版橫式 (Landscape) 或小螢幕下方功能列強制修正 */
+@media (max-width: 768px) {
+    #side-panel {
+        top: auto !important;
+        bottom: 0 !important;
+        left: 0 !important;
+        width: 100% !important;
+        height: auto !important;
+        border-radius: 20px 20px 0 0 !important;
+        
+        /* 橫列於下方，內容支援左右滑動 */
+        display: flex;
+        flex-direction: row;
+        overflow-x: auto;
+        white-space: nowrap;
+        padding: 15px;
+        
+        /* 確保收展方向為「往下隱藏」 */
+        transform: translateY(0);
+        transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1);
+    }
+    
+    /* 當功能列被加上 collapsed 時，往正下方收合 */
+    #side-panel.collapsed {
+        transform: translateY(120%) !important;
+    }
 }
