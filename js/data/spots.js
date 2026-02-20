@@ -59,6 +59,7 @@ export const spots = [
     { name: "鼻頭角燈塔", wikiTitle: "鼻頭角燈塔", lat: 25.12877, lng: 121.92346, tags: ["地標"], keywords: ["燈塔", "海景"], highlights: "燈塔海景", food: "無", history: "建於1896年，守護北台灣海域。", transport: "步行自鼻頭角步道", heat: 0.8 }
 
     // 自動生成的瑞芳區官方圖資庫
+    export const spots = [
     {    
         "id": "C1_382000000A_112420",
         "name": "三個磅空自行車道",
@@ -800,4 +801,7 @@ export const spots = [
         "warning": "",
         "brochureUrl": ""
     }
+
+];
+        
 ];
