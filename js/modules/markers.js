@@ -29,7 +29,7 @@ export function addMarkerToMap(spot) {
 
     marker.on('click', () => showCard(spot));
     
-    // 🌟 將地圖上的標記物件存回 spot 裡面，這樣 ui.js 刪除時才找得到它！
+    // 將地圖上的標記物件存回 spot 裡面，這樣 ui.js 刪除時才找得到它！
     spot.markerObj = marker;
     
     state.cluster.addLayer(marker);
@@ -37,13 +37,13 @@ export function addMarkerToMap(spot) {
 }
 
 // =========================================
-// 🌟 2. 重新繪製「所有」標記 (官方資料 + 您的自訂秘境)
+// 🌟 2. 重新繪製「所有」標記 (已修正為 main.js 需要的 renderAllMarkers)
 // =========================================
-export function renderMarkers() {
+export function renderAllMarkers() {
     if (!state.cluster) return;
     state.cluster.clearLayers();
 
-    // 確保讀取到正確的官方資料與自訂資料 (ui.js 存在 state.savedCustomSpots 裡)
+    // 確保讀取到正確的官方資料與自訂資料
     const officialSpots = Array.isArray(spots) ? spots : [];
     const customList = state.savedCustomSpots || []; 
     const allSpots = [...officialSpots, ...customList];
