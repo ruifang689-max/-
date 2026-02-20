@@ -11,7 +11,7 @@ let currentLayerIdx = 0;
 let currentTileLayer = null;
 
 export function initMap() {
-    // 1. 🌟 終極防護罩：檢查地圖容器是否已經被初始化過
+    // 1. 終極防護罩：檢查地圖容器是否已經被初始化過
     const mapContainer = document.getElementById('map');
     if (mapContainer && mapContainer._leaflet_id) {
         console.warn("地圖已經存在，已攔截重複建立的指令！");
@@ -38,7 +38,7 @@ export function initMap() {
     });
 
     // ==========================================
-    // 🌟 自動抓取並繪製「瑞芳區行政界線」 (突破 CORS 阻擋版)
+    // 6. 🌟 自動抓取並繪製「瑞芳區行政界線」 (突破 CORS 阻擋版)
     // ==========================================
     const nominatimUrl = 'https://nominatim.openstreetmap.org/search?q=瑞芳區,新北市,台灣&format=json&polygon_geojson=1&limit=1&email=ruifang.guide@gmail.com';
     
@@ -63,6 +63,7 @@ export function initMap() {
         }
     })
     .catch(err => console.error("區界線載入失敗，可能伺服器暫時阻擋", err));
+} // 👈 就是這個大括號！剛剛遺失了它，導致後面的 export 報錯
 
 // 7. 切換底圖功能
 export function toggleLayer() {
