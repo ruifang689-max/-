@@ -10,15 +10,13 @@ import { showCard, closeCard } from './cards.js';
 import { triggerSearch } from './search.js';
 
 // =========================================
-// 🌟 地圖功能列：側收、隱藏與手機手勢 (已移至最外層，徹底解決 export 報錯！)
+// 🌟 地圖功能列：側收、隱藏與手機手勢
 // =========================================
 export function initPanelGestures() {
-    const panel = document.getElementById("side-panel");
-        if(panel) {
-            panel.style.display = 'flex'; // 確保不是 none
-            panel.classList.remove("collapsed"); // 解除隱藏狀態
-        }
-    
+    // 🎯 換成正確的目標 ID！
+    const panel = document.getElementById("side-function-zone"); 
+    if (!panel) return;
+
     let startX = 0, startY = 0;
 
     panel.addEventListener('touchstart', (e) => {
@@ -30,17 +28,49 @@ export function initPanelGestures() {
         const diffX = e.changedTouches[0].clientX - startX;
         const diffY = e.changedTouches[0].clientY - startY;
 
-        // 手機版 (置底)：向下滑動收起，向上滑動展開
+        // 手機版 (置底)：向「下」滑動大於 40px 收起，向「上」滑動展開
         if (window.innerWidth <= 768 || window.innerHeight <= 500) {
             if (diffY > 40) panel.classList.add("collapsed");
             else if (diffY < -40) panel.classList.remove("collapsed");
         } 
-        // 電腦版 (靠左)：向左滑動收起，向右滑動展開
+        // 電腦版 (靠側邊)：判斷左右滑動收展
         else {
-            if (diffX < -40) panel.classList.add("collapsed");
-            else if (diffX > 40) panel.classList.remove("collapsed");
+            if (diffX > 40 || diffX < -40) {
+                panel.classList.toggle("collapsed");
+            }
         }
     }, { passive: true });
+}
+
+// =========================================
+// 🌟 進入地圖：解鎖動畫與強制顯示功能列
+// =========================================
+export function enterMap() {
+    const intro = document.getElementById('intro');
+    if(intro) { intro.style.opacity = '0'; setTimeout(() => { intro.style.display = 'none'; }, 400); }
+
+    const welcome = document.getElementById('welcome-screen');
+    if(welcome) { welcome.style.opacity = '0'; setTimeout(() => { welcome.style.display = 'none'; }, 400); }
+
+    // 🎯 確保進入地圖時，您的功能列絕對會出現！
+    const panel = document.getElementById("side-function-zone");
+    if(panel) {
+        panel.classList.remove("collapsed");
+        panel.style.display = 'flex';
+    }
+    
+    const sug = document.getElementById("suggest");
+    if(sug) sug.style.display = "none";
+    
+    if (typeof window.closeCard === 'function') window.closeCard();
+
+    setTimeout(() => { 
+        const skipTour = localStorage.getItem('rf_skip_tour') === 'true';
+        const skipTutorial = localStorage.getItem('rf_skip_tutorial') === 'true';
+        
+        if (!skipTour) window.startFeatureTour();
+        else if (!skipTutorial) window.startTutorialOverlay();
+    }, 400); 
 }
 
 // =========================================
