@@ -1,5 +1,5 @@
 /**
- * js/modules/ui.js (v524)
+ * js/modules/ui.js (v567 終極修復版)
  * 負責：UI 交互、主題、字體、導覽流程、滑動開關設定
  */
 import { state, saveState } from '../core/store.js';
@@ -9,11 +9,43 @@ import { addMarkerToMap } from './markers.js';
 import { showCard, closeCard } from './cards.js';
 import { triggerSearch } from './search.js';
 
+// =========================================
+// 🌟 地圖功能列：側收、隱藏與手機手勢 (已移至最外層，徹底解決 export 報錯！)
+// =========================================
+export function initPanelGestures() {
+    const panel = document.getElementById("side-panel");
+    if (!panel) return;
+
+    let startX = 0, startY = 0;
+
+    panel.addEventListener('touchstart', (e) => {
+        startX = e.touches[0].clientX;
+        startY = e.touches[0].clientY;
+    }, { passive: true });
+
+    panel.addEventListener('touchend', (e) => {
+        const diffX = e.changedTouches[0].clientX - startX;
+        const diffY = e.changedTouches[0].clientY - startY;
+
+        // 手機版 (置底)：向下滑動收起，向上滑動展開
+        if (window.innerWidth <= 768 || window.innerHeight <= 500) {
+            if (diffY > 40) panel.classList.add("collapsed");
+            else if (diffY < -40) panel.classList.remove("collapsed");
+        } 
+        // 電腦版 (靠左)：向左滑動收起，向右滑動展開
+        else {
+            if (diffX < -40) panel.classList.add("collapsed");
+            else if (diffX > 40) panel.classList.remove("collapsed");
+        }
+    }, { passive: true });
+}
+
+// =========================================
+// 🌟 系統初始化 (將所有功能綁定到 Window 全域)
+// =========================================
 export function initUI() {
 
-    // =========================================
     // 🌟 全域客製化下拉選單控制器
-    // =========================================
     window.toggleDropdown = (listId) => {
         document.querySelectorAll('.custom-select-options').forEach(list => { if (list.id !== listId) list.classList.remove('open'); });
         const targetList = document.getElementById(listId); if(targetList) targetList.classList.toggle('open');
@@ -22,46 +54,14 @@ export function initUI() {
         if (!e.target.closest('.custom-select-wrapper')) { document.querySelectorAll('.custom-select-options').forEach(list => list.classList.remove('open')); }
     });
 
+    // 🌟 進入地圖：完美融合動畫解除、強制展開功能列與新手教學
+    window.enterMap = () => { 
+        const intro = document.getElementById('intro');
+        if(intro) { intro.style.opacity = '0'; setTimeout(() => { intro.style.display = 'none'; }, 400); }
 
-    // =========================================
-    // 🌟 地圖功能列：側收、隱藏與手機手勢 (修復版)
-    // =========================================
-    export function initPanelGestures() {
-        const panel = document.getElementById("side-panel");
-        if (!panel) return;
-    
-        let startX = 0, startY = 0;
-    
-        // 監聽整個功能列的觸控
-        panel.addEventListener('touchstart', (e) => {
-            startX = e.touches[0].clientX;
-            startY = e.touches[0].clientY;
-        }, { passive: true });
-    
-        panel.addEventListener('touchend', (e) => {
-            const diffX = e.changedTouches[0].clientX - startX;
-            const diffY = e.changedTouches[0].clientY - startY;
-    
-            // 手機版 (置底)：向「下」滑動大於 40px 收起，向「上」滑動展開
-            if (window.innerWidth <= 768 || window.innerHeight <= 500) {
-                if (diffY > 40) panel.classList.add("collapsed");
-                else if (diffY < -40) panel.classList.remove("collapsed");
-            } 
-            // 電腦版 (靠左)：向「左」滑動大於 40px 收起，向「右」滑動展開
-            else {
-                if (diffX < -40) panel.classList.add("collapsed");
-                else if (diffX > 40) panel.classList.remove("collapsed");
-            }
-        }, { passive: true });
-    } // 🌟 👈 剛剛就是少了這個救命的右大括號！現在已經牢牢補上了！
-    
-    // =========================================
-    // 🌟 進入地圖：隱藏開場、強制展開功能列、關閉其他卡片
-    // =========================================
-    export function enterMap() {
-        const intro = document.getElementById("intro");
-        if(intro) intro.style.display = "none";
-        
+        const welcome = document.getElementById('welcome-screen');
+        if(welcome) { welcome.style.opacity = '0'; setTimeout(() => { welcome.style.display = 'none'; }, 400); }
+
         const panel = document.getElementById("side-panel");
         if(panel) panel.classList.remove("collapsed");
         
@@ -69,11 +69,17 @@ export function initUI() {
         if(sug) sug.style.display = "none";
         
         if (typeof window.closeCard === 'function') window.closeCard();
-    }
-    
-    // =========================================
+
+        setTimeout(() => { 
+            const skipTour = localStorage.getItem('rf_skip_tour') === 'true';
+            const skipTutorial = localStorage.getItem('rf_skip_tutorial') === 'true';
+            
+            if (!skipTour) window.startFeatureTour();
+            else if (!skipTutorial) window.startTutorialOverlay();
+        }, 400); 
+    };
+
     // 1. 語言、主題、字體切換
-    // =========================================
     window.applyLanguage = (lang) => {
         state.currentLang = lang; localStorage.setItem('ruifang_lang', lang); const t = translations[lang] || translations['zh'];
         document.querySelectorAll('[data-i18n]').forEach(el => {
@@ -120,9 +126,7 @@ export function initUI() {
         if (document.getElementById('current-font-text')) document.getElementById('current-font-text').innerText = fontText || '系統預設 (黑體)';
     };
 
-    // =========================================
-    // 2. 🌟 啟動略過開關與記憶系統 (Toggle Storage)
-    // =========================================
+    // 2. 啟動略過開關與記憶系統
     window.saveSkipSettings = () => {
         localStorage.setItem('rf_skip_anim', document.getElementById('toggle-skip-anim').checked);
         localStorage.setItem('rf_skip_welcome', document.getElementById('toggle-skip-welcome').checked);
@@ -141,20 +145,16 @@ export function initUI() {
         if(document.getElementById('toggle-skip-tour')) document.getElementById('toggle-skip-tour').checked = skipTour;
         if(document.getElementById('toggle-skip-tutorial')) document.getElementById('toggle-skip-tutorial').checked = skipTutorial;
 
-        // 執行開場略過邏輯
         if (skipAnim) { const anim = document.getElementById('intro-animation') || document.querySelector('.intro-overlay'); if (anim) { anim.style.display = 'none'; anim.style.opacity = '0'; } }
         if (skipWelcome) {
             const welcome = document.getElementById('welcome-screen');
             if (welcome) { welcome.style.display = 'none'; welcome.style.opacity = '0'; }
-            // 直接觸發導覽順序
             if (!skipTour) setTimeout(window.startFeatureTour, 500);
             else if (!skipTutorial) setTimeout(window.startTutorialOverlay, 500);
         }
     };
 
-    // =========================================
-    // 3. 🌟 功能說明 (Feature Tour) 與 畫面切換流程
-    // =========================================
+    // 3. 功能說明 (Feature Tour)
     let currentTourStep = 0;
     const tourSteps = [
         { target: '#search', text: '🔍 <b style="color:var(--primary); font-size:16px;">搜尋景點</b><br>在這裡輸入關鍵字，可以快速尋找景點與秘境！', pos: 'bottom' },
@@ -162,21 +162,6 @@ export function initUI() {
         { target: 'button[onclick="openSettings()"]', text: '⚙️ <b style="color:var(--primary); font-size:16px;">系統設定</b><br>從這裡可以管理收藏夾、切換語言、更改主題顏色與字體喔！', pos: 'top' },
         { target: 'center', text: '🗺️ <b style="color:var(--primary); font-size:16px;">探索地圖</b><br>💡 <b>隱藏技巧</b>：長按地圖任一處，還能新增專屬的自訂景點！', pos: 'center' }
     ];
-
-    window.enterMap = () => { 
-        const welcome = document.getElementById('welcome-screen');
-        if(welcome) welcome.style.opacity = '0'; 
-        setTimeout(() => { 
-            if(welcome) welcome.style.display = 'none'; 
-            
-            // 順序：進入地圖 → 功能說明 → 指引教學
-            const skipTour = localStorage.getItem('rf_skip_tour') === 'true';
-            const skipTutorial = localStorage.getItem('rf_skip_tutorial') === 'true';
-            
-            if (!skipTour) window.startFeatureTour();
-            else if (!skipTutorial) window.startTutorialOverlay();
-        }, 400); 
-    };
 
     window.startFeatureTour = () => { document.getElementById('tour-overlay').style.display = 'block'; currentTourStep = 0; window.showTourStep(); };
     window.showTourStep = () => {
@@ -202,19 +187,13 @@ export function initUI() {
     window.nextTourStep = () => { currentTourStep++; window.showTourStep(); };
     window.endTour = () => {
         document.getElementById('tour-overlay').style.display = 'none'; document.getElementById('tour-focus-ring').style.display = 'none';
-        
-        // 說明結束，自動打勾並存檔
         localStorage.setItem('rf_skip_tour', 'true');
         if(document.getElementById('toggle-skip-tour')) document.getElementById('toggle-skip-tour').checked = true;
-
-        // 檢查是否接續 指引教學
         const skipTutorial = localStorage.getItem('rf_skip_tutorial') === 'true';
         if (!skipTutorial) window.startTutorialOverlay();
     };
 
-    // =========================================
     // 4. 指引教學 (Tutorial Overlay)
-    // =========================================
     window.startTutorialOverlay = () => {
         const tutorial = document.getElementById('tutorial-overlay');
         if(tutorial) {
@@ -231,16 +210,12 @@ export function initUI() {
         if(tut) tut.style.opacity = '0'; 
         setTimeout(() => { 
             if(tut) tut.style.display = 'none'; 
-            
-            // 教學結束，自動打勾並存檔
             localStorage.setItem('rf_skip_tutorial', 'true');
             if(document.getElementById('toggle-skip-tutorial')) document.getElementById('toggle-skip-tutorial').checked = true;
-
             if (state.mapInstance) state.mapInstance.invalidateSize(); 
         }, 400); 
     };
 
-    // 如果使用者想要強制重新看一次所有教學
     window.reopenTutorial = () => { 
         window.closeSettings(); 
         localStorage.setItem('rf_skip_tour', 'false'); localStorage.setItem('rf_skip_tutorial', 'false');
@@ -249,7 +224,7 @@ export function initUI() {
         window.startFeatureTour(); 
     };
 
-    // ... 下面保留原有功能 (PWA, 收藏夾, 自訂標記, 雙 API) ...
+    // 其他基礎功能
     window.resetNorth = () => { state.mapInstance.flyTo([25.1032, 121.8224], 14); };
     window.goToStation = () => { state.mapInstance.flyTo([25.108, 121.805], 16); closeCard(); };
     window.openSettings = () => { document.getElementById('settings-modal-overlay').style.display = 'flex'; };
@@ -280,9 +255,6 @@ export function initUI() {
         });
     }
 
-    // =========================================
-    // 🌟 補回：九大區域地圖浮水印標籤
-    // =========================================
     if (state.mapInstance) {
         const ruifangRegions = [
             { name: "四腳亭", lat: 25.1020, lng: 121.7610 },
@@ -306,8 +278,8 @@ export function initUI() {
 
             L.marker([region.lat, region.lng], {
                 icon: regionIcon,
-                interactive: false,  // 關閉互動，讓滑鼠可以穿透點擊
-                zIndexOffset: -1000  // 沉在最底層
+                interactive: false,
+                zIndexOffset: -1000
             }).addTo(state.mapInstance);
         });
     }
@@ -320,12 +292,11 @@ export function initUI() {
     window.saveEditSpot = () => { const newName = document.getElementById('edit-name').value.trim(); if(!newName) return alert("名稱不能為空！"); const savedIdx = state.savedCustomSpots.findIndex(x => x.name === state.currentEditingSpotName); if(savedIdx === -1) return; const s = state.savedCustomSpots[savedIdx]; s.name = newName; s.highlights = document.getElementById('edit-highlights').value; s.history = document.getElementById('edit-history').value; s.wikiImg = document.getElementById('edit-image-preview').src; saveState.customSpots(); if(s.markerObj) state.cluster.removeLayer(s.markerObj); addMarkerToMap(s); window.closeEditModal(); showCard(s); };
     window.deleteCustomSpot = (name) => { if(!confirm(`確定要刪除「${name}」？無法復原喔！`)) return; const spotIndex = state.savedCustomSpots.findIndex(s => s.name === name); if (spotIndex > -1) { if(state.savedCustomSpots[spotIndex].markerObj) state.cluster.removeLayer(state.savedCustomSpots[spotIndex].markerObj); state.savedCustomSpots.splice(spotIndex, 1); saveState.customSpots(); } if (state.myFavs.includes(name)) { state.myFavs = state.myFavs.filter(fav => fav !== name); saveState.favs(); } closeCard(); alert('🗑️ 標記已刪除！'); };
 
-    // =========================================
-    // 🌟 初始化套用設定與字體
-    // =========================================
+    // 初始化套用設定與字體
     window.applyLanguage(state.currentLang);
     const savedTheme = localStorage.getItem('ruifang_theme'); if (!savedTheme || savedTheme === 'default') { window.applyCustomTheme('#007bff', false); } else { window.applyCustomTheme(savedTheme, true); }
     const savedFont = localStorage.getItem('ruifang_font') || 'default'; const fontMap = { 'default': '系統預設 (黑體)', 'iansui': '芫荽', 'wenkai': '文楷', 'huninn': '粉圓' }; window.changeFont(savedFont, fontMap[savedFont]);
     
-    // 🌟 初始化略過設定 (這行必須放在最後)
+    // 初始化略過設定
     window.loadSkipSettings();
+}
