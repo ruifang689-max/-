@@ -38,26 +38,31 @@ export function initMap() {
     });
 
     // ==========================================
-    // 6. 🌟 自動抓取並繪製「瑞芳區行政界線」
+    // 🌟 自動抓取並繪製「瑞芳區行政界線」 (突破 CORS 阻擋版)
     // ==========================================
-    fetch('https://nominatim.openstreetmap.org/search?q=瑞芳區,新北市,台灣&format=json&polygon_geojson=1&limit=1')
-        .then(res => res.json())
-        .then(data => {
-            if (data && data.length > 0 && data[0].geojson) {
-                L.geoJSON(data[0].geojson, {
-                    style: {
-                        color: 'var(--primary)',     // 線條顏色自動綁定您的主題色！
-                        weight: 3,                   
-                        dashArray: '8, 12',          
-                        fillColor: 'var(--primary)', 
-                        fillOpacity: 0.04            // 超薄的透明度，微微凸顯瑞芳區
-                    },
-                    interactive: false // 關閉這層的互動，讓滑鼠可以「穿透」界線點擊景點
-                }).addTo(state.mapInstance);
-            }
-        })
-        .catch(err => console.error("區界線載入失敗", err));
-}
+    const nominatimUrl = 'https://nominatim.openstreetmap.org/search?q=瑞芳區,新北市,台灣&format=json&polygon_geojson=1&limit=1&email=ruifang.guide@gmail.com';
+    
+    fetch(nominatimUrl, {
+        headers: {
+            'Accept-Language': 'zh-TW,zh;q=0.9,en;q=0.8'
+        }
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data && data.length > 0 && data[0].geojson) {
+            L.geoJSON(data[0].geojson, {
+                style: {
+                    color: 'var(--primary)',     
+                    weight: 3,                   
+                    dashArray: '8, 12',          
+                    fillColor: 'var(--primary)', 
+                    fillOpacity: 0.04            
+                },
+                interactive: false 
+            }).addTo(state.mapInstance);
+        }
+    })
+    .catch(err => console.error("區界線載入失敗，可能伺服器暫時阻擋", err));
 
 // 7. 切換底圖功能
 export function toggleLayer() {
