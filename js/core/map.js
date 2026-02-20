@@ -62,19 +62,18 @@ export function initMap() {
     });
 
     // ==========================================
-    // 🌟 修復 2：離線快取版「瑞芳區行政界線」
+    // 🌟 終極優化：0 毫秒本地端載入「瑞芳區行政界線」
     // ==========================================
-    const cacheKey = 'ruifang_boundary_geojson';
-    const cachedData = localStorage.getItem(cacheKey);
-
-    const drawBoundary = (geojsonData) => {
-        L.geoJSON(geojsonData, {
-            style: {
-                color: 'var(--primary)', weight: 3, dashArray: '8, 12',
-                fillColor: 'var(--primary)', fillOpacity: 0.04            
-            },
-            interactive: false 
-        }).addTo(state.mapInstance);
+    L.geoJSON(ruifangBoundary, {
+        style: {
+            color: 'var(--primary)', 
+            weight: 3, 
+            dashArray: '8, 12',
+            fillColor: 'var(--primary)', 
+            fillOpacity: 0.04            
+        },
+        interactive: false // 依然保持滑鼠穿透
+    }).addTo(state.mapInstance);
     };
 
     if (cachedData) {
