@@ -1,4 +1,5 @@
 import { state } from '../core/store.js';
+import { ruifangBoundary } from '../data/boundary.js';
 
 const mapLayers = [
     { url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', name: '街道', icon: 'fa-map', dark: false },
