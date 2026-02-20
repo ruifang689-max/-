@@ -607,66 +607,6 @@ body.dark-mode .warning-banner {
 }
 
 /* =========================================
-   🌟 唯一的把手：控制隱藏與顯示
-   ========================================= */
-#zone-collapse-btn {
-    width: 24px;
-    height: 90px;
-    background: rgba(255, 255, 255, 0.25);
-    border: 1px solid rgba(255, 255, 255, 0.5);
-    border-right: none;
-    border-radius: 8px 0 0 8px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
-    cursor: pointer;
-    
-    opacity: 0; /* 預設完全隱藏 */
-    transition: all 0.3s ease;
-}
-
-/* 狀態 1 (展開時喚出)：未收合時，滑鼠靠近區域顯現 〉〉 */
-#side-function-zone:not(.collapsed):hover #zone-collapse-btn {
-    opacity: 1;
-}
-
-/* =========================================
-   🌟 狀態 2 (剛收合)：退到螢幕外，把手留在邊緣顯示 〈〈
-   ========================================= */
-#side-function-zone.collapsed {
-    transform: translate(100%, -50%);
-}
-
-#side-function-zone.collapsed #zone-collapse-btn {
-    position: absolute;
-    left: -24px;
-    opacity: 1; /* 收合時強制顯示 2.5 秒 */
-    background: rgba(255, 255, 255, 0.35);
-}
-
-/* =========================================
-   🌟 狀態 3 (睡眠模式)：完全隱形，但保留觸發區
-   ========================================= */
-#side-function-zone.collapsed.sleep #zone-collapse-btn {
-    opacity: 0;
-    background: transparent;
-    border-color: transparent;
-    text-shadow: none;
-}
-
-/* 狀態 4 (睡眠時喚出)：滑鼠碰到透明的把手區域時，再次顯現 〈〈 */
-#side-function-zone.collapsed.sleep:hover #zone-collapse-btn,
-#side-function-zone.collapsed.sleep:active #zone-collapse-btn {
-    opacity: 1;
-    background: rgba(255, 255, 255, 0.35);
-    border: 1px solid rgba(255, 255, 255, 0.5);
-    border-right: none;
-    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
-}
-
-/* =========================================
    🌟 修正 3：功能列介面優化 (刪拉環、定位修正)
    ========================================= */
 /* 徹底隱藏拉環 */
