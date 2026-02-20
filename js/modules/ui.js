@@ -24,25 +24,26 @@ export function initUI() {
 
 
     // =========================================
-    // 🌟 地圖功能列：側收、隱藏與手機手勢
+    // 🌟 地圖功能列：側收、隱藏與手機手勢 (修復版)
     // =========================================
-    window.collapseTimer = null; // 放在全域避免重複觸發
-    
+    // 1. 必須先宣告 zone，後面的程式才認得它！
+    const zone = document.getElementById('side-function-zone');
+    window.collapseTimer = null; 
+
     window.toggleSidePanel = () => {
-        const zone = document.getElementById('side-function-zone');
         if (!zone) return;
         const icon = document.getElementById('side-panel-icon');
         
         if (zone.classList.contains('collapsed')) {
             // 👉 執行展開
             zone.classList.remove('collapsed', 'sleep');
-            icon.className = 'fas fa-angle-double-right'; // 換成準備收合的 〉〉
+            icon.className = 'fas fa-angle-double-right'; // 準備收合的 〉〉
             clearTimeout(window.collapseTimer);
         } else {
             // 👉 執行收合
             zone.classList.add('collapsed');
             zone.classList.remove('sleep');
-            icon.className = 'fas fa-angle-double-left'; // 換成準備展開的 〈〈
+            icon.className = 'fas fa-angle-double-left'; // 準備展開的 〈〈
             
             // 👉 倒數 2.5 秒後進入隱藏睡眠模式
             clearTimeout(window.collapseTimer);
@@ -54,40 +55,37 @@ export function initUI() {
         }
     };
 
-    // 📱 手機觸控與滑動偵測 (Swipe)
+    // 📱 2. 手機觸控與滑動偵測 (Swipe)
     if (zone) {
         let startX = 0;
 
-        // 手指按下時：記錄起點，並處理「點擊喚醒」
         zone.addEventListener('touchstart', (e) => {
             startX = e.touches[0].clientX;
-            
-            // 如果在睡眠隱藏狀態，手指一碰到該區域就喚醒
+            // 如果在睡眠狀態，手指一碰到就喚醒
             if (zone.classList.contains('collapsed') && zone.classList.contains('sleep')) {
                 zone.classList.remove('sleep');
-                clearTimeout(collapseTimer);
-                // 喚醒後如果沒有進一步動作，2.5秒後再次隱藏
-                collapseTimer = setTimeout(() => {
+                clearTimeout(window.collapseTimer);
+                window.collapseTimer = setTimeout(() => {
                     if (zone.classList.contains('collapsed')) zone.classList.add('sleep');
                 }, 2500);
             }
-        });
+        }, { passive: true });
 
-        // 手指放開時：計算滑動方向
         zone.addEventListener('touchend', (e) => {
             let endX = e.changedTouches[0].clientX;
             let diffX = endX - startX;
 
-            // diffX > 40 代表向右滑動
+            // 向右滑動 (收合)
             if (diffX > 40 && !zone.classList.contains('collapsed')) {
-                window.toggleSidePanel(); // 觸發收合
+                window.toggleSidePanel(); 
             } 
-            // diffX < -40 代表向左滑動
+            // 向左滑動 (展開)
             else if (diffX < -40 && zone.classList.contains('collapsed')) {
-                window.toggleSidePanel(); // 觸發展開
+                window.toggleSidePanel(); 
             }
-        });
+        }, { passive: true });
     }
+}
     
     // =========================================
     // 1. 語言、主題、字體切換
