@@ -23,21 +23,70 @@ export function initUI() {
     });
 
     // =========================================
-    // 🌟 地圖功能列側收邏輯 (修正玻璃版箭頭方向)
+    // 🌟 地圖功能列：側收、2.5秒隱藏、手機滑動手勢
     // =========================================
+    let collapseTimer = null;
+    const zone = document.getElementById('side-function-zone');
+
     window.toggleSidePanel = () => {
-        const zone = document.getElementById('side-function-zone');
-        zone.classList.toggle('collapsed');
-        
+        if (!zone) return;
         const icon = document.getElementById('side-panel-icon');
+        
         if (zone.classList.contains('collapsed')) {
-            // 收起狀態時：顯示「<」向左拉開的白色箭頭
-            icon.className = 'fas fa-chevron-left'; 
+            // 👉 執行展開
+            zone.classList.remove('collapsed', 'sleep');
+            icon.className = 'fas fa-angle-double-right'; // 準備下次收合的 〉〉
+            clearTimeout(collapseTimer); // 清除定時器
         } else {
-            // 展開狀態時：顯示「>」向右收起的白色箭頭
-            icon.className = 'fas fa-chevron-right'; 
+            // 👉 執行收合
+            zone.classList.add('collapsed');
+            zone.classList.remove('sleep');
+            icon.className = 'fas fa-angle-double-left'; // 準備下次展開的 〈〈
+            
+            // 👉 倒數 2.5 秒後進入隱藏睡眠模式
+            clearTimeout(collapseTimer);
+            collapseTimer = setTimeout(() => {
+                if (zone.classList.contains('collapsed')) {
+                    zone.classList.add('sleep');
+                }
+            }, 2500);
         }
     };
+
+    // 📱 手機觸控與滑動偵測 (Swipe)
+    if (zone) {
+        let startX = 0;
+
+        // 手指按下時：記錄起點，並處理「點擊喚醒」
+        zone.addEventListener('touchstart', (e) => {
+            startX = e.touches[0].clientX;
+            
+            // 如果在睡眠隱藏狀態，手指一碰到該區域就喚醒
+            if (zone.classList.contains('collapsed') && zone.classList.contains('sleep')) {
+                zone.classList.remove('sleep');
+                clearTimeout(collapseTimer);
+                // 喚醒後如果沒有進一步動作，2.5秒後再次隱藏
+                collapseTimer = setTimeout(() => {
+                    if (zone.classList.contains('collapsed')) zone.classList.add('sleep');
+                }, 2500);
+            }
+        });
+
+        // 手指放開時：計算滑動方向
+        zone.addEventListener('touchend', (e) => {
+            let endX = e.changedTouches[0].clientX;
+            let diffX = endX - startX;
+
+            // diffX > 40 代表向右滑動
+            if (diffX > 40 && !zone.classList.contains('collapsed')) {
+                window.toggleSidePanel(); // 觸發收合
+            } 
+            // diffX < -40 代表向左滑動
+            else if (diffX < -40 && zone.classList.contains('collapsed')) {
+                window.toggleSidePanel(); // 觸發展開
+            }
+        });
+    }
     
     // =========================================
     // 1. 語言、主題、字體切換
