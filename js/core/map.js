@@ -38,15 +38,12 @@ export function initMap() {
     });
 
     // ==========================================
-    // 6. 🌟 自動抓取並繪製「瑞芳區行政界線」 (突破 CORS 阻擋版)
+    // 6. 🌟 自動抓取並繪製「瑞芳區行政界線」 (最純淨請求版，避免觸發 CORS 預檢)
     // ==========================================
-    const nominatimUrl = 'https://nominatim.openstreetmap.org/search?q=瑞芳區,新北市,台灣&format=json&polygon_geojson=1&limit=1&email=ruifang.guide@gmail.com';
+    const nominatimUrl = 'https://nominatim.openstreetmap.org/search?q=瑞芳區,新北市,台灣&format=json&polygon_geojson=1&limit=1';
     
-    fetch(nominatimUrl, {
-        headers: {
-            'Accept-Language': 'zh-TW,zh;q=0.9,en;q=0.8'
-        }
-    })
+    // 👉 核心修改：直接 fetch 網址，絕對不要加 headers 大括號！
+    fetch(nominatimUrl)
     .then(res => res.json())
     .then(data => {
         if (data && data.length > 0 && data[0].geojson) {
@@ -62,8 +59,7 @@ export function initMap() {
             }).addTo(state.mapInstance);
         }
     })
-    .catch(err => console.error("區界線載入失敗，可能伺服器暫時阻擋", err));
-} // 👈 就是這個大括號！剛剛遺失了它，導致後面的 export 報錯
+    .catch(err => console.error("區界線載入失敗", err));
 
 // 7. 切換底圖功能
 export function toggleLayer() {
