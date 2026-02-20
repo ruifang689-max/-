@@ -42,13 +42,15 @@ export function initUI() {
         const diffX = e.changedTouches[0].clientX - startX;
         const diffY = e.changedTouches[0].clientY - startY;
 
-        // 如果是手機版 (置底)：向「下」滑動大於 40px 就收起
+        // 手機版 (置底)：向「下」滑動大於 40px 收起，向「上」滑動展開
         if (window.innerWidth <= 768 || window.innerHeight <= 500) {
             if (diffY > 40) panel.classList.add("collapsed");
+            else if (diffY < -40) panel.classList.remove("collapsed");
         } 
-        // 如果是電腦版 (靠左)：向「左」滑動大於 40px 就收起
+        // 電腦版 (靠左)：向「左」滑動大於 40px 收起，向「右」滑動展開
         else {
             if (diffX < -40) panel.classList.add("collapsed");
+            else if (diffX > 40) panel.classList.remove("collapsed");
         }
     }, { passive: true });
 }
