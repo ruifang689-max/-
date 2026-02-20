@@ -1,0 +1,32 @@
+/* =========================================
+   🌟 地圖區域名稱浮水印
+   ========================================= */
+.region-watermark-wrap {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    pointer-events: none !important; /* 確保絕對不會擋到下方的景點點擊 */
+}
+
+.region-text {
+    font-size: 1.8rem;
+    font-weight: 900;
+    letter-spacing: 6px; /* 寬鬆的字距更有質感 */
+    white-space: nowrap;
+    transform: translate(-50%, -50%); /* 完美置中於座標點 */
+    
+    /* 🌟 高質感半透明浮水印效果 */
+    color: rgba(0, 0, 0, 0.15); 
+    text-shadow: 1px 1px 0px rgba(255, 255, 255, 0.6), 
+                -1px -1px 0px rgba(255, 255, 255, 0.6);
+    
+    font-family: "Noto Sans TC", "Microsoft JhengHei", sans-serif;
+    user-select: none;
+}
+
+/* 黑暗模式下的浮水印自動反轉 */
+body.dark-mode .region-text {
+    color: rgba(255, 255, 255, 0.12);
+    text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.8), 
+                -1px -1px 0px rgba(0, 0, 0, 0.8);
+}
