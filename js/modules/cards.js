@@ -22,30 +22,62 @@ export function showCard(s) {
     const tags = s.tags ? s.tags : (s.category ? [s.category] : []);
     document.getElementById("card-tags").innerHTML = tags.map(t => `<span class="info-tag">${t}</span>`).join(''); 
     
+    export function showCard(s) { 
+    state.targetSpot = s; 
+    document.getElementById("card-fav-icon").className = state.myFavs.includes(s.name) ? "fas fa-heart active" : "fas fa-heart"; 
+    document.getElementById("title").innerText = s.name; 
+    
+    // 圖片處理
+    const imgEl = document.getElementById("img"); 
+    imgEl.src = s.wikiImg || s.brochureUrl || getPlaceholderImage(s.name); 
+    imgEl.onerror = () => { imgEl.src = getPlaceholderImage(s.name); }; 
+    
+    // 標籤處理
+    const tags = s.tags ? (Array.isArray(s.tags) ? s.tags : [s.tags]) : (s.category ? [s.category] : []);
+    document.getElementById("card-tags").innerHTML = tags.map(t => `<span class="info-tag">${t}</span>`).join(''); 
+    
     // =========================================
-    // 🌟 3. 核心優化：渲染官方詳細資訊與警告橫幅
+    // 🌟 修正 1：保留舊版模樣，並優雅匯入新版官方資訊
     // =========================================
     const warningHtml = s.warning ? `<div class="warning-banner"><i class="fas fa-exclamation-triangle"></i><span>${s.warning}</span></div>` : '';
-    const detailHtml = `
-        ${warningHtml}
-        <div class="spot-detail-info">
+    const officialDetails = (s.address || s.openTime || (s.tel && s.tel !== '無')) ? `
+        <div class="spot-detail-info" style="margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px dashed var(--glass);">
             ${s.address ? `<div><i class="fas fa-map-marker-alt"></i> ${s.address}</div>` : ''}
             ${s.openTime ? `<div><i class="fas fa-clock"></i> ${s.openTime}</div>` : ''}
             ${s.tel && s.tel !== '無' ? `<div><i class="fas fa-phone"></i> <a href="tel:${s.tel}">${s.tel}</a></div>` : ''}
         </div>
-        <div style="line-height: 1.6; margin-top: 15px; padding-top: 15px; border-top: 1px dashed rgba(0,0,0,0.1);">
-            ${s.description || s.highlights || "暫無官方介紹"}
-        </div>
-    `;
+    ` : '';
     
-    // 將豐富的官方資訊統一塞入 highlights 區塊
+    // 將官方的地址與介紹，塞入 Highlights 區塊
+    const desc = s.description || s.highlights || "暫無介紹";
     const highlightsEl = document.getElementById("card-highlights");
-    if (highlightsEl) highlightsEl.innerHTML = detailHtml;
+    if (highlightsEl) highlightsEl.innerHTML = warningHtml + officialDetails + `<div>${desc}</div>`;
     
-    // 隱藏舊版的獨立文字欄位 (避免版面錯亂)
-    const foodEl = document.getElementById("card-food"); if(foodEl) foodEl.style.display = "none"; 
-    const historyEl = document.getElementById("card-history"); if(historyEl) historyEl.style.display = "none"; 
-    const transportEl = document.getElementById("card-transport"); if(transportEl) transportEl.style.display = "none"; 
+    // 🌟 修正 2：解封舊版的專屬欄位！(美食、歷史、交通)
+    const foodEl = document.getElementById("card-food"); 
+    if(foodEl) { foodEl.style.display = "block"; foodEl.innerText = s.food || "--"; }
+    
+    const historyEl = document.getElementById("card-history"); 
+    if(historyEl) { historyEl.style.display = "block"; historyEl.innerText = s.history || "--"; }
+    
+    const transportEl = document.getElementById("card-transport"); 
+    if(transportEl) { transportEl.style.display = "block"; transportEl.innerText = s.transport || "自行前往"; }
+    
+    // =========================================
+    // 按鈕渲染與卡片展開
+    // =========================================
+    const t = translations[state.currentLang] || translations['zh'];
+    const btnGroup = document.getElementById("card-btn-group");
+    
+    if (tags.includes('自訂')) { 
+        btnGroup.innerHTML = `<button onclick="startNav()" style="flex: 1.2;"><i class="fas fa-location-arrow"></i> ${t.nav}</button><button class="secondary" onclick="openEditModal('${s.name}')"><i class="fas fa-edit"></i> 編輯</button><button class="danger" onclick="deleteCustomSpot('${s.name}')"><i class="fas fa-trash-alt"></i> 刪除</button>`; 
+    } else { 
+        btnGroup.innerHTML = `<button onclick="startNav()"><i class="fas fa-location-arrow"></i> ${t.nav}</button><button class="secondary" onclick="aiTrip()"><i class="fas fa-magic"></i> ${t.ai}</button>`; 
+    }
+    
+    document.getElementById("card").classList.add("open"); 
+    document.getElementById("card").style.transform = ''; 
+    }
     
     // =========================================
     // 4. 渲染按鈕
