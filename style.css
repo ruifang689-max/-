@@ -579,7 +579,7 @@ body.dark-mode .warning-banner {
 }
 
 /* =========================================
-   🌟 終極修正：功能列 (side-function-zone) 排版與滑動
+   🌟 終極修正：功能列 (side-function-zone) 智慧排版
    ========================================= */
 
 /* 1. 徹底刪除拉環/收展按鈕 (改用全區滑動) */
@@ -587,49 +587,68 @@ body.dark-mode .warning-banner {
     display: none !important;
 }
 
-/* 2. 電腦版預設：靠邊直列 */
+/* 2. 預設排版 (電腦版 & 手機直式 Portrait)：右側直列 */
 #side-function-zone {
+    position: fixed !important;
+    right: 15px !important;
+    top: 50% !important;
+    transform: translateY(-50%) translateX(0) !important;
     z-index: 9999 !important;
     display: flex !important;
+    flex-direction: column !important;
+    background: rgba(255, 255, 255, 0.85) !important;
+    backdrop-filter: blur(8px) !important;
+    padding: 15px 10px !important;
+    border-radius: 20px !important;
+    box-shadow: -4px 0 15px rgba(0,0,0,0.1) !important;
     transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1) !important;
 }
 
 .zone-buttons {
-    display: flex;
-    gap: 10px;
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 12px !important;
 }
 
-/* 3. 手機版強制置底橫列 (直式與橫式皆適用) */
-@media (max-width: 768px), (max-height: 500px) {
+.control-btn {
+    margin: 0 !important; /* 確保直式時不偏移 */
+}
+
+/* 預設直欄的收合動作 (往右隱藏) */
+#side-function-zone.collapsed {
+    transform: translateY(-50%) translateX(120%) !important;
+}
+
+/* 3. 僅限手機橫式 (Landscape)：強制置底橫躺 */
+@media (orientation: landscape) and (max-height: 600px), (max-height: 450px) {
     #side-function-zone {
-        position: fixed !important;
         top: auto !important;
         bottom: 0px !important;
         left: 0px !important;
+        right: 0px !important;
         width: 100vw !important;
-        background: rgba(255, 255, 255, 0.85) !important;
-        backdrop-filter: blur(8px) !important;
-        padding: 15px 15px 20px 15px !important;
+        flex-direction: row !important;
+        padding: 10px 15px 15px 15px !important;
         border-radius: 20px 20px 0 0 !important;
         box-shadow: 0 -4px 15px rgba(0,0,0,0.1) !important;
-        transform: translateY(0) !important; /* 確保停留在畫面上 */
+        transform: translateY(0) translateX(0) !important; 
     }
     
     .zone-buttons {
         flex-direction: row !important; /* 強制橫向排列 */
         overflow-x: auto !important;    /* 超出螢幕可左右滑動按鈕 */
         white-space: nowrap !important;
-        padding-bottom: 5px; 
+        gap: 0 !important;
     }
     
     .control-btn {
-        flex-shrink: 0 !important; /* 防止按鈕被擠壓變形 */
+        flex-shrink: 0 !important; 
         margin-right: 12px !important;
     }
 
-    /* 當手勢向下滑動時，觸發收合到底部 */
+    /* 橫式的收合動作 (往下隱藏) */
     #side-function-zone.collapsed {
-        transform: translateY(110%) !important;
+        transform: translateY(110%) translateX(0) !important;
     }
 }
 
