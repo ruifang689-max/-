@@ -18,9 +18,16 @@ export function addMarkerToMap(spot) {
 
     const marker = L.marker([spot.lat, spot.lng], {
         icon: L.divIcon({
-            className: 'custom-marker',
-            // 🌟 恢復您以前的簡潔 HTML，原汁原味呈現
-            html: `<div style="background-color: ${markerColor}"><i class="fas ${iconClass}"></i></div>`
+            className: 'custom-marker-wrapper',
+            // 🌟 完美復刻：上方是水滴圖釘，下方是名稱標籤
+            html: `
+                <div class="custom-marker" style="background-color: ${markerColor};">
+                    <i class="fas ${iconClass}"></i>
+                </div>
+                <div class="marker-label">${spot.name}</div>
+            `,
+            iconSize: [40, 56],   // 調整感應大小以包含文字
+            iconAnchor: [20, 48]  // 將定位錨點設在水滴底部尖端
         })
     });
 
