@@ -56,3 +56,11 @@ html, body { margin: 0; padding: 0; width: 100vw; height: 100dvh; overflow: hidd
 body.font-iansui, body.font-iansui input, body.font-iansui select, body.font-iansui button, body.font-iansui textarea, body.font-iansui .leaflet-container { font-family: 'Iansui', sans-serif !important; }
 body.font-wenkai, body.font-wenkai input, body.font-wenkai select, body.font-wenkai button, body.font-wenkai textarea, body.font-wenkai .leaflet-container { font-family: 'LXGW WenKai TC', sans-serif !important; }
 body.font-huninn, body.font-huninn input, body.font-huninn select, body.font-huninn button, body.font-huninn textarea, body.font-huninn .leaflet-container { font-family: 'jf-openhuninn', sans-serif !important; }
+
+/* =========================================
+   🌟 狀態驅動：UI 工具類別 (Utility Classes)
+   ========================================= */
+.u-hidden { display: none !important; }
+.u-flex { display: flex !important; }
+.u-block { display: block !important; }
+.u-fade-out { opacity: 0 !important; pointer-events: none !important; transition: opacity 0.4s ease; }
