@@ -354,34 +354,12 @@ export function initUI() {
     if (state.mapInstance) {
         state.mapInstance.on('contextmenu', function(e) {
             const lat = e.latlng.lat; const lng = e.latlng.lng;
-            const tempPopup = L.popup({ closeButton: false, autoClose: false, offset: [0, -10] }).setLatLng(e.latlng).setContent("<div style='padding:8px; font-weight:bold; color:var(--primary); font-size:14px;'><i class='fas fa-spinner fa-spin'></i> 獲取地址中...</div>").openOn(state.mapInstance);
-            const apiUrl = `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=zh-tw`;
-            fetch(apiUrl).then(res => res.json()).then(data => { 
-                let addr = "瑞芳秘境"; 
-                if(data) {
-                    let city = data.principalSubdivision || "";
-                    let dist = data.city || "";
-                    let village = data.locality || "";
-                    let road = "";
-                    
-                    // 🌟 深度挖掘 API：找出精確的「里」與「路/街」
-                    if (data.localityInfo) {
-                        if (data.localityInfo.administrative) {
-                            const v = data.localityInfo.administrative.find(a => a.name.endsWith('里') || a.adminLevel === 10);
-                            if (v && v.name) village = v.name;
-                        }
-                        if (data.localityInfo.informative) {
-                            const r = data.localityInfo.informative.find(i => i.name.endsWith('路') || i.name.endsWith('街') || i.name.endsWith('道') || i.description === 'road');
-                            if (r && r.name) road = r.name;
-                        }
-                    }
-                    
-                    // 🌟 組合出最詳細的地址 (例如：新北市瑞芳區龍潭里明燈路)
-                    const parts = [city, dist].filter(Boolean);
-                    const uniqueParts = [...new Set(parts)];
-                    addr = `${uniqueParts.join('')}${village}${road}` || "瑞芳秘境"; 
-                }
-                
+            const tempPopup = L.popup({ closeButton: false, autoClose: false, offset: [0, -10] }).setLatLng(e.latlng).setContent("<div style='padding:8px; font-weight:bold; color:var(--primary); font-size:14px;'><i class='fas fa-spinner fa-spin'></i> 獲取詳細地址中...</div>").openOn(state.mapInstance);
+            
+            const primaryUrl = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1&accept-language=zh-TW&email=ruifang689@gmail.com`;
+            const fallbackUrl = `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=zh-tw`;
+
+            const showCustomModal = (addr) => {
                 state.mapInstance.closePopup(tempPopup); 
                 setTimeout(() => { 
                     state.tempCustomSpot = { lat, lng, addr }; 
@@ -389,8 +367,61 @@ export function initUI() {
                     document.getElementById('custom-spot-name').value = ""; 
                     const m = document.getElementById('custom-spot-modal');
                     if(m) { m.classList.remove('u-hidden'); m.classList.add('u-flex'); }
-                }, 150); 
-            }).catch(() => state.mapInstance.closePopup(tempPopup));
+                }, 150);
+            };
+
+            // 🌟 1. 先嘗試 OSM，獲取精確到「路、巷、號、地標」的地址
+            fetch(primaryUrl)
+            .then(res => { if(!res.ok) throw new Error(); return res.json(); })
+            .then(data => {
+                let addr = "瑞芳秘境";
+                if (data && data.address) {
+                    const a = data.address;
+                    const city = a.city || a.county || a.state || "";
+                    const dist = a.town || a.suburb || a.district || "";
+                    const village = a.village || a.hamlet || a.neighbourhood || "";
+                    const road = a.road || a.pedestrian || "";
+                    const houseNumber = a.house_number ? `${a.house_number}號` : "";
+                    const poi = a.amenity || a.building || a.shop || a.tourism || "";
+
+                    const parts = [city, dist].filter(Boolean);
+                    const uniqueParts = [...new Set(parts)];
+                    let baseStr = uniqueParts.join('');
+
+                    // 🌟 完美組合出：新北市瑞芳區明燈路三段82號 (瑞芳車站)
+                    addr = `${baseStr}${village}${road}${houseNumber}`;
+                    if (poi && !addr.includes(poi)) addr += ` (${poi})`;
+                    if (!addr) addr = "瑞芳秘境";
+                }
+                showCustomModal(addr);
+            })
+            .catch(() => {
+                // 🌟 2. 若 OSM 封鎖，退回 BDC API
+                fetch(fallbackUrl).then(res => res.json()).then(data => { 
+                    let addr = "瑞芳秘境"; 
+                    if(data) {
+                        let city = data.principalSubdivision || "";
+                        let dist = data.city || "";
+                        let village = data.locality || "";
+                        let road = "";
+                        
+                        if (data.localityInfo) {
+                            if (data.localityInfo.administrative) {
+                                const v = data.localityInfo.administrative.find(a => a.name.endsWith('里') || a.adminLevel === 10);
+                                if (v && v.name) village = v.name;
+                            }
+                            if (data.localityInfo.informative) {
+                                const r = data.localityInfo.informative.find(i => i.name.endsWith('路') || i.name.endsWith('街') || i.name.endsWith('道') || i.description === 'road');
+                                if (r && r.name) road = r.name;
+                            }
+                        }
+                        const parts = [city, dist].filter(Boolean);
+                        const uniqueParts = [...new Set(parts)];
+                        addr = `${uniqueParts.join('')}${village}${road}` || "瑞芳秘境"; 
+                    }
+                    showCustomModal(addr);
+                }).catch(() => showCustomModal("瑞芳秘境"));
+            });
         });
     }
 
