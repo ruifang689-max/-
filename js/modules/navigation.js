@@ -4,8 +4,15 @@ import { spots } from '../data/spots.js';
 import { closeCard, showCard } from './cards.js';
 
 export function initNavigation() {
-    window.openRouteMenu = () => { document.getElementById('route-select-modal').style.display = 'flex'; };
-    window.closeRouteMenu = () => { document.getElementById('route-select-modal').style.display = 'none'; };
+    // 🌟 升級為狀態驅動 (移除 style.display)
+    window.openRouteMenu = () => { 
+        const m = document.getElementById('route-select-modal');
+        if(m) { m.classList.remove('u-hidden'); m.classList.add('u-flex'); }
+    };
+    window.closeRouteMenu = () => { 
+        const m = document.getElementById('route-select-modal');
+        if(m) { m.classList.remove('u-flex'); m.classList.add('u-hidden'); }
+    };
     
     window.selectRoute = (routeKey) => { 
         window.closeRouteMenu(); if(state.currentRoute) state.mapInstance.removeLayer(state.currentRoute); 
@@ -20,14 +27,44 @@ export function initNavigation() {
         const btn = document.querySelector('.route-btn'); btn.innerHTML = '<i class="fas fa-route"></i>'; btn.onclick = window.openRouteMenu; btn.classList.remove('active'); alert('🏁 路線已關閉'); 
     };
 
-    window.closeNav = () => { if(state.currentRoute) state.mapInstance.removeLayer(state.currentRoute); document.getElementById('route-info-panel').style.display = 'none'; };
-    window.changeNavMode = (mode) => { state.navMode = mode; document.querySelectorAll('.route-mode-btn').forEach(btn => btn.classList.remove('active')); document.getElementById(`mode-${mode}`).classList.add('active'); window.startNav(); };
+    window.closeNav = () => { 
+        if(state.currentRoute) state.mapInstance.removeLayer(state.currentRoute); 
+        const p = document.getElementById('route-info-panel');
+        if(p) { p.classList.remove('u-flex'); p.classList.add('u-hidden'); }
+    };
     
-    window.startNav = () => { 
-        if(!state.userPos || !state.targetSpot) return alert("請開啟 GPS 定位"); 
-        closeCard(); document.getElementById('route-time').innerText = "計算中..."; document.getElementById('route-dist').innerText = ""; document.getElementById('route-info-panel').style.display = 'flex'; 
+    window.changeNavMode = (mode) => { 
+        state.navMode = mode; 
+        document.querySelectorAll('.route-mode-btn').forEach(btn => btn.classList.remove('active')); 
+        document.getElementById(`mode-${mode}`).classList.add('active'); 
+        // 🌟 切換模式時，使用上一次紀錄的座標重算路線
+        window.startNav(state._tempNavLat, state._tempNavLng); 
+    };
+    
+    // 🌟 核心修改：支援接收特定 lat, lng 參數
+    window.startNav = (lat, lng) => { 
+        if(!state.userPos) return alert("請開啟 GPS 定位"); 
+        
+        // 如果有傳入參數就用參數，沒有就去抓 state.targetSpot
+        const targetLat = lat || (state.targetSpot ? state.targetSpot.lat : null);
+        const targetLng = lng || (state.targetSpot ? state.targetSpot.lng : null);
+        
+        if (!targetLat || !targetLng) return alert("請先選擇一個目的地！");
+
+        // 紀錄目前的導航目標，以便切換 步行/開車 模式時重算
+        state._tempNavLat = targetLat;
+        state._tempNavLng = targetLng;
+
+        if(typeof window.closeCard === 'function') window.closeCard(); 
+        
+        const p = document.getElementById('route-info-panel');
+        if(p) { p.classList.remove('u-hidden'); p.classList.add('u-flex'); }
+        
+        document.getElementById('route-time').innerText = "計算中..."; 
+        document.getElementById('route-dist').innerText = ""; 
+        
         const profile = state.navMode === 'walking' ? 'foot' : 'driving'; 
-        fetch(`https://router.project-osrm.org/route/v1/${profile}/${state.userPos.lng},${state.userPos.lat};${state.targetSpot.lng},${state.targetSpot.lat}?overview=full&geometries=geojson`)
+        fetch(`https://router.project-osrm.org/route/v1/${profile}/${state.userPos.lng},${state.userPos.lat};${targetLng},${targetLat}?overview=full&geometries=geojson`)
         .then(r => r.json()).then(data => { 
             if(state.currentRoute) state.mapInstance.removeLayer(state.currentRoute); 
             const route = data.routes[0]; const coords = route.geometry.coordinates.map(c => [c[1], c[0]]); 
