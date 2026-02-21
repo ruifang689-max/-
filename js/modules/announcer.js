@@ -35,15 +35,32 @@ export function initAnnouncer() {
                 let areaStr = "探索瑞芳中...";
                 if (data && data.address) { 
                     const a = data.address; 
-                    const city = a.city || a.county || "";
+                    // 🌟 確保抓到 OSM 的各種層級 (OSM 常把新北市放在 state)
+                    const city = a.city || a.county || a.state || "";
                     const dist = a.town || a.suburb || a.district || "";
-                    const village = a.village || a.hamlet || "";
+                    const village = a.village || a.hamlet || a.neighbourhood || "";
                     
-                    let baseStr = city + dist + village;
+                    // 🌟 陣列去重：消除「新北市新北市」
+                    const parts = [city, dist].filter(Boolean);
+                    const uniqueParts = [...new Set(parts)];
+                    let baseStr = uniqueParts.join('');
                     if (!baseStr) baseStr = a.road || "";
                     
-                    if (dist === "瑞芳區" && village && ruifangMap[village]) areaStr = `${baseStr} (${ruifangMap[village]})`;
-                    else if (baseStr) areaStr = baseStr;
+                    // 🌟 智慧匹配九大區域
+                    let matchedArea = "";
+                    if (village && typeof ruifangMap !== 'undefined') {
+                        if (ruifangMap[village]) {
+                            matchedArea = ruifangMap[village];
+                        } else {
+                            const villageCore = village.substring(0, 2);
+                            for (let key in ruifangMap) {
+                                if (key.startsWith(villageCore)) { matchedArea = ruifangMap[key]; break; }
+                            }
+                        }
+                    }
+
+                    if (dist === "瑞芳區" && matchedArea) areaStr = `${baseStr}${village} (${matchedArea})`;
+                    else areaStr = `${baseStr}${village}`;
                 } 
                 document.getElementById("addr-text").innerText = areaStr; 
             })
