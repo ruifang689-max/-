@@ -48,17 +48,16 @@ export function initMap() {
                 spiderfyOnMaxZoom: true,     
                 disableClusteringAtZoom: 16, // 放大到 16 級時強制關閉聚合
                 
-                // 🌟 高質感聚合數字圖示
-                iconCreateFunction: function(cluster) {
-                    const count = cluster.getChildCount();
-                    let size = 'small';
-                    if (count > 20) size = 'large';
-                    else if (count > 10) size = 'medium';
-
-                    return L.divIcon({
-                        html: `<div class="custom-cluster-icon ${size}"><span>${count}</span></div>`,
-                        className: 'cluster-icon-wrapper',
-                        iconSize: L.point(40, 40)
+                    // 🌟 極限效能版叢集引擎 (MarkerCluster) - 保留效能，恢復預設視覺
+                    state.cluster = L.markerClusterGroup({
+                        chunkedLoading: true,        // 🌟 效能核心：開啟分塊載入
+                        chunkInterval: 200,          
+                        chunkDelay: 50,              
+                        maxClusterRadius: 40,        // 縮小聚合半徑，讓圖釘更容易分散
+                        spiderfyOnMaxZoom: true,     
+                        disableClusteringAtZoom: 16  // 放大到 16 級時強制關閉聚合
+                        
+                        // (已移除自訂 iconCreateFunction，回歸 Leaflet 原生的經典叢集樣式)
                     });
                 }
             });
