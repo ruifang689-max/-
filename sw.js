@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ruifang-app-v600'; // 🌟 版本號更新
+const CACHE_NAME = 'ruifang-app-v602'; // 🌟 版本號更新
 
 const urlsToCache = [
   './',
