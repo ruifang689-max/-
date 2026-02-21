@@ -50,10 +50,11 @@ export function initSearch() {
     };
     
     // =========================================
-    // 🌟 預設搜尋推薦：渲染歷史紀錄與分類
+    // 🌟 預設搜尋推薦：歷史紀錄、快速分類與隨機推薦
     // =========================================
     window.renderDefaultSearch = () => {
         const c = document.getElementById("suggest-content");
+        const sugBox = document.getElementById("suggest");
         if(!c || !sugBox) return;
         
         c.innerHTML = "";
@@ -89,6 +90,32 @@ export function initSearch() {
             catBox.appendChild(btn);
         });
         c.appendChild(catBox);
+        
+        // 🌟 3. 新增：隨機分類探索推薦 (每次點開都有不同驚喜)
+        const recCats = ['美食', '自然', '歷史']; 
+        const randomCat = recCats[Math.floor(Math.random() * recCats.length)];
+        c.innerHTML += `<div class="search-section-title" style="color: var(--accent);">🎁 探索推薦：${randomCat}</div>`;
+        
+        // 過濾出符合隨機分類的景點
+        const matchedSpots = spots.concat(state.savedCustomSpots || []).filter(s => (s.tags || []).includes(randomCat));
+        // 將陣列隨機洗牌，並只取出前 5 筆，避免清單過長
+        const shuffledSpots = matchedSpots.sort(() => 0.5 - Math.random()).slice(0, 5);
+        
+        shuffledSpots.forEach(s => {
+            const div = document.createElement("div"); 
+            div.className = "list-item";
+            // 🌟 加上星星圖示與右側小箭頭，質感滿分
+            div.innerHTML = `
+                <span><i class="fas fa-star" style="color:var(--accent); margin-right:8px;"></i> ${s.name}</span> 
+                <i class="fas fa-chevron-right" style="color:#ccc; font-size:12px;"></i>
+            `;
+            div.onclick = () => { 
+                document.getElementById("search").value = s.name; 
+                triggerSearch(s.name); 
+                window.closeSuggest();
+            };
+            c.appendChild(div);
+        });
         
         // 🌟 狀態驅動：顯示建議框
         sugBox.classList.remove('u-hidden');
