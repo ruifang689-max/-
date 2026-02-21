@@ -54,7 +54,9 @@ export function initUI() {
         if (!e.target.closest('.custom-select-wrapper')) { document.querySelectorAll('.custom-select-options').forEach(list => list.classList.remove('open')); }
     });
 
-    // 🌟 進入地圖：展開功能列與新手教學
+    // =========================================
+    // 🌟 進入地圖：解鎖動畫、顯示功能列、導覽說明
+    // =========================================
     window.enterMap = () => { 
         const intro = document.getElementById('intro');
         if(intro) { intro.style.opacity = '0'; setTimeout(() => { intro.style.display = 'none'; }, 400); }
@@ -62,32 +64,11 @@ export function initUI() {
         const welcome = document.getElementById('welcome-screen');
         if(welcome) { welcome.style.opacity = '0'; setTimeout(() => { welcome.style.display = 'none'; }, 400); }
 
-        // 🌟 進入地圖後，才將功能列顯示出來
-        const panel = document.getElementById("side-function-zone");
-        if(panel) {
-            panel.classList.remove("collapsed");
-            panel.style.setProperty('display', 'flex', 'important'); 
-        }
-        
-        // ==========================================
-        // 🌟 終極暴力解法：直接用 JS 覆蓋所有 CSS 隱藏屬性
-        // ==========================================
-        const panel = document.getElementById("side-panel");
-        if(panel) {
-            panel.classList.remove("collapsed");
-            // 強制寫入 Style，確保絕對置底、浮在最上層、完全可見
-            panel.style.cssText = `
-                display: flex !important; 
-                position: fixed !important; 
-                bottom: 0px !important; 
-                left: 0px !important;
-                width: 100vw !important;
-                z-index: 99999 !important; 
-                transform: translateY(0) !important; 
-                visibility: visible !important; 
-                opacity: 1 !important;
-                background-color: var(--bg-color, #ffffff) !important;
-            `;
+        // 🌟 變數改名為 functionPanel，徹底避開 Identifier already declared 的報錯！
+        const functionPanel = document.getElementById("side-function-zone");
+        if(functionPanel) {
+            functionPanel.classList.remove("collapsed");
+            functionPanel.style.setProperty('display', 'flex', 'important'); 
         }
         
         const sug = document.getElementById("suggest");
@@ -102,6 +83,20 @@ export function initUI() {
             if (!skipTour) window.startFeatureTour();
             else if (!skipTutorial) window.startTutorialOverlay();
         }, 400); 
+    };
+
+    // =========================================
+    // 🌟 點擊收展功能列 (全裝置適用)
+    // =========================================
+    window.toggleSidePanel = () => {
+        const targetPanel = document.getElementById("side-function-zone");
+        const icon = document.getElementById("side-panel-icon");
+        if (targetPanel) {
+            targetPanel.classList.toggle("collapsed");
+            if (icon) {
+                icon.className = targetPanel.classList.contains("collapsed") ? "fas fa-angle-double-left" : "fas fa-angle-double-right";
+            }
+        }
     };
     
     // 1. 語言、主題、字體切換
