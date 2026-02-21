@@ -1,6 +1,6 @@
 // js/main.js (v607)
 // 🌟 載入核心與原始模組
-import { state } from './core/store.js?v=607';
+import { state } from './core/store.js?v=611';
 import { initMap, toggleLayer } from './core/map.js?v=607';
 import { fetchWeather } from './modules/weather.js?v=607';
 import { initGPS } from './modules/gps.js?v=607';
