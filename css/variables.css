@@ -71,17 +71,15 @@ body.font-huninn, body.font-huninn input, body.font-huninn select, body.font-hun
 /* =========================================
    🌟 狀態驅動：UI 工具類別 (Utility Classes)
    ========================================= */
-.u-hidden { display: none !important; }
 .u-flex { display: flex !important; }
 .u-block { display: block !important; }
 .u-fade-out { opacity: 0 !important; pointer-events: none !important; transition: opacity var(--trans-normal); }
 .u-fade-in { opacity: 1 !important; pointer-events: auto !important; transition: opacity var(--trans-normal); }
 
-/* 🌟 全站統一的按鈕點擊回饋 (Click Feedback) */
-/* 未來只要在按鈕的 HTML 加上 class="u-btn-active"，點擊時就會有統一的縮小微彈效果 */
-.u-btn-active {
-    transition: transform var(--trans-fast);
-}
-.u-btn-active:active {
-    transform: scale(0.94);
+/* 🌟 將 hidden 移到最後，確保「隱藏」的優先級最高，絕不卡視窗 */
+.u-hidden { display: none !important; }
+
+/* 🌟 全站統一的按鈕點擊回饋 */
+.u-btn-active { transition: transform var(--trans-fast); }
+.u-btn-active:active { transform: scale(0.94); }4);
 }
