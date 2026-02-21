@@ -64,3 +64,4 @@ body.font-huninn, body.font-huninn input, body.font-huninn select, body.font-hun
 .u-flex { display: flex !important; }
 .u-block { display: block !important; }
 .u-fade-out { opacity: 0 !important; pointer-events: none !important; transition: opacity 0.4s ease; }
+.u-fade-in { opacity: 1 !important; pointer-events: auto !important; transition: opacity 0.4s ease; }
