@@ -1,1 +1,8 @@
-
+/* 🌟 模態設定視窗與遮罩 */
+.modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh; background: rgba(0,0,0,0.6); backdrop-filter: blur(3px); z-index: var(--z-modal); display: none; align-items: center; justify-content: center; padding: 15px;}
+.modal-box { background: var(--bg-color); width: 100%; max-width: 380px; max-height: 85vh; overflow-y: auto; border-radius: var(--radius-lg); padding: 25px; display: flex; flex-direction: column; gap: 12px; color: var(--text-main); border: 1px solid var(--primary); border-top: 3px solid var(--primary); box-shadow: var(--card-shadow); }
+.settings-title { color: var(--primary); text-align: center; margin: 0 0 10px 0; font-size: 20px; font-weight: 800;}
+.settings-sub { color: var(--accent); text-align: left; margin: 10px 0 0 0; font-size: 14px; font-weight: bold; }
+.modal-title { color: var(--text-main); margin: 0 0 10px 0; font-size: 20px; font-weight: 900; display: flex; align-items: center; gap: 8px;}
+.modal-title.route i { color: #8e44ad; }
+.modal-title.fav i { color: var(--danger); }
