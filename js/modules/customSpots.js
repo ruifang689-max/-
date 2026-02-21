@@ -15,8 +15,10 @@ export function initCustomSpots() {
                 state.mapInstance.closePopup(tempPopup); 
                 setTimeout(() => { 
                     state.tempCustomSpot = { lat, lng, addr }; 
-                    const mapLink = `https://www.google.com/maps/search/?api=1&query=$${lat},${lng}`;
-                    const gmapNav = `https://www.google.com/maps/dir/?api=1&destination=$${lat},${lng}`;
+                    
+                    // 🌟 徹底修復：改用真正的 Google Maps 官方標準 API 網址
+                    const mapLink = `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
+                    const gmapNav = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
                     
                     const addrHTML = `
                         <div style="font-weight: bold; font-size: 14px; line-height: 1.6; display: flex; align-items: flex-start; gap: 8px;">
