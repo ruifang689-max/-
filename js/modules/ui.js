@@ -382,22 +382,28 @@ export function initUI() {
                 setTimeout(() => { 
                     state.tempCustomSpot = { lat, lng, addr }; 
                     
-                    // 🌟 強化版 UI：完美凸排、虛線超連結、三顆滿版快捷按鈕
-                    const mapLink = `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
+                    const mapLink = `https://www.google.com/maps/search/?api=1&query=$${lat},${lng}`;
+                    
+                    // 🌟 強化版 UI：完美文字虛線底線、分隔線、本地圖導航
                     const addrHTML = `
-                        <div style="margin-bottom: 12px; font-weight: bold; font-size: 14px; line-height: 1.5; display: flex; align-items: flex-start; gap: 8px;">
+                        <div style="font-weight: bold; font-size: 14px; line-height: 1.6; display: flex; align-items: flex-start; gap: 8px;">
                             <i class="fas fa-map-marker-alt" style="color: var(--danger); margin-top: 4px; flex-shrink: 0;"></i>
-                            <a href="${mapLink}" target="_blank" style="color: var(--text-main); text-decoration: none; border-bottom: 1px dashed #888; padding-bottom: 2px; flex: 1; word-break: break-all;">
+                            <a href="${mapLink}" target="_blank" style="color: var(--text-main); text-decoration: underline dashed #aaa; text-underline-offset: 4px; flex: 1; word-break: break-all;">
                                 ${addr}
                             </a>
                         </div>
+                        
+                        <hr style="border: none; border-top: 1px solid var(--border-color); margin: 12px 0;">
+                        
                         <div style="display: flex; gap: 6px;">
                             <button onclick="navigator.clipboard.writeText('${addr}').then(() => alert('✅ 地址已複製！'))" style="flex: 1; padding: 8px 0; border: none; border-radius: 6px; background: var(--primary); color: white; font-size: 13px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; transition: 0.2s;" onmousedown="this.style.transform='scale(0.95)'" onmouseup="this.style.transform='scale(1)'" onmouseleave="this.style.transform='scale(1)'">
                                 <i class="fas fa-copy"></i> 複製
                             </button>
-                            <button onclick="window.open('${mapLink}', '_blank')" style="flex: 1; padding: 8px 0; border: none; border-radius: 6px; background: #28a745; color: white; font-size: 13px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; transition: 0.2s;" onmousedown="this.style.transform='scale(0.95)'" onmouseup="this.style.transform='scale(1)'" onmouseleave="this.style.transform='scale(1)'">
-                                <i class="fas fa-map-marked-alt"></i> 導航
+                            
+                            <button onclick="if(typeof window.startLocalNav === 'function'){ window.startLocalNav(${lat}, ${lng}); closeCustomSpotModal(); } else { alert('請確認導航模組已載入！'); }" style="flex: 1; padding: 8px 0; border: none; border-radius: 6px; background: #28a745; color: white; font-size: 13px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; transition: 0.2s;" onmousedown="this.style.transform='scale(0.95)'" onmouseup="this.style.transform='scale(1)'" onmouseleave="this.style.transform='scale(1)'">
+                                <i class="fas fa-route"></i> 導航
                             </button>
+                            
                             <button onclick="if(navigator.share){ navigator.share({title:'瑞芳秘境', text:'${addr}', url:'${mapLink}'}).catch(()=>{}) } else { alert('您的瀏覽器不支援分享功能'); }" style="flex: 1; padding: 8px 0; border: none; border-radius: 6px; background: var(--accent); color: white; font-size: 13px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; transition: 0.2s;" onmousedown="this.style.transform='scale(0.95)'" onmouseup="this.style.transform='scale(1)'" onmouseleave="this.style.transform='scale(1)'">
                                 <i class="fas fa-share-square"></i> 分享
                             </button>
