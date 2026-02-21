@@ -381,7 +381,23 @@ export function initUI() {
                 state.mapInstance.closePopup(tempPopup); 
                 setTimeout(() => { 
                     state.tempCustomSpot = { lat, lng, addr }; 
-                    document.getElementById('custom-spot-addr').innerHTML = `<i class="fas fa-map-marker-alt"></i> ${addr}`; 
+                    
+                    // 🌟 強化版 UI：加入美觀的複製與 Google 地圖導航按鈕
+                    const addrHTML = `
+                        <div style="margin-bottom: 12px; font-weight: bold; color: var(--text-main); font-size: 14px; line-height: 1.4;">
+                            <i class="fas fa-map-marker-alt" style="color: var(--danger);"></i> ${addr}
+                        </div>
+                        <div style="display: flex; gap: 8px;">
+                            <button onclick="navigator.clipboard.writeText('${addr}').then(() => alert('✅ 地址已複製！'))" style="flex: 1; padding: 8px; border: none; border-radius: 6px; background: var(--primary); color: white; font-size: 13px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; transition: 0.2s;" onmousedown="this.style.transform='scale(0.95)'" onmouseup="this.style.transform='scale(1)'" onmouseleave="this.style.transform='scale(1)'">
+                                <i class="fas fa-copy"></i> 複製地址
+                            </button>
+                            <button onclick="window.open('https://www.google.com/maps/search/?api=1&query=${lat},${lng}', '_blank')" style="flex: 1; padding: 8px; border: none; border-radius: 6px; background: #28a745; color: white; font-size: 13px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; transition: 0.2s;" onmousedown="this.style.transform='scale(0.95)'" onmouseup="this.style.transform='scale(1)'" onmouseleave="this.style.transform='scale(1)'">
+                                <i class="fas fa-map-marked-alt"></i> Google 地圖
+                            </button>
+                        </div>
+                    `;
+                    
+                    document.getElementById('custom-spot-addr').innerHTML = addrHTML; 
                     document.getElementById('custom-spot-name').value = ""; 
                     const m = document.getElementById('custom-spot-modal');
                     if(m) { m.classList.remove('u-hidden'); m.classList.add('u-flex'); }
