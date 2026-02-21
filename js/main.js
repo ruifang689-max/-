@@ -1,4 +1,4 @@
-// js/main.js (v612)
+// js/main.js (v615)
 // 🌟 1. 建立企業級全域命名空間 (Namespace 工具箱)
 window.rfApp = {
     ui: {},
@@ -20,9 +20,9 @@ import { initCardGestures, closeCard } from './modules/cards.js?v=607';
 import { renderAllMarkers } from './modules/markers.js?v=607';
 import { initSearch } from './modules/search.js?v=607';
 import { initNavigation } from './modules/navigation.js?v=607';
-import { initUI } from './modules/ui.js?v=612'; // 🌟 更新
+import { initUI } from './modules/ui.js?v=615'; // 🌟 更新
 import { initFirebase } from './modules/firebase-sync.js?v=607';
-import { initTheme } from './modules/theme.js?v=612'; // 🌟 更新
+import { initTheme } from './modules/theme.js?v=615'; // 🌟 更新
 import { initPWA } from './modules/pwa.js?v=607';
 import { initTour } from './modules/tour.js?v=607';
 import { initFavorites } from './modules/favorites.js?v=607';
