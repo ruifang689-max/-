@@ -1,13 +1,13 @@
 #map { position: absolute; top: 0; left: 0; right: 0; bottom: 0; z-index: 1; }
 
 /* 🌟 開場與歡迎幕 */
-#splash-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: #ffffff; z-index: 10005; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.5s ease-in-out; pointer-events: none; }
+#splash-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: #ffffff; z-index: var(--z-splash); display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.5s ease-in-out; pointer-events: none; }
 .logo-anim { width: 100px; height: 100px; border: 4px solid var(--intro-color); color: var(--intro-color); display: flex; align-items: center; justify-content: center; font-size: 50px; font-weight: bold; border-radius: 20px; animation: scaleUp 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
 .splash-title-text { color: var(--intro-color); margin-top: 20px; letter-spacing: 4px; font-size: 20px; opacity: 0; animation: fadeInText 0.8s ease-out 0.3s forwards; }
 @keyframes scaleUp { 0% { transform: scale(0.5); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
 @keyframes fadeInText { 0% { transform: translateY(10px); opacity: 0; } 100% { transform: translateY(0); opacity: 1; } }
 
-#welcome-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: #ffffff; z-index: 10004; display: flex; flex-direction: column; align-items: center; padding: 15px; overflow-y: auto; transition: opacity 0.4s ease; }
+#welcome-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: #ffffff; z-index: var(--z-splash); display: flex; flex-direction: column; align-items: center; padding: 15px; overflow-y: auto; transition: opacity 0.4s ease; }
 .welcome-wrapper { width: 100%; max-width: 320px; display: flex; flex-direction: column; align-items: center; padding-top: 5vh; padding-bottom: env(safe-area-inset-bottom, 20px); margin: auto; }
 .logo-static { width: 80px; height: 80px; border: 3px solid var(--intro-color); color: var(--intro-color); display: flex; align-items: center; justify-content: center; font-size: 40px; font-weight: bold; border-radius: 15px; }
 .welcome-title { color: var(--intro-color); margin-top: 15px; margin-bottom: 10px; text-align: center; letter-spacing: 2px; font-size: 22px; font-weight: 900; }
@@ -24,7 +24,7 @@
 .btn-enter-map:active { transform: scale(0.96); opacity: 0.8; }
 
 /* 🌟 地圖頂部 UI (搜尋、標籤、天氣) */
-#top-ui { position: absolute; top: calc(15px + env(safe-area-inset-top, 0px)); left: 50%; transform: translateX(-50%); z-index: 3000; width: 85%; max-width: 420px; display: flex; flex-direction: column; align-items: center; gap: 8px; pointer-events: none; }
+#top-ui { position: absolute; top: calc(15px + env(safe-area-inset-top, 0px)); left: 50%; transform: translateX(-50%); z-index: var(--z-controls); width: 85%; max-width: 420px; display: flex; flex-direction: column; align-items: center; gap: 8px; pointer-events: none; }
 #search-container { position: relative; width: 100%; pointer-events: auto; }
 #search { width: 100%; padding: 12px 38px 12px 20px; border: none; border-radius: 30px; box-shadow: var(--card-shadow); outline: none; background: var(--glass); color: var(--text-main); font-size: 14px; text-align: center; border: 1px solid var(--border-color); }
 #search-clear-btn { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: #aaa; cursor: pointer; font-size: 18px; display: none; transition: color 0.2s, transform 0.1s; padding: 5px; }
@@ -38,7 +38,7 @@
 #map-center-panel { background: var(--glass); backdrop-filter: blur(8px); padding: 4px 14px; border-radius: 20px; box-shadow: 0 2px 8px var(--card-shadow); color: var(--primary); font-size: 12px; font-weight: bold; display: flex; justify-content: center; align-items: center; gap: 6px; max-width: 85%; pointer-events: none; border: 1px solid var(--border-color); }
 #addr-text { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: inline-block; transition: opacity 0.3s; }
 
-#weather-box { position: absolute; top: calc(15px + env(safe-area-inset-top, 0px)); right: calc(15px + env(safe-area-inset-right, 0px)); z-index: 3000; width: 45px; height: 45px; background: var(--bg-color); border-radius: 12px; box-shadow: var(--card-shadow); border: 1px solid var(--border-color); display: flex; flex-direction: column; justify-content: center; align-items: center; pointer-events: auto; }
+#weather-box { position: absolute; top: calc(15px + env(safe-area-inset-top, 0px)); right: calc(15px + env(safe-area-inset-right, 0px)); z-index: var(--z-controls); width: 45px; height: 45px; background: var(--bg-color); border-radius: 12px; box-shadow: var(--card-shadow); border: 1px solid var(--border-color); display: flex; flex-direction: column; justify-content: center; align-items: center; pointer-events: auto; }
 #weather-box i { font-size: 18px; margin-bottom: 2px; } 
 #weather-temp { font-size: 11px; font-weight: bold; color: var(--text-main); }
 .weather-sun { color: #f39c12 !important; } .weather-cloud { color: #bdc3c7 !important; } .weather-rain { color: #7f8c8d !important; }
@@ -46,12 +46,12 @@
 /* 🌟 地圖底部 UI (比例尺、GPS、按鈕) */
 .leaflet-bottom.leaflet-right { bottom: calc(20px + env(safe-area-inset-bottom, 0px)) !important; right: calc(15px + env(safe-area-inset-right, 0px)) !important; }
 .leaflet-control-scale-line { background: rgba(255, 255, 255, 0.8) !important; border: 2px solid #333 !important; font-weight: bold; padding: 2px 5px; color: #333 !important; font-size: 10px;}
-#gps-val-text { position: absolute; bottom: calc(22px + env(safe-area-inset-bottom, 0px)); right: calc(130px + env(safe-area-inset-right, 0px)); left: auto; z-index: 3000; font-family: monospace; font-size: 11px; font-weight: bold; color: var(--primary); pointer-events: none; text-shadow: -1px -1px 0 var(--bg-color), 1px -1px 0 var(--bg-color), -1px 1px 0 var(--bg-color), 1px 1px 0 var(--bg-color); }
+#gps-val-text { position: absolute; bottom: calc(22px + env(safe-area-inset-bottom, 0px)); right: calc(130px + env(safe-area-inset-right, 0px)); left: auto; z-index: var(--z-controls); font-family: monospace; font-size: 11px; font-weight: bold; color: var(--primary); pointer-events: none; text-shadow: -1px -1px 0 var(--bg-color), 1px -1px 0 var(--bg-color), -1px 1px 0 var(--bg-color), 1px 1px 0 var(--bg-color); }
 
 body.dark-mode .leaflet-control-scale-line { background: rgba(0, 0, 0, 0.6) !important; color: #fff !important; border-color: #888 !important; text-shadow: none !important; box-shadow: none !important; }
 body.dark-mode #gps-val-text { text-shadow: -1px -1px 0 #121212, 1px -1px 0 #121212, -1px 1px 0 #121212, 1px 1px 0 #121212 !important; }
 
-.map-controls { position: absolute; bottom: calc(85px + env(safe-area-inset-bottom, 0px)); right: calc(12px + env(safe-area-inset-right, 0px)); z-index: 3000; display: flex; flex-direction: column; gap: 12px; pointer-events: auto; }
+.map-controls { position: absolute; bottom: calc(85px + env(safe-area-inset-bottom, 0px)); right: calc(12px + env(safe-area-inset-right, 0px)); z-index: var(--z-controls); display: flex; flex-direction: column; gap: 12px; pointer-events: auto; }
 .control-btn { background: var(--glass); backdrop-filter: blur(8px); width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: var(--card-shadow); cursor: pointer; color: var(--text-main); font-size: 20px; border: 1px solid var(--border-color); transition: transform 0.1s; margin: 0 !important; }
 .control-btn:active { transform: scale(0.9); }
 .route-btn { color: #8e44ad; } .fav-btn { color: var(--danger); } .compass-btn { color: var(--success); } .active { color: var(--primary); border: 2px solid var(--primary); }
