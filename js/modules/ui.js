@@ -307,11 +307,11 @@ export function initUI() {
 
     window.resetNorth = () => { 
         state.mapInstance.flyTo([25.1032, 121.8224], 14); 
-        // 🌟 觸發「瑞」字蓋章動畫
         const ruiBtn = document.querySelector('.rui-icon');
         if (ruiBtn) {
             ruiBtn.classList.remove('stamped');
-            void ruiBtn.offsetWidth; // 強制重繪 (Magic trick)
+            // 🌟 魔法技巧：強制瀏覽器重繪，讓 CSS 動畫可以無縫重新執行
+            void ruiBtn.offsetWidth; 
             ruiBtn.classList.add('stamped');
         }
     };
