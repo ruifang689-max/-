@@ -35,97 +35,76 @@ export function initSearch() {
         window.closeSuggest(); 
     };
     
-    window.renderDefaultSearch = () => { 
-        const c = document.getElementById("suggest-content"); 
-        if(!c) return; // 防呆
-        c.innerHTML = ""; 
-        
-        if(state.searchHistory.length > 0) { 
-            c.innerHTML += `<div class="search-section-title"><span>🕒 歷史搜尋</span> <span class="clear-history-btn" onclick="clearHistory()"><i class="fas fa-trash"></i> 清除</span></div>`; 
-            state.searchHistory.forEach(h => { 
-                const div = document.createElement("div"); div.className = "list-item"; 
-                div.innerHTML = `<span><i class="fas fa-history" style="color:#aaa;"></i> ${h}</span>`;
-                div.onclick = () => window.triggerSearch(h);
-                c.appendChild(div);
-            }); 
-        } 
-        
-        c.innerHTML += `<div class="search-section-title">⭐ 推薦景點</div>`; 
-        ["九份老街", "猴硐貓村", "水湳洞陰陽海"].forEach(r => { 
+// =========================================
+// 🌟 預設搜尋推薦：渲染歷史紀錄與分類
+// =========================================
+window.renderDefaultSearch = () => {
+    const c = document.getElementById("suggest-content");
+    const sugBox = document.getElementById("suggest");
+    if(!c || !sugBox) return;
+    
+    c.innerHTML = "";
+    
+    // 1. 渲染歷史紀錄
+    if (state.searchHistory && state.searchHistory.length > 0) {
+        c.innerHTML += `<div class="search-section-title">🕒 最近搜尋 <span class="clear-history-btn" onclick="clearHistory()">清除</span></div>`;
+        state.searchHistory.forEach(h => {
             const div = document.createElement("div"); div.className = "list-item";
-            div.innerHTML = `<span><i class="fas fa-fire" style="color:#e74c3c;"></i> ${r}</span>`;
-            div.onclick = () => window.triggerSearch(r);
+            div.innerHTML = `<span><i class="fas fa-history" style="color:#888; margin-right:5px;"></i> ${h}</span>`;
+            div.onclick = () => { 
+                document.getElementById("search").value = h; 
+                if (typeof triggerSearch === 'function') triggerSearch(h); 
+                sugBox.classList.remove('u-block'); sugBox.classList.add('u-hidden'); // 狀態驅動關閉
+            };
             c.appendChild(div);
-        }); 
-        
-        if(sugBox) sugBox.style.display = "block"; 
-    };
-
-    window.clearHistory = () => { state.searchHistory = []; saveState.history(); window.renderDefaultSearch(); };
-    window.triggerSearch = triggerSearch;
-
-if(searchInput) {
-        searchInput.addEventListener('focus', () => { 
-            if(!searchInput.value.trim()) {
-                window.renderDefaultSearch(); 
-            // 🌟 狀態驅動：把 .style.display === "none" 改為檢查 class
-            } else if (sugBox && sugBox.classList.contains('u-hidden')) {
-                searchInput.dispatchEvent(new Event('input')); 
-            }
-        });
-
-        searchInput.addEventListener('input', function() { 
-            const k = this.value.trim(); 
-            
-            // 🌟 狀態驅動：切換清除按鈕
-            if (clearBtn) {
-                if (k) { clearBtn.classList.remove('u-hidden'); clearBtn.classList.add('u-block'); }
-                else { clearBtn.classList.add('u-hidden'); clearBtn.classList.remove('u-block'); }
-            }
-            
-            const c = document.getElementById("suggest-content"); 
-            if(!k) { window.renderDefaultSearch(); return; } 
-            
-            c.innerHTML = ""; 
-            
-            // 🌟🌟🌟 防呆核心：加上 (s.tags || []) 和 (s.keywords || [])，並防範 savedCustomSpots 為空
-            const matches = spots.concat(state.savedCustomSpots || []).filter(s => 
-                (s.name || '').includes(k) || 
-                (s.tags || []).some(t => t.includes(k)) || 
-                (s.keywords || []).some(kw => kw.includes(k))
-            ); 
-            
-            if(matches.length > 0) { 
-                // 🌟 狀態驅動：顯示建議框
-                if(sugBox) { sugBox.classList.remove('u-hidden'); sugBox.classList.add('u-block'); }
-                
-                matches.forEach(s => { 
-                    const div = document.createElement("div"); div.className = "list-item"; 
-                    div.innerHTML = `<span><i class="fas fa-map-marker-alt" style="color:var(--primary)"></i> ${s.name}</span>`; 
-                    div.onclick = () => { 
-                        // 保留您原本的歷史紀錄儲存邏輯
-                        state.searchHistory = state.searchHistory.filter(h => h !== s.name); 
-                        state.searchHistory.unshift(s.name); 
-                        if(state.searchHistory.length > 5) state.searchHistory.pop(); 
-                        saveState.history();
-                        
-                        triggerSearch(s.name); 
-                    }; 
-                    c.appendChild(div); 
-                }); 
-            } else { 
-                // 🌟 狀態驅動：隱藏建議框
-                if(sugBox) { sugBox.classList.add('u-hidden'); sugBox.classList.remove('u-block'); }
-            } 
         });
     }
-    // 點擊地圖他處時，自動關閉搜尋推薦
-    document.addEventListener('click', (e) => {
-        const topUi = document.getElementById('top-ui');
-        if (topUi && !topUi.contains(e.target) && sugBox && sugBox.style.display === 'block') {
-            window.closeSuggest();
-        }
+    
+    // 2. 渲染快速分類
+    c.innerHTML += `<div class="search-section-title">🏷️ 快速分類</div>`;
+    // 抓取獨一無二的 tags 或給定預設分類
+    const cats = ['美食', '自然', '歷史', '交通']; 
+    const catBox = document.createElement("div");
+    catBox.style.cssText = "display:flex; gap:8px; padding:10px 15px; flex-wrap:wrap;";
+    cats.forEach(cat => {
+        const btn = document.createElement("button");
+        btn.className = "chip"; btn.innerText = cat;
+        btn.onclick = () => { 
+            document.getElementById("search").value = cat; 
+            window.filterSpots(cat, null); // 觸發過濾
+            sugBox.classList.remove('u-block'); sugBox.classList.add('u-hidden'); // 狀態驅動關閉
+        };
+        catBox.appendChild(btn);
     });
+    c.appendChild(catBox);
+    
+    // 🌟 狀態驅動：顯示建議框
+    sugBox.classList.remove('u-hidden');
+    sugBox.classList.add('u-block');
+};
+
+// 清除歷史紀錄
+window.clearHistory = () => {
+    state.searchHistory = [];
+    if (typeof saveState !== 'undefined') saveState.history();
+    window.renderDefaultSearch();
+};
+
+// =========================================
+// 🌟 點擊地圖空白處，自動關閉搜尋建議框
+// =========================================
+document.addEventListener('click', (e) => {
+    const sugBox = document.getElementById("suggest");
+    const searchInput = document.getElementById("search");
+    
+    // 如果點擊的地方不是搜尋框，也不是建議框裡面的東西，就把它關掉
+    if (sugBox && !sugBox.classList.contains('u-hidden')) {
+        if (!sugBox.contains(e.target) && e.target !== searchInput) {
+            sugBox.classList.remove('u-block');
+            sugBox.classList.add('u-hidden');
+        }
+    }
+});
 
     window.filterSpots = (category, element) => {
     if(element) { 
