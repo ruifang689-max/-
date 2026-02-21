@@ -40,6 +40,17 @@
     /* effects */
     --card-shadow: 0 8px 30px rgba(0,0,0,0.15); 
     --dynamic-border: var(--text-main); 
+
+    /* 全站統一的圓角規範 (Border Radius) */
+    --radius-sm: 8px;      /* 用於小按鈕、標籤 */
+    --radius-md: 12px;     /* 用於資訊卡片內的圖片、列表 */
+    --radius-lg: 20px;     /* 用於大彈窗、底部資訊大卡 */
+    --radius-pill: 50px;   /* 用於全圓角按鈕、搜尋框 */
+
+    /* 全站統一的轉場動畫速度 (Transitions) */
+    --trans-fast: 0.15s ease;
+    --trans-normal: 0.3s ease;
+    --trans-bounce: 0.4s cubic-bezier(0.32, 0.72, 0, 1); /* 帶有 Q 彈感的滑動 */
 }
 
 /* 黑暗模式變數覆蓋 */
@@ -63,5 +74,14 @@ body.font-huninn, body.font-huninn input, body.font-huninn select, body.font-hun
 .u-hidden { display: none !important; }
 .u-flex { display: flex !important; }
 .u-block { display: block !important; }
-.u-fade-out { opacity: 0 !important; pointer-events: none !important; transition: opacity 0.4s ease; }
-.u-fade-in { opacity: 1 !important; pointer-events: auto !important; transition: opacity 0.4s ease; }
+.u-fade-out { opacity: 0 !important; pointer-events: none !important; transition: opacity var(--trans-normal); }
+.u-fade-in { opacity: 1 !important; pointer-events: auto !important; transition: opacity var(--trans-normal); }
+
+/* 🌟 全站統一的按鈕點擊回饋 (Click Feedback) */
+/* 未來只要在按鈕的 HTML 加上 class="u-btn-active"，點擊時就會有統一的縮小微彈效果 */
+.u-btn-active {
+    transition: transform var(--trans-fast);
+}
+.u-btn-active:active {
+    transform: scale(0.94);
+}
