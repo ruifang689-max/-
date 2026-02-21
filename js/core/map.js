@@ -1,3 +1,4 @@
+// js/core/map.js (v617)
 import { state } from './store.js';
 
 const mapLayers = [
@@ -24,13 +25,12 @@ let currentLayerIdx = 0;
 let currentTileLayer = null;
 
 export function initMap() {
-    // 🌟 核心：必須回傳 Promise，讓 main.js 能用 .then() 等待地圖載入完成
     return new Promise((resolve, reject) => {
         try {
             const mapContainer = document.getElementById('map');
             if (mapContainer && mapContainer._leaflet_id) {
                 console.warn("地圖已經存在，已攔截重複建立的指令！");
-                resolve(); // 就算已經存在，也要告知外部程式「準備好了」
+                resolve(); 
                 return; 
             }
 
@@ -39,36 +39,24 @@ export function initMap() {
             currentTileLayer = L.tileLayer(mapLayers[0].url).addTo(state.mapInstance);
             L.control.scale({ metric: true, imperial: false, position: 'bottomright' }).addTo(state.mapInstance);
 
-            // 🌟 極限效能版叢集引擎 (MarkerCluster)
+            // 🌟 極限效能版叢集引擎 (MarkerCluster) - 回歸原生視覺
             state.cluster = L.markerClusterGroup({
                 chunkedLoading: true,        // 效能核心：開啟分塊載入
                 chunkInterval: 200,          
                 chunkDelay: 50,              
-                maxClusterRadius: 40,        // 縮小聚合半徑
+                maxClusterRadius: 40,        
                 spiderfyOnMaxZoom: true,     
-                disableClusteringAtZoom: 16, // 放大到 16 級時強制關閉聚合
-                
-                    // 🌟 極限效能版叢集引擎 (MarkerCluster) - 保留效能，恢復預設視覺
-                    state.cluster = L.markerClusterGroup({
-                        chunkedLoading: true,        // 🌟 效能核心：開啟分塊載入
-                        chunkInterval: 200,          
-                        chunkDelay: 50,              
-                        maxClusterRadius: 40,        // 縮小聚合半徑，讓圖釘更容易分散
-                        spiderfyOnMaxZoom: true,     
-                        disableClusteringAtZoom: 16  // 放大到 16 級時強制關閉聚合
-                        
-                        // (已移除自訂 iconCreateFunction，回歸 Leaflet 原生的經典叢集樣式)
-                    });
-                }
+                disableClusteringAtZoom: 16  
             });
             
-            // 將叢集引擎加入地圖
             state.mapInstance.addLayer(state.cluster);
 
             state.mapInstance.on('click', () => { 
-                // 統一使用 rfApp 命名空間，或是判斷全域函式是否存在
-                if (window.rfApp && window.rfApp.ui && typeof window.rfApp.ui.closeCard === 'function') window.rfApp.ui.closeCard(); 
-                else if (typeof window.closeCard === 'function') window.closeCard(); 
+                if (window.rfApp && window.rfApp.ui && typeof window.rfApp.ui.closeCard === 'function') {
+                    window.rfApp.ui.closeCard(); 
+                } else if (typeof window.closeCard === 'function') {
+                    window.closeCard(); 
+                }
                 
                 if (typeof window.closeSuggest === 'function') window.closeSuggest(); 
                 
@@ -119,9 +107,8 @@ export function initMap() {
                 }).catch(err => console.log("界線載入中...", err));
             }
 
-            // 🌟 核心：完成所有地圖初始化設定後，告訴主程式「我準備好了！」
+            // 成功結束，通知主程式
             resolve();
-            
         } catch (error) {
             console.error("地圖初始化發生錯誤:", error);
             reject(error);
