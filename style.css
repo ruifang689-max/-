@@ -665,7 +665,7 @@ body.dark-mode .warning-banner {
 }
 
 /* =========================================
-   🌟 復刻經典：水滴圖釘 + 名稱標籤
+   🌟 復刻經典：完美圓形圖釘 + 小巧名稱標籤
    ========================================= */
 .custom-marker-wrapper {
     display: flex;
@@ -674,33 +674,32 @@ body.dark-mode .warning-banner {
     justify-content: center;
 }
 
+/* 完美正圓外框，不再歪斜 */
 .custom-marker {
-    width: 32px;
-    height: 32px;
-    border-radius: 50% 50% 50% 0;
-    transform: rotate(-45deg);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    border: 2px solid white;
-    box-shadow: 2px 2px 5px rgba(0,0,0,0.4);
+    width: 28px !important;
+    height: 28px !important;
+    border-radius: 50% !important; /* 絕對正圓 */
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    color: white !important;
+    border: 2px solid white !important;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.4) !important;
+    font-size: 14px !important; /* 適合 Emoji 的大小 */
+    transform: none !important; /* 拔除旋轉，避免變形 */
+    box-sizing: border-box !important;
 }
 
-.custom-marker i {
-    transform: rotate(45deg);
-    font-size: 14px;
-}
-
+/* 標籤變小、變精緻 */
 .marker-label {
-    background: rgba(255, 255, 255, 0.95);
-    padding: 2px 6px;
-    border-radius: 4px;
-    font-size: 12px;
-    font-weight: bold;
-    color: #333;
-    white-space: nowrap;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.3);
-    margin-top: 4px; /* 讓標籤跟圖釘保持一點距離 */
-    border: 1px solid rgba(0,0,0,0.1);
+    background: rgba(255, 255, 255, 0.9) !important;
+    padding: 1px 4px !important; /* 內距縮小 */
+    border-radius: 4px !important;
+    font-size: 10px !important; /* 🌟 字體變小 */
+    font-weight: bold !important;
+    color: #333 !important;
+    white-space: nowrap !important;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.3) !important;
+    margin-top: 3px !important; 
+    border: 1px solid rgba(0,0,0,0.1) !important;
 }
