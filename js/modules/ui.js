@@ -382,7 +382,7 @@ export function initUI() {
                 setTimeout(() => { 
                     state.tempCustomSpot = { lat, lng, addr }; 
                     
-                    // 🌟 1. 修復：使用正確且標準的 Google 地圖搜尋與導航連結
+                    // 🌟 徹底修復：使用 Google Maps 官方標準的搜尋與導航參數網址
                     const mapLink = `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
                     const gmapNav = `https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}`;
                     
@@ -401,16 +401,7 @@ export function initUI() {
                                 <i class="fas fa-copy"></i> 複製
                             </button>
                             
-                            <button onclick="
-                                // 👉 請將下方 calculateRoute 換成您 navigation.js 裡面的實際導航函數名稱！
-                                if(typeof window.calculateRoute === 'function') { 
-                                    window.calculateRoute(${lat}, ${lng}); 
-                                    closeCustomSpotModal(); 
-                                } else { 
-                                    // 如果還沒寫好本地導航函數，就無縫退回 Google Maps 導航
-                                    window.open('${gmapNav}', '_blank'); 
-                                }
-                            " style="flex: 1; padding: 8px 0; border: none; border-radius: 6px; background: #28a745; color: white; font-size: 13px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; transition: 0.2s;" onmousedown="this.style.transform='scale(0.95)'" onmouseup="this.style.transform='scale(1)'" onmouseleave="this.style.transform='scale(1)'">
+                            <button onclick="if(typeof window.startNav === 'function') { window.startNav(${lat}, ${lng}); closeCustomSpotModal(); } else { window.open('${gmapNav}', '_blank'); }" style="flex: 1; padding: 8px 0; border: none; border-radius: 6px; background: #28a745; color: white; font-size: 13px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; transition: 0.2s;" onmousedown="this.style.transform='scale(0.95)'" onmouseup="this.style.transform='scale(1)'" onmouseleave="this.style.transform='scale(1)'">
                                 <i class="fas fa-route"></i> 導航
                             </button>
                             
