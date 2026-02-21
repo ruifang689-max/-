@@ -1,4 +1,4 @@
-// js/main.js (v615)
+// js/main.js (v616)
 // 🌟 1. 建立企業級全域命名空間 (Namespace 工具箱)
 window.rfApp = {
     ui: {},
@@ -12,7 +12,7 @@ window.rfApp = {
 };
 
 import { state } from './core/store.js?v=611'; 
-import { initMap, toggleLayer } from './core/map.js?v=607'; 
+import { initMap, toggleLayer } from './core/map.js?v=616'; 
 import { fetchWeather } from './modules/weather.js?v=607';
 import { initGPS } from './modules/gps.js?v=607';
 import { initAnnouncer } from './modules/announcer.js?v=608'; 
