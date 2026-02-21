@@ -71,6 +71,24 @@ function safeInit(fn, name) {
     }
 }
 
+// 🌟 新增：路由偵探 (Deep Linking)
+function handleDeepLink() {
+    const params = new URLSearchParams(window.location.search);
+    const spotName = params.get('spot'); // 檢查網址有沒有 ?spot=名稱
+    
+    if (spotName) {
+        console.log(`🔗 偵測到深層連結：${spotName}`);
+        // 延遲執行，確保地圖與圖釘都載入好了
+        setTimeout(() => {
+            if (typeof window.rfApp.search.triggerSearch === 'function') {
+                window.rfApp.search.triggerSearch(spotName);
+            } else if (typeof triggerSearch === 'function') {
+                triggerSearch(spotName);
+            }
+        }, 1500); 
+    }
+}
+
 // 🌟 重新編排的最佳化啟動順序
 function bootstrapApp() {
     // 第一階段：初始化與畫面無關的系統與基礎 UI
