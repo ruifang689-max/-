@@ -305,17 +305,24 @@ export function initUI() {
         setTimeout(() => window.startFeatureTour(), 300); 
     };
 
+    // 🌟 指北針按鈕：只要回到預設視角就好
     window.resetNorth = () => { 
         state.mapInstance.flyTo([25.1032, 121.8224], 14); 
+    };
+
+    // 🌟 瑞芳中心按鈕：這裡才是「瑞」字蓋章動畫的觸發點！
+    window.goToStation = () => { 
+        state.mapInstance.flyTo([25.108, 121.805], 16); 
+        closeCard(); 
+        
         const ruiBtn = document.querySelector('.rui-icon');
         if (ruiBtn) {
             ruiBtn.classList.remove('stamped');
-            // 🌟 魔法技巧：強制瀏覽器重繪，讓 CSS 動畫可以無縫重新執行
+            // 魔法技巧：強制重繪
             void ruiBtn.offsetWidth; 
             ruiBtn.classList.add('stamped');
         }
     };
-    window.goToStation = () => { state.mapInstance.flyTo([25.108, 121.805], 16); closeCard(); };
     
     // 🌟 狀態驅動：設定視窗
     window.openSettings = () => { 
