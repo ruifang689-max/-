@@ -69,12 +69,24 @@ body.dark-mode #gps-val-text { text-shadow: -1px -1px 0 #121212, 1px -1px 0 #121
     transition: all var(--trans-fast); 
 }
 
-/* 🌟 蓋章動畫：顏色綁定我們剛剛設定的變數 */
+/* 🌟 蓋章動畫：加入主題色光暈影子 */
 @keyframes stamp-press { 
-    0% { transform: scale(1) rotate(0deg); } 
-    40% { transform: scale(0.8) rotate(-8deg); color: var(--stamp-active); border-color: var(--stamp-active); } 
-    70% { transform: scale(1.1) rotate(3deg); } 
-    100% { transform: scale(1) rotate(0deg); } 
+    0% { transform: scale(1) rotate(0deg); box-shadow: transparent 0 0 0; text-shadow: none; } 
+    40% { 
+        transform: scale(0.8) rotate(-8deg); 
+        color: var(--stamp-active); 
+        border-color: var(--stamp-active); 
+        /* 🌟 用力壓下時產生強烈的影子 */
+        box-shadow: 0 0 12px var(--stamp-active);
+        text-shadow: 0 0 8px var(--stamp-active);
+    } 
+    70% { 
+        transform: scale(1.1) rotate(3deg); 
+        /* 🌟 回彈時影子稍微擴散 */
+        box-shadow: 0 0 6px var(--stamp-active);
+        text-shadow: 0 0 4px var(--stamp-active);
+    } 
+    100% { transform: scale(1) rotate(0deg); box-shadow: transparent 0 0 0; text-shadow: none; } 
 }
 .rui-icon.stamped { animation: stamp-press 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
 
