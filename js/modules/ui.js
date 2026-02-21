@@ -1,25 +1,17 @@
 import { state } from '../core/store.js';
 
 export function initUI() {
-    // 🌟 狀態驅動：進入地圖
-    window.enterMap = () => { 
+    // 🌟 將方法收納到專屬命名空間 rfApp.ui
+    window.rfApp.ui.enterMap = () => { 
         ['intro', 'welcome-screen'].forEach(id => {
             const el = document.getElementById(id);
-            if (el) {
-                el.classList.add('u-fade-out');
-                setTimeout(() => el.classList.add('u-hidden'), 400); 
-            }
+            if (el) { el.classList.add('u-fade-out'); setTimeout(() => el.classList.add('u-hidden'), 400); }
         });
-
         const functionPanel = document.getElementById("side-function-zone");
-        if(functionPanel) {
-            functionPanel.classList.remove("collapsed", "u-hidden");
-            functionPanel.classList.add("u-flex");
-        }
-        
+        if(functionPanel) { functionPanel.classList.remove("collapsed", "u-hidden"); functionPanel.classList.add("u-flex"); }
         const sug = document.getElementById("suggest");
         if(sug) sug.classList.add("u-hidden");
-        if (typeof window.closeCard === 'function') window.closeCard();
+        if (typeof window.rfApp.ui.closeCard === 'function') window.rfApp.ui.closeCard();
 
         setTimeout(() => { 
             const skipTour = localStorage.getItem('rf_skip_tour') === 'true';
@@ -29,67 +21,52 @@ export function initUI() {
         }, 400); 
     };
 
-    window.toggleSidePanel = () => {
+    window.rfApp.ui.toggleSidePanel = () => {
         const targetPanel = document.getElementById("side-function-zone");
         const icon = document.getElementById("side-panel-icon");
         if (targetPanel) {
             targetPanel.classList.toggle("collapsed");
-            if (icon) {
-                icon.className = targetPanel.classList.contains("collapsed") ? "fas fa-angle-double-left" : "fas fa-angle-double-right";
-            }
+            if (icon) { icon.className = targetPanel.classList.contains("collapsed") ? "fas fa-angle-double-left" : "fas fa-angle-double-right"; }
         }
     };
 
-    // 🌟 狀態驅動：下拉選單
-    window.toggleDropdown = (listId) => {
+    window.rfApp.ui.toggleDropdown = (listId) => {
         document.querySelectorAll('.custom-select-options').forEach(list => { 
-            if (list.id !== listId) list.classList.add('u-hidden'); 
-            list.classList.remove('u-flex');
+            if (list.id !== listId) list.classList.add('u-hidden'); list.classList.remove('u-flex');
         });
         const targetList = document.getElementById(listId); 
         if(targetList) {
             if (targetList.classList.contains('u-hidden') || targetList.style.display === 'none' || !targetList.classList.contains('u-flex')) {
-                targetList.classList.remove('u-hidden');
-                targetList.classList.add('u-flex');
+                targetList.classList.remove('u-hidden'); targetList.classList.add('u-flex');
             } else {
-                targetList.classList.remove('u-flex');
-                targetList.classList.add('u-hidden');
+                targetList.classList.remove('u-flex'); targetList.classList.add('u-hidden');
             }
         }
     };
     
     document.addEventListener('click', (e) => {
         if (!e.target.closest('.custom-select-wrapper')) { 
-            document.querySelectorAll('.custom-select-options').forEach(list => {
-                list.classList.remove('u-flex');
-                list.classList.add('u-hidden');
-            });
+            document.querySelectorAll('.custom-select-options').forEach(list => { list.classList.remove('u-flex'); list.classList.add('u-hidden'); });
         }
     });
 
-    // 🌟 狀態驅動：設定視窗
-    window.openSettings = () => { 
-        const m = document.getElementById('settings-modal-overlay');
-        if(m) { m.classList.remove('u-hidden'); m.classList.add('u-flex'); }
-    };
-    window.closeSettings = () => { 
-        const m = document.getElementById('settings-modal-overlay');
-        if(m) { m.classList.remove('u-flex'); m.classList.add('u-hidden'); }
+    window.rfApp.ui.openSettings = () => { const m = document.getElementById('settings-modal-overlay'); if(m) { m.classList.remove('u-hidden'); m.classList.add('u-flex'); } };
+    window.rfApp.ui.closeSettings = () => { const m = document.getElementById('settings-modal-overlay'); if(m) { m.classList.remove('u-flex'); m.classList.add('u-hidden'); } };
+
+    window.rfApp.ui.resetNorth = () => { if(state.mapInstance) state.mapInstance.flyTo([25.1032, 121.8224], 14); };
+    window.rfApp.ui.goToStation = () => { 
+        if(state.mapInstance) state.mapInstance.flyTo([25.108, 121.805], 16); 
+        if(typeof window.rfApp.ui.closeCard === 'function') window.rfApp.ui.closeCard(); 
+        const ruiBtn = document.querySelector('.rui-icon');
+        if (ruiBtn) { ruiBtn.classList.remove('stamped'); void ruiBtn.offsetWidth; ruiBtn.classList.add('stamped'); }
     };
 
-    // 🌟 地圖控制按鈕
-    window.resetNorth = () => { 
-        if(state.mapInstance) state.mapInstance.flyTo([25.1032, 121.8224], 14); 
-    };
-    window.goToStation = () => { 
-        if(state.mapInstance) state.mapInstance.flyTo([25.108, 121.805], 16); 
-        if(typeof window.closeCard === 'function') window.closeCard(); 
-        
-        const ruiBtn = document.querySelector('.rui-icon');
-        if (ruiBtn) {
-            ruiBtn.classList.remove('stamped');
-            void ruiBtn.offsetWidth; // 觸發重繪
-            ruiBtn.classList.add('stamped');
-        }
-    };
+    // 🌟 向下相容橋樑 (Legacy Bridge)：保證 index.html 不用改也能正常運作！
+    window.enterMap = window.rfApp.ui.enterMap;
+    window.toggleSidePanel = window.rfApp.ui.toggleSidePanel;
+    window.toggleDropdown = window.rfApp.ui.toggleDropdown;
+    window.openSettings = window.rfApp.ui.openSettings;
+    window.closeSettings = window.rfApp.ui.closeSettings;
+    window.resetNorth = window.rfApp.ui.resetNorth;
+    window.goToStation = window.rfApp.ui.goToStation;
 }
