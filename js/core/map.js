@@ -1,4 +1,4 @@
-import { state } from '../core/store.js';
+import { state } from './store.js';
 
 const mapLayers = [
     { url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', name: '街道', icon: 'fa-map', dark: false },
@@ -24,67 +24,111 @@ let currentLayerIdx = 0;
 let currentTileLayer = null;
 
 export function initMap() {
-    const mapContainer = document.getElementById('map');
-    if (mapContainer && mapContainer._leaflet_id) {
-        console.warn("地圖已經存在，已攔截重複建立的指令！");
-        return; 
-    }
-
-    state.mapInstance = L.map('map', { zoomControl: false, attributionControl: false }).setView([25.1032, 121.8224], 13);
-    
-    currentTileLayer = L.tileLayer(mapLayers[0].url).addTo(state.mapInstance);
-    L.control.scale({ metric: true, imperial: false, position: 'bottomright' }).addTo(state.mapInstance);
-
-    state.cluster = L.markerClusterGroup(); 
-    state.mapInstance.addLayer(state.cluster);
-
-    state.mapInstance.on('click', () => { 
-        if (typeof window.closeCard === 'function') window.closeCard(); 
-        if (typeof window.closeSuggest === 'function') window.closeSuggest(); 
-        const sug = document.getElementById("suggest");
-        if(sug) sug.style.display = "none";
-    });
-
-    // ==========================================
-    // 🌟 繪製九大區域浮水印
-    // ==========================================
-    ruifangRegions.forEach(r => {
-        L.marker([r.lat, r.lng], {
-            icon: L.divIcon({
-                className: 'region-label', 
-                html: `<div class="region-label-text">${r.name}</div>`, 
-                iconSize: [0, 0] 
-            }),
-            interactive: false 
-        }).addTo(state.mapInstance);
-    });
-
-    // ==========================================
-    // 🌟 穩健修復版：瑞芳區行政界線 (快取機制)
-    // ==========================================
-    const cacheKey = 'ruifang_boundary';
-    const cachedData = localStorage.getItem(cacheKey);
-
-    const drawBoundary = (geojsonData) => {
-        L.geoJSON(geojsonData, {
-            style: { color: 'var(--primary)', weight: 3, dashArray: '8, 12', fillColor: 'var(--primary)', fillOpacity: 0.04 },
-            interactive: false 
-        }).addTo(state.mapInstance);
-    };
-
-    if (cachedData) {
-        drawBoundary(JSON.parse(cachedData));
-    } else {
-        fetch('https://nominatim.openstreetmap.org/search?q=瑞芳區,新北市,台灣&format=json&polygon_geojson=1&limit=1')
-        .then(res => res.json())
-        .then(data => {
-            if (data && data.length > 0 && data[0].geojson) {
-                localStorage.setItem(cacheKey, JSON.stringify(data[0].geojson));
-                drawBoundary(data[0].geojson);
+    // 🌟 核心：必須回傳 Promise，讓 main.js 能用 .then() 等待地圖載入完成
+    return new Promise((resolve, reject) => {
+        try {
+            const mapContainer = document.getElementById('map');
+            if (mapContainer && mapContainer._leaflet_id) {
+                console.warn("地圖已經存在，已攔截重複建立的指令！");
+                resolve(); // 就算已經存在，也要告知外部程式「準備好了」
+                return; 
             }
-        }).catch(err => console.log("界線載入中...", err));
-    }
-} // 👈 就是這個救命的右大括號，這次我幫您確實補上了！
+
+            state.mapInstance = L.map('map', { zoomControl: false, attributionControl: false }).setView([25.1032, 121.8224], 13);
+            
+            currentTileLayer = L.tileLayer(mapLayers[0].url).addTo(state.mapInstance);
+            L.control.scale({ metric: true, imperial: false, position: 'bottomright' }).addTo(state.mapInstance);
+
+            // 🌟 極限效能版叢集引擎 (MarkerCluster)
+            state.cluster = L.markerClusterGroup({
+                chunkedLoading: true,        // 效能核心：開啟分塊載入
+                chunkInterval: 200,          
+                chunkDelay: 50,              
+                maxClusterRadius: 40,        // 縮小聚合半徑
+                spiderfyOnMaxZoom: true,     
+                disableClusteringAtZoom: 16, // 放大到 16 級時強制關閉聚合
+                
+                // 🌟 高質感聚合數字圖示
+                iconCreateFunction: function(cluster) {
+                    const count = cluster.getChildCount();
+                    let size = 'small';
+                    if (count > 20) size = 'large';
+                    else if (count > 10) size = 'medium';
+
+                    return L.divIcon({
+                        html: `<div class="custom-cluster-icon ${size}"><span>${count}</span></div>`,
+                        className: 'cluster-icon-wrapper',
+                        iconSize: L.point(40, 40)
+                    });
+                }
+            });
+            
+            // 將叢集引擎加入地圖
+            state.mapInstance.addLayer(state.cluster);
+
+            state.mapInstance.on('click', () => { 
+                // 統一使用 rfApp 命名空間，或是判斷全域函式是否存在
+                if (window.rfApp && window.rfApp.ui && typeof window.rfApp.ui.closeCard === 'function') window.rfApp.ui.closeCard(); 
+                else if (typeof window.closeCard === 'function') window.closeCard(); 
+                
+                if (typeof window.closeSuggest === 'function') window.closeSuggest(); 
+                
+                const sug = document.getElementById("suggest");
+                if(sug) {
+                    sug.classList.remove('u-block');
+                    sug.classList.add('u-hidden');
+                }
+            });
+
+            // ==========================================
+            // 🌟 繪製九大區域浮水印
+            // ==========================================
+            ruifangRegions.forEach(r => {
+                L.marker([r.lat, r.lng], {
+                    icon: L.divIcon({
+                        className: 'region-label', 
+                        html: `<div class="region-label-text">${r.name}</div>`, 
+                        iconSize: [0, 0] 
+                    }),
+                    interactive: false 
+                }).addTo(state.mapInstance);
+            });
+
+            // ==========================================
+            // 🌟 瑞芳區行政界線 (快取機制)
+            // ==========================================
+            const cacheKey = 'ruifang_boundary';
+            const cachedData = localStorage.getItem(cacheKey);
+
+            const drawBoundary = (geojsonData) => {
+                L.geoJSON(geojsonData, {
+                    style: { color: 'var(--primary)', weight: 3, dashArray: '8, 12', fillColor: 'var(--primary)', fillOpacity: 0.04 },
+                    interactive: false 
+                }).addTo(state.mapInstance);
+            };
+
+            if (cachedData) {
+                drawBoundary(JSON.parse(cachedData));
+            } else {
+                fetch('https://nominatim.openstreetmap.org/search?q=瑞芳區,新北市,台灣&format=json&polygon_geojson=1&limit=1')
+                .then(res => res.json())
+                .then(data => {
+                    if (data && data.length > 0 && data[0].geojson) {
+                        localStorage.setItem(cacheKey, JSON.stringify(data[0].geojson));
+                        drawBoundary(data[0].geojson);
+                    }
+                }).catch(err => console.log("界線載入中...", err));
+            }
+
+            // 🌟 核心：完成所有地圖初始化設定後，告訴主程式「我準備好了！」
+            resolve();
+            
+        } catch (error) {
+            console.error("地圖初始化發生錯誤:", error);
+            reject(error);
+        }
+    });
+}
 
 export function toggleLayer() {
     currentLayerIdx = (currentLayerIdx + 1) % mapLayers.length; 
