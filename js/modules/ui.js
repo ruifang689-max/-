@@ -305,7 +305,16 @@ export function initUI() {
         setTimeout(() => window.startFeatureTour(), 300); 
     };
 
-    window.resetNorth = () => { state.mapInstance.flyTo([25.1032, 121.8224], 14); };
+    window.resetNorth = () => { 
+        state.mapInstance.flyTo([25.1032, 121.8224], 14); 
+        // 🌟 觸發「瑞」字蓋章動畫
+        const ruiBtn = document.querySelector('.rui-icon');
+        if (ruiBtn) {
+            ruiBtn.classList.remove('stamped');
+            void ruiBtn.offsetWidth; // 強制重繪 (Magic trick)
+            ruiBtn.classList.add('stamped');
+        }
+    };
     window.goToStation = () => { state.mapInstance.flyTo([25.108, 121.805], 16); closeCard(); };
     
     // 🌟 狀態驅動：設定視窗
@@ -341,7 +350,13 @@ export function initUI() {
             const tempPopup = L.popup({ closeButton: false, autoClose: false, offset: [0, -10] }).setLatLng(e.latlng).setContent("<div style='padding:8px; font-weight:bold; color:var(--primary); font-size:14px;'><i class='fas fa-spinner fa-spin'></i> 獲取地址中...</div>").openOn(state.mapInstance);
             const apiUrl = `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=zh-tw`;
             fetch(apiUrl).then(res => res.json()).then(data => { 
-                let addr = "瑞芳秘境"; if(data) addr = (data.principalSubdivision || "") + (data.city || "") + (data.locality || ""); 
+                let addr = "瑞芳秘境"; 
+                if(data) {
+                    // 🌟 利用 Set 陣列去重，消除「新北市新北市」的問題
+                    const parts = [data.principalSubdivision, data.city, data.locality].filter(Boolean);
+                    const uniqueParts = [...new Set(parts)];
+                    addr = uniqueParts.join('') || "瑞芳秘境"; 
+                }
                 state.mapInstance.closePopup(tempPopup); 
                 setTimeout(() => { 
                     state.tempCustomSpot = { lat, lng, addr }; 
