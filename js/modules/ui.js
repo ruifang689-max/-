@@ -171,6 +171,9 @@ export function initUI() {
         }
     };
 
+    // =========================================
+    // 🌟 狀態驅動：功能指引 (Feature Tour)
+    // =========================================
     let currentTourStep = 0;
     const tourSteps = [
         { target: '#search', text: '🔍 <b style="color:var(--primary); font-size:16px;">搜尋景點</b><br>在這裡輸入關鍵字，可以快速尋找景點與秘境！', pos: 'bottom' },
@@ -179,10 +182,18 @@ export function initUI() {
         { target: 'center', text: '🗺️ <b style="color:var(--primary); font-size:16px;">探索地圖</b><br>💡 <b>隱藏技巧</b>：長按地圖任一處，還能新增專屬的自訂景點！', pos: 'center' }
     ];
 
-    window.startFeatureTour = () => { document.getElementById('tour-overlay').classList.remove('u-hidden'); document.getElementById('tour-overlay').classList.add('u-block'); currentTourStep = 0; window.showTourStep(); };
+    window.startFeatureTour = () => { 
+        const overlay = document.getElementById('tour-overlay');
+        if(overlay) { overlay.classList.remove('u-hidden'); overlay.classList.add('u-block'); }
+        currentTourStep = 0; window.showTourStep(); 
+    };
+
     window.showTourStep = () => {
         if(currentTourStep >= tourSteps.length) { window.endTour(); return; }
-        const step = tourSteps[currentTourStep]; const ring = document.getElementById('tour-focus-ring'); const tooltip = document.getElementById('tour-tooltip');
+        const step = tourSteps[currentTourStep]; 
+        const ring = document.getElementById('tour-focus-ring'); 
+        const tooltip = document.getElementById('tour-tooltip');
+        
         document.getElementById('tour-text').innerHTML = step.text;
         document.getElementById('tour-next-btn').innerText = (currentTourStep === tourSteps.length - 1) ? '開始探索！' : '下一步';
 
@@ -191,7 +202,10 @@ export function initUI() {
             if(targetEl) {
                 const rect = targetEl.getBoundingClientRect(); const pad = 6;
                 ring.classList.remove('u-hidden'); ring.classList.add('u-block'); 
-                ring.style.top = (rect.top - pad) + 'px'; ring.style.left = (rect.left - pad) + 'px'; ring.style.width = (rect.width + pad*2) + 'px'; ring.style.height = (rect.height + pad*2) + 'px'; ring.style.borderRadius = window.getComputedStyle(targetEl).borderRadius; ring.style.border = '3px solid var(--primary)';
+                ring.style.top = (rect.top - pad) + 'px'; ring.style.left = (rect.left - pad) + 'px'; 
+                ring.style.width = (rect.width + pad*2) + 'px'; ring.style.height = (rect.height + pad*2) + 'px'; 
+                ring.style.borderRadius = window.getComputedStyle(targetEl).borderRadius; ring.style.border = '3px solid var(--primary)';
+                
                 tooltip.style.left = '50%'; tooltip.style.transform = 'translateX(-50%)';
                 if(step.pos === 'bottom') { tooltip.style.top = (rect.bottom + pad + 15) + 'px'; tooltip.style.bottom = 'auto'; } 
                 else if(step.pos === 'top') { tooltip.style.bottom = (window.innerHeight - rect.top + pad + 15) + 'px'; tooltip.style.top = 'auto'; }
@@ -202,44 +216,93 @@ export function initUI() {
             tooltip.style.top = '50%'; tooltip.style.left = '50%'; tooltip.style.transform = 'translate(-50%, -50%)'; tooltip.style.bottom = 'auto';
         }
     };
+
     window.nextTourStep = () => { currentTourStep++; window.showTourStep(); };
+
     window.endTour = () => {
-        document.getElementById('tour-overlay').classList.add('u-hidden'); document.getElementById('tour-focus-ring').classList.add('u-hidden');
+        const overlay = document.getElementById('tour-overlay');
+        const ring = document.getElementById('tour-focus-ring');
+        
+        // 🌟 徹底清除顯示狀態，再掛上隱藏
+        if(overlay) { overlay.classList.remove('u-block'); overlay.classList.add('u-hidden'); }
+        if(ring) { ring.classList.remove('u-block'); ring.classList.add('u-hidden'); }
+        
         localStorage.setItem('rf_skip_tour', 'true');
-        if(document.getElementById('toggle-skip-tour')) document.getElementById('toggle-skip-tour').checked = true;
+        const toggleTour = document.getElementById('toggle-skip-tour');
+        if(toggleTour) toggleTour.checked = true;
+        
         const skipTutorial = localStorage.getItem('rf_skip_tutorial') === 'true';
-        if (!skipTutorial) window.startTutorialOverlay();
+        if (!skipTutorial) {
+            // 🌟 延遲 300 毫秒再開啟黑底說明，避免畫面重疊衝突
+            setTimeout(() => window.startTutorialOverlay(), 300);
+        }
     };
 
+    // =========================================
+    // 🌟 狀態驅動：教學說明 (Tutorial Overlay)
+    // =========================================
     window.startTutorialOverlay = () => {
         const tutorial = document.getElementById('tutorial-overlay');
         if(tutorial) {
-            tutorial.classList.remove('u-hidden');
+            tutorial.classList.remove('u-hidden', 'u-fade-out');
             tutorial.classList.add('u-flex'); 
-            setTimeout(() => { tutorial.classList.remove('u-fade-out'); tutorial.classList.add('u-fade-in'); }, 50); 
-            document.getElementById('tut-step-1').classList.remove('u-hidden'); document.getElementById('tut-step-1').classList.add('u-block'); 
-            document.getElementById('tut-step-2').classList.add('u-hidden'); document.getElementById('tut-step-2').classList.remove('u-block'); 
+            setTimeout(() => { tutorial.classList.add('u-fade-in'); }, 50); 
+            
+            const step1 = document.getElementById('tut-step-1');
+            const step2 = document.getElementById('tut-step-2');
+            if (step1) { step1.classList.remove('u-hidden'); step1.classList.add('u-block'); }
+            if (step2) { step2.classList.remove('u-block'); step2.classList.add('u-hidden'); }
         }
     };
-    window.nextTutorial = () => { document.getElementById('tut-step-1').classList.add('u-hidden'); document.getElementById('tut-step-2').classList.remove('u-hidden'); document.getElementById('tut-step-2').classList.add('u-block'); };
-    window.prevTutorial = () => { document.getElementById('tut-step-2').classList.add('u-hidden'); document.getElementById('tut-step-1').classList.remove('u-hidden'); document.getElementById('tut-step-1').classList.add('u-block'); };
+
+    window.nextTutorial = () => { 
+        const step1 = document.getElementById('tut-step-1');
+        const step2 = document.getElementById('tut-step-2');
+        if(step1) { step1.classList.remove('u-block'); step1.classList.add('u-hidden'); }
+        if(step2) { step2.classList.remove('u-hidden'); step2.classList.add('u-block'); }
+    };
+
+    window.prevTutorial = () => { 
+        const step1 = document.getElementById('tut-step-1');
+        const step2 = document.getElementById('tut-step-2');
+        if(step2) { step2.classList.remove('u-block'); step2.classList.add('u-hidden'); }
+        if(step1) { step1.classList.remove('u-hidden'); step1.classList.add('u-block'); }
+    };
+
     window.finishTutorial = () => { 
         const tut = document.getElementById('tutorial-overlay');
-        if(tut) tut.classList.add('u-fade-out'); 
-        setTimeout(() => { 
-            if(tut) tut.classList.add('u-hidden'); 
-            localStorage.setItem('rf_skip_tutorial', 'true');
-            if(document.getElementById('toggle-skip-tutorial')) document.getElementById('toggle-skip-tutorial').checked = true;
-            if (state.mapInstance) state.mapInstance.invalidateSize(); 
-        }, 400); 
+        if(tut) {
+            tut.classList.remove('u-fade-in');
+            tut.classList.add('u-fade-out'); 
+            setTimeout(() => { 
+                // 🌟 徹底清除 flex 狀態
+                tut.classList.remove('u-flex', 'u-fade-out'); 
+                tut.classList.add('u-hidden'); 
+                
+                localStorage.setItem('rf_skip_tutorial', 'true');
+                const toggleTut = document.getElementById('toggle-skip-tutorial');
+                if(toggleTut) toggleTut.checked = true;
+                
+                if (state.mapInstance) state.mapInstance.invalidateSize(); 
+            }, 400); 
+        }
     };
 
     window.reopenTutorial = () => { 
         window.closeSettings(); 
-        localStorage.setItem('rf_skip_tour', 'false'); localStorage.setItem('rf_skip_tutorial', 'false');
-        if(document.getElementById('toggle-skip-tour')) document.getElementById('toggle-skip-tour').checked = false;
-        if(document.getElementById('toggle-skip-tutorial')) document.getElementById('toggle-skip-tutorial').checked = false;
-        window.startFeatureTour(); 
+        localStorage.setItem('rf_skip_tour', 'false'); 
+        localStorage.setItem('rf_skip_tutorial', 'false');
+        
+        const toggleTour = document.getElementById('toggle-skip-tour');
+        const toggleTut = document.getElementById('toggle-skip-tutorial');
+        if(toggleTour) toggleTour.checked = false;
+        if(toggleTut) toggleTut.checked = false;
+        
+        // 確保黑底說明確實關閉後，再啟動導覽
+        const tut = document.getElementById('tutorial-overlay');
+        if(tut) { tut.classList.remove('u-flex', 'u-block'); tut.classList.add('u-hidden'); }
+        
+        setTimeout(() => window.startFeatureTour(), 300); 
     };
 
     window.resetNorth = () => { state.mapInstance.flyTo([25.1032, 121.8224], 14); };
