@@ -1,15 +1,19 @@
 // js/main.js (v410)
 import { initFirebase } from './modules/firebase-sync.js';// 我們剛剛新增的雲端模組
 import { state } from './core/store.js';
-import { initMap, toggleLayer } from './core/map.js';
+import { initMap, toggleLayer } from './core/map.js?v=593';
 import { fetchWeather } from './modules/weather.js';
-import { initGPS } from './modules/gps.js';
-import { initAnnouncer } from './modules/announcer.js';
+import { initGPS } from './modules/gps.js?v=593';
+import { initAnnouncer } from './modules/announcer.js?v=593';
 import { initCardGestures, closeCard } from './modules/cards.js';
 import { renderAllMarkers } from './modules/markers.js';
-import { initSearch } from './modules/search.js';
+import { initSearch } from './modules/search.js?v=593';
 import { initNavigation } from './modules/navigation.js';
-import { initUI } from './modules/ui.js';
+import { initUI } from './modules/ui.js?v=593';
+import { initStore } from './core/store.js?v=593';
+import { initCards } from './modules/cards.js?v=593';
+import { initWeather } from './modules/weather.js?v=593';
+import { initMarkers } from './modules/markers.js?v=593';
 
 window.toggleLayer = toggleLayer;
 window.closeCard = closeCard;
