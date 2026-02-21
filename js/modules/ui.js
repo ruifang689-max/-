@@ -10,53 +10,6 @@ import { showCard, closeCard } from './cards.js';
 import { triggerSearch } from './search.js';
 
 // =========================================
-// 🌟 地圖功能列：手機滑動 / 電腦點擊 雙軌制 (最高權限版)
-// =========================================
-export function initPanelGestures() {
-    const panel = document.getElementById("side-function-zone"); 
-    if (!panel) return;
-
-    let startX = 0, startY = 0;
-
-    // 🌟 綁定在 window 上，並使用 capture: true 強制第一個攔截手勢
-    window.addEventListener('touchstart', (e) => {
-        if (window.innerWidth > 900) return; // 電腦版不啟用滑動
-        startX = e.touches[0].clientX;
-        startY = e.touches[0].clientY;
-    }, { passive: true, capture: true });
-
-    window.addEventListener('touchend', (e) => {
-        if (window.innerWidth > 900) return; // 電腦版不啟用滑動
-        
-        const diffX = e.changedTouches[0].clientX - startX;
-        const diffY = e.changedTouches[0].clientY - startY;
-        
-        // 判斷目前是橫式還是直式
-        const isLandscape = window.innerWidth > window.innerHeight;
-
-        if (isLandscape) {
-            // 【橫式：置底】判斷上下滑動 (忽略左右滑動)
-            if (Math.abs(diffY) > Math.abs(diffX) && Math.abs(diffY) > 40) {
-                if (diffY > 0) {
-                    panel.classList.add("collapsed"); // 往下滑 -> 收起
-                } else if (diffY < 0 && startY > window.innerHeight - 120) {
-                    panel.classList.remove("collapsed"); // 往上滑 -> 展開 (底部 120px 內皆可觸發)
-                }
-            }
-        } else {
-            // 【直式：靠右】判斷左右滑動 (忽略上下滑動)
-            if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > 40) {
-                if (diffX > 0) {
-                    panel.classList.add("collapsed"); // 往右滑 -> 收起
-                } else if (diffX < 0 && startX > window.innerWidth - 120) {
-                    panel.classList.remove("collapsed"); // 往左滑 -> 展開 (右側 120px 內皆可觸發)
-                }
-            }
-        }
-    }, { passive: true, capture: true });
-}
-
-// =========================================
 // 🌟 進入地圖：解鎖動畫與強制顯示功能列
 // =========================================
 export function enterMap() {
