@@ -579,29 +579,27 @@ body.dark-mode .warning-banner {
 }
 
 /* =========================================
-   🌟 終極漂浮功能列 (完整版)
+   🌟 終極穩定版：功能列 (圖層修復 & 全裝置純點擊)
    ========================================= */
 
-/* 1. 基礎定位：絕對固定在右側 65% 高度，完全透明，絕不消失！ */
+/* 1. 基礎定位：降低 z-index 至 1000，確保在卡片(2000+)與教學(9000+)之下 */
 #side-function-zone {
     position: fixed !important;
     right: 15px !important;
-    top: 52% !important;
+    top: 65% !important;
     transform: translateY(-50%) !important;
-    z-index: 99999 !important; /* 🌟 最高層級，保證不被地圖遮擋 */
-    display: flex !important;
+    z-index: 1000 !important; /* 🌟 降級！墊在各種介面之下 */
+    display: none !important; /* 🌟 預設隱藏，避免開場幕穿幫 */
     flex-direction: column !important;
     align-items: flex-end !important;
     background: transparent !important;
-    pointer-events: none !important; /* 透明區域穿透，不擋地圖 */
+    pointer-events: none !important;
 }
 
-/* 讓按鈕恢復點擊與互動能力 */
 .zone-buttons, #zone-collapse-btn {
     pointer-events: auto !important;
 }
 
-/* 2. 按鈕群組直列排版 */
 .zone-buttons {
     display: flex !important;
     flex-direction: column !important;
@@ -616,9 +614,9 @@ body.dark-mode .warning-banner {
     margin: 0 !important;
 }
 
-/* 3. 電腦版專屬：雙箭頭點擊收展按鈕 */
+/* 雙箭頭點擊收展按鈕 (現在手機與電腦皆顯示) */
 #zone-collapse-btn {
-    display: flex !important;
+    display: flex !important; /* 拔除隱藏，全裝置皆可見 */
     align-items: center;
     justify-content: center;
     width: 40px;
@@ -631,25 +629,14 @@ body.dark-mode .warning-banner {
     color: var(--text-main);
 }
 
-/* 4. 直式收合狀態：按鈕群往右推隱藏 */
+/* 直式收合：按鈕群往右推 */
 #side-function-zone.collapsed .zone-buttons {
     transform: translateX(150%) !important;
     opacity: 0 !important;
     pointer-events: none !important;
 }
 
-/* =========================================
-   🌟 手機版專屬變形
-   ========================================= */
-
-/* 5. 所有手機版 (含直/橫)：徹底隱藏雙箭頭，強迫使用滑動 */
-@media (max-width: 900px), (max-height: 600px) {
-    #zone-collapse-btn {
-        display: none !important; 
-    }
-}
-
-/* 6. 手機橫式專屬排版：置底、橫列、置中 */
+/* 橫式專屬排版 (依然保留橫躺，但改為純點擊收合) */
 @media (orientation: landscape) and (max-height: 600px) {
     #side-function-zone {
         top: auto !important;
@@ -672,122 +659,48 @@ body.dark-mode .warning-banner {
         padding: 0 15px !important;
     }
     
-    /* 橫式收合狀態：按鈕群往下推隱藏 */
     #side-function-zone.collapsed .zone-buttons {
         transform: translateY(150%) translateX(0) !important;
     }
 }
 
 /* =========================================
-   🌟 終極修正：擴大手機判定與隱形滑動感應區
+   🌟 復刻經典：水滴圖釘 + 名稱標籤
    ========================================= */
-
-/* 1. 確保所有的手機（包含超寬橫式螢幕）都隱藏雙箭頭按鈕 */
-@media (max-width: 900px), (max-height: 600px) {
-    #zone-collapse-btn {
-        display: none !important; 
-    }
+.custom-marker-wrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
 }
 
-/* 2. 建立隱形的「邊緣滑動感應區」 (預設直式：靠右) */
-#swipe-edge-overlay {
-    position: fixed;
-    right: 0;
-    top: 0;
-    width: 25px; /* 右側 25px 感應區，不影響地圖點擊 */
-    height: 100vh;
-    z-index: 99990; /* 浮在地圖上，但在功能按鈕之下 */
+.custom-marker {
+    width: 32px;
+    height: 32px;
+    border-radius: 50% 50% 50% 0;
+    transform: rotate(-45deg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    border: 2px solid white;
+    box-shadow: 2px 2px 5px rgba(0,0,0,0.4);
 }
 
-/* 3. 邊緣感應區 (橫式：靠底) */
-@media (orientation: landscape) and (max-height: 600px) {
-    #swipe-edge-overlay {
-        right: 0;
-        top: auto;
-        bottom: 0;
-        width: 100vw;
-        height: 25px; /* 底部 25px 感應區 */
-    }
-}
-
-/* 確保功能列的層級永遠最高，不會被感應區遮擋點擊 */
-#side-function-zone {
-    z-index: 100000 !important;
-}
-
-/* =========================================
-   🌟 保證功能列正常顯現的防呆樣式
-   ========================================= */
-#side-panel {
-    display: block; 
-    transition: transform 0.3s ease-out !important;
-}
-
-@media (max-width: 768px), (max-height: 500px) {
-    #side-panel {
-        display: flex !important; /* 強制橫向排列 */
-        transform: translateY(0) !important; /* 確保停留在畫面上 */
-        opacity: 1 !important;
-        visibility: visible !important;
-    }
-    
-    /* 只有被加上 collapsed 才會往下收 */
-    #side-panel.collapsed {
-        transform: translateY(110%) !important;
-    }
-}
-
-/* =========================================
-   🌟 終極防護：確保圖釘原貌與功能列絕對顯現
-   ========================================= */
-
-/* 1. 恢復您熟悉的經典圖釘外觀 (帶陰影與圓角) */
-.custom-marker div {
-    width: 32px !important;
-    height: 32px !important;
-    border-radius: 50% 50% 50% 0 !important; /* 經典水滴狀 */
-    transform: rotate(-45deg) !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    color: white !important;
-    border: 2px solid white !important;
-    box-shadow: 2px 2px 5px rgba(0,0,0,0.4) !important;
-}
-
-/* 將圖標轉正 */
 .custom-marker i {
-    transform: rotate(45deg) !important;
-    font-size: 14px !important;
+    transform: rotate(45deg);
+    font-size: 14px;
 }
 
-/* 2. 手機版功能列強制置底、橫列且絕對可見 */
-@media (max-width: 768px), (max-height: 500px) {
-    #side-panel {
-        display: flex !important;
-        position: fixed !important;
-        bottom: 0 !important;
-        left: 0 !important;
-        width: 100vw !important;
-        height: auto !important;
-        z-index: 9999 !important; /* 確保浮在最上層，不被地圖蓋住 */
-        background-color: var(--bg-color, #ffffff) !important;
-        
-        /* 橫向滑動設定 */
-        flex-direction: row !important;
-        overflow-x: auto !important;
-        overflow-y: hidden !important;
-        padding: 15px !important;
-        
-        /* 動畫與可見度 */
-        opacity: 1 !important;
-        visibility: visible !important;
-        transform: translateY(0) !important;
-        transition: transform 0.3s cubic-bezier(0.32, 0.72, 0, 1) !important;
-    }
-    
-    /* 當觸發收合時，往正下方隱藏 */
-    #side-panel.collapsed {
-        transform: translateY(110%) !important;
-    }
+.marker-label {
+    background: rgba(255, 255, 255, 0.95);
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: bold;
+    color: #333;
+    white-space: nowrap;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.3);
+    margin-top: 4px; /* 讓標籤跟圖釘保持一點距離 */
+    border: 1px solid rgba(0,0,0,0.1);
 }
