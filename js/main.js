@@ -1,4 +1,4 @@
-// js/main.js (v618)
+// js/main.js (v620)
 // 🌟 1. 建立企業級全域命名空間 (Namespace 工具箱)
 window.rfApp = {
     ui: {},
@@ -8,36 +8,34 @@ window.rfApp = {
     tour: {},
     map: {},
     search: {},
-    custom: {}
+    custom: {},
+    pwa: {}
 };
 
-import { state } from './core/store.js?v=611'; 
-import { initMap, toggleLayer } from './core/map.js?v=616'; 
-import { fetchWeather } from './modules/weather.js?v=607';
-import { initGPS } from './modules/gps.js?v=607';
-import { initAnnouncer } from './modules/announcer.js?v=608'; 
-import { initCardGestures, closeCard } from './modules/cards.js?v=607';
-import { renderAllMarkers } from './modules/markers.js?v=607';
-import { initSearch } from './modules/search.js?v=607';
-import { initNavigation } from './modules/navigation.js?v=607';
-import { initUI } from './modules/ui.js?v=615'; // 🌟 更新
-import { initFirebase } from './modules/firebase-sync.js?v=607';
-import { initTheme } from './modules/theme.js?v=615'; // 🌟 更新
-import { initPWA } from './modules/pwa.js?v=607';
-import { initTour } from './modules/tour.js?v=607';
-import { initFavorites } from './modules/favorites.js?v=607';
-import { initCustomSpots } from './modules/customSpots.js?v=609'; 
+import { state } from './core/store.js?v=620'; 
+import { initMap, toggleLayer } from './core/map.js?v=620'; 
+import { fetchWeather } from './modules/weather.js?v=620';
+import { initGPS } from './modules/gps.js?v=620';
+import { initAnnouncer } from './modules/announcer.js?v=620'; 
+import { initCardGestures, closeCard } from './modules/cards.js?v=620';
+import { renderAllMarkers } from './modules/markers.js?v=620';
+import { initSearch } from './modules/search.js?v=620';
+import { initNavigation } from './modules/navigation.js?v=620';
+import { initUI } from './modules/ui.js?v=620'; 
+import { initFirebase } from './modules/firebase-sync.js?v=620';
+import { initTheme } from './modules/theme.js?v=620'; 
+import { initPWA } from './modules/pwa.js?v=620';
+import { initTour } from './modules/tour.js?v=620';
+import { initFavorites } from './modules/favorites.js?v=620';
+import { initCustomSpots } from './modules/customSpots.js?v=620'; 
 
-// 將方法收納進工具箱，並建立向下相容橋樑
+// 將核心方法收納進工具箱，並建立向下相容橋樑
 window.rfApp.map.toggleLayer = toggleLayer;
 window.rfApp.ui.closeCard = closeCard;
-
 window.toggleLayer = window.rfApp.map.toggleLayer;
 window.closeCard = window.rfApp.ui.closeCard;
 
-// ... (下方的 removeSplashScreen 與 bootstrapApp 維持原樣即可) ...
-
-// 保留您原本的開場動畫移除邏輯
+// 🌟 開場動畫移除邏輯
 function removeSplashScreen() {
     const splash = document.getElementById('splash-screen');
     const welcome = document.getElementById('welcome-screen');
@@ -56,7 +54,10 @@ function removeSplashScreen() {
         setTimeout(() => { 
             if (splash) { 
                 splash.style.opacity = '0'; 
-                setTimeout(() => { splash.style.display = 'none'; if (state.mapInstance) state.mapInstance.invalidateSize(); }, 500); 
+                setTimeout(() => { 
+                    splash.style.display = 'none'; 
+                    if (state.mapInstance) state.mapInstance.invalidateSize(); 
+                }, 500); 
             } 
         }, 2000);
     }
@@ -71,19 +72,17 @@ function safeInit(fn, name) {
     }
 }
 
-// 🌟 新增：路由偵探 (Deep Linking)
+// 🌟 路由偵探 (Deep Linking)：處理 ?spot=名稱 邏輯
 function handleDeepLink() {
     const params = new URLSearchParams(window.location.search);
-    const spotName = params.get('spot'); // 檢查網址有沒有 ?spot=名稱
+    const spotName = params.get('spot'); 
     
     if (spotName) {
         console.log(`🔗 偵測到深層連結：${spotName}`);
-        // 延遲執行，確保地圖與圖釘都載入好了
+        // 延遲執行，確保地圖與圖釘都渲染完成，且動畫已結束
         setTimeout(() => {
-            if (typeof window.rfApp.search.triggerSearch === 'function') {
+            if (window.rfApp.search && typeof window.rfApp.search.triggerSearch === 'function') {
                 window.rfApp.search.triggerSearch(spotName);
-            } else if (typeof triggerSearch === 'function') {
-                triggerSearch(spotName);
             }
         }, 1500); 
     }
@@ -91,7 +90,7 @@ function handleDeepLink() {
 
 // 🌟 重新編排的最佳化啟動順序
 function bootstrapApp() {
-    // 第一階段：初始化與畫面無關的系統與基礎 UI
+    // 第一階段：基礎系統
     safeInit(initTheme, '主題與語系');
     safeInit(initPWA, 'PWA 系統');
     safeInit(initTour, '導覽教學');
@@ -99,24 +98,27 @@ function bootstrapApp() {
     safeInit(initUI, '基礎 UI 介面');
     safeInit(initFirebase, 'Firebase 雲端同步');
 
-    // 第二階段：初始化地圖引擎 (這最重要)
-    safeInit(initMap, '地圖引擎');
-
-    // 第三階段：初始化依賴地圖的附屬功能
-    safeInit(initGPS, 'GPS定位');
-    safeInit(initAnnouncer, '報幕系統');
-    safeInit(initCardGestures, '卡片手勢');
-    safeInit(renderAllMarkers, '圖釘渲染');
-    safeInit(initSearch, '搜尋系統');
-    safeInit(initNavigation, '導航系統');
-    safeInit(initCustomSpots, '自訂秘境'); // 確保地圖建立後再綁定長按事件
+    // 第二階段：地圖載入 (非同步)
+    initMap().then(() => {
+        // 第三階段：地圖相關功能
+        safeInit(initGPS, 'GPS定位');
+        safeInit(initAnnouncer, '報幕系統');
+        safeInit(initCardGestures, '卡片手勢');
+        safeInit(renderAllMarkers, '圖釘渲染');
+        safeInit(initSearch, '搜尋系統');
+        safeInit(initNavigation, '導航系統');
+        safeInit(initCustomSpots, '自訂秘境');
+        
+        // 🌟 最後：執行路由偵探，檢查是否有深層連結目的地
+        safeInit(handleDeepLink, 'URL路由解析');
+    }).catch(e => console.error("地圖啟動失敗", e));
     
     // 獨立執行
     fetchWeather();
     removeSplashScreen();
 }
 
-// 🌟 解決重複執行的 Bug：只使用單一入口啟動
+// 單一入口啟動
 if (document.readyState === 'complete' || document.readyState === 'interactive') {
     bootstrapApp();
 } else {
