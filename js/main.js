@@ -10,7 +10,6 @@ import { renderAllMarkers } from './modules/markers.js';
 import { initSearch } from './modules/search.js?v=593';
 import { initNavigation } from './modules/navigation.js';
 import { initUI } from './modules/ui.js?v=593';
-import { initStore } from './core/store.js?v=593';
 import { initWeather } from './modules/weather.js?v=593';
 
 window.toggleLayer = toggleLayer;
