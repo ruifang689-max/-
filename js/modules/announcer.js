@@ -28,25 +28,24 @@ export function initAnnouncer() {
             const primaryUrl = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1&accept-language=zh-TW&email=ruifang689@gmail.com`;
             const fallbackUrl = `https://api.bigdatacloud.net/data/reverse-geocode-client?latitude=${lat}&longitude=${lng}&localityLanguage=zh-tw`;
 
-            // 1. 先嘗試主 API (保留您的 OSM)
+            // 🌟 1. 主 API (OSM) 升級：加入狀態解析、去重與智慧比對
             fetch(primaryUrl)
             .then(res => { if(!res.ok) throw new Error(); return res.json(); })
             .then(data => { 
                 let areaStr = "探索瑞芳中...";
                 if (data && data.address) { 
                     const a = data.address; 
-                    // 🌟 確保抓到 OSM 的各種層級 (OSM 常把新北市放在 state)
+                    // 確保抓到 OSM 的各種層級 (OSM 常把新北市放在 state)
                     const city = a.city || a.county || a.state || "";
                     const dist = a.town || a.suburb || a.district || "";
                     const village = a.village || a.hamlet || a.neighbourhood || "";
                     
-                    // 🌟 陣列去重：消除「新北市新北市」
+                    // 陣列去重：消除「新北市新北市」
                     const parts = [city, dist].filter(Boolean);
                     const uniqueParts = [...new Set(parts)];
                     let baseStr = uniqueParts.join('');
-                    if (!baseStr) baseStr = a.road || "";
                     
-                    // 🌟 智慧匹配九大區域
+                    // 智慧匹配九大區域
                     let matchedArea = "";
                     if (village && typeof ruifangMap !== 'undefined') {
                         if (ruifangMap[village]) {
@@ -60,12 +59,13 @@ export function initAnnouncer() {
                     }
 
                     if (dist === "瑞芳區" && matchedArea) areaStr = `${baseStr}${village} (${matchedArea})`;
-                    else areaStr = `${baseStr}${village}`;
+                    else if (baseStr || village) areaStr = `${baseStr}${village}`;
+                    else if (a.road) areaStr = a.road;
                 } 
                 document.getElementById("addr-text").innerText = areaStr; 
             })
             .catch(() => { 
-                // 🌟 2. 主 API 被封鎖時，無縫啟動備用 API (加入去重與九大區域)
+                // 🌟 2. 備用 API (BDC)
                 fetch(fallbackUrl)
                 .then(res => res.json())
                 .then(data => {
