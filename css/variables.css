@@ -62,8 +62,35 @@
 }
 body.dark-mode { --bg-color: #121212; --text-main: #e0e0e0; --text-sub: #aaaaaa; --border-color: #333; --divider-color: #222; --glass: rgba(30, 30, 30, 0.98); --card-shadow: 0 8px 30px rgba(0,0,0,0.6); color: var(--text-main); --stamp-active: var(--accent); }
 
-/* 🌟 基礎歸零與字體繼承 */
-html, body { margin: 0; padding: 0; width: 100vw; height: 100dvh; overflow: hidden; background-color: var(--bg-color); color: var(--text-main); transition: background-color 0.3s, color 0.3s; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; box-sizing: border-box; }
+/* =========================================
+   🌟 基礎歸零與字體繼承 (加強防跑版)
+   ========================================= */
+html, body { 
+    margin: 0; 
+    padding: 0; 
+    width: 100vw; 
+    height: 100dvh; 
+    overflow: hidden; 
+    
+    /* 🌟 防跑版神器 1：將底層徹底釘死，防止彈出鍵盤或滑動時整個網頁位移 */
+    position: fixed; 
+    
+    /* 🌟 防跑版神器 2：禁用 iOS/Android 預設的下拉更新與彈性滾動 */
+    overscroll-behavior: none; 
+    
+    background-color: var(--bg-color); 
+    color: var(--text-main); 
+    transition: background-color 0.3s, color 0.3s; 
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif; 
+    box-sizing: border-box; 
+}
+
+/* 🌟 防滾動穿透 (Scroll Chaining)：
+   讓所有內部「可滑動」的區塊，滑到底時都不會把力量傳遞給底層地圖 */
+:is(#card, .modal-box, #welcome-screen, .custom-select-options, #suggest, #fav-list-panel, .route-list-container, .tutorial-box) {
+    overscroll-behavior: contain;
+}
+
 *, *:before, *:after { box-sizing: inherit; }
 
 /* 確保所有輸入框、按鈕、選單，及地圖容器皆繼承字體 */
