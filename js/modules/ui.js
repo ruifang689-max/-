@@ -54,8 +54,7 @@ export function initUI() {
         if (!e.target.closest('.custom-select-wrapper')) { document.querySelectorAll('.custom-select-options').forEach(list => list.classList.remove('open')); }
     });
 
-    // 🌟 進入地圖：完美融合動畫解除、強制展開功能列與新手教學
-    // 🌟 進入地圖：暴力解鎖功能列
+    // 🌟 進入地圖：展開功能列與新手教學
     window.enterMap = () => { 
         const intro = document.getElementById('intro');
         if(intro) { intro.style.opacity = '0'; setTimeout(() => { intro.style.display = 'none'; }, 400); }
@@ -63,6 +62,13 @@ export function initUI() {
         const welcome = document.getElementById('welcome-screen');
         if(welcome) { welcome.style.opacity = '0'; setTimeout(() => { welcome.style.display = 'none'; }, 400); }
 
+        // 🌟 進入地圖後，才將功能列顯示出來
+        const panel = document.getElementById("side-function-zone");
+        if(panel) {
+            panel.classList.remove("collapsed");
+            panel.style.setProperty('display', 'flex', 'important'); 
+        }
+        
         // ==========================================
         // 🌟 終極暴力解法：直接用 JS 覆蓋所有 CSS 隱藏屬性
         // ==========================================
