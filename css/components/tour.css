@@ -1,0 +1,25 @@
+/* 🌟 導覽教學遮罩 */
+#tutorial-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); backdrop-filter: blur(3px); z-index: var(--z-tour); display: none; align-items: center; justify-content: center; padding: 15px; opacity: 0; transition: opacity var(--trans-normal); }
+.tutorial-box { background: var(--bg-color); width: 90%; max-width: 340px; border-radius: var(--radius-lg); padding: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.5); border: 2px solid var(--primary); }
+.tutorial-box h3 { color: var(--primary); margin-top: 0; border-bottom: 1px dashed var(--divider-color); padding-bottom: 8px; margin-bottom: 12px; font-size: 16px; display: flex; align-items: center; gap: 8px;}
+.tutorial-box ul { padding-left: 0; list-style: none; font-size: 13px; line-height: 1.8; color: var(--text-sub); margin: 0;}
+.tutorial-box ul li { margin: 8px 0; display: flex; align-items: flex-start; gap: 8px;}
+.tutorial-box ul li b { color: var(--text-main); }
+.tutorial-btns { display: flex; justify-content: space-between; gap: 10px; margin-top: 20px; }
+.tutorial-btns button { flex: 1; padding: 10px; border: none; border-radius: var(--radius-sm); font-weight: bold; font-size: 14px; cursor: pointer; transition: transform var(--trans-fast); }
+.tutorial-btns button:active { transform: scale(0.95); }
+.btn-outline { background: transparent; border: 2px solid var(--primary); color: var(--primary); }
+.btn-fill { background: var(--primary); color: white; }
+
+#tour-focus-ring { position: fixed; border: 3px solid var(--primary); box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.65); z-index: calc(var(--z-tour) - 1); pointer-events: none; transition: all var(--trans-bounce); display: none; }
+#tour-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100dvh; z-index: var(--z-tour); pointer-events: auto; }
+.tour-tooltip { position: absolute; background: var(--glass); backdrop-filter: blur(15px); color: var(--text-main); padding: 20px; border-radius: var(--radius-md); box-shadow: var(--card-shadow); border: 2px solid var(--primary); width: 85%; max-width: 320px; transition: all var(--trans-bounce); line-height: 1.6; font-size: 15px; }
+.tour-buttons { display: flex; justify-content: space-between; align-items: center; margin-top: 15px; border-top: 1px dashed var(--divider-color); padding-top: 15px; }
+.tour-buttons button { padding: 8px 20px; border-radius: var(--radius-sm); font-size: 14px; font-weight: bold; cursor: pointer; border: none; transition: transform var(--trans-fast); }
+#tour-next-btn { background: var(--primary); color: #fff; }
+#tour-next-btn:active { transform: scale(0.95); }
+.tour-skip { background: transparent; color: var(--text-sub); }
+
+@media (max-height: 500px) and (orientation: landscape) { 
+    .tutorial-box { padding: 15px; max-height: 90vh; overflow-y: auto; } .tutorial-box h3 { padding-bottom: 5px; margin-bottom: 5px; } .tutorial-box ul li { margin: 5px 0; } .tutorial-btns { margin-top: 10px; }
+}
