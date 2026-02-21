@@ -1,49 +1,49 @@
-#map { position: absolute; top: 0; left: 0; right: 0; bottom: 0; z-index: 1; }
+#map { position: absolute; top: 0; left: 0; right: 0; bottom: 0; z-index: var(--z-map); }
 
 /* 🌟 開場與歡迎幕 */
-#splash-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: #ffffff; z-index: var(--z-splash); display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity 0.5s ease-in-out; pointer-events: none; }
-.logo-anim { width: 100px; height: 100px; border: 4px solid var(--intro-color); color: var(--intro-color); display: flex; align-items: center; justify-content: center; font-size: 50px; font-weight: bold; border-radius: 20px; animation: scaleUp 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
+#splash-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: var(--bg-color); z-index: var(--z-splash); display: flex; flex-direction: column; align-items: center; justify-content: center; transition: opacity var(--trans-normal); pointer-events: none; }
+.logo-anim { width: 100px; height: 100px; border: 4px solid var(--intro-color); color: var(--intro-color); display: flex; align-items: center; justify-content: center; font-size: 50px; font-weight: bold; border-radius: var(--radius-lg); animation: scaleUp 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards; }
 .splash-title-text { color: var(--intro-color); margin-top: 20px; letter-spacing: 4px; font-size: 20px; opacity: 0; animation: fadeInText 0.8s ease-out 0.3s forwards; }
 @keyframes scaleUp { 0% { transform: scale(0.5); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
 @keyframes fadeInText { 0% { transform: translateY(10px); opacity: 0; } 100% { transform: translateY(0); opacity: 1; } }
 
-#welcome-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: #ffffff; z-index: var(--z-splash); display: flex; flex-direction: column; align-items: center; padding: 15px; overflow-y: auto; transition: opacity 0.4s ease; }
+#welcome-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: var(--bg-color); z-index: var(--z-splash); display: flex; flex-direction: column; align-items: center; padding: 15px; overflow-y: auto; transition: opacity var(--trans-normal); }
 .welcome-wrapper { width: 100%; max-width: 320px; display: flex; flex-direction: column; align-items: center; padding-top: 5vh; padding-bottom: env(safe-area-inset-bottom, 20px); margin: auto; }
-.logo-static { width: 80px; height: 80px; border: 3px solid var(--intro-color); color: var(--intro-color); display: flex; align-items: center; justify-content: center; font-size: 40px; font-weight: bold; border-radius: 15px; }
+.logo-static { width: 80px; height: 80px; border: 3px solid var(--intro-color); color: var(--intro-color); display: flex; align-items: center; justify-content: center; font-size: 40px; font-weight: bold; border-radius: var(--radius-md); }
 .welcome-title { color: var(--intro-color); margin-top: 15px; margin-bottom: 10px; text-align: center; letter-spacing: 2px; font-size: 22px; font-weight: 900; }
-.welcome-desc { text-align: center; color: #444444; line-height: 1.6; font-size: 15px; font-weight: 500; margin-bottom: 25px; width: 100%; }
+.welcome-desc { text-align: center; color: var(--text-sub); line-height: 1.6; font-size: 15px; font-weight: 500; margin-bottom: 25px; width: 100%; }
 
 .input-group { width: 100%; margin-bottom: 20px; }
 .input-group label { font-weight: bold; display: block; margin-bottom: 8px; color: var(--intro-color); font-size: 14px; text-align: center; }
 .link-box { display: flex; flex-direction: column; gap: 12px; width: 100%; margin-bottom: 10px; }
-.link-box a { display: flex; align-items: center; justify-content: center; padding: 12px; border-radius: 8px; text-decoration: none; color: var(--intro-color); font-weight: bold; font-size: 14px; border: 2px solid var(--intro-color); background: #ffffff; transition: all 0.2s; }
-.link-box a:active { background: var(--intro-color); color: #ffffff; }
-.link-box a:active i { color: #ffffff; }
-.link-box a i { margin-right: 8px; font-size: 16px; color: var(--intro-color); transition: color 0.2s; }
-.btn-enter-map { width: 100%; padding: 16px 20px; background: var(--intro-color); color: #ffffff; border: none; border-radius: 30px; font-size: 18px; font-weight: bold; letter-spacing: 1px; cursor: pointer; transition: transform 0.2s, opacity 0.3s; margin-top: 35px;}
+.link-box a { display: flex; align-items: center; justify-content: center; padding: 12px; border-radius: var(--radius-sm); text-decoration: none; color: var(--intro-color); font-weight: bold; font-size: 14px; border: 2px solid var(--intro-color); background: transparent; transition: all var(--trans-fast); }
+.link-box a:active { background: var(--intro-color); color: var(--bg-color); }
+.link-box a:active i { color: var(--bg-color); }
+.link-box a i { margin-right: 8px; font-size: 16px; color: var(--intro-color); transition: color var(--trans-fast); }
+.btn-enter-map { width: 100%; padding: 16px 20px; background: var(--intro-color); color: var(--bg-color); border: none; border-radius: var(--radius-pill); font-size: 18px; font-weight: bold; letter-spacing: 1px; cursor: pointer; transition: transform var(--trans-fast), opacity var(--trans-normal); margin-top: 35px;}
 .btn-enter-map:active { transform: scale(0.96); opacity: 0.8; }
 
-/* 🌟 地圖頂部 UI (搜尋、標籤、天氣) */
+/* 🌟 地圖頂部 UI */
 #top-ui { position: absolute; top: calc(15px + env(safe-area-inset-top, 0px)); left: 50%; transform: translateX(-50%); z-index: var(--z-controls); width: 85%; max-width: 420px; display: flex; flex-direction: column; align-items: center; gap: 8px; pointer-events: none; }
 #search-container { position: relative; width: 100%; pointer-events: auto; }
-#search { width: 100%; padding: 12px 38px 12px 20px; border: none; border-radius: 30px; box-shadow: var(--card-shadow); outline: none; background: var(--glass); color: var(--text-main); font-size: 14px; text-align: center; border: 1px solid var(--border-color); }
-#search-clear-btn { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: #aaa; cursor: pointer; font-size: 18px; display: none; transition: color 0.2s, transform 0.1s; padding: 5px; }
+#search { width: 100%; padding: 12px 38px 12px 20px; border: none; border-radius: var(--radius-pill); box-shadow: var(--card-shadow); outline: none; background: var(--glass); color: var(--text-main); font-size: 14px; text-align: center; border: 1px solid var(--border-color); }
+#search-clear-btn { position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: #aaa; cursor: pointer; font-size: 18px; display: none; transition: color var(--trans-fast), transform var(--trans-fast); padding: 5px; }
 #search-clear-btn:active { color: var(--danger); transform: translateY(-50%) scale(0.9); }
 
 #category-chips { display: flex; gap: 6px; overflow-x: auto; width: 100%; padding: 2px 5px; scrollbar-width: none; -ms-overflow-style: none; pointer-events: auto; }
 #category-chips::-webkit-scrollbar { display: none; }
-.chip { background: var(--glass); border: 1px solid var(--border-color); padding: 8px 16px; border-radius: 20px; font-size: 12px; font-weight: bold; color: var(--text-main); white-space: nowrap; cursor: pointer; box-shadow: 0 2px 5px var(--card-shadow); transition: all 0.2s; user-select: none; }
+.chip { background: var(--glass); border: 1px solid var(--border-color); padding: 8px 16px; border-radius: var(--radius-pill); font-size: 12px; font-weight: bold; color: var(--text-main); white-space: nowrap; cursor: pointer; box-shadow: 0 2px 5px var(--card-shadow); transition: all var(--trans-fast); user-select: none; }
 .chip.active { background: var(--primary); color: white; border-color: var(--primary); }
 
-#map-center-panel { background: var(--glass); backdrop-filter: blur(8px); padding: 4px 14px; border-radius: 20px; box-shadow: 0 2px 8px var(--card-shadow); color: var(--primary); font-size: 12px; font-weight: bold; display: flex; justify-content: center; align-items: center; gap: 6px; max-width: 85%; pointer-events: none; border: 1px solid var(--border-color); }
-#addr-text { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: inline-block; transition: opacity 0.3s; }
+#map-center-panel { background: var(--glass); backdrop-filter: blur(8px); padding: 4px 14px; border-radius: var(--radius-pill); box-shadow: 0 2px 8px var(--card-shadow); color: var(--primary); font-size: 12px; font-weight: bold; display: flex; justify-content: center; align-items: center; gap: 6px; max-width: 85%; pointer-events: none; border: 1px solid var(--border-color); }
+#addr-text { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: inline-block; transition: opacity var(--trans-normal); }
 
-#weather-box { position: absolute; top: calc(15px + env(safe-area-inset-top, 0px)); right: calc(15px + env(safe-area-inset-right, 0px)); z-index: var(--z-controls); width: 45px; height: 45px; background: var(--bg-color); border-radius: 12px; box-shadow: var(--card-shadow); border: 1px solid var(--border-color); display: flex; flex-direction: column; justify-content: center; align-items: center; pointer-events: auto; }
+#weather-box { position: absolute; top: calc(15px + env(safe-area-inset-top, 0px)); right: calc(15px + env(safe-area-inset-right, 0px)); z-index: var(--z-controls); width: 45px; height: 45px; background: var(--bg-color); border-radius: var(--radius-md); box-shadow: var(--card-shadow); border: 1px solid var(--border-color); display: flex; flex-direction: column; justify-content: center; align-items: center; pointer-events: auto; }
 #weather-box i { font-size: 18px; margin-bottom: 2px; } 
 #weather-temp { font-size: 11px; font-weight: bold; color: var(--text-main); }
 .weather-sun { color: #f39c12 !important; } .weather-cloud { color: #bdc3c7 !important; } .weather-rain { color: #7f8c8d !important; }
 
-/* 🌟 地圖底部 UI (比例尺、GPS、按鈕) */
+/* 🌟 地圖底部 UI */
 .leaflet-bottom.leaflet-right { bottom: calc(20px + env(safe-area-inset-bottom, 0px)) !important; right: calc(15px + env(safe-area-inset-right, 0px)) !important; }
 .leaflet-control-scale-line { background: rgba(255, 255, 255, 0.8) !important; border: 2px solid #333 !important; font-weight: bold; padding: 2px 5px; color: #333 !important; font-size: 10px;}
 #gps-val-text { position: absolute; bottom: calc(22px + env(safe-area-inset-bottom, 0px)); right: calc(130px + env(safe-area-inset-right, 0px)); left: auto; z-index: var(--z-controls); font-family: monospace; font-size: 11px; font-weight: bold; color: var(--primary); pointer-events: none; text-shadow: -1px -1px 0 var(--bg-color), 1px -1px 0 var(--bg-color), -1px 1px 0 var(--bg-color), 1px 1px 0 var(--bg-color); }
@@ -52,11 +52,11 @@ body.dark-mode .leaflet-control-scale-line { background: rgba(0, 0, 0, 0.6) !imp
 body.dark-mode #gps-val-text { text-shadow: -1px -1px 0 #121212, 1px -1px 0 #121212, -1px 1px 0 #121212, 1px 1px 0 #121212 !important; }
 
 .map-controls { position: absolute; bottom: calc(85px + env(safe-area-inset-bottom, 0px)); right: calc(12px + env(safe-area-inset-right, 0px)); z-index: var(--z-controls); display: flex; flex-direction: column; gap: 12px; pointer-events: auto; }
-.control-btn { background: var(--glass); backdrop-filter: blur(8px); width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: var(--card-shadow); cursor: pointer; color: var(--text-main); font-size: 20px; border: 1px solid var(--border-color); transition: transform 0.1s; margin: 0 !important; }
+.control-btn { background: var(--glass); backdrop-filter: blur(8px); width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: var(--card-shadow); cursor: pointer; color: var(--text-main); font-size: 20px; border: 1px solid var(--border-color); transition: transform var(--trans-fast); margin: 0 !important; }
 .control-btn:active { transform: scale(0.9); }
 .route-btn { color: #8e44ad; } .fav-btn { color: var(--danger); } .compass-btn { color: var(--success); } .active { color: var(--primary); border: 2px solid var(--primary); }
 
-.rui-icon { font-family: "DFKai-sb", "BiauKai", serif; font-weight: 900; font-size: 18px; color: var(--accent); border: 2px solid var(--accent); border-radius: 4px; padding: 1px 3px; line-height: 1; transition: all 0.2s ease; }
+.rui-icon { font-family: "DFKai-sb", "BiauKai", serif; font-weight: 900; font-size: 18px; color: var(--accent); border: 2px solid var(--accent); border-radius: var(--radius-sm); padding: 1px 3px; line-height: 1; transition: all var(--trans-fast); }
 @keyframes stamp-press { 0% { transform: scale(1) rotate(0deg); } 40% { transform: scale(0.8) rotate(-8deg); color: var(--danger); border-color: var(--danger); } 70% { transform: scale(1.1) rotate(3deg); } 100% { transform: scale(1) rotate(0deg); } }
 .rui-icon.stamped { animation: stamp-press 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
 
@@ -73,5 +73,5 @@ body.dark-mode #gps-val-text { text-shadow: -1px -1px 0 #121212, 1px -1px 0 #121
     .welcome-wrapper { padding-top: 10px; padding-bottom: 10px; } .logo-static { width: 50px; height: 50px; font-size: 24px; margin-top: 0; } .welcome-title { margin-top: 8px; font-size: 18px; } .welcome-desc { margin-bottom: 10px; font-size: 12px; } .btn-enter-map { padding: 8px 30px; font-size: 14px; }
     #top-ui { width: 260px; left: 15px; transform: none; top: 10px; gap: 4px; } #search { padding: 8px 15px; font-size: 13px; } #category-chips .chip { padding: 4px 10px; font-size: 11px; }
     .map-controls { flex-direction: row; bottom: 15px; left: 50%; transform: translateX(-50%); right: auto; gap: 8px; } .control-btn { width: 40px; height: 40px; font-size: 16px; } 
-    #gps-val-text { left: 15px; right: auto; bottom: calc(22px + env(safe-area-inset-bottom, 0px)); z-index: 4000; } 
+    #gps-val-text { left: 15px; right: auto; bottom: calc(22px + env(safe-area-inset-bottom, 0px)); z-index: var(--z-modal); } 
 }
