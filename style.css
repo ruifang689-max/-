@@ -675,37 +675,40 @@ body.dark-mode .warning-banner {
     justify-content: flex-start !important;
 }
 
-/* 經典水滴圖釘：透過正方形加上單邊直角並旋轉 45 度達成 */
+/* 經典水滴圖釘 */
 .gmap-pin {
     width: 32px !important;
     height: 32px !important;
-    border-radius: 50% 50% 50% 0 !important; /* 經典水滴狀 */
+    border-radius: 50% 50% 50% 0 !important;
     transform: rotate(-45deg) !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
-    color: white !important;
-    border: 2px solid white !important;
-    box-shadow: 2px 2px 5px rgba(0,0,0,0.4) !important;
+    color: white !important; /* 內部 Icon 保持白色以維持對比 */
+    
+    /* 🌟 邊框改用背景變數：亮色模式是白邊，黑暗模式會自動變深色邊 */
+    border: 2px solid var(--bg-color, white) !important; 
+    box-shadow: 2px 2px 5px rgba(0,0,0,0.5) !important;
     flex-shrink: 0 !important;
 }
 
-/* 將圖標轉正 (因為外框轉了 -45 度，所以圖標要轉 +45 度回來) */
 .gmap-pin i {
     transform: rotate(45deg) !important;
     font-size: 14px !important;
 }
 
-/* 名稱標籤：精緻小巧 */
+/* 名稱標籤：精緻小巧且支援黑暗模式 */
 .pin-label {
-    background: rgba(255, 255, 255, 0.95) !important;
+    /* 🌟 背景色與文字色直接綁定系統變數，自動無縫切換 */
+    background: var(--bg-color, rgba(255, 255, 255, 0.95)) !important;
+    color: var(--text-main, #333) !important;
+    border: 1px solid var(--border-color, rgba(0,0,0,0.1)) !important;
+    
     padding: 2px 6px !important;
     border-radius: 4px !important;
     font-size: 12px !important;
     font-weight: bold !important;
-    color: #333 !important;
     white-space: nowrap !important;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.3) !important;
-    margin-top: 4px !important; /* 讓標籤跟圖釘保持適當距離 */
-    border: 1px solid rgba(0,0,0,0.1) !important;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.4) !important;
+    margin-top: 4px !important; 
 }
