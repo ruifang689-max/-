@@ -52,8 +52,8 @@
     --trans-normal: 0.3s ease;
     --trans-bounce: 0.4s cubic-bezier(0.32, 0.72, 0, 1); /* 帶有 Q 彈感的滑動 */
 
-    /* 全站統一的主題色設定 */
-    --stamp-active: var(--primary);
+    /* 全站統一的「瑞」印章光暈主題色 (預設為紅色) */
+    --stamp-active: var(--danger);
 }
 
 /* 黑暗模式變數覆蓋 */
