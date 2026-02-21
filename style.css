@@ -665,41 +665,47 @@ body.dark-mode .warning-banner {
 }
 
 /* =========================================
-   🌟 復刻經典：完美圓形圖釘 + 小巧名稱標籤
+   🌟 復刻經典：水滴圖釘與名稱標籤 (完美比例)
    ========================================= */
-.custom-marker-wrapper {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
+/* 外部容器：讓圖釘與文字垂直置中排列 */
+.custom-pin-wrap {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
 }
 
-/* 完美正圓外框，不再歪斜 */
-.custom-marker {
-    width: 28px !important;
-    height: 28px !important;
-    border-radius: 50% !important; /* 絕對正圓 */
+/* 經典水滴圖釘：透過正方形加上單邊直角並旋轉 45 度達成 */
+.gmap-pin {
+    width: 32px !important;
+    height: 32px !important;
+    border-radius: 50% 50% 50% 0 !important; /* 經典水滴狀 */
+    transform: rotate(-45deg) !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
     color: white !important;
     border: 2px solid white !important;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.4) !important;
-    font-size: 14px !important; /* 適合 Emoji 的大小 */
-    transform: none !important; /* 拔除旋轉，避免變形 */
-    box-sizing: border-box !important;
+    box-shadow: 2px 2px 5px rgba(0,0,0,0.4) !important;
+    flex-shrink: 0 !important;
 }
 
-/* 標籤變小、變精緻 */
-.marker-label {
-    background: rgba(255, 255, 255, 0.9) !important;
-    padding: 1px 4px !important; /* 內距縮小 */
+/* 將圖標轉正 (因為外框轉了 -45 度，所以圖標要轉 +45 度回來) */
+.gmap-pin i {
+    transform: rotate(45deg) !important;
+    font-size: 14px !important;
+}
+
+/* 名稱標籤：精緻小巧 */
+.pin-label {
+    background: rgba(255, 255, 255, 0.95) !important;
+    padding: 2px 6px !important;
     border-radius: 4px !important;
-    font-size: 10px !important; /* 🌟 字體變小 */
+    font-size: 12px !important;
     font-weight: bold !important;
     color: #333 !important;
     white-space: nowrap !important;
     box-shadow: 0 1px 3px rgba(0,0,0,0.3) !important;
-    margin-top: 3px !important; 
+    margin-top: 4px !important; /* 讓標籤跟圖釘保持適當距離 */
     border: 1px solid rgba(0,0,0,0.1) !important;
 }
