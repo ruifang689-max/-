@@ -1,19 +1,29 @@
-// js/main.js (v410)
-import { initFirebase } from './modules/firebase-sync.js';// 我們剛剛新增的雲端模組
-import { state } from './core/store.js';
-import { initMap, toggleLayer } from './core/map.js?v=593';
-import { fetchWeather } from './modules/weather.js';
-import { initGPS } from './modules/gps.js?v=593';
-import { initAnnouncer } from './modules/announcer.js?v=593';
-import { initCardGestures, closeCard } from './modules/cards.js';
-import { renderAllMarkers } from './modules/markers.js';
-import { initSearch } from './modules/search.js?v=593';
-import { initNavigation } from './modules/navigation.js';
-import { initUI } from './modules/ui.js?v=593';
+// js/main.js (v607)
+// 🌟 載入核心與原始模組
+import { state } from './core/store.js?v=607';
+import { initMap, toggleLayer } from './core/map.js?v=607';
+import { fetchWeather } from './modules/weather.js?v=607';
+import { initGPS } from './modules/gps.js?v=607';
+import { initAnnouncer } from './modules/announcer.js?v=607';
+import { initCardGestures, closeCard } from './modules/cards.js?v=607';
+import { renderAllMarkers } from './modules/markers.js?v=607';
+import { initSearch } from './modules/search.js?v=607';
+import { initNavigation } from './modules/navigation.js?v=607';
+import { initUI } from './modules/ui.js?v=607';
+import { initFirebase } from './modules/firebase-sync.js?v=607';
 
+// 🌟 載入全新拆分的 5 大模組
+import { initTheme } from './modules/theme.js?v=607';
+import { initPWA } from './modules/pwa.js?v=607';
+import { initTour } from './modules/tour.js?v=607';
+import { initFavorites } from './modules/favorites.js?v=607';
+import { initCustomSpots } from './modules/customSpots.js?v=607';
+
+// 將需要跨檔案呼叫的方法綁定到 window 上
 window.toggleLayer = toggleLayer;
 window.closeCard = closeCard;
 
+// 保留您原本的開場動畫移除邏輯
 function removeSplashScreen() {
     const splash = document.getElementById('splash-screen');
     const welcome = document.getElementById('welcome-screen');
@@ -40,35 +50,43 @@ function removeSplashScreen() {
 
 // 🌟 核心防護罩：單一模組報錯，不會讓整個 App 癱瘓
 function safeInit(fn, name) {
-    try { fn(); } catch (e) { console.error(`❌ [防護機制] 模組 ${name} 啟動失敗:`, e); }
+    try { 
+        fn(); 
+    } catch (e) { 
+        console.error(`❌ [防護機制] 模組 ${name} 啟動失敗:`, e); 
+    }
 }
 
+// 🌟 重新編排的最佳化啟動順序
 function bootstrapApp() {
+    // 第一階段：初始化與畫面無關的系統與基礎 UI
+    safeInit(initTheme, '主題與語系');
+    safeInit(initPWA, 'PWA 系統');
+    safeInit(initTour, '導覽教學');
+    safeInit(initFavorites, '收藏夾');
+    safeInit(initUI, '基礎 UI 介面');
+    safeInit(initFirebase, 'Firebase 雲端同步');
+
+    // 第二階段：初始化地圖引擎 (這最重要)
     safeInit(initMap, '地圖引擎');
+
+    // 第三階段：初始化依賴地圖的附屬功能
     safeInit(initGPS, 'GPS定位');
     safeInit(initAnnouncer, '報幕系統');
     safeInit(initCardGestures, '卡片手勢');
     safeInit(renderAllMarkers, '圖釘渲染');
     safeInit(initSearch, '搜尋系統');
     safeInit(initNavigation, '導航系統');
-    safeInit(initUI, 'UI介面與設定');
+    safeInit(initCustomSpots, '自訂秘境'); // 確保地圖建立後再綁定長按事件
     
-    // 獨立執行，保證天氣一定會被呼叫
+    // 獨立執行
     fetchWeather();
     removeSplashScreen();
 }
 
+// 🌟 解決重複執行的 Bug：只使用單一入口啟動
 if (document.readyState === 'complete' || document.readyState === 'interactive') {
     bootstrapApp();
 } else {
     document.addEventListener('DOMContentLoaded', bootstrapApp);
 }
-
-document.addEventListener('DOMContentLoaded', () => {
-    initMap();
-    renderAllMarkers(); // 呼叫正確的名稱
-    initUI();
-    
-    // 🌟 啟動 Firebase 雲端模組
-    initFirebase();
-});
