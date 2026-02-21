@@ -48,29 +48,51 @@ export function initAnnouncer() {
                 document.getElementById("addr-text").innerText = areaStr; 
             })
             .catch(() => { 
-                // 🌟 2. 主 API 被封鎖時，無縫啟動備用 API (自動去重優化版)
+                // 🌟 2. 主 API 被封鎖時，無縫啟動備用 API (進階去重與九大區域版)
                 fetch(fallbackUrl)
                 .then(res => res.json())
                 .then(data => {
                     let areaStr = "探索瑞芳中...";
                     if(data) {
-                        // 1. 取出所有欄位並過濾掉空字串
-                        const parts = [data.principalSubdivision, data.city, data.locality].filter(Boolean);
-                        // 2. 利用 Set 陣列特性，把重複的「新北市」過濾掉，然後合併
+                        let city = data.principalSubdivision || "";
+                        let dist = data.city || "";
+                        let village = data.locality || "";
+                        
+                        // 🌟 深度挖掘：抓出精確的「里」
+                        if (data.localityInfo && data.localityInfo.administrative) {
+                            const v = data.localityInfo.administrative.find(a => a.name.endsWith('里') || a.adminLevel === 10);
+                            if (v && v.name) village = v.name;
+                        }
+
+                        // 🌟 陣列去重：消除「新北市新北市」
+                        const parts = [city, dist].filter(Boolean);
                         const uniqueParts = [...new Set(parts)];
                         let baseStr = uniqueParts.join('');
-                        
-                        // 3. 保留您原本超棒的「九大區域」在地化標記邏輯！
-                        const dist = data.city || "";
-                        const village = data.locality || "";
-                        if (dist === "瑞芳區" && village && typeof ruifangMap !== 'undefined' && ruifangMap[village]) {
-                            areaStr = `${baseStr} (${ruifangMap[village]})`;
-                        } else if (baseStr) {
-                            areaStr = baseStr;
+
+                        // 🌟 智慧匹配九大區域
+                        let matchedArea = "";
+                        if (village && typeof ruifangMap !== 'undefined') {
+                            if (ruifangMap[village]) {
+                                matchedArea = ruifangMap[village];
+                            } else {
+                                // 模糊比對 (解決「龍潭堵」與「龍潭里」的字尾差異)
+                                const villageCore = village.substring(0, 2);
+                                for (let key in ruifangMap) {
+                                    if (key.startsWith(villageCore)) {
+                                        matchedArea = ruifangMap[key];
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+
+                        if (dist === "瑞芳區" && matchedArea) {
+                            // 完美組合出：新北市瑞芳區龍潭里(瑞芳市區)
+                            areaStr = `${baseStr}${village}(${matchedArea})`;
+                        } else {
+                            areaStr = `${baseStr}${village}`;
                         }
                     }
-                    
-                    // 🌟 UI 更新必須包在這個 then 的大括號裡面！
                     document.getElementById("addr-text").innerText = areaStr; 
                 })
                 .catch(() => {
