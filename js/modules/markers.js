@@ -1,3 +1,5 @@
+// js/modules/markers.js (v615)
+
 import { state } from '../core/store.js';
 import { spots } from '../data/spots.js'; 
 import { showCard } from './cards.js';
@@ -33,29 +35,44 @@ const createCustomPin = (tags, name, category) => {
     });
 };
 
-export function addMarkerToMap(spot) {
-    if (!state.cluster) return;
-
-    // 呼叫 createCustomPin 來生成圖釘
+// 🌟 新增一個純粹用來「產生」圖釘物件的內部工具函數
+const createMarkerObj = (spot) => {
     const marker = L.marker([spot.lat, spot.lng], {
         icon: createCustomPin(spot.tags, spot.name, spot.category)
     });
-
     marker.on('click', () => showCard(spot));
     spot.markerObj = marker;
-    state.cluster.addLayer(marker);
+    return marker;
+};
+
+// 供外部單一呼叫 (例如：使用者長按地圖新增了一個自訂秘境，只需加一個圖釘)
+export function addMarkerToMap(spot) {
+    if (!state.cluster) return;
+    const marker = createMarkerObj(spot);
+    state.cluster.addLayer(marker); // 單一新增，直接加上去沒問題
     return marker;
 }
 
+// 🌟 終極效能大絕招：初始化的批次載入 (Batch Add)
 export function renderAllMarkers() {
     if (!state.cluster) return;
+    
+    // 1. 先清空舊圖釘
     state.cluster.clearLayers();
 
     const officialSpots = Array.isArray(spots) ? spots : [];
     const customList = state.savedCustomSpots || []; 
     const allSpots = [...officialSpots, ...customList];
 
+    // 2. 建立等待列陣列
+    const markersArray = [];
+
+    // 3. 把所有圖釘「裝進陣列」，先不畫到畫面上！
     allSpots.forEach(spot => {
-        addMarkerToMap(spot);
+        const marker = createMarkerObj(spot);
+        markersArray.push(marker);
     });
+
+    // 4. 一次性整包丟給叢集引擎，讓 Leaflet 在背景分塊處理！
+    state.cluster.addLayers(markersArray);
 }
