@@ -352,11 +352,29 @@ export function initUI() {
             fetch(apiUrl).then(res => res.json()).then(data => { 
                 let addr = "瑞芳秘境"; 
                 if(data) {
-                    // 🌟 利用 Set 陣列去重，消除「新北市新北市」的問題
-                    const parts = [data.principalSubdivision, data.city, data.locality].filter(Boolean);
+                    let city = data.principalSubdivision || "";
+                    let dist = data.city || "";
+                    let village = data.locality || "";
+                    let road = "";
+                    
+                    // 🌟 深度挖掘 API：找出精確的「里」與「路/街」
+                    if (data.localityInfo) {
+                        if (data.localityInfo.administrative) {
+                            const v = data.localityInfo.administrative.find(a => a.name.endsWith('里') || a.adminLevel === 10);
+                            if (v && v.name) village = v.name;
+                        }
+                        if (data.localityInfo.informative) {
+                            const r = data.localityInfo.informative.find(i => i.name.endsWith('路') || i.name.endsWith('街') || i.name.endsWith('道') || i.description === 'road');
+                            if (r && r.name) road = r.name;
+                        }
+                    }
+                    
+                    // 🌟 組合出最詳細的地址 (例如：新北市瑞芳區龍潭里明燈路)
+                    const parts = [city, dist].filter(Boolean);
                     const uniqueParts = [...new Set(parts)];
-                    addr = uniqueParts.join('') || "瑞芳秘境"; 
+                    addr = `${uniqueParts.join('')}${village}${road}` || "瑞芳秘境"; 
                 }
+                
                 state.mapInstance.closePopup(tempPopup); 
                 setTimeout(() => { 
                     state.tempCustomSpot = { lat, lng, addr }; 
