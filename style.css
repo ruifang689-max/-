@@ -586,7 +586,7 @@ body.dark-mode .warning-banner {
 #side-function-zone {
     position: fixed !important;
     right: 15px !important;
-    top: 65% !important;
+    top: 52% !important;
     transform: translateY(-50%) !important;
     z-index: 1000 !important; /* 🌟 降級！墊在各種介面之下 */
     display: none !important; /* 🌟 預設隱藏，避免開場幕穿幫 */
