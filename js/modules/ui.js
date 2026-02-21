@@ -382,17 +382,24 @@ export function initUI() {
                 setTimeout(() => { 
                     state.tempCustomSpot = { lat, lng, addr }; 
                     
-                    // 🌟 強化版 UI：加入美觀的複製與 Google 地圖導航按鈕
+                    // 🌟 強化版 UI：完美凸排、虛線超連結、三顆滿版快捷按鈕
+                    const mapLink = `https://www.google.com/maps/search/?api=1&query=${lat},${lng}`;
                     const addrHTML = `
-                        <div style="margin-bottom: 12px; font-weight: bold; color: var(--text-main); font-size: 14px; line-height: 1.4;">
-                            <i class="fas fa-map-marker-alt" style="color: var(--danger);"></i> ${addr}
+                        <div style="margin-bottom: 12px; font-weight: bold; font-size: 14px; line-height: 1.5; display: flex; align-items: flex-start; gap: 8px;">
+                            <i class="fas fa-map-marker-alt" style="color: var(--danger); margin-top: 4px; flex-shrink: 0;"></i>
+                            <a href="${mapLink}" target="_blank" style="color: var(--text-main); text-decoration: none; border-bottom: 1px dashed #888; padding-bottom: 2px; flex: 1; word-break: break-all;">
+                                ${addr}
+                            </a>
                         </div>
-                        <div style="display: flex; gap: 8px;">
-                            <button onclick="navigator.clipboard.writeText('${addr}').then(() => alert('✅ 地址已複製！'))" style="flex: 1; padding: 8px; border: none; border-radius: 6px; background: var(--primary); color: white; font-size: 13px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; transition: 0.2s;" onmousedown="this.style.transform='scale(0.95)'" onmouseup="this.style.transform='scale(1)'" onmouseleave="this.style.transform='scale(1)'">
-                                <i class="fas fa-copy"></i> 複製地址
+                        <div style="display: flex; gap: 6px;">
+                            <button onclick="navigator.clipboard.writeText('${addr}').then(() => alert('✅ 地址已複製！'))" style="flex: 1; padding: 8px 0; border: none; border-radius: 6px; background: var(--primary); color: white; font-size: 13px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; transition: 0.2s;" onmousedown="this.style.transform='scale(0.95)'" onmouseup="this.style.transform='scale(1)'" onmouseleave="this.style.transform='scale(1)'">
+                                <i class="fas fa-copy"></i> 複製
                             </button>
-                            <button onclick="window.open('https://www.google.com/maps/search/?api=1&query=${lat},${lng}', '_blank')" style="flex: 1; padding: 8px; border: none; border-radius: 6px; background: #28a745; color: white; font-size: 13px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; transition: 0.2s;" onmousedown="this.style.transform='scale(0.95)'" onmouseup="this.style.transform='scale(1)'" onmouseleave="this.style.transform='scale(1)'">
-                                <i class="fas fa-map-marked-alt"></i> Google 地圖
+                            <button onclick="window.open('${mapLink}', '_blank')" style="flex: 1; padding: 8px 0; border: none; border-radius: 6px; background: #28a745; color: white; font-size: 13px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; transition: 0.2s;" onmousedown="this.style.transform='scale(0.95)'" onmouseup="this.style.transform='scale(1)'" onmouseleave="this.style.transform='scale(1)'">
+                                <i class="fas fa-map-marked-alt"></i> 導航
+                            </button>
+                            <button onclick="if(navigator.share){ navigator.share({title:'瑞芳秘境', text:'${addr}', url:'${mapLink}'}).catch(()=>{}) } else { alert('您的瀏覽器不支援分享功能'); }" style="flex: 1; padding: 8px 0; border: none; border-radius: 6px; background: var(--accent); color: white; font-size: 13px; font-weight: bold; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 4px; transition: 0.2s;" onmousedown="this.style.transform='scale(0.95)'" onmouseup="this.style.transform='scale(1)'" onmouseleave="this.style.transform='scale(1)'">
+                                <i class="fas fa-share-square"></i> 分享
                             </button>
                         </div>
                     `;
@@ -415,14 +422,18 @@ export function initUI() {
                     const dist = a.town || a.suburb || a.district || "";
                     const village = a.village || a.hamlet || a.neighbourhood || "";
                     const road = a.road || a.pedestrian || "";
-                    const houseNumber = a.house_number ? `${a.house_number}號` : "";
+                    
+                    // 🌟 修正「號號」問題：自動判斷是否已包含「號」字
+                    let houseNumber = a.house_number || "";
+                    if (houseNumber && !houseNumber.includes('號')) houseNumber += '號';
+
                     const poi = a.amenity || a.building || a.shop || a.tourism || "";
 
                     const parts = [city, dist].filter(Boolean);
                     const uniqueParts = [...new Set(parts)];
                     let baseStr = uniqueParts.join('');
 
-                    // 🌟 完美組合出：新北市瑞芳區明燈路三段82號 (瑞芳車站)
+                    // 🌟 完美組合出：新北市瑞芳區明燈路三段65號 (瑞芳車站)
                     addr = `${baseStr}${village}${road}${houseNumber}`;
                     if (poi && !addr.includes(poi)) addr += ` (${poi})`;
                     if (!addr) addr = "瑞芳秘境";
