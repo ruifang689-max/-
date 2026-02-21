@@ -684,10 +684,10 @@ body.dark-mode .warning-banner {
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
-    color: white !important; /* 內部 Icon 保持白色以維持對比 */
+    color: white !important; 
     
-    /* 🌟 邊框改用背景變數：亮色模式是白邊，黑暗模式會自動變深色邊 */
-    border: 2px solid var(--bg-color, white) !important; 
+    /* 🌟 恢復帶有質感的白邊，讓圖釘在地圖上更立體 */
+    border: 2px solid rgba(255, 255, 255, 0.9) !important; 
     box-shadow: 2px 2px 5px rgba(0,0,0,0.5) !important;
     flex-shrink: 0 !important;
 }
@@ -697,18 +697,19 @@ body.dark-mode .warning-banner {
     font-size: 14px !important;
 }
 
-/* 名稱標籤：精緻小巧且支援黑暗模式 */
+/* 名稱標籤：精緻小巧、支援黑暗模式、外框帶點白色 */
 .pin-label {
-    /* 🌟 背景色與文字色直接綁定系統變數，自動無縫切換 */
     background: var(--bg-color, rgba(255, 255, 255, 0.95)) !important;
     color: var(--text-main, #333) !important;
-    border: 1px solid var(--border-color, rgba(0,0,0,0.1)) !important;
+    
+    /* 🌟 外框保留微透的白色，增加層次感 */
+    border: 1.5px solid rgba(255, 255, 255, 0.7) !important;
     
     padding: 2px 6px !important;
     border-radius: 4px !important;
     font-size: 12px !important;
     font-weight: bold !important;
     white-space: nowrap !important;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.4) !important;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.5) !important; /* 加深一點陰影襯托白邊 */
     margin-top: 4px !important; 
 }
