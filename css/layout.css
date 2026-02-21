@@ -56,9 +56,26 @@ body.dark-mode #gps-val-text { text-shadow: -1px -1px 0 #121212, 1px -1px 0 #121
 .control-btn:active { transform: scale(0.9); }
 .route-btn { color: #8e44ad; } .fav-btn { color: var(--danger); } .compass-btn { color: var(--success); } .active { color: var(--primary); border: 2px solid var(--primary); }
 
-/* 🌟 改回專屬的 4px 直角感，不使用全站圓角變數 */
-.rui-icon { font-family: "DFKai-sb", "BiauKai", serif; font-weight: 900; font-size: 18px; color: var(--accent); border: 2px solid var(--accent); border-radius: 4px !important; padding: 1px 3px; line-height: 1; transition: all var(--trans-fast); }
-@keyframes stamp-press { 0% { transform: scale(1) rotate(0deg); } 40% { transform: scale(0.8) rotate(-8deg); color: var(--danger); border-color: var(--danger); } 70% { transform: scale(1.1) rotate(3deg); } 100% { transform: scale(1) rotate(0deg); } }
+.rui-icon { 
+    font-family: "DFKai-sb", "BiauKai", serif; 
+    font-weight: 900; 
+    font-size: 18px; 
+    color: var(--accent); 
+    border: 2px solid var(--accent); 
+    /* 🌟 拔除變數，鎖死為原本的 4px 直角感 */
+    border-radius: 4px !important; 
+    padding: 1px 3px; 
+    line-height: 1; 
+    transition: all var(--trans-fast); 
+}
+
+/* 🌟 蓋章動畫：顏色綁定我們剛剛設定的變數 */
+@keyframes stamp-press { 
+    0% { transform: scale(1) rotate(0deg); } 
+    40% { transform: scale(0.8) rotate(-8deg); color: var(--stamp-active); border-color: var(--stamp-active); } 
+    70% { transform: scale(1.1) rotate(3deg); } 
+    100% { transform: scale(1) rotate(0deg); } 
+}
 .rui-icon.stamped { animation: stamp-press 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
 
 /* 🌟 RWD 排版調整 */
