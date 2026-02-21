@@ -1,1 +1,30 @@
+/* 🌟 復刻經典水滴圖釘與名稱標籤 */
+.custom-pin-wrap { display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: flex-start !important; }
+.gmap-pin { width: 32px !important; height: 32px !important; border-radius: 50% 50% 50% 0 !important; transform: rotate(-45deg) !important; display: flex !important; align-items: center !important; justify-content: center !important; color: white !important; border: 2px solid rgba(255, 255, 255, 0.9) !important; box-shadow: 2px 2px 5px rgba(0,0,0,0.5) !important; flex-shrink: 0 !important; }
+.gmap-pin i { transform: rotate(45deg) !important; font-size: 14px !important; }
+.pin-label { background: var(--bg-color, rgba(255, 255, 255, 0.95)) !important; color: var(--text-main, #333) !important; border: 1.5px solid rgba(255, 255, 255, 0.7) !important; padding: 2px 6px !important; border-radius: 4px !important; font-size: 12px !important; font-weight: bold !important; white-space: nowrap !important; box-shadow: 0 1px 4px rgba(0,0,0,0.5) !important; margin-top: 4px !important; }
 
+/* 🌟 地圖預覽小卡 (Popup) */
+.leaflet-popup { pointer-events: none !important; }
+.leaflet-popup-content-wrapper { border-radius: 12px; background: var(--glass); padding: 0; overflow: hidden; border: 1px solid var(--primary); box-shadow: var(--card-shadow); } 
+.leaflet-popup-content { margin: 0; width: 240px !important; color: var(--text-main); } 
+body.dark-mode .leaflet-popup-tip { background: var(--glass); }
+.preview-card { width: 100%; display: flex; flex-direction: column;} 
+.preview-img { width: 100%; height: 110px; object-fit: cover; background: var(--divider-color); border-bottom: 1px solid var(--border-color);} 
+.preview-info { padding: 10px; } 
+.preview-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; } 
+.preview-title { font-weight: 800; font-size: 15px; color: var(--text-main); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 140px;}
+.preview-tag-box { display: flex; flex-wrap: wrap; gap: 4px;}
+.mini-tag, .walk-badge { display: inline-flex; align-items: center; font-size: 10px; padding: 3px 6px; border-radius: 6px; background: rgba(0, 123, 255, 0.1); color: var(--primary); border: 1px solid rgba(0, 123, 255, 0.2); font-weight: bold; white-space: nowrap; } 
+.food-preview { font-size: 12px; color: var(--accent); font-weight: bold; border-top: 1px dashed var(--border-color); padding-top: 8px; margin-top: 8px; display: flex; align-items: center; gap: 5px;}
+
+/* 🌟 地區大標籤 (浮水印) */
+.region-label { background: transparent; border: none; box-shadow: none; }
+.region-label-text { font-size: 22px; font-weight: 900; color: var(--primary); transform: translate(-50%, -50%); text-shadow: 1px 1px 0 var(--glass), -1px 1px 0 var(--glass), 1px -1px 0 var(--glass), -1px -1px 0 var(--glass), 0px 1px 0 var(--glass), 0px -1px 0 var(--glass), 1px 0px 0 var(--glass), -1px 0px 0 var(--glass), 0px 1px 3px rgba(0,0,0,0.2); white-space: nowrap; letter-spacing: 4px; pointer-events: none; opacity: 0.9; text-align: center; transition: color 0.3s, text-shadow 0.3s; }
+body.dark-mode .region-label-text { color: var(--text-main); text-shadow: 1px 1px 0 #121212, -1px 1px 0 #121212, 1px -1px 0 #121212, -1px -1px 0 #121212, 0px 1px 0 #121212, 0px -1px 0 #121212, 1px 0px 0 #121212, -1px 0px 0 #121212, 0px 1px 4px rgba(0,0,0,0.8); }
+
+/* 🌟 地圖上的雷達波紋 */
+.user-pulse-icon { width: 40px; height: 40px; display: block; position: relative; }
+.user-pulse-icon .dot { width: 14px; height: 14px; background: var(--primary); border-radius: 50%; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); border: 3px solid white; box-shadow: 0 0 5px rgba(0,0,0,0.3); }
+.user-pulse-icon .pulse { width: 40px; height: 40px; background: var(--primary); border-radius: 50%; position: absolute; top: 0; left: 0; opacity: 0.2; animation: user-pulse 1.8s infinite; }
+@keyframes user-pulse { 0% { transform: scale(0.5); opacity: 0.6; } 100% { transform: scale(1.1); opacity: 0; } }
