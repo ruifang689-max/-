@@ -1,4 +1,3 @@
-// js/modules/announcer.js (v410)
 import { state } from '../core/store.js';
 
 const ruifangMap = {
@@ -49,21 +48,34 @@ export function initAnnouncer() {
                 document.getElementById("addr-text").innerText = areaStr; 
             })
             .catch(() => { 
-                // 🌟 2. 主 API 被封鎖時，無縫啟動備用 API
+                // 🌟 2. 主 API 被封鎖時，無縫啟動備用 API (自動去重優化版)
                 fetch(fallbackUrl)
                 .then(res => res.json())
                 .then(data => {
                     let areaStr = "探索瑞芳中...";
                     if(data) {
-                        const city = data.principalSubdivision || "";
+                        // 1. 取出所有欄位並過濾掉空字串
+                        const parts = [data.principalSubdivision, data.city, data.locality].filter(Boolean);
+                        // 2. 利用 Set 陣列特性，把重複的「新北市」過濾掉，然後合併
+                        const uniqueParts = [...new Set(parts)];
+                        let baseStr = uniqueParts.join('');
+                        
+                        // 3. 保留您原本超棒的「九大區域」在地化標記邏輯！
                         const dist = data.city || "";
                         const village = data.locality || "";
-                        let baseStr = city + dist + village;
-                        if (dist === "瑞芳區" && village && ruifangMap[village]) areaStr = `${baseStr} (${ruifangMap[village]})`;
-                        else if (baseStr) areaStr = baseStr;
+                        if (dist === "瑞芳區" && village && typeof ruifangMap !== 'undefined' && ruifangMap[village]) {
+                            areaStr = `${baseStr} (${ruifangMap[village]})`;
+                        } else if (baseStr) {
+                            areaStr = baseStr;
+                        }
                     }
+                    
+                    // 🌟 UI 更新必須包在這個 then 的大括號裡面！
                     document.getElementById("addr-text").innerText = areaStr; 
-                }).catch(() => document.getElementById("addr-text").innerText = "探索瑞芳中...");
+                })
+                .catch(() => {
+                    document.getElementById("addr-text").innerText = "探索瑞芳中...";
+                });
             }); 
         }, 1000); 
     });
