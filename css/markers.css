@@ -28,3 +28,21 @@ body.dark-mode .region-label-text { color: var(--text-main); text-shadow: 1px 1p
 .user-pulse-icon .dot { width: 14px; height: 14px; background: var(--primary); border-radius: 50%; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); border: 3px solid white; box-shadow: 0 0 5px rgba(0,0,0,0.3); }
 .user-pulse-icon .pulse { width: 40px; height: 40px; background: var(--primary); border-radius: 50%; position: absolute; top: 0; left: 0; opacity: 0.2; animation: user-pulse 1.8s infinite; }
 @keyframes user-pulse { 0% { transform: scale(0.5); opacity: 0.6; } 100% { transform: scale(1.1); opacity: 0; } }
+
+/* 🌟 叢集圖釘 (Marker Cluster) 客製化樣式 */
+.cluster-icon-wrapper { background: transparent; }
+.custom-cluster-icon {
+    width: 36px; height: 36px;
+    background: rgba(0, 123, 255, 0.85); /* 系統藍色半透明 */
+    backdrop-filter: blur(4px);
+    color: white;
+    border-radius: 50%;
+    display: flex; justify-content: center; align-items: center;
+    font-weight: 900; font-size: 14px;
+    border: 3px solid rgba(255, 255, 255, 0.9);
+    box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+    transition: transform 0.2s ease, background 0.2s;
+}
+.custom-cluster-icon:hover { transform: scale(1.1); background: var(--primary); }
+.custom-cluster-icon.medium { width: 44px; height: 44px; font-size: 16px; background: rgba(40, 167, 69, 0.85); /* 綠色 */ }
+.custom-cluster-icon.large { width: 52px; height: 52px; font-size: 18px; background: rgba(220, 53, 69, 0.85); /* 紅色 */ }
