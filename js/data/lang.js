@@ -214,7 +214,7 @@ export const translations = {
         toast_copy_success: "✅ クリップボードにコピーしました",
         toast_custom_saved: "✅ 保存しました",
         toast_custom_deleted: "🗑️ 削除しました",
-        toast_network_err: "ネットワークエラー"
+        toast_network_err: "ネットワークエラー",
 
         // 🌟 JS Dynamic
         toast_gps_success: "✅ 位置情報を取得しました",
