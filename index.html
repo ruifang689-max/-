@@ -32,10 +32,10 @@
     <link rel="apple-touch-icon" href="icon/icon-192.png">
     <link rel="icon" type="image/png" href="icon/icon-192.png">
     
-    <link rel="stylesheet" href="./css/variables.css?v=610">
-    <link rel="stylesheet" href="./css/layout.css?v=610">
-    <link rel="stylesheet" href="./css/markers.css?v=610">
-    <link rel="stylesheet" href="./css/main.css?v=610">
+    <link rel="stylesheet" href="./css/variables.css?v=624">
+    <link rel="stylesheet" href="./css/layout.css?v=624">
+    <link rel="stylesheet" href="./css/markers.css?v=624">
+    <link rel="stylesheet" href="./css/main.css?v=624">
 </head>
     
 <body id="main-body">
@@ -430,7 +430,7 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
     
-    <script type="module" src="./js/main.js?v=610"></script>
+    <script type="module" src="./js/main.js?v=624"></script>
 
     <script>
         setTimeout(() => {
@@ -446,16 +446,26 @@
         }, 3000);
     </script>
 
+    <template id="tpl-list-item">
+        <div class="list-item" data-name="">
+            <span>
+                <i class="item-icon fas"></i> 
+                <span class="item-text"></span>
+            </span>
+            <i class="item-arrow fas fa-chevron-right u-hidden" style="color:#ccc; font-size:12px;"></i>
+        </div>
+    </template>
+
+    <template id="tpl-fav-manage-item">
+        <div style="display:flex; justify-content:space-between; align-items:center; padding:10px; background:var(--glass); border:1px solid var(--border-color); border-radius:8px; margin-bottom:8px;">
+            <span class="fav-name" style="font-weight:bold; color:var(--text-main); font-size:14px;"></span>
+            <div style="display:flex; gap:6px;">
+                <button class="btn-up" data-action="up" style="padding:6px 10px; cursor:pointer; background:var(--divider-color); border:none; border-radius:6px; color:var(--text-main);"><i class="fas fa-arrow-up"></i></button>
+                <button class="btn-down" data-action="down" style="padding:6px 10px; cursor:pointer; background:var(--divider-color); border:none; border-radius:6px; color:var(--text-main);"><i class="fas fa-arrow-down"></i></button>
+                <button class="btn-remove" data-action="remove" style="padding:6px 10px; background:var(--danger); color:white; cursor:pointer; border:none; border-radius:6px;"><i class="fas fa-trash"></i></button>
+            </div>
+        </div>
+    </template>
+    
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
