@@ -37,39 +37,7 @@ export const translations = {
         toast_copy_success: "✅ 內容已複製到剪貼簿",
         toast_custom_saved: "✅ 秘境已儲存",
         toast_custom_deleted: "🗑️ 標記已刪除",
-        toast_network_err: "網路連線異常，請稍後再試",
-
-        // 🌟 [新增] 介面風格 (Skin)
-        "setting_skin": "介面風格 (Skin)",
-        "skin_default": "系統預設 (乾淨)",
-        "skin_glass": "💧 液態玻璃 (透視感)",
-        "skin_newyear": "🧧 恭賀新禧 (燈籠)",
-        "skin_sakura": "🌸 浪漫櫻花 (飄落)",
-
-        // 🌟 [新增] 地圖圖層設定
-        "setting_map_layer": "地圖底圖模式",
-        "map_std": "標準街道圖 (預設)",
-        "map_sat": "衛星影像 (Satellite)",
-        "map_topo": "等高地形圖 (Topo)",
-        "map_hist": "懷舊歷史濾鏡 (Sepia)",
-        
-        // 🌟 [新增] 交通路網開關
-        "setting_transit": "顯示交通路網",
-        "label_transit_on": "開啟鐵路/捷運線",
-
-        "distance_prefix": "距離",
-        "route_title": "選擇前往方式",
-        "route_drive": "開車 (Driving)",
-        "route_scooter": "機車 (Scooter)",
-        "route_transit": "大眾運輸 (Transit)",
-        "route_walk": "步行 (Walk)",
-        "cancel": "取消",
-        "addr_copy_success": "地址已複製",
-        "tab_history": "歷史背景",
-        "tab_food": "推薦美食",
-        "tab_transport": "交通資訊",
-        "btn_route": "前往導航",
-        "btn_voice": "語音介紹",
+        toast_network_err: "網路連線異常，請稍後再試"
     },
     'en': { 
         splash_title: "Ruifang Guide", splash_desc: "Accurate local guide in Ruifang.", 
@@ -105,36 +73,7 @@ export const translations = {
         toast_copy_success: "✅ Copied to clipboard",
         toast_custom_saved: "✅ Custom spot saved",
         toast_custom_deleted: "🗑️ Spot deleted",
-        toast_network_err: "Network error, please try again",
-
-        setting_skin: "Interface Skin",
-        skin_default: "Default (Clean)",
-        skin_glass: "💧 Liquid Glass",
-        skin_newyear: "🧧 Lunar New Year",
-        skin_sakura: "🌸 Sakura Falling",
-
-        setting_map_layer: "Map Base Layer",
-        map_std: "Standard Street",
-        map_sat: "Satellite Imagery",
-        map_topo: "Topographic",
-        map_hist: "History Filter",
-
-        setting_transit: "Transit Network",
-        label_transit_on: "Show Railway/Metro",
-
-        "distance_prefix": "Dist",
-        "route_title": "Directions",
-        "route_drive": "Driving",
-        "route_scooter": "Scooter",
-        "route_transit": "Transit",
-        "route_walk": "Walk",
-        "cancel": "Cancel",
-        "addr_copy_success": "Address Copied",
-        "tab_history": "History",
-        "tab_food": "Local Food",
-        "tab_transport": "Transport",
-        "btn_route": "Route",
-        "btn_voice": "Voice",
+        toast_network_err: "Network error, please try again"
     },
     'ja': { 
         splash_title: "瑞芳ガイド", splash_desc: "瑞芳の正確なローカルガイド。", 
@@ -170,36 +109,7 @@ export const translations = {
         toast_copy_success: "✅ クリップボードにコピーしました",
         toast_custom_saved: "✅ 保存しました",
         toast_custom_deleted: "🗑️ 削除しました",
-        toast_network_err: "ネットワークエラー",
-
-        setting_skin: "テーマスキン",
-        skin_default: "デフォルト (標準)",
-        skin_glass: "💧 ガラス風 (Glass)",
-        skin_newyear: "🧧 新年 (提灯)",
-        skin_sakura: "🌸 桜吹雪 (Sakura)",
-
-        setting_map_layer: "地図レイヤー",
-        map_std: "標準マップ",
-        map_sat: "衛星写真",
-        map_topo: "地形図",
-        map_hist: "レトロフィルター",
-
-        setting_transit: "交通網表示",
-        label_transit_on: "鉄道・地下鉄を表示",
-
-        "distance_prefix": "距離",
-        "route_title": "アクセス方法",
-        "route_drive": "車で",
-        "route_scooter": "バイクで",
-        "route_transit": "交通機関",
-        "route_walk": "徒歩",
-        "cancel": "キャンセル",
-        "addr_copy_success": "住所をコピーしました",
-        "tab_history": "歴史",
-        "tab_food": "グルメ",
-        "tab_transport": "アクセス",
-        "btn_route": "ルート",
-        "btn_voice": "音声ガイド",
+        toast_network_err: "ネットワークエラー"
     },
     'ko': { 
         splash_title: "루이팡 가이드", splash_desc: "루이팡 지역의 정확한 로컬 가이드.", 
@@ -235,7 +145,7 @@ export const translations = {
         toast_copy_success: "✅ 클립보드에 복사됨",
         toast_custom_saved: "✅ 저장되었습니다",
         toast_custom_deleted: "🗑️ 삭제되었습니다",
-        toast_network_err: "네트워크 오류",
+        toast_network_err: "네트워크 오류"
     },
     'vi': { 
         splash_title: "Bản đồ Ruifang", splash_desc: "Hướng dẫn du lịch địa phương chính xác nhất.", 
@@ -271,6 +181,6 @@ export const translations = {
         toast_copy_success: "✅ Đã sao chép vào khay nhớ tạm",
         toast_custom_saved: "✅ Đã lưu địa điểm",
         toast_custom_deleted: "🗑️ Đã xóa",
-        toast_network_err: "Lỗi mạng, vui lòng thử lại",
+        toast_network_err: "Lỗi mạng, vui lòng thử lại"
     }
 };
