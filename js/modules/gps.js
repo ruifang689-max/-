@@ -1,5 +1,6 @@
-// js/modules/gps.js (v645) - 恢復比例尺旁 GPS 座標顯示
+// js/modules/gps.js (v646) - 事件驅動版
 import { state } from '../core/store.js';
+import { events } from '../core/events.js?v=646'; // 🌟 引入事件匯流排
 
 let watchId = null;
 let userMarker = null;
@@ -29,9 +30,7 @@ const injectCompassCSS = () => {
             0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0.7; }
             100% { transform: translate(-50%, -50%) scale(3.5); opacity: 0; }
         }
-        
         .gps-arrow-container { position: absolute; top: 0; left: 0; width: 60px; height: 60px; z-index: 2; transition: transform 0.1s ease-out; }
-        
         .gps-arrow-container::before { 
             content: ''; position: absolute; bottom: 50%; left: 50%; transform: translateX(-50%);
             width: 55px; height: 55px; 
@@ -92,10 +91,8 @@ const requestCompassPermission = () => {
 export function initGPS() {
     injectCompassCSS();
 
-    let isUserPanning = false;
-    if (state.mapInstance) {
-        state.mapInstance.on('dragstart', () => { isUserPanning = true; });
-    }
+    // GPS 模組不再關心「使用者是否在拖曳地圖」，它只負責報告位置
+    // 那些 UI 邏輯將由接收端 (announcer) 自己判斷
 
     window.rfApp.map.goToUser = () => {
         if (!navigator.geolocation) {
@@ -103,7 +100,6 @@ export function initGPS() {
             return;
         }
         
-        isUserPanning = false; 
         requestCompassPermission();
         
         const btnIcon = document.querySelector('.control-btn.active .fa-location-crosshairs');
@@ -117,34 +113,26 @@ export function initGPS() {
                 const { latitude: lat, longitude: lng, accuracy } = pos.coords;
                 state.userLocation = { lat, lng };
 
-                // 🌟 修復：在這裡把精確的經緯度座標寫回比例尺旁的 HTML 元素裡
+                // 1. 更新本機 UI (GPS 座標顯示) - 這是 GPS 模組的本份
                 const gpsValText = document.getElementById('gps-val-text');
                 if (gpsValText) gpsValText.textContent = `GPS: ${lat.toFixed(4)}, ${lng.toFixed(4)}`;
 
+                // 2. 更新地圖圖標
                 if (!userMarker) {
                     userMarker = L.marker([lat, lng], { icon: createCompassIcon(), zIndexOffset: 1000 }).addTo(state.mapInstance);
-                    
-                    compassCircle = L.circle([lat, lng], { 
-                        radius: accuracy, color: 'var(--primary)', opacity: 0.35,        
-                        fillColor: 'var(--primary)', fillOpacity: 0.08, weight: 1
-                    }).addTo(state.mapInstance);
-                    
+                    compassCircle = L.circle([lat, lng], { radius: accuracy, color: 'var(--primary)', opacity: 0.35, fillColor: 'var(--primary)', fillOpacity: 0.08, weight: 1 }).addTo(state.mapInstance);
                     state.mapInstance.flyTo([lat, lng], 17, { animate: true, duration: 1.5 });
                     if (typeof window.showToast === 'function') window.showToast('✅ 定位成功！實境羅盤已啟動', 'success');
                 } else {
                     userMarker.setLatLng([lat, lng]);
                     compassCircle.setLatLng([lat, lng]);
                     compassCircle.setRadius(accuracy);
-                    if (!isUserPanning) state.mapInstance.panTo([lat, lng]); 
+                    
+                    // 🌟 這裡發出一個「重要事件」，告知全系統：使用者位置更新了！
+                    // 並附帶「是否該鎖定視角」的建議 (但接收者可以選擇不理會)
+                    events.emit('location_update', { lat, lng, accuracy, timestamp: Date.now() });
                 }
                 if (btnIcon) btnIcon.classList.remove('fa-spin');
-                
-                // 🌟 真實地址解析
-                if (!isUserPanning) {
-                    if (window.rfApp.announcer && typeof window.rfApp.announcer.fetchRealAddress === 'function') {
-                        window.rfApp.announcer.fetchRealAddress(lat, lng, Math.round(accuracy));
-                    }
-                }
             },
             (err) => {
                 console.warn('GPS 錯誤:', err);
