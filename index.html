@@ -44,26 +44,17 @@
     
 <body id="main-body">
     
-    <header>
+    <header style="display:none;">
         <h1>瑞芳導覽地圖</h1>
         <p>探索礦鄉風華，山海美景一手掌握。</p>
     </header>
 
-    <main>
-        <h2>APP 核心導覽功能</h2>
-        <ul>
-            <li><strong>景點深度介紹：</strong>收錄九份老街、黃金博物館、猴硐貓村等在地故事。</li>
-            <li><strong>智慧交通路線：</strong>整合公車與火車時刻，解決瑞芳山區交通痛點。</li>
-            <li><strong>在地美食推薦：</strong>發掘隱藏版小吃，讓您吃得道地。</li>
-        </ul>
-    </main>
-    
     <div id="splash-screen">
         <div class="logo-anim">瑞</div>
         <h2 class="splash-title-text">瑞芳導覽</h2>
     </div>
 
-    <div id="welcome-screen">
+    <div id="intro-screen">
         <div class="welcome-wrapper">
             <div class="logo-static">瑞</div>
             <h1 class="welcome-title" data-i18n="splash_title">瑞芳導覽地圖</h1>
@@ -72,7 +63,7 @@
             <div class="input-group">
                 <label data-i18n="lang">語言 / Language</label>
                 <div class="custom-select-wrapper">
-                    <div class="custom-select-trigger" onclick="toggleDropdown('lang-startup-options')" style="border: 2px solid var(--intro-color) !important;">
+                    <div class="custom-select-trigger" onclick="toggleDropdown('lang-startup-options')" style="border: 2px solid var(--intro-screen) !important;">
                         <div class="left-content"><span id="current-lang-text-startup">繁體中文 (🇹🇼)</span></div>
                         <i class="fas fa-chevron-down" style="color: var(--text-sub);"></i>
                     </div>
@@ -90,7 +81,7 @@
                 <label data-i18n="feedback_title">測評問卷與聯絡 / Feedback</label>
                 <div class="link-box">
                     <a href="https://docs.google.com/forms/d/e/1FAIpQLSfi76mygYPT0XeWDkTVjy1F3NjWTW1qveFKTV2bC5TlJ6yybA/viewform?usp=header" target="_blank"><i class="fas fa-clipboard-list"></i> <span data-i18n="form_link">填寫測評問卷</span></a>
-                    <a href="mailto:service@example.com?subject=關於瑞芳導覽地圖的建議&body=你好，對此我有些建議想告訴："><i class="fas fa-envelope"></i> <span data-i18n="contact">聯絡開發團隊</span></a>
+                    <a href="mailto:ruifang689@gmail.com?subject=關於瑞芳導覽地圖的建議&body=你好，對此我有些建議想告訴："><i class="fas fa-envelope"></i> <span data-i18n="contact">聯絡開發團隊</span></a>
                 </div>
             </div>
 
@@ -98,342 +89,373 @@
         </div>
     </div>
 
-    <div id="tutorial-overlay">
-        <div class="tutorial-box">
-            <div id="tut-step-1">
-                <h3 data-i18n="tut_step1_title"><i class="fas fa-search"></i> 功能說明 (1/2)</h3>
-                <ul>
-                    <li>🔍 <b data-i18n="tut_search">搜尋與標籤</b>：上方可快速尋找與篩選景點。</li>
-                    <li>📍 <b data-i18n="tut_add">長按新增</b>：地圖長按可新增私房景點。</li>
-                    <li>🧭 <b data-i18n="tut_compass">指北針</b>：右下角綠色按鈕，指引方向。</li>
-                </ul>
-                <div class="tutorial-btns">
-                    <button class="btn-fill" style="width: 100%;" onclick="nextTutorial()" data-i18n="tut_next">下一步</button>
-                </div>
-            </div>
-            <div id="tut-step-2" style="display:none;">
-                <h3 data-i18n="tut_step2_title"><i class="fas fa-tools"></i> 進階功能 (2/2)</h3>
-                <ul>
-                    <li>🚗 <b data-i18n="tut_nav">多模式導航</b>：支援步行與開車路線計算。</li>
-                    <li>🎬 <b data-i18n="tut_tour">自動導覽</b>：點擊右下角播放鍵自動導覽。</li>
-                    <li><span style="color: var(--primary);">●</span> <b data-i18n="tut_share">分享鍵</b>：快速分享景點連結給好友。</li>
-                </ul>
-                <div class="tutorial-btns">
-                    <button class="btn-outline" onclick="prevTutorial()" data-i18n="tut_prev">上一步</button>
-                    <button class="btn-fill" onclick="finishTutorial()" data-i18n="tut_finish">開始使用</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-
-    <div id="map"></div>
-
-
-    <div id="weather-box" title="即時天氣"><i class="fas fa-spinner fa-spin"></i><span id="weather-temp">--</span></div>
-
-    <div id="top-ui">
-        <div id="search-container" style="width: 100%; position: relative;">
-            <input id="search" placeholder="🔍 搜尋景點、以下推薦或長按新增⋯⋯" data-i18n="search_ph">
-            <i id="search-clear-btn" class="fas fa-times-circle" onclick="clearSearchInput()" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: #aaa; cursor: pointer; display: none;"></i>
-        </div>
-        <div id="category-chips">
-            <div class="chip active" onclick="filterSpots('all', this)" data-i18n="chip_all">🌟 全部</div>
-            <div class="chip" onclick="filterSpots('美食', this)" data-i18n="chip_food">🍜 美食</div>
-            <div class="chip" onclick="filterSpots('歷史', this)" data-i18n="chip_history">🏛️ 歷史</div>
-            <div class="chip" onclick="filterSpots('自然', this)" data-i18n="chip_nature">⛰️ 自然</div>
-            <div class="chip" onclick="filterSpots('自訂', this)" data-i18n="chip_custom">📍 標記</div>
-        </div>
-        <div id="map-center-panel"><i class="fas fa-map-marker-alt" style="color:var(--primary)"></i><span id="addr-text" data-i18n="locating">即時報幕定位中...</span></div>
-        <div id="suggest">
-            <div class="suggest-header"><span style="font-size:12px; font-weight:bold; color:var(--text-sub);">搜尋與推薦</span> <i class="fas fa-times" style="cursor:pointer;" onclick="closeSuggest()"></i></div>
-            <div id="suggest-content"></div>
-        </div>
-    </div>
-
-    <div id="side-function-zone">
+    <div id="app" style="display: none;">
         
-        <div id="zone-collapse-btn" onclick="toggleSidePanel()">
-            <i class="fas fa-angle-double-right" id="side-panel-icon"></i>
-        </div>
-        
-        <div class="zone-buttons">
-            <div class="control-btn" onclick="openSettings()" title="系統設定"><i class="fas fa-cog"></i></div>
-            <div class="control-btn compass-btn" onclick="resetNorth()" title="指北針"><i class="fas fa-compass" style="color: #27ae60;"></i></div>
-            <div class="control-btn route-btn" onclick="openRouteMenu()" title="推薦路線"><i class="fas fa-route" style="color: #8e44ad;"></i></div>
-            <div class="control-btn fav-btn" onclick="toggleFavList()" title="我的收藏"><i class="fas fa-folder" style="color: #ff4757;"></i></div>
-            <div class="control-btn" id="tour-btn" onclick="toggleGuidedTour()" title="自動導覽"><i class="fas fa-play" style="color: #e84393;"></i></div>
-            <div class="control-btn" onclick="goToStation()" title="回到瑞芳中心" style="background:var(--bg-color);"><span class="rui-icon">瑞</span></div>
-            <div id="layer-btn" class="control-btn" onclick="toggleLayer()" title="切換底圖"><i class="fas fa-map"></i></div>
-            <div class="control-btn active" onclick="goToUser()" title="我的位置"><i class="fas fa-location-crosshairs" style="color: var(--primary);"></i></div>
-        </div>
-    </div>
-
-    <div id="fav-list-panel"></div>
-    <div id="gps-val-text" data-i18n="gps_locating">GPS: 定位中...</div>
-
-    <div id="route-info-panel">
-        <div class="route-modes">
-            <div class="route-mode-btn active" id="mode-driving" onclick="changeNavMode('driving')" title="開車/騎車"><i class="fas fa-car"></i></div>
-            <div class="route-mode-btn" id="mode-walking" onclick="changeNavMode('walking')" title="步行"><i class="fas fa-walking"></i></div>
-        </div>
-        <div class="route-data">
-            <span class="route-time" id="route-time">計算中...</span>
-            <span class="route-dist" id="route-dist"></span>
-        </div>
-        <i class="fas fa-times-circle route-close" onclick="closeNav()"></i>
-    </div>
-
-    <div id="card">
-        <div class="close-bar" onclick="closeCard()"></div>
-        <div class="card-header-row">
-            <h2 id="title">景點名稱</h2>
-            <div class="card-header-icons">
-                <i class="fas fa-share-alt" id="card-share-icon" onclick="shareSpot()"></i>
-                <i class="fas fa-heart" id="card-fav-icon" onclick="toggleCurrentFav()"></i>
-            </div>
-        </div>
-        <div id="card-tags"></div>
-        <img id="img" src="" alt="景點圖片">
-        <div class="info-section"><span class="info-label"><i class="fas fa-utensils"></i> <span data-i18n="food">特色</span></span><span class="info-text" id="card-food"></span></div>
-        <div class="info-section"><span class="info-label"><i class="fas fa-star"></i> <span data-i18n="highlights">推薦亮點</span></span><span class="info-text" id="card-highlights"></span></div>
-        <div class="info-section"><span class="info-label"><i class="fas fa-book-open"></i> <span data-i18n="history">歷史</span></span><span class="info-text" id="card-history"></span></div>
-        <div class="info-section"><span class="info-label"><i class="fas fa-bus"></i> <span data-i18n="transport">交通</span></span><span class="info-text" id="card-transport"></span></div>
-        <div class="btn-group" id="card-btn-group"></div>
-    </div>
-
-
-    <div id="settings-modal-overlay" class="modal-overlay">
-        <div class="modal-box">
-            <h2 class="settings-title" data-i18n="settings"><i class="fas fa-cog"></i> 系統設定</h2>
-            
-           <h3 class="settings-sub" data-i18n="lang"><i class="fas fa-globe"></i> 語言 / Language</h3>
-            <div class="custom-select-wrapper">
-                <div class="custom-select-trigger" onclick="toggleDropdown('lang-settings-options')">
-                    <div class="left-content"><span id="current-lang-text-settings">繁體中文 (🇹🇼)</span></div>
-                    <i class="fas fa-chevron-down" style="color: var(--text-sub);"></i>
+        <div id="tutorial-overlay">
+            <div class="tutorial-box">
+                <div id="tut-step-1">
+                    <h3 data-i18n="tut_step1_title"><i class="fas fa-search"></i> 功能說明 (1/2)</h3>
+                    <ul>
+                        <li>🔍 <b data-i18n="tut_search">搜尋與標籤</b>：上方可快速尋找與篩選景點。</li>
+                        <li>📍 <b data-i18n="tut_add">長按新增</b>：地圖長按可新增私房景點。</li>
+                        <li>🧭 <b data-i18n="tut_compass">指北針</b>：右下角綠色按鈕，指引方向。</li>
+                    </ul>
+                    <div class="tutorial-btns">
+                        <button class="btn-fill" style="width: 100%;" onclick="nextTutorial()" data-i18n="tut_next">下一步</button>
+                    </div>
                 </div>
-                <div class="custom-select-options" id="lang-settings-options">
-                    <div class="custom-option" onclick="selectLangOption('zh')">繁體中文 (🇹🇼)</div>
-                    <div class="custom-option" onclick="selectLangOption('en')">English (🇺🇸)</div>
-                    <div class="custom-option" onclick="selectLangOption('ja')">日本語 (🇯🇵)</div>
-                    <div class="custom-option" onclick="selectLangOption('ko')">한국어 (🇰🇷)</div>
-                    <div class="custom-option" onclick="selectLangOption('vi')">Tiếng Việt (🇻🇳)</div>
+                <div id="tut-step-2" style="display:none;">
+                    <h3 data-i18n="tut_step2_title"><i class="fas fa-tools"></i> 進階功能 (2/2)</h3>
+                    <ul>
+                        <li>🚗 <b data-i18n="tut_nav">多模式導航</b>：支援步行與開車路線計算。</li>
+                        <li>🎬 <b data-i18n="tut_tour">自動導覽</b>：點擊右下角播放鍵自動導覽。</li>
+                        <li><span style="color: var(--primary);">●</span> <b data-i18n="tut_share">分享鍵</b>：快速分享景點連結給好友。</li>
+                    </ul>
+                    <div class="tutorial-btns">
+                        <button class="btn-outline" onclick="prevTutorial()" data-i18n="tut_prev">上一步</button>
+                        <button class="btn-fill" onclick="finishTutorial()" data-i18n="tut_finish">開始使用</button>
+                    </div>
                 </div>
             </div>
+        </div>
 
-            <h3 class="settings-sub"><i class="fas fa-cloud"></i> 雲端同步</h3>
-            <div style="background: var(--glass); border: 1px solid var(--border-color); border-radius: 8px; padding: 15px; text-align: center; margin-bottom: 20px;">
-                <div id="user-info" style="display: none; margin-bottom: 12px; font-weight: bold; font-size: 14px; line-height: 1.5;"></div>
-                <button id="google-login-btn" style="background: #4285F4; color: white; border: none; padding: 10px 20px; border-radius: 6px; font-weight: bold; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s; width: 100%; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                    <i class="fab fa-google"></i> <span id="login-btn-text">使用 Google 帳號登入</span>
-                </button>
+        <div id="map"></div>
+
+        <div id="weather-box" title="即時天氣"><i class="fas fa-spinner fa-spin"></i><span id="weather-temp">--</span></div>
+
+        <div id="top-ui">
+            <div id="search-container" style="width: 100%; position: relative;">
+                <input id="search" placeholder="🔍 搜尋景點、以下推薦或長按新增⋯⋯" data-i18n="search_ph">
+                <i id="search-clear-btn" class="fas fa-times-circle" onclick="clearSearchInput()" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); color: #aaa; cursor: pointer; display: none;"></i>
             </div>
-            
-            <h3 class="settings-sub" data-i18n="theme"><i class="fas fa-palette"></i> 主題顏色</h3>
-            <div class="custom-select-wrapper" id="theme-custom-select">
+            <div id="category-chips">
+                <div class="chip active" onclick="filterSpots('all', this)" data-i18n="chip_all">🌟 全部</div>
+                <div class="chip" onclick="filterSpots('美食', this)" data-i18n="chip_food">🍜 美食</div>
+                <div class="chip" onclick="filterSpots('歷史', this)" data-i18n="chip_history">🏛️ 歷史</div>
+                <div class="chip" onclick="filterSpots('自然', this)" data-i18n="chip_nature">⛰️ 自然</div>
+                <div class="chip" onclick="filterSpots('自訂', this)" data-i18n="chip_custom">📍 標記</div>
+            </div>
+            <div id="map-center-panel"><i class="fas fa-map-marker-alt" style="color:var(--primary)"></i><span id="addr-text" data-i18n="locating">即時報幕定位中...</span></div>
+            <div id="suggest">
+                <div class="suggest-header"><span style="font-size:12px; font-weight:bold; color:var(--text-sub);">搜尋與推薦</span> <i class="fas fa-times" style="cursor:pointer;" onclick="closeSuggest()"></i></div>
+                <div id="suggest-content"></div>
+            </div>
+        </div>
+
+        <div id="side-function-zone">
+            <div id="zone-collapse-btn" onclick="toggleSidePanel()">
+                <i class="fas fa-angle-double-right" id="side-panel-icon"></i>
+            </div>
+            <div class="zone-buttons">
+                <div class="control-btn" onclick="openSettings()" title="系統設定"><i class="fas fa-cog"></i></div>
+                <div class="control-btn compass-btn" onclick="resetNorth()" title="指北針"><i class="fas fa-compass" style="color: #27ae60;"></i></div>
+                <div class="control-btn route-btn" onclick="openRouteMenu()" title="推薦路線"><i class="fas fa-route" style="color: #8e44ad;"></i></div>
+                <div class="control-btn fav-btn" onclick="toggleFavList()" title="我的收藏"><i class="fas fa-folder" style="color: #ff4757;"></i></div>
+                <div class="control-btn" id="tour-btn" onclick="toggleGuidedTour()" title="自動導覽"><i class="fas fa-play" style="color: #e84393;"></i></div>
+                <div class="control-btn" onclick="goToStation()" title="回到瑞芳中心" style="background:var(--bg-color);"><span class="rui-icon">瑞</span></div>
+                <div id="layer-btn" class="control-btn" onclick="toggleLayer()" title="切換底圖"><i class="fas fa-map"></i></div>
+                <div class="control-btn active" onclick="goToUser()" title="我的位置"><i class="fas fa-location-crosshairs" style="color: var(--primary);"></i></div>
+            </div>
+        </div>
+
+        <div id="fav-list-panel"></div>
+        <div id="gps-val-text" data-i18n="gps_locating">GPS: 定位中...</div>
+
+        <div id="route-info-panel">
+            <div class="route-modes">
+                <div class="route-mode-btn active" id="mode-driving" onclick="changeNavMode('driving')" title="開車/騎車"><i class="fas fa-car"></i></div>
+                <div class="route-mode-btn" id="mode-walking" onclick="changeNavMode('walking')" title="步行"><i class="fas fa-walking"></i></div>
+            </div>
+            <div class="route-data">
+                <span class="route-time" id="route-time">計算中...</span>
+                <span class="route-dist" id="route-dist"></span>
+            </div>
+            <i class="fas fa-times-circle route-close" onclick="closeNav()"></i>
+        </div>
+
+        <div id="card">
+            <div class="close-bar" onclick="closeCard()"></div>
+            <div class="card-header-row">
+                <h2 id="title">景點名稱</h2>
+                <div class="card-header-icons">
+                    <i class="fas fa-share-alt" id="card-share-icon" onclick="shareSpot()"></i>
+                    <i class="fas fa-heart" id="card-fav-icon" onclick="toggleCurrentFav()"></i>
+                </div>
+            </div>
+            <div id="card-tags"></div>
+            <img id="img" src="" alt="景點圖片">
+            <div class="info-section"><span class="info-label"><i class="fas fa-utensils"></i> <span data-i18n="food">特色</span></span><span class="info-text" id="card-food"></span></div>
+            <div class="info-section"><span class="info-label"><i class="fas fa-star"></i> <span data-i18n="highlights">推薦亮點</span></span><span class="info-text" id="card-highlights"></span></div>
+            <div class="info-section"><span class="info-label"><i class="fas fa-book-open"></i> <span data-i18n="history">歷史</span></span><span class="info-text" id="card-history"></span></div>
+            <div class="info-section"><span class="info-label"><i class="fas fa-bus"></i> <span data-i18n="transport">交通</span></span><span class="info-text" id="card-transport"></span></div>
+            <div class="btn-group" id="card-btn-group"></div>
+        </div>
+
+        <div id="settings-modal-overlay" class="modal-overlay">
+            <div class="modal-box">
+                <h2 class="settings-title" data-i18n="settings"><i class="fas fa-cog"></i> 系統設定</h2>
                 
-                <div class="custom-select-trigger" onclick="toggleDropdown('theme-options-list')">
-                    <div class="left-content">
-                        <div class="color-swatch" id="current-theme-color" style="background: #007bff;"></div>
-                        <span id="current-theme-text">系統主題色 (預設)</span>
+                <h3 class="settings-sub" data-i18n="lang"><i class="fas fa-globe"></i> 語言 / Language</h3>
+                <div class="custom-select-wrapper">
+                    <div class="custom-select-trigger" onclick="toggleDropdown('lang-settings-options')">
+                        <div class="left-content"><span id="current-lang-text-settings">繁體中文 (🇹🇼)</span></div>
+                        <i class="fas fa-chevron-down" style="color: var(--text-sub);"></i>
                     </div>
-                    <i class="fas fa-chevron-down" style="color: var(--text-sub);"></i>
+                    <div class="custom-select-options" id="lang-settings-options">
+                        <div class="custom-option" onclick="selectLangOption('zh')">繁體中文 (🇹🇼)</div>
+                        <div class="custom-option" onclick="selectLangOption('en')">English (🇺🇸)</div>
+                        <div class="custom-option" onclick="selectLangOption('ja')">日本語 (🇯🇵)</div>
+                        <div class="custom-option" onclick="selectLangOption('ko')">한국어 (🇰🇷)</div>
+                        <div class="custom-option" onclick="selectLangOption('vi')">Tiếng Việt (🇻🇳)</div>
+                    </div>
+                </div>
+
+                <div class="setting-divider"></div>
+                <h3 class="settings-sub"><i class="fas fa-paint-brush"></i> 介面與地圖外觀</h3>
+                
+                <div class="setting-item">
+                    <div class="setting-label">
+                        <i class="fas fa-magic"></i> 
+                        <span data-i18n="setting_skin">介面風格 (Skin)</span>
+                    </div>
+                    <div class="custom-select-container" onclick="toggleSkinOptions()">
+                        <div class="custom-select-display">
+                            <span id="current-skin-text" data-i18n="skin_default">系統預設 (乾淨)</span>
+                            <i class="fas fa-chevron-down"></i>
+                        </div>
+                        <div id="skin-options-list" class="custom-select-options u-hidden">
+                            <div class="option-item" onclick="selectSkinOption('default', '系統預設 (乾淨)')"><span data-i18n="skin_default">系統預設 (乾淨)</span></div>
+                            <div class="option-item" onclick="selectSkinOption('glass', '💧 液態玻璃 (Glassmorphism)')"><span data-i18n="skin_glass">💧 液態玻璃 (Glassmorphism)</span></div>
+                            <div class="option-item" onclick="selectSkinOption('newyear', '🧧 恭賀新禧 (燈籠春聯)')"><span data-i18n="skin_newyear">🧧 恭賀新禧 (燈籠春聯)</span></div>
+                            <div class="option-item" onclick="selectSkinOption('sakura', '🌸 浪漫櫻花 (飄落特效)')"><span data-i18n="skin_sakura">🌸 浪漫櫻花 (飄落特效)</span></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="setting-item">
+                    <div class="setting-label">
+                        <i class="fas fa-layer-group"></i> 
+                        <span data-i18n="setting_map_layer">地圖底圖模式</span>
+                    </div>
+                    <div class="setting-control">
+                        <select class="form-select" onchange="window.rfApp.map.switchBaseLayer(this.value)" style="width:100%; padding:8px; border-radius:8px;">
+                            <option value="standard" data-i18n="map_std">標準街道圖</option>
+                            <option value="satellite" data-i18n="map_sat">衛星影像</option>
+                            <option value="topo" data-i18n="map_topo">等高地形圖</option>
+                            <option value="history" data-i18n="map_hist">懷舊歷史濾鏡</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="setting-item" style="display:flex; justify-content:space-between; align-items:center; margin-top:10px;">
+                    <div class="setting-label">
+                        <i class="fas fa-train"></i> 
+                        <span data-i18n="setting_transit">顯示交通路網</span>
+                    </div>
+                    <div class="setting-control">
+                        <label class="toggle-switch">
+                            <input type="checkbox" onchange="window.rfApp.map.toggleTransitLayer(this.checked)">
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                </div>
+                <div class="setting-divider"></div>
+
+                <h3 class="settings-sub"><i class="fas fa-cloud"></i> 雲端同步</h3>
+                <div style="background: var(--glass); border: 1px solid var(--border-color); border-radius: 8px; padding: 15px; text-align: center; margin-bottom: 20px;">
+                    <div id="user-info" style="display: none; margin-bottom: 12px; font-weight: bold; font-size: 14px; line-height: 1.5;"></div>
+                    <button id="google-login-btn" style="background: #4285F4; color: white; border: none; padding: 10px 20px; border-radius: 6px; font-weight: bold; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s; width: 100%; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                        <i class="fab fa-google"></i> <span id="login-btn-text">使用 Google 帳號登入</span>
+                    </button>
                 </div>
                 
-                <div class="custom-select-options" id="theme-options-list">
-                    <div class="custom-option" onclick="selectThemeOption('default', '#007bff', '系統主題色 (預設)')"><div class="color-swatch" style="background: #007bff;"></div>系統主題色 (預設)</div>
-                    <div class="custom-option" onclick="selectThemeOption('#007bff', '#007bff', '活力藍')"><div class="color-swatch" style="background: #007bff;"></div>活力藍</div>
-                    <div class="custom-option" onclick="selectThemeOption('#34495e', '#34495e', '夜幕藍')"><div class="color-swatch" style="background: #34495e;"></div>夜幕藍</div>
-                    <div class="custom-option" onclick="selectThemeOption('#333333', '#333333', '極簡黑')"><div class="color-swatch" style="background: #333333;"></div>極簡黑</div>
-                    <div class="custom-option" onclick="selectThemeOption('#95a5a6', '#95a5a6', '現代灰')"><div class="color-swatch" style="background: #95a5a6;"></div>現代灰</div>
-                    <div class="custom-option" onclick="selectThemeOption('#28a745', '#28a745', '自然綠')"><div class="color-swatch" style="background: #28a745;"></div>自然綠</div>
-                    <div class="custom-option" onclick="selectThemeOption('#27ae60', '#27ae60', '森林綠')"><div class="color-swatch" style="background: #27ae60;"></div>森林綠</div>
-                    <div class="custom-option" onclick="selectThemeOption('#f39c12', '#f39c12', '溫暖橘')"><div class="color-swatch" style="background: #f39c12;"></div>溫暖橘</div>
-                    <div class="custom-option" onclick="selectThemeOption('#e67e22', '#e67e22', '夕陽橘')"><div class="color-swatch" style="background: #e67e22;"></div>夕陽橘</div>
-                    <div class="custom-option" onclick="selectThemeOption('#FF0000', '#FF0000', '喜慶紅')"><div class="color-swatch" style="background: #FF0000;"></div>喜慶紅</div>
-                    <div class="custom-option" onclick="selectThemeOption('#f1c40f', '#f1c40f', '陽光黃')"><div class="color-swatch" style="background: #f1c40f;"></div>陽光黃</div>
-                    <div class="custom-option" onclick="selectThemeOption('#8e44ad', '#8e44ad', '神秘紫')"><div class="color-swatch" style="background: #8e44ad;"></div>神秘紫</div>
-                    <div class="custom-option" onclick="selectThemeOption('#e84393', '#e84393', '櫻花粉')"><div class="color-swatch" style="background: #e84393;"></div>櫻花粉</div>
-                    <div class="custom-option" onclick="selectThemeOption('custom', 'linear-gradient(135deg, #ff9a9e, #fecfef)', '自訂顏色...')"><div class="color-swatch" style="background: linear-gradient(135deg, #ff9a9e, #fecfef);"></div>自訂顏色...</div>
-                </div>
-            </div>
-            
-            <input type="color" id="custom-color-picker" style="display:none; width:100%; margin-top:10px; height:40px; border:none; cursor:pointer;" onchange="applyCustomTheme(this.value, true)">
-
-
-            <h3 class="settings-sub" data-i18n="font"><i class="fas fa-font"></i> 字體選擇</h3>
-            <div class="custom-select-wrapper" id="font-custom-select">
-                <div class="custom-select-trigger" onclick="toggleDropdown('font-options-list')">
-                    <div class="left-content">
-                        <span id="current-font-text">系統預設 (黑體)</span>
+                <h3 class="settings-sub" data-i18n="theme"><i class="fas fa-palette"></i> 主題顏色</h3>
+                <div class="custom-select-wrapper" id="theme-custom-select">
+                    <div class="custom-select-trigger" onclick="toggleDropdown('theme-options-list')">
+                        <div class="left-content">
+                            <div class="color-swatch" id="current-theme-color" style="background: #007bff;"></div>
+                            <span id="current-theme-text">系統主題色 (預設)</span>
+                        </div>
+                        <i class="fas fa-chevron-down" style="color: var(--text-sub);"></i>
                     </div>
-                    <i class="fas fa-chevron-down" style="color: var(--text-sub);"></i>
+                    <div class="custom-select-options" id="theme-options-list">
+                        <div class="custom-option" onclick="selectThemeOption('default', '#007bff', '系統主題色 (預設)')"><div class="color-swatch" style="background: #007bff;"></div>系統主題色 (預設)</div>
+                        <div class="custom-option" onclick="selectThemeOption('#007bff', '#007bff', '活力藍')"><div class="color-swatch" style="background: #007bff;"></div>活力藍</div>
+                        <div class="custom-option" onclick="selectThemeOption('#34495e', '#34495e', '夜幕藍')"><div class="color-swatch" style="background: #34495e;"></div>夜幕藍</div>
+                        <div class="custom-option" onclick="selectThemeOption('#333333', '#333333', '極簡黑')"><div class="color-swatch" style="background: #333333;"></div>極簡黑</div>
+                        <div class="custom-option" onclick="selectThemeOption('#95a5a6', '#95a5a6', '現代灰')"><div class="color-swatch" style="background: #95a5a6;"></div>現代灰</div>
+                        <div class="custom-option" onclick="selectThemeOption('#28a745', '#28a745', '自然綠')"><div class="color-swatch" style="background: #28a745;"></div>自然綠</div>
+                        <div class="custom-option" onclick="selectThemeOption('#27ae60', '#27ae60', '森林綠')"><div class="color-swatch" style="background: #27ae60;"></div>森林綠</div>
+                        <div class="custom-option" onclick="selectThemeOption('#f39c12', '#f39c12', '溫暖橘')"><div class="color-swatch" style="background: #f39c12;"></div>溫暖橘</div>
+                        <div class="custom-option" onclick="selectThemeOption('#e67e22', '#e67e22', '夕陽橘')"><div class="color-swatch" style="background: #e67e22;"></div>夕陽橘</div>
+                        <div class="custom-option" onclick="selectThemeOption('#FF0000', '#FF0000', '喜慶紅')"><div class="color-swatch" style="background: #FF0000;"></div>喜慶紅</div>
+                        <div class="custom-option" onclick="selectThemeOption('#f1c40f', '#f1c40f', '陽光黃')"><div class="color-swatch" style="background: #f1c40f;"></div>陽光黃</div>
+                        <div class="custom-option" onclick="selectThemeOption('#8e44ad', '#8e44ad', '神秘紫')"><div class="color-swatch" style="background: #8e44ad;"></div>神秘紫</div>
+                        <div class="custom-option" onclick="selectThemeOption('#e84393', '#e84393', '櫻花粉')"><div class="color-swatch" style="background: #e84393;"></div>櫻花粉</div>
+                        <div class="custom-option" onclick="selectThemeOption('custom', 'linear-gradient(135deg, #ff9a9e, #fecfef)', '自訂顏色...')"><div class="color-swatch" style="background: linear-gradient(135deg, #ff9a9e, #fecfef);"></div>自訂顏色...</div>
+                    </div>
+                </div>
+                <input type="color" id="custom-color-picker" style="display:none; width:100%; margin-top:10px; height:40px; border:none; cursor:pointer;" onchange="applyCustomTheme(this.value, true)">
+
+                <h3 class="settings-sub" data-i18n="font"><i class="fas fa-font"></i> 字體選擇</h3>
+                <div class="custom-select-wrapper" id="font-custom-select">
+                    <div class="custom-select-trigger" onclick="toggleDropdown('font-options-list')">
+                        <div class="left-content"><span id="current-font-text">系統預設 (黑體)</span></div>
+                        <i class="fas fa-chevron-down" style="color: var(--text-sub);"></i>
+                    </div>
+                    <div class="custom-select-options" id="font-options-list">
+                        <div class="custom-option" onclick="selectFontOption('default', '系統預設 (黑體)')"><span style="font-family: sans-serif;">系統預設 (黑體)</span></div>
+                        <div class="custom-option" onclick="selectFontOption('iansui', '芫荽')"><span style="font-family: 'Iansui', sans-serif; font-size: 16px;">芫荽</span></div>
+                        <div class="custom-option" onclick="selectFontOption('wenkai', '文楷')"><span style="font-family: 'LXGW WenKai TC', sans-serif; font-size: 15px;">文楷</span></div>
+                        <div class="custom-option" onclick="selectFontOption('huninn', '粉圓')"><span style="font-family: 'jf-openhuninn', sans-serif; font-size: 15px;">粉圓</span></div>
+                    </div>
                 </div>
                 
-                <div class="custom-select-options" id="font-options-list">
-                    <div class="custom-option" onclick="selectFontOption('default', '系統預設 (黑體)')">
-                        <span style="font-family: sans-serif;">系統預設 (黑體)</span>
+                <div style="margin-top: 20px; border-top: 1px dashed var(--divider-color); padding-top: 15px;">
+                    <h3 class="settings-sub" style="margin-top: 0; margin-bottom: 15px;"><i class="fas fa-forward"></i> 啟動略過設定</h3>
+                    <div class="settings-grid">
+                        <label class="toggle-label">
+                            <span>開場動畫</span>
+                            <div class="toggle-switch">
+                                <input type="checkbox" id="toggle-skip-anim" onchange="saveSkipSettings()">
+                                <span class="toggle-slider"></span>
+                            </div>
+                        </label>
+                        <label class="toggle-label">
+                            <span>開幕介面</span>
+                            <div class="toggle-switch">
+                                <input type="checkbox" id="toggle-skip-welcome" onchange="saveSkipSettings()">
+                                <span class="toggle-slider"></span>
+                            </div>
+                        </label>
+                        <label class="toggle-label">
+                            <span>功能說明</span>
+                            <div class="toggle-switch">
+                                <input type="checkbox" id="toggle-skip-tour" onchange="saveSkipSettings()">
+                                <span class="toggle-slider"></span>
+                            </div>
+                        </label>
+                        <label class="toggle-label">
+                            <span>指引教學</span>
+                            <div class="toggle-switch">
+                                <input type="checkbox" id="toggle-skip-tutorial" onchange="saveSkipSettings()">
+                                <span class="toggle-slider"></span>
+                            </div>
+                        </label>
                     </div>
-                    <div class="custom-option" onclick="selectFontOption('iansui', '芫荽')">
-                        <span style="font-family: 'Iansui', sans-serif; font-size: 16px;">芫荽</span>
+                </div>
+
+                <div id="install-btn-container" style="display:none; margin-top: 15px;">
+                    <button class="install-pwa-btn" onclick="installPWA()"><i class="fas fa-download"></i> <span data-i18n="install_app">將 App 安裝至桌面</span></button>
+                </div>
+
+                <div class="contact-section">
+                    <h3 class="settings-sub" style="width:100%; margin-bottom:10px;" data-i18n="feedback_title">測評問卷與聯絡</h3>
+                    <a href="https://docs.google.com/forms/d/e/1FAIpQLSfi76mygYPT0XeWDkTVjy1F3NjWTW1qveFKTV2bC5TlJ6yybA/viewform?usp=header" target="_blank" class="contact-btn"><i class="fas fa-clipboard-list"></i> <span data-i18n="form_link">填寫測評問卷</span></a>
+                    <a href="mailto:service@example.com?subject=關於瑞芳導覽地圖的建議&body=你好，對此我有些建議想告訴：" class="contact-btn"><i class="fas fa-envelope"></i> <span data-i18n="contact">聯絡開發團隊</span></a>
+                    <div class="contact-btn" onclick="shareAppMap()"><i class="fas fa-share-alt"></i> <span data-i18n="share_map_title">推薦地圖給好友</span></div>
+                </div>
+
+                <div style="text-align:center; margin-top: 10px;">
+                    <button onclick="reopenTutorial()" style="background:transparent; border:1px solid #aaa; padding:8px 20px; border-radius:8px; color:#555; font-size:13px; cursor:pointer;">
+                        <i class="fas fa-info-circle"></i> <span data-i18n="tut_title">重新查看功能教學</span>
+                    </button>
+                </div>
+
+                <div class="modal-btns">
+                    <button class="modal-cancel" onclick="closeSettings()" data-i18n="close">關閉</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="route-select-modal" class="modal-overlay">
+            <div class="modal-box">
+                <h3 class="modal-title route"><i class="fas fa-route"></i> 選擇熱門路線</h3>
+                <div class="route-list-container">
+                    <div class="route-item" onclick="selectRoute('history')">
+                        <div class="route-info"><span class="route-name" style="color: #8e44ad;">🏛️ 歷史懷舊線</span><span class="route-desc">九份老街 ➔ 黃金博物館</span></div>
+                        <button class="route-action-btn" style="background:#8e44ad;">出發</button>
                     </div>
-                    <div class="custom-option" onclick="selectFontOption('wenkai', '文楷')">
-                        <span style="font-family: 'LXGW WenKai TC', sans-serif; font-size: 15px;">文楷</span>
+                    <div class="route-item" onclick="selectRoute('nature')">
+                        <div class="route-info"><span class="route-name" style="color: #27ae60;">⛰️ 山海自然線</span><span class="route-desc">猴硐 ➔ 報時山 ➔ 陰陽海</span></div>
+                        <button class="route-action-btn" style="background:#27ae60;">出發</button>
                     </div>
-                    <div class="custom-option" onclick="selectFontOption('huninn', '粉圓')">
-                        <span style="font-family: 'jf-openhuninn', sans-serif; font-size: 15px;">粉圓</span>
+                    <div class="route-item" onclick="selectRoute('food')">
+                        <div class="route-info"><span class="route-name" style="color: #d35400;">🍜 饕客美食線</span><span class="route-desc">車站美食 ➔ 芋圓 ➔ 礦工便當</span></div>
+                        <button class="route-action-btn" style="background:#d35400;">出發</button>
                     </div>
                 </div>
-            </div>
-            
-            <div style="margin-top: 20px; border-top: 1px dashed var(--divider-color); padding-top: 15px;">
-                <h3 class="settings-sub" style="margin-top: 0; margin-bottom: 15px;"><i class="fas fa-forward"></i> 啟動略過設定</h3>
-                <div class="settings-grid">
-                    <label class="toggle-label">
-                        <span>開場動畫</span>
-                        <div class="toggle-switch">
-                            <input type="checkbox" id="toggle-skip-anim" onchange="saveSkipSettings()">
-                            <span class="toggle-slider"></span>
-                        </div>
-                    </label>
-                    <label class="toggle-label">
-                        <span>開幕介面</span>
-                        <div class="toggle-switch">
-                            <input type="checkbox" id="toggle-skip-welcome" onchange="saveSkipSettings()">
-                            <span class="toggle-slider"></span>
-                        </div>
-                    </label>
-                    <label class="toggle-label">
-                        <span>功能說明</span>
-                        <div class="toggle-switch">
-                            <input type="checkbox" id="toggle-skip-tour" onchange="saveSkipSettings()">
-                            <span class="toggle-slider"></span>
-                        </div>
-                    </label>
-                    <label class="toggle-label">
-                        <span>指引教學</span>
-                        <div class="toggle-switch">
-                            <input type="checkbox" id="toggle-skip-tutorial" onchange="saveSkipSettings()">
-                            <span class="toggle-slider"></span>
-                        </div>
-                    </label>
+                <div class="modal-btns">
+                    <button class="modal-cancel" onclick="closeRouteMenu()" data-i18n="close" style="width: 100%;">關閉</button>
                 </div>
             </div>
-
-            <div id="install-btn-container" style="display:none; margin-top: 15px;">
-                <button class="install-pwa-btn" onclick="installPWA()"><i class="fas fa-download"></i> <span data-i18n="install_app">將 App 安裝至桌面</span></button>
-            </div>
-
-            <div class="contact-section">
-                <h3 class="settings-sub" style="width:100%; margin-bottom:10px;" data-i18n="feedback_title">測評問卷與聯絡</h3>
-                <a href="https://docs.google.com/forms/d/e/1FAIpQLSfi76mygYPT0XeWDkTVjy1F3NjWTW1qveFKTV2bC5TlJ6yybA/viewform?usp=header" target="_blank" class="contact-btn"><i class="fas fa-clipboard-list"></i> <span data-i18n="form_link">填寫測評問卷</span></a>
-                <a href="mailto:service@example.com?subject=關於瑞芳導覽地圖的建議&body=你好，對此我有些建議想告訴：" class="contact-btn"><i class="fas fa-envelope"></i> <span data-i18n="contact">聯絡開發團隊</span></a>
-                <div class="contact-btn" onclick="shareAppMap()"><i class="fas fa-share-alt"></i> <span data-i18n="share_map_title">推薦地圖給好友</span></div>
-            </div>
-
-            <div style="text-align:center; margin-top: 10px;">
-                <button onclick="reopenTutorial()" style="background:transparent; border:1px solid #aaa; padding:8px 20px; border-radius:8px; color:#555; font-size:13px; cursor:pointer;">
-                    <i class="fas fa-info-circle"></i> <span data-i18n="tut_title">重新查看功能教學</span>
-                </button>
-            </div>
-
-            <div class="modal-btns">
-                <button class="modal-cancel" onclick="closeSettings()" data-i18n="close">關閉</button>
-            </div>
         </div>
-    </div>
 
-    <div id="route-select-modal" class="modal-overlay">
-        <div class="modal-box">
-            <h3 class="modal-title route"><i class="fas fa-route"></i> 選擇熱門路線</h3>
-            <div class="route-list-container">
-                <div class="route-item" onclick="selectRoute('history')">
-                    <div class="route-info"><span class="route-name" style="color: #8e44ad;">🏛️ 歷史懷舊線</span><span class="route-desc">九份老街 ➔ 黃金博物館</span></div>
-                    <button class="route-action-btn" style="background:#8e44ad;">出發</button>
-                </div>
-                <div class="route-item" onclick="selectRoute('nature')">
-                    <div class="route-info"><span class="route-name" style="color: #27ae60;">⛰️ 山海自然線</span><span class="route-desc">猴硐 ➔ 報時山 ➔ 陰陽海</span></div>
-                    <button class="route-action-btn" style="background:#27ae60;">出發</button>
-                </div>
-                <div class="route-item" onclick="selectRoute('food')">
-                    <div class="route-info"><span class="route-name" style="color: #d35400;">🍜 饕客美食線</span><span class="route-desc">車站美食 ➔ 芋圓 ➔ 礦工便當</span></div>
-                    <button class="route-action-btn" style="background:#d35400;">出發</button>
+        <div id="fav-manage-modal" class="modal-overlay">
+            <div class="modal-box">
+                <h3 class="modal-title fav"><i class="fas fa-folder-open"></i> <span data-i18n="manage_fav">管理收藏夾</span></h3>
+                <div id="fav-manage-list" style="max-height: 50vh; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding-right: 5px;"></div>
+                <div class="modal-btns">
+                    <button class="modal-cancel" onclick="closeFavManage()" data-i18n="close" style="width: 100%;">關閉</button>
                 </div>
             </div>
-            <div class="modal-btns">
-                <button class="modal-cancel" onclick="closeRouteMenu()" data-i18n="close" style="width: 100%;">關閉</button>
+        </div>
+
+        <div id="edit-modal-overlay" class="modal-overlay">
+            <div class="modal-box">
+                <h3 class="modal-title"><i class="fas fa-edit" style="color: var(--primary);"></i> 編輯自訂標記</h3>
+                <input type="text" id="edit-name" class="modal-input" placeholder="地點名稱 (必填)">
+                <textarea id="edit-highlights" class="modal-textarea" placeholder="推薦亮點..."></textarea>
+                <textarea id="edit-history" class="modal-textarea" placeholder="備註或歷史..."></textarea>
+                <label class="modal-file-label"><i class="fas fa-camera"></i> 上傳專屬照片<input type="file" id="edit-image" accept="image/*" style="display:none;"></label>
+                <img id="edit-image-preview" src="">
+                <div class="modal-btns">
+                    <button class="modal-cancel" onclick="closeEditModal()">取消</button>
+                    <button class="modal-save" onclick="saveEditSpot()">儲存</button>
+                </div>
             </div>
         </div>
-    </div>
 
-    <div id="fav-manage-modal" class="modal-overlay">
-        <div class="modal-box">
-            <h3 class="modal-title fav"><i class="fas fa-folder-open"></i> <span data-i18n="manage_fav">管理收藏夾</span></h3>
-            <div id="fav-manage-list" style="max-height: 50vh; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; padding-right: 5px;"></div>
-            <div class="modal-btns">
-                <button class="modal-cancel" onclick="closeFavManage()" data-i18n="close" style="width: 100%;">關閉</button>
+        <div id="custom-spot-modal" class="modal-overlay">
+            <div class="modal-box">
+                <h3 class="modal-title"><i class="fas fa-map-pin" style="color: var(--primary);"></i> 新增自訂景點</h3>
+                <div id="custom-spot-addr" style="font-size: 13px; color: var(--text-sub); margin-bottom: 5px; padding: 12px; background: var(--divider-color); border-radius: 8px; line-height: 1.6; border: 1px solid var(--border-color);">
+                    📍 載入中...
+                </div>
+                <input type="text" id="custom-spot-name" class="modal-input" placeholder="請為此秘境命名 (例：我的秘密基地)">
+                <div class="modal-btns">
+                    <button class="modal-cancel" onclick="closeCustomSpotModal()">取消</button>
+                    <button class="modal-save" onclick="confirmCustomSpot()">儲存景點</button>
+                </div>
             </div>
         </div>
-    </div>
 
-    <div id="edit-modal-overlay" class="modal-overlay">
-        <div class="modal-box">
-            <h3 class="modal-title"><i class="fas fa-edit" style="color: var(--primary);"></i> 編輯自訂標記</h3>
-            <input type="text" id="edit-name" class="modal-input" placeholder="地點名稱 (必填)">
-            <textarea id="edit-highlights" class="modal-textarea" placeholder="推薦亮點..."></textarea>
-            <textarea id="edit-history" class="modal-textarea" placeholder="備註或歷史..."></textarea>
-            <label class="modal-file-label"><i class="fas fa-camera"></i> 上傳專屬照片<input type="file" id="edit-image" accept="image/*" style="display:none;"></label>
-            <img id="edit-image-preview" src="">
-            <div class="modal-btns">
-                <button class="modal-cancel" onclick="closeEditModal()">取消</button>
-                <button class="modal-save" onclick="saveEditSpot()">儲存</button>
+        <div id="ios-instruction-modal" class="modal-overlay" style="z-index: 99999;">
+            <div class="modal-box" style="text-align: center;">
+                <h3 style="color: #007aff; margin-bottom: 15px;"><i class="fab fa-apple"></i> 安裝至 iPhone 桌面</h3>
+                <p style="font-size: 15px; color: var(--text-main); line-height: 1.6;">
+                    為了獲得最佳的全螢幕導覽體驗，請：<br><br>
+                    1. 點擊瀏覽器下方的 <i class="fas fa-share-square" style="color:#007aff; font-size:18px;"></i> <b>分享按鈕</b><br><br>
+                    2. 往下滑動並選擇 <i class="fas fa-plus-square" style="color:#007aff; font-size:18px;"></i> <b>「加入主畫面」</b>
+                </p>
+                <div class="modal-btns" style="margin-top: 20px;">
+                    <button class="modal-save" style="background:#007aff;" onclick="closeIosInstruction()">我知道了</button>
+                </div>
             </div>
         </div>
-    </div>
 
-    <div id="custom-spot-modal" class="modal-overlay">
-        <div class="modal-box">
-            <h3 class="modal-title"><i class="fas fa-map-pin" style="color: var(--primary);"></i> 新增自訂景點</h3>
-            <div id="custom-spot-addr" style="font-size: 13px; color: var(--text-sub); margin-bottom: 5px; padding: 12px; background: var(--divider-color); border-radius: 8px; line-height: 1.6; border: 1px solid var(--border-color);">
-                📍 載入中...
-            </div>
-            <input type="text" id="custom-spot-name" class="modal-input" placeholder="請為此秘境命名 (例：我的秘密基地)">
-            <div class="modal-btns">
-                <button class="modal-cancel" onclick="closeCustomSpotModal()">取消</button>
-                <button class="modal-save" onclick="confirmCustomSpot()">儲存景點</button>
+        <div id="tour-focus-ring"></div>
+        <div id="tour-overlay" style="display: none;">
+            <div id="tour-tooltip" class="tour-tooltip">
+                <div id="tour-text"></div>
+                <div class="tour-buttons">
+                    <button onclick="endTour()" class="tour-skip">略過</button>
+                    <button onclick="nextTourStep()" id="tour-next-btn">下一步</button>
+                </div>
             </div>
         </div>
-    </div>
-
-    <div id="ios-instruction-modal" class="modal-overlay" style="z-index: 99999;">
-        <div class="modal-box" style="text-align: center;">
-            <h3 style="color: #007aff; margin-bottom: 15px;"><i class="fab fa-apple"></i> 安裝至 iPhone 桌面</h3>
-            <p style="font-size: 15px; color: var(--text-main); line-height: 1.6;">
-                為了獲得最佳的全螢幕導覽體驗，請：<br><br>
-                1. 點擊瀏覽器下方的 <i class="fas fa-share-square" style="color:#007aff; font-size:18px;"></i> <b>分享按鈕</b><br><br>
-                2. 往下滑動並選擇 <i class="fas fa-plus-square" style="color:#007aff; font-size:18px;"></i> <b>「加入主畫面」</b>
-            </p>
-            <div class="modal-btns" style="margin-top: 20px;">
-                <button class="modal-save" style="background:#007aff;" onclick="closeIosInstruction()">我知道了</button>
-            </div>
-        </div>
-    </div>
-
-    <div id="tour-focus-ring"></div>
-    <div id="tour-overlay" style="display: none;">
-        <div id="tour-tooltip" class="tour-tooltip">
-            <div id="tour-text"></div>
-            <div class="tour-buttons">
-                <button onclick="endTour()" class="tour-skip">略過</button>
-                <button onclick="nextTourStep()" id="tour-next-btn">下一步</button>
-            </div>
-        </div>
-    </div>
-
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    </div> <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
-    
     <script type="module" src="./js/main.js?v=657"></script>
 
     <script>
@@ -442,8 +464,8 @@
             if (splash && splash.style.display !== 'none' && splash.style.opacity !== '0') {
                 console.warn("⚠️ 啟動超時，已強制解除開場動畫");
                 splash.style.display = 'none';
-                const welcome = document.getElementById('welcome-screen');
-                if (!localStorage.getItem('ruifang_welcomed') && !localStorage.getItem('ruifang_skip_intro') === 'true' && welcome) {
+                const welcome = document.getElementById('intro-screen'); // 這裡也修正了
+                if (!localStorage.getItem('ruifang_welcomed') && !localStorage.getItem('ruifang_skip_intro-screen') === 'true' && welcome) {
                     welcome.style.display = 'flex'; welcome.style.opacity = '1';
                 }
             }
@@ -470,68 +492,9 @@
             </div>
         </div>
     </template>
-
-    <div class="setting-item">
-    <div class="setting-label">
-        <i class="fas fa-magic"></i> 
-        <span data-i18n="setting_skin">介面風格 (Skin)</span>
-    </div>
-    
-    <div class="custom-select-container" onclick="toggleSkinOptions()">
-        <div class="custom-select-display">
-            <span id="current-skin-text" data-i18n="skin_default">系統預設 (乾淨)</span>
-            <i class="fas fa-chevron-down"></i>
-        </div>
-        
-        <div id="skin-options-list" class="custom-select-options u-hidden">
-            <div class="option-item" onclick="selectSkinOption('default', '系統預設 (乾淨)')">
-                <span data-i18n="skin_default">系統預設 (乾淨)</span>
-            </div>
-            <div class="option-item" onclick="selectSkinOption('glass', '💧 液態玻璃 (Glassmorphism)')">
-                <span data-i18n="skin_glass">💧 液態玻璃 (Glassmorphism)</span>
-            </div>
-            <div class="option-item" onclick="selectSkinOption('newyear', '🧧 恭賀新禧 (燈籠春聯)')">
-                <span data-i18n="skin_newyear">🧧 恭賀新禧 (燈籠春聯)</span>
-            </div>
-            <div class="option-item" onclick="selectSkinOption('sakura', '🌸 浪漫櫻花 (飄落特效)')">
-                <span data-i18n="skin_sakura">🌸 浪漫櫻花 (飄落特效)</span>
-            </div>
-        </div>
-    </div>
-</div>
-
-    <div class="setting-divider"></div>
-
-<div class="setting-item">
-    <div class="setting-label">
-        <i class="fas fa-layer-group"></i> 
-        <span data-i18n="setting_map_layer">地圖底圖模式</span>
-    </div>
-    <div class="setting-control">
-        <select class="form-select" onchange="window.rfApp.map.switchBaseLayer(this.value)">
-            <option value="standard" data-i18n="map_std">標準街道圖</option>
-            <option value="satellite" data-i18n="map_sat">衛星影像</option>
-            <option value="topo" data-i18n="map_topo">等高地形圖</option>
-            <option value="history" data-i18n="map_hist">懷舊歷史濾鏡</option>
-        </select>
-    </div>
-</div>
-
-<div class="setting-item">
-    <div class="setting-label">
-        <i class="fas fa-train"></i> 
-        <span data-i18n="setting_transit">顯示交通路網</span>
-    </div>
-    <div class="setting-control">
-        <label class="toggle-switch">
-            <input type="checkbox" onchange="window.rfApp.map.toggleTransitLayer(this.checked)">
-            <span class="slider round"></span>
-        </label>
-    </div>
-</div>
-    
 </body>
 </html>
+
 
 
 
