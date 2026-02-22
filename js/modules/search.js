@@ -1,4 +1,4 @@
-// js/modules/search.js (v660) - 多國語言與搜尋欄修正版
+// js/modules/search.js (v661) - 多國語言與搜尋欄修正版
 import { state, saveState } from '../core/store.js';
 import { spots } from '../data/spots.js';
 import { showCard } from './cards.js';
@@ -210,14 +210,21 @@ export function initSearch() {
 
     if(searchInput) {
         searchInput.addEventListener('focus', () => { if(!searchInput.value.trim()) window.rfApp.search.renderDefaultSearch(); });
-        searchInput.addEventListener('input', function() {
+       searchInput.addEventListener('input', function() {
             const k = this.value.trim().toLowerCase();
             if (clearBtn) { if (k) { clearBtn.classList.remove('u-hidden'); clearBtn.classList.add('u-block'); } else { clearBtn.classList.add('u-hidden'); clearBtn.classList.remove('u-block'); } }
             clearTimeout(debounceTimer);
             debounceTimer = setTimeout(() => {
                 if(!k) { window.rfApp.search.renderDefaultSearch(); return; }
                 const allSpots = spots.concat(state.savedCustomSpots || []);
-                const plainSpots = allSpots.map(s => ({ name: s.name, tags: s.tags || [] }));
+                
+                // 🌟 修復關鍵：把 keywords 也一起打包傳給 Worker！
+                const plainSpots = allSpots.map(s => ({ 
+                    name: s.name, 
+                    tags: s.tags || [],
+                    keywords: s.keywords || [] // <--- 補上這行
+                }));
+                
                 if (searchWorker) { searchWorker.postMessage({ action: 'search', keyword: k, spotsData: plainSpots }); }
             }, 300);
         });
