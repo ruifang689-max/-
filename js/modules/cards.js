@@ -1,6 +1,5 @@
-// js/modules/cards.js (v630) - 瘦身版
+// js/modules/cards.js (v661) - 國際化 UI 補完版
 import { state, saveState } from '../core/store.js';
-import { translations } from '../data/lang.js';
 
 export function getPlaceholderImage(text) {
     const canvas = document.createElement('canvas'); canvas.width = 400; canvas.height = 200; const ctx = canvas.getContext('2d');
@@ -17,7 +16,7 @@ export function showCard(s) {
     const imgEl = document.getElementById('img');
     if (imgEl) {
         imgEl.loading = "lazy";
-        imgEl.src = s.wikiImg || getPlaceholderImage(s.name);
+        imgEl.src = s.wikiImg || s.coverImg || getPlaceholderImage(s.name);
         imgEl.onerror = () => { imgEl.src = getPlaceholderImage(s.name); };
     }
     
@@ -33,6 +32,9 @@ export function showCard(s) {
         </div>
     ` : '';
     
+    // 🌟 引入全域翻譯，若找不到則回退為中文預設值
+    const t = window.rfApp.t || (k => k); 
+
     const desc = s.description || s.highlights || "暫無介紹";
     const highlightsEl = document.getElementById("card-highlights");
     if (highlightsEl) highlightsEl.innerHTML = warningHtml + officialDetails + `<div>${desc}</div>`;
@@ -44,24 +46,31 @@ export function showCard(s) {
     if(historyEl) { historyEl.style.display = "block"; historyEl.innerText = s.history || "--"; }
     
     const transportEl = document.getElementById("card-transport"); 
-    if(transportEl) { transportEl.style.display = "block"; transportEl.innerText = s.transport || "自行前往"; }
+    // 加入翻譯
+    const selfGuideTxt = state.currentLang === 'en' ? 'Go by yourself' : (state.currentLang === 'ja' ? '各自アクセス' : '自行前往');
+    if(transportEl) { transportEl.style.display = "block"; transportEl.innerText = s.transport || selfGuideTxt; }
     
-    const t = translations[state.currentLang] || translations['zh'];
     const btnGroup = document.getElementById("card-btn-group");
     
-    // UI 按鈕依然呼叫 toggleTTS()，因為我們在 tts.js 建立了全域橋樑
+    // 🌟 將按鈕文字也接上動態翻譯
+    const txtNav = t('nav') || '導航';
+    const txtVoice = state.currentLang === 'en' ? 'Voice' : (state.currentLang === 'ja' ? '音声' : '語音');
+    const txtEdit = state.currentLang === 'en' ? 'Edit' : (state.currentLang === 'ja' ? '編集' : '編輯');
+    const txtDel = state.currentLang === 'en' ? 'Delete' : (state.currentLang === 'ja' ? '削除' : '刪除');
+    const txtAi = t('ai') || 'AI 行程';
+
     if (tags.includes('自訂')) { 
         btnGroup.innerHTML = `
-            <button onclick="startNav()" style="flex: 1;"><i class="fas fa-location-arrow"></i> ${t.nav || '導航'}</button>
-            <button class="secondary" onclick="toggleTTS()"><i class="fas fa-volume-up"></i> 語音</button>
-            <button class="secondary" onclick="openEditModal('${s.name}')"><i class="fas fa-edit"></i> 編輯</button>
-            <button class="danger" onclick="deleteCustomSpot('${s.name}')"><i class="fas fa-trash-alt"></i> 刪除</button>
+            <button onclick="startNav()" style="flex: 1;"><i class="fas fa-location-arrow"></i> ${txtNav}</button>
+            <button class="secondary" onclick="toggleTTS()"><i class="fas fa-volume-up"></i> ${txtVoice}</button>
+            <button class="secondary" onclick="openEditModal('${s.name}')"><i class="fas fa-edit"></i> ${txtEdit}</button>
+            <button class="danger" onclick="deleteCustomSpot('${s.name}')"><i class="fas fa-trash-alt"></i> ${txtDel}</button>
         `; 
     } else { 
         btnGroup.innerHTML = `
-            <button onclick="startNav()"><i class="fas fa-location-arrow"></i> ${t.nav || '導航'}</button>
-            <button class="secondary" onclick="toggleTTS()"><i class="fas fa-volume-up"></i> 語音</button>
-            <button class="secondary" onclick="aiTrip()"><i class="fas fa-magic"></i> ${t.ai || 'AI 行程'}</button>
+            <button onclick="startNav()"><i class="fas fa-location-arrow"></i> ${txtNav}</button>
+            <button class="secondary" onclick="toggleTTS()"><i class="fas fa-volume-up"></i> ${txtVoice}</button>
+            <button class="secondary" onclick="aiTrip()"><i class="fas fa-magic"></i> ${txtAi}</button>
         `; 
     }
     
@@ -72,7 +81,6 @@ export function showCard(s) {
 export function closeCard() { 
     document.getElementById("card").classList.remove("open"); 
     document.getElementById("card").style.transform = ''; 
-    // 🌟 呼叫新模組的 stop API
     if (typeof window.stopTTS === 'function') window.stopTTS();
 }
 
