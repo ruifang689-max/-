@@ -1,4 +1,4 @@
-// js/modules/gps.js (v658) - 修復非同步拉回 Bug 與效能優化
+// js/modules/gps.js (v659) - 修復初次定位廣播與防呆
 import { state } from '../core/store.js';
 import { events } from '../core/events.js?v=651'; 
 
@@ -11,7 +11,6 @@ let totalRotation = 0;
 let isCompassActive = false;
 let isFollowing = false; 
 
-// (CSS 注入部分維持原樣)
 const injectCompassCSS = () => {
     if (document.getElementById('gps-compass-style')) return;
     const style = document.createElement('style');
@@ -57,43 +56,61 @@ export function initGPS() {
     injectCompassCSS();
 
     if (state.mapInstance) {
-        // 使用者手動拖曳地圖時，解除跟隨模式
         state.mapInstance.on('dragstart', () => {
             if (isFollowing) {
                 isFollowing = false;
                 const gpsBtn = document.querySelector('.control-btn[onclick*="goToUser"]');
                 if (gpsBtn) gpsBtn.classList.remove('active');
-                if(typeof window.showToast === 'function') window.showToast(window.rfApp.t('toast_gps_follow_stop'), 'info');
+                if(typeof window.showToast === 'function') {
+                    const msg = window.rfApp.t ? window.rfApp.t('toast_gps_follow_stop') : '已停止位置跟隨';
+                    window.showToast(msg, 'info');
+                }
             }
         });
     }
 
     window.rfApp.map.goToUser = () => {
         if (!navigator.geolocation) {
-            if (typeof window.showToast === 'function') window.showToast(window.rfApp.t('toast_gps_fail'), 'error');
+            if (typeof window.showToast === 'function') {
+                const msg = window.rfApp.t ? window.rfApp.t('toast_gps_fail') : '您的裝置不支援定位';
+                window.showToast(msg, 'error');
+            }
             return;
         }
         
         isFollowing = true; 
         const gpsBtn = document.querySelector('.control-btn[onclick*="goToUser"]');
-        if (gpsBtn) gpsBtn.classList.add('active'); // 按下後，按鈕維持高亮狀態
+        if (gpsBtn) gpsBtn.classList.add('active'); 
         
         requestCompassPermission();
         
         const btnIcon = gpsBtn ? gpsBtn.querySelector('i') : null;
         
-        // 🌟 效能優化：如果硬體 GPS 已經有定位點了，直接切換視角，不重新發送硬體請求
+        // 🌟 效能優化：如果硬體 GPS 已啟動，瞬間飛回並廣播更新報幕
         if (watchId && userMarker) {
             const latlng = userMarker.getLatLng();
             state.mapInstance.flyTo(latlng, 17, { animate: true });
-            if (typeof window.showToast === 'function') window.showToast(window.rfApp.t('toast_gps_success'), 'success');
+            if (typeof window.showToast === 'function') {
+                const msg = window.rfApp.t ? window.rfApp.t('toast_gps_success') : '✅ 定位成功！';
+                window.showToast(msg, 'success');
+            }
+            events.emit('location_update', { 
+                lat: latlng.lat, 
+                lng: latlng.lng, 
+                accuracy: compassCircle.getRadius(), 
+                isFollowing: true, 
+                timestamp: Date.now() 
+            });
             return; 
         }
 
         if (watchId) navigator.geolocation.clearWatch(watchId);
 
         if (btnIcon) btnIcon.classList.add('fa-spin');
-        if (typeof window.showToast === 'function') window.showToast(window.rfApp.t('toast_gps_connecting'), 'info');
+        if (typeof window.showToast === 'function') {
+            const msg = window.rfApp.t ? window.rfApp.t('toast_gps_connecting') : '🛰️ GPS 衛星連線中...';
+            window.showToast(msg, 'info');
+        }
 
         watchId = navigator.geolocation.watchPosition(
             (pos) => {
@@ -105,13 +122,14 @@ export function initGPS() {
 
                 if (!userMarker) {
                     userMarker = L.marker([lat, lng], { icon: createCompassIcon(), zIndexOffset: 1000 }).addTo(state.mapInstance);
-                    compassCircle = L.circle([lat, lng], { radius: accuracy, color: 'var(--primary)', opacity: 0.4, fillColor: 'var(--primary)', fillOpacity: 0.08, weight: 1 }).addTo(state.mapInstance);
+                    compassCircle = L.circle([lat, lng], { radius: accuracy, color: 'var(--primary)', opacity: 0.4, fillColor: 'var(--primary)', fillOpacity: 0.08, weight: 1.5 }).addTo(state.mapInstance);
                     
-                    // 🌟 BUG 修復核心：即使是第一次拿到定位，也必須檢查 isFollowing
-                    // 如果使用者在這幾秒的空窗期內已經按了「瑞」或拖曳了地圖，就不准飛過去拉回視角！
                     if (isFollowing) {
                         state.mapInstance.flyTo([lat, lng], 17, { animate: true });
-                        if (typeof window.showToast === 'function') window.showToast(window.rfApp.t('toast_gps_success'), 'success');
+                        if (typeof window.showToast === 'function') {
+                            const msg = window.rfApp.t ? window.rfApp.t('toast_gps_success') : '✅ 定位成功！';
+                            window.showToast(msg, 'success');
+                        }
                     }
                 } else {
                     userMarker.setLatLng([lat, lng]);
@@ -121,26 +139,34 @@ export function initGPS() {
                     if (isFollowing) {
                         state.mapInstance.panTo([lat, lng]);
                     }
-                    events.emit('location_update', { lat, lng, accuracy, timestamp: Date.now() });
                 }
+                
+                // 🌟 核心修復：不管是第幾次拿到座標，一律向全域廣播，並告知目前是否在跟隨中
                 if (btnIcon) btnIcon.classList.remove('fa-spin');
+                events.emit('location_update', { lat, lng, accuracy, isFollowing, timestamp: Date.now() });
             },
             (err) => {
                 if (btnIcon) btnIcon.classList.remove('fa-spin');
-                if (typeof window.showToast === 'function') window.showToast(window.rfApp.t('toast_gps_fail'), 'error');
+                if (typeof window.showToast === 'function') {
+                    const msg = window.rfApp.t ? window.rfApp.t('toast_gps_fail') : '無法取得定位';
+                    window.showToast(msg, 'error');
+                }
             },
             { enableHighAccuracy: true, maximumAge: 5000, timeout: 15000 } 
         );
     };
 
     window.rfApp.map.resetNorth = () => {
-        isFollowing = false; // 🌟 確實關閉跟隨模式
+        isFollowing = false;
         const gpsBtn = document.querySelector('.control-btn[onclick*="goToUser"]');
-        if (gpsBtn) gpsBtn.classList.remove('active'); // 取消定位按鈕的高亮狀態
+        if (gpsBtn) gpsBtn.classList.remove('active');
 
         if (state.mapInstance) {
             state.mapInstance.flyTo([25.1086, 121.8058], 15, { animate: true });
-            if (typeof window.showToast === 'function') window.showToast(window.rfApp.t('toast_gps_reset'), 'info');
+            if (typeof window.showToast === 'function') {
+                const msg = window.rfApp.t ? window.rfApp.t('toast_gps_reset') : '已回到瑞芳中心';
+                window.showToast(msg, 'info');
+            }
         }
     };
 
