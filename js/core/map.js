@@ -192,3 +192,43 @@ window.rfApp.map.updateMarkerLabels = () => {
     }
     createSpotMarkers();
 };
+
+// 將這段加入到 js/core/map.js 的最下方
+
+// 🌟 全域：過濾地圖上的標記
+window.rfApp.map.filterMarkers = (category) => {
+    if (!markersLayer) return;
+    
+    // 先清空所有標記
+    markersLayer.clearLayers();
+    const lang = state.currentLang || 'zh';
+
+    // 重新篩選並加入符合的標記
+    spots.forEach(spot => {
+        // 如果選了 'all'，或者景點的 tags 包含該分類，就顯示
+        const isMatch = category === 'all' || (spot.tags && spot.tags.includes(category));
+        
+        if (isMatch) {
+            const icon = L.divIcon({
+                className: 'custom-div-icon',
+                html: `<div class='marker-pulse'></div><div class='custom-marker-pin'></div>`,
+                iconSize: [30, 42],
+                iconAnchor: [15, 42],
+                popupAnchor: [0, -35]
+            });
+
+            const marker = L.marker([spot.lat, spot.lng], { icon: icon });
+            const displayName = spot[`name_${lang}`] || spot.name;
+            marker.bindTooltip(displayName, { direction: 'top', offset: [0, -40], opacity: 0.9 });
+
+            marker.on('click', () => {
+                import('../modules/cards.js').then(module => {
+                    module.showCard(spot);
+                });
+                state.mapInstance.flyTo([spot.lat, spot.lng], 16, { animate: true, duration: 0.8 });
+            });
+
+            markersLayer.addLayer(marker);
+        }
+    });
+};
