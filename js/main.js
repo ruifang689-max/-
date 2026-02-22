@@ -1,4 +1,4 @@
-// js/main.js (v620)
+// js/main.js (v625)
 // 🌟 1. 建立企業級全域命名空間 (Namespace 工具箱)
 window.rfApp = {
     ui: {},
@@ -12,22 +12,23 @@ window.rfApp = {
     pwa: {}
 };
 
-import { state } from './core/store.js?v=620'; 
-import { initMap, toggleLayer } from './core/map.js?v=620'; 
-import { fetchWeather } from './modules/weather.js?v=620';
-import { initGPS } from './modules/gps.js?v=620';
-import { initAnnouncer } from './modules/announcer.js?v=620'; 
-import { initCardGestures, closeCard } from './modules/cards.js?v=620';
-import { renderAllMarkers } from './modules/markers.js?v=620';
-import { initSearch } from './modules/search.js?v=620';
-import { initNavigation } from './modules/navigation.js?v=620';
-import { initUI } from './modules/ui.js?v=620'; 
-import { initFirebase } from './modules/firebase-sync.js?v=620';
-import { initTheme } from './modules/theme.js?v=620'; 
-import { initPWA } from './modules/pwa.js?v=620';
-import { initTour } from './modules/tour.js?v=620';
-import { initFavorites } from './modules/favorites.js?v=620';
-import { initCustomSpots } from './modules/customSpots.js?v=620'; 
+import { initErrorHandler, showToast } from './modules/toast.js?v=625';
+import { state } from './core/store.js?v=625'; 
+import { initMap, toggleLayer } from './core/map.js?v=625'; 
+import { fetchWeather } from './modules/weather.js?v=625';
+import { initGPS } from './modules/gps.js?v=625';
+import { initAnnouncer } from './modules/announcer.js?v=625'; 
+import { initCardGestures, closeCard } from './modules/cards.js?v=625';
+import { renderAllMarkers } from './modules/markers.js?v=625';
+import { initSearch } from './modules/search.js?v=625';
+import { initNavigation } from './modules/navigation.js?v=625';
+import { initUI } from './modules/ui.js?v=625'; 
+import { initFirebase } from './modules/firebase-sync.js?v=625';
+import { initTheme } from './modules/theme.js?v=625'; 
+import { initPWA } from './modules/pwa.js?v=625';
+import { initTour } from './modules/tour.js?v=625';
+import { initFavorites } from './modules/favorites.js?v=625';
+import { initCustomSpots } from './modules/customSpots.js?v=625'; 
 
 // 將核心方法收納進工具箱，並建立向下相容橋樑
 window.rfApp.map.toggleLayer = toggleLayer;
@@ -64,11 +65,16 @@ function removeSplashScreen() {
 }
 
 // 🌟 核心防護罩：單一模組報錯，不會讓整個 App 癱瘓
+// 🌟 核心防護罩升級：一旦單一模組啟動失敗，用 Toast 提醒使用者 (而非只有 Console 紅字)
 function safeInit(fn, name) {
     try { 
         fn(); 
     } catch (e) { 
-        console.error(`❌ [防護機制] 模組 ${name} 啟動失敗:`, e); 
+        console.error(`❌ [防護機制] 模組 ${name} 啟動失敗:`, e);
+        // 呼叫 Toast 提示
+        if (typeof showToast === 'function') {
+            showToast(`模組 [${name}] 載入失敗 ⚠️`, 'error');
+        }
     }
 }
 
@@ -90,6 +96,10 @@ function handleDeepLink() {
 
 // 🌟 重新編排的最佳化啟動順序
 function bootstrapApp() {
+
+    // 🛡️ 第零階段：最優先拉起全域防護網！
+    initErrorHandler();
+    
     // 第一階段：基礎系統
     safeInit(initTheme, '主題與語系');
     safeInit(initPWA, 'PWA 系統');
