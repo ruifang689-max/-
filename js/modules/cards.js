@@ -1,4 +1,4 @@
-// js/modules/cards.js (v623)
+// js/modules/cards.js (v628) - 智慧語音導覽版
 import { state, saveState } from '../core/store.js';
 import { translations } from '../data/lang.js';
 
@@ -9,21 +9,53 @@ export function getPlaceholderImage(text) {
     return canvas.toDataURL('image/jpeg', 0.8);
 }
 
+// =========================================
+// 🌟 核心新功能：切換語音導覽 (TTS)
+// =========================================
+window.rfApp.ui.toggleTTS = () => {
+    // 檢查瀏覽器支援度
+    if (!window.speechSynthesis) {
+        if(typeof window.showToast === 'function') window.showToast('您的瀏覽器不支援語音功能', 'error');
+        return;
+    }
+    
+    // 如果正在播放，就當作「停止鍵」使用
+    if (window.speechSynthesis.speaking) {
+        window.speechSynthesis.cancel();
+        if(typeof window.showToast === 'function') window.showToast('🔇 語音導覽已停止', 'info');
+        return;
+    }
+
+    const s = state.targetSpot;
+    if (!s) return;
+    
+    // 抓取要朗讀的內容，並用 Regex 過濾掉 HTML 標籤，確保發音正常
+    const rawText = (s.description || s.highlights || s.history || "暫無詳細介紹").replace(/<[^>]*>?/gm, '');
+    const textToSpeak = `${s.name}。${rawText}`;
+
+    const utterance = new SpeechSynthesisUtterance(textToSpeak);
+    
+    // 根據目前的語系設定發音口音
+    const langMap = { 'zh': 'zh-TW', 'en': 'en-US', 'ja': 'ja-JP', 'ko': 'ko-KR' };
+    utterance.lang = langMap[state.currentLang] || 'zh-TW';
+    utterance.rate = 0.95; // 稍微放慢語速，讓長輩也聽得清楚
+    
+    window.speechSynthesis.speak(utterance);
+    
+    // 搭配我們剛做的 Toast 提示系統
+    if(typeof window.showToast === 'function') window.showToast('🔊 語音導覽播放中...', 'success');
+};
+
 export function showCard(s) { 
     state.targetSpot = s; 
-    document.getElementById("card-fav-icon").className = state.myFavs.includes(s.name) ? "fas fa-heart active" : "fas fa-heart"; 
+    document.getElementById("card-fav-icon").className = (state.myFavs || []).includes(s.name) ? "fas fa-heart active" : "fas fa-heart"; 
     document.getElementById("title").innerText = s.name; 
     
-    // 🌟 圖片處理：修復變數名稱，並加入超滑順懶載入
+    // 圖片懶載入
     const imgEl = document.getElementById('img');
     if (imgEl) {
-        // 加入懶載入屬性，讓畫面外面的圖片先不下載，省流量！
         imgEl.loading = "lazy";
-        
-        // 使用傳入的 s，如果沒有圖片，直接呼叫動態產生器畫一張專屬佔位圖
         imgEl.src = s.wikiImg || getPlaceholderImage(s.name);
-        
-        // 網路錯誤破圖時的終極防線
         imgEl.onerror = () => { imgEl.src = getPlaceholderImage(s.name); };
     }
     
@@ -31,9 +63,6 @@ export function showCard(s) {
     const tags = s.tags ? (Array.isArray(s.tags) ? s.tags : [s.tags]) : (s.category ? [s.category] : []);
     document.getElementById("card-tags").innerHTML = tags.map(t => `<span class="info-tag">${t}</span>`).join(''); 
     
-    // =========================================
-    // 🌟 保留舊版模樣，並優雅匯入新版官方資訊
-    // =========================================
     const warningHtml = s.warning ? `<div class="warning-banner"><i class="fas fa-exclamation-triangle"></i><span>${s.warning}</span></div>` : '';
     const officialDetails = (s.address || s.openTime || (s.tel && s.tel !== '無')) ? `
         <div class="spot-detail-info" style="margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px dashed var(--glass);">
@@ -43,12 +72,10 @@ export function showCard(s) {
         </div>
     ` : '';
     
-    // 將官方的地址與介紹，塞入 Highlights 區塊
     const desc = s.description || s.highlights || "暫無介紹";
     const highlightsEl = document.getElementById("card-highlights");
     if (highlightsEl) highlightsEl.innerHTML = warningHtml + officialDetails + `<div>${desc}</div>`;
     
-    // 🌟 解封舊版的專屬欄位！(美食、歷史、交通)
     const foodEl = document.getElementById("card-food"); 
     if(foodEl) { foodEl.style.display = "block"; foodEl.innerText = s.food || "--"; }
     
@@ -59,15 +86,24 @@ export function showCard(s) {
     if(transportEl) { transportEl.style.display = "block"; transportEl.innerText = s.transport || "自行前往"; }
     
     // =========================================
-    // 按鈕渲染與卡片展開
+    // 🌟 按鈕渲染 (加入全新的語音導覽按鈕)
     // =========================================
     const t = translations[state.currentLang] || translations['zh'];
     const btnGroup = document.getElementById("card-btn-group");
     
     if (tags.includes('自訂')) { 
-        btnGroup.innerHTML = `<button onclick="startNav()" style="flex: 1.2;"><i class="fas fa-location-arrow"></i> ${t.nav}</button><button class="secondary" onclick="openEditModal('${s.name}')"><i class="fas fa-edit"></i> 編輯</button><button class="danger" onclick="deleteCustomSpot('${s.name}')"><i class="fas fa-trash-alt"></i> 刪除</button>`; 
+        btnGroup.innerHTML = `
+            <button onclick="startNav()" style="flex: 1;"><i class="fas fa-location-arrow"></i> ${t.nav || '導航'}</button>
+            <button class="secondary" onclick="window.rfApp.ui.toggleTTS()"><i class="fas fa-volume-up"></i> 語音</button>
+            <button class="secondary" onclick="openEditModal('${s.name}')"><i class="fas fa-edit"></i> 編輯</button>
+            <button class="danger" onclick="deleteCustomSpot('${s.name}')"><i class="fas fa-trash-alt"></i> 刪除</button>
+        `; 
     } else { 
-        btnGroup.innerHTML = `<button onclick="startNav()"><i class="fas fa-location-arrow"></i> ${t.nav}</button><button class="secondary" onclick="aiTrip()"><i class="fas fa-magic"></i> ${t.ai}</button>`; 
+        btnGroup.innerHTML = `
+            <button onclick="startNav()"><i class="fas fa-location-arrow"></i> ${t.nav || '導航'}</button>
+            <button class="secondary" onclick="window.rfApp.ui.toggleTTS()"><i class="fas fa-volume-up"></i> 語音</button>
+            <button class="secondary" onclick="aiTrip()"><i class="fas fa-magic"></i> ${t.ai || 'AI 行程'}</button>
+        `; 
     }
     
     document.getElementById("card").classList.add("open"); 
@@ -77,6 +113,8 @@ export function showCard(s) {
 export function closeCard() { 
     document.getElementById("card").classList.remove("open"); 
     document.getElementById("card").style.transform = ''; 
+    // 🌟 貼心設計：關閉卡片時立刻中斷語音，避免背景一直碎碎念
+    if (window.speechSynthesis) window.speechSynthesis.cancel();
 }
 
 export function initCardGestures() {
