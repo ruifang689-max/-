@@ -223,4 +223,99 @@ export function showCard(s) {
     if (s.food && s.food !== "--") {
         sectionsHtml += `<div class="section-title">${t('food') || '推薦美食'}</div><div class="section-content">${s.food}</div>`;
     }
-    if (s.
+    if (s.transport && s.transport !== "自行前往" && s.transport !== "--") {
+        sectionsHtml += `<div class="section-title">${t('transport') || '交通資訊'}</div><div class="section-content">${s.transport}</div>`;
+    }
+    document.getElementById("full-sections").innerHTML = sectionsHtml;
+
+    // --- 底部按鈕 ---
+    const btnGroup = document.getElementById("card-btn-group");
+    const txtRoute = lang === 'en' ? 'Route' : '前往';
+    const txtVoice = lang === 'en' ? 'Voice' : '語音';
+
+    if (tags.includes('自訂')) { 
+        btnGroup.innerHTML = `
+            <button class="primary" id="full-route-btn" style="flex: 1.2;"><i class="fas fa-directions"></i> ${txtRoute}</button>
+            <button class="secondary" onclick="toggleTTS()"><i class="fas fa-volume-up"></i></button>
+            <button class="secondary" onclick="openEditModal('${s.name}')"><i class="fas fa-edit"></i></button>
+            <button class="danger" onclick="deleteCustomSpot('${s.name}')"><i class="fas fa-trash-alt"></i></button>
+        `; 
+    } else { 
+        btnGroup.innerHTML = `
+            <button class="primary" id="full-route-btn" style="flex: 2;"><i class="fas fa-directions"></i> ${txtRoute}</button>
+            <button class="secondary" onclick="toggleTTS()" style="flex: 1;"><i class="fas fa-volume-up"></i> ${txtVoice}</button>
+        `; 
+    }
+    
+    // 🌟 防彈綁定：展開後的路線按鈕
+    const fullBtn = document.getElementById('full-route-btn');
+    if(fullBtn) fullBtn.onclick = () => window.openRouteMenu(s.lat, s.lng, s.name);
+
+    document.getElementById("card-preview-zone").classList.remove('u-hidden');
+    document.getElementById("card-full-zone").classList.add('u-hidden');
+    document.getElementById("card-btn-group").classList.add('u-hidden');
+}
+
+export function closeCard() { 
+    const cardEl = document.getElementById("card");
+    if(!cardEl) return;
+    
+    if (cardEl.classList.contains('expanded')) {
+        cardEl.classList.remove('expanded');
+        cardEl.classList.add('preview');
+        
+        document.getElementById("card-preview-zone").classList.remove('u-hidden');
+        document.getElementById("card-full-zone").classList.add('u-hidden');
+        document.getElementById("card-btn-group").classList.add('u-hidden');
+        
+        const menu = document.getElementById('route-menu-container');
+        if(menu) menu.classList.remove('active');
+        if (typeof window.stopTTS === 'function') window.stopTTS();
+        
+    } else {
+        cardEl.classList.remove("open", "preview", "expanded"); 
+        cardEl.style.transform = ''; 
+    }
+}
+
+export function initCardGestures() {
+    initCardDOM(); 
+    const cardEl = document.getElementById("card"); 
+    if(!cardEl) return;
+
+    let touchStartY = 0, isSwiping = false; 
+    
+    cardEl.addEventListener('touchstart', (e) => { 
+        const fullZone = document.getElementById('card-full-zone');
+        const isAtTop = !fullZone || fullZone.scrollTop <= 0;
+        if(isAtTop && !e.target.closest('.route-menu-overlay')){ 
+            touchStartY = e.touches[0].clientY; 
+            isSwiping = true; 
+            cardEl.style.transition = 'none'; 
+        }
+    }, {passive:true}); 
+    
+    cardEl.addEventListener('touchmove', (e) => { 
+        if(isSwiping && e.touches[0].clientY > touchStartY){ 
+            cardEl.style.transform = `translateY(${e.touches[0].clientY - touchStartY}px)`; 
+        } else if (isSwiping && e.touches[0].clientY < touchStartY - 20) {
+            if (cardEl.classList.contains('preview')) {
+                window.expandCard();
+                isSwiping = false;
+                cardEl.style.transform = '';
+            }
+        }
+    }); 
+    
+    cardEl.addEventListener('touchend', (e) => { 
+        if(isSwiping){ 
+            isSwiping = false; 
+            cardEl.style.transition = 'transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1)'; 
+            if((e.changedTouches[0]?.clientY || 0) - touchStartY > 60) {
+                closeCard(); 
+            } else { 
+                cardEl.style.transform = ''; 
+            }
+        }
+    });
+}
