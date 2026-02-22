@@ -62,7 +62,7 @@ export const zones = [
     { 
         id: 'shenao', 
         name: '深澳', 
-        icon: '🦑', 
+        icon: '🚤', 
         lat: 25.1320, 
         lng: 121.8150, 
         zoom: 16,
@@ -71,7 +71,7 @@ export const zones = [
     { 
         id: 'sandiaoling', 
         name: '三貂嶺', 
-        icon: '🌿', 
+        icon: '⛰️', 
         lat: 25.0750, 
         lng: 121.8180, 
         zoom: 15,
