@@ -31,19 +31,23 @@ window.rfApp.map.toggleTransitLayer(true);
 window.rfApp.ui.closeCard = closeCard;
 window.closeCard = window.rfApp.ui.closeCard;
 
-function removeSplashScreen() {
-    const splash = document.getElementById('splash-screen');
-    if (splash) { 
-        setTimeout(() => { 
-            splash.style.opacity = '0'; 
-            setTimeout(() => { 
-                splash.style.display = 'none'; 
-                if (state.mapInstance) state.mapInstance.invalidateSize(); 
-                events.emit('app_ready', null);
-            }, 500); 
-        }, 2000);
-    } else {
-        events.emit('app_ready', null);
+// 確保函數是定義在最外層 (不要包在其他 function 裡面)
+function enterMap() {
+    const intro = document.getElementById('intro-screen');
+    const app = document.getElementById('app');
+    
+    if (intro && app) {
+        // 進入地圖的動畫邏輯
+        intro.style.opacity = '0';
+        setTimeout(() => {
+            intro.style.display = 'none';
+            app.style.display = 'block';
+            
+            // 確保地圖尺寸正確 (避免破圖)
+            if (state.mapInstance) {
+                state.mapInstance.invalidateSize();
+            }
+        }, 500);
     }
 }
 
