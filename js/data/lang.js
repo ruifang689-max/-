@@ -37,7 +37,7 @@ export const translations = {
         toast_copy_success: "✅ 內容已複製到剪貼簿",
         toast_custom_saved: "✅ 秘境已儲存",
         toast_custom_deleted: "🗑️ 標記已刪除",
-        toast_network_err: "網路連線異常，請稍後再試"
+        toast_network_err: "網路連線異常，請稍後再試",
 
         // 🌟 [新增] 介面風格 (Skin)
         "setting_skin": "介面風格 (Skin)",
@@ -55,7 +55,7 @@ export const translations = {
         
         // 🌟 [新增] 交通路網開關
         "setting_transit": "顯示交通路網",
-        "label_transit_on": "開啟鐵路/捷運線"
+        "label_transit_on": "開啟鐵路/捷運線",
     },
     'en': { 
         splash_title: "Ruifang Guide", splash_desc: "Accurate local guide in Ruifang.", 
@@ -91,7 +91,7 @@ export const translations = {
         toast_copy_success: "✅ Copied to clipboard",
         toast_custom_saved: "✅ Custom spot saved",
         toast_custom_deleted: "🗑️ Spot deleted",
-        toast_network_err: "Network error, please try again"
+        toast_network_err: "Network error, please try again",
 
         setting_skin: "Interface Skin",
         skin_default: "Default (Clean)",
@@ -106,7 +106,7 @@ export const translations = {
         map_hist: "History Filter",
 
         setting_transit: "Transit Network",
-        label_transit_on: "Show Railway/Metro"
+        label_transit_on: "Show Railway/Metro",
     },
     'ja': { 
         splash_title: "瑞芳ガイド", splash_desc: "瑞芳の正確なローカルガイド。", 
@@ -142,7 +142,7 @@ export const translations = {
         toast_copy_success: "✅ クリップボードにコピーしました",
         toast_custom_saved: "✅ 保存しました",
         toast_custom_deleted: "🗑️ 削除しました",
-        toast_network_err: "ネットワークエラー"
+        toast_network_err: "ネットワークエラー",
 
         setting_skin: "テーマスキン",
         skin_default: "デフォルト (標準)",
@@ -157,7 +157,7 @@ export const translations = {
         map_hist: "レトロフィルター",
 
         setting_transit: "交通網表示",
-        label_transit_on: "鉄道・地下鉄を表示"
+        label_transit_on: "鉄道・地下鉄を表示",
     },
     'ko': { 
         splash_title: "루이팡 가이드", splash_desc: "루이팡 지역의 정확한 로컬 가이드.", 
@@ -193,7 +193,7 @@ export const translations = {
         toast_copy_success: "✅ 클립보드에 복사됨",
         toast_custom_saved: "✅ 저장되었습니다",
         toast_custom_deleted: "🗑️ 삭제되었습니다",
-        toast_network_err: "네트워크 오류"
+        toast_network_err: "네트워크 오류",
     },
     'vi': { 
         splash_title: "Bản đồ Ruifang", splash_desc: "Hướng dẫn du lịch địa phương chính xác nhất.", 
@@ -229,6 +229,6 @@ export const translations = {
         toast_copy_success: "✅ Đã sao chép vào khay nhớ tạm",
         toast_custom_saved: "✅ Đã lưu địa điểm",
         toast_custom_deleted: "🗑️ Đã xóa",
-        toast_network_err: "Lỗi mạng, vui lòng thử lại"
+        toast_network_err: "Lỗi mạng, vui lòng thử lại",
     }
 };
