@@ -26,9 +26,9 @@ import { initCustomSpots } from './modules/customSpots.js?v=657';
 import { initTTS } from './modules/tts.js?v=657';
 import { initNearby } from './modules/nearby.js?v=651';
 
-window.rfApp.map.toggleLayer = toggleLayer;
+window.rfApp.map.switchBaseLayer('satellite');
+window.rfApp.map.toggleTransitLayer(true);
 window.rfApp.ui.closeCard = closeCard;
-window.toggleLayer = window.rfApp.map.toggleLayer;
 window.closeCard = window.rfApp.ui.closeCard;
 
 function removeSplashScreen() {
