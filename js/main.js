@@ -1,30 +1,30 @@
-// js/main.js (v683) - 終極效能打磨版
-window.rfApp = {
-    ui: {}, theme: {}, nav: {}, fav: {}, tour: {}, 
-    map: {}, search: {}, custom: {}, pwa: {}, tts: {},
-    cards: {}, dashboard: {}
-};
+// js/main.js (v692) - 命名空間安全初始化版
+window.rfApp = window.rfApp || {};
+const modules = ['ui', 'theme', 'nav', 'fav', 'tour', 'map', 'search', 'custom', 'pwa', 'tts', 'cards', 'dashboard'];
+modules.forEach(key => {
+    window.rfApp[key] = window.rfApp[key] || {};
+});
 
-import { events } from './core/events.js?v=683'; // 🌟 引入事件匯流排
-import { initErrorHandler, showToast } from './modules/toast.js?v=683';
-import { state } from './core/store.js?v=683'; 
-import { initMap, toggleLayer } from './core/map.js?v=683'; 
-import { fetchWeather } from './modules/weather.js?v=690'; // 更新 v683
-import { initGPS } from './modules/gps.js?v=683'; // 更新 v683
+import { events } from './core/events.js?v=651'; 
+import { initErrorHandler, showToast } from './modules/toast.js?v=651';
+import { state } from './core/store.js?v=651'; 
+import { initMap, toggleLayer } from './core/map.js?v=670'; 
+import { fetchWeather } from './modules/weather.js?v=690'; 
+import { initGPS } from './modules/gps.js?v=670'; 
 import { initAnnouncer } from './modules/announcer.js?v=659'; 
-import { initCardGestures, closeCard } from './modules/cards.js?v=683';
-import { renderAllMarkers, filterSpots } from './modules/markers.js?v=683';
-import { initSearch } from './modules/search.js?v=683';
-import { initNavigation } from './modules/navigation.js?v=683';
-import { initUI } from './modules/ui.js?v=683'; 
-import { initFirebase } from './modules/firebase-sync.js?v=683';
-import { initTheme } from './modules/theme.js?v=683'; 
-import { initPWA } from './modules/pwa.js?v=683';
-import { initTour } from './modules/tour.js?v=683';
-import { initFavorites } from './modules/favorites.js?v=683';
-import { initCustomSpots } from './modules/customSpots.js?v=683'; 
-import { initTTS } from './modules/tts.js?v=683';
-import { initNearby } from './modules/nearby.js?v=683';
+import { initCardGestures, closeCard } from './modules/cards.js?v=683'; 
+import { renderAllMarkers, filterSpots } from './modules/markers.js?v=672';
+import { initSearch } from './modules/search.js?v=661';
+import { initNavigation } from './modules/navigation.js?v=651';
+import { initUI } from './modules/ui.js?v=661'; 
+import { initFirebase } from './modules/firebase-sync.js?v=651';
+import { initTheme } from './modules/theme.js?v=656'; 
+import { initPWA } from './modules/pwa.js?v=657';
+import { initTour } from './modules/tour.js?v=651';
+import { initFavorites } from './modules/favorites.js?v=657';
+import { initCustomSpots } from './modules/customSpots.js?v=657'; 
+import { initTTS } from './modules/tts.js?v=657';
+import { initNearby } from './modules/nearby.js?v=651';
 
 window.rfApp.map.toggleLayer = toggleLayer;
 window.rfApp.ui.closeCard = closeCard;
@@ -39,13 +39,10 @@ function removeSplashScreen() {
             setTimeout(() => { 
                 splash.style.display = 'none'; 
                 if (state.mapInstance) state.mapInstance.invalidateSize(); 
-                
-                // 🌟 發送「App 已完全就緒」廣播
                 events.emit('app_ready', null);
             }, 500); 
         }, 2000);
     } else {
-        // 若沒有開場動畫，直接廣播
         events.emit('app_ready', null);
     }
 }
@@ -59,13 +56,11 @@ function safeInit(fn, name) {
     }
 }
 
-// 🌟 拔除 1500ms 的魔法數字，改用事件驅動！
 function handleDeepLink() {
     const params = new URLSearchParams(window.location.search);
     const spotName = params.get('spot'); 
     
     if (spotName) {
-        // 監聽 App 就緒事件，一準備好就瞬間觸發！
         events.on('app_ready', () => {
             if (window.rfApp.search && typeof window.rfApp.search.triggerSearch === 'function') {
                 window.rfApp.search.triggerSearch(spotName);
@@ -84,7 +79,6 @@ function bootstrapApp() {
     safeInit(initUI, '基礎 UI 介面');
     safeInit(initFirebase, 'Firebase 雲端同步');
 
-    // 🌟 先註冊 DeepLink 監聽器
     safeInit(handleDeepLink, 'URL路由解析');
 
     initMap().then(() => {
@@ -103,7 +97,7 @@ function bootstrapApp() {
     });
     
     fetchWeather();
-    removeSplashScreen(); // 這裡執行完畢會觸發 app_ready
+    removeSplashScreen();
 }
 
 if (document.readyState === 'complete' || document.readyState === 'interactive') {
