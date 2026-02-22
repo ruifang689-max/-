@@ -1,4 +1,4 @@
-// js/modules/gps.js (v657) - 國際化翻譯支援版
+// js/modules/gps.js (v658) - 修復非同步拉回 Bug 與效能優化
 import { state } from '../core/store.js';
 import { events } from '../core/events.js?v=651'; 
 
@@ -11,7 +11,6 @@ let totalRotation = 0;
 let isCompassActive = false;
 let isFollowing = false; 
 
-// (CSS 注入部分維持原樣)
 const injectCompassCSS = () => {
     if (document.getElementById('gps-compass-style')) return;
     const style = document.createElement('style');
@@ -57,10 +56,12 @@ export function initGPS() {
     injectCompassCSS();
 
     if (state.mapInstance) {
+        // 使用者手動拖曳地圖時，解除跟隨模式
         state.mapInstance.on('dragstart', () => {
             if (isFollowing) {
                 isFollowing = false;
-                // 🌟 動態翻譯
+                const gpsBtn = document.querySelector('.control-btn[onclick*="goToUser"]');
+                if (gpsBtn) gpsBtn.classList.remove('active');
                 if(typeof window.showToast === 'function') window.showToast(window.rfApp.t('toast_gps_follow_stop'), 'info');
             }
         });
@@ -68,21 +69,28 @@ export function initGPS() {
 
     window.rfApp.map.goToUser = () => {
         if (!navigator.geolocation) {
-            // 🌟 動態翻譯
             if (typeof window.showToast === 'function') window.showToast(window.rfApp.t('toast_gps_fail'), 'error');
             return;
         }
         
         isFollowing = true; 
+        const gpsBtn = document.querySelector('.control-btn[onclick*="goToUser"]');
+        if (gpsBtn) gpsBtn.classList.add('active'); // 按下後，按鈕維持高亮狀態
+        
         requestCompassPermission();
         
-        const btnIcon = document.querySelector('.control-btn.active .fa-location-crosshairs');
+        const btnIcon = gpsBtn ? gpsBtn.querySelector('i') : null;
+        
+        // 🌟 效能優化：如果硬體 GPS 已經在跑了，就不需要重置它，直接飛過去就好！
+        if (watchId && userMarker) {
+            const latlng = userMarker.getLatLng();
+            state.mapInstance.flyTo(latlng, 17, { animate: true });
+            if (typeof window.showToast === 'function') window.showToast(window.rfApp.t('toast_gps_success'), 'success');
+            return; 
+        }
+
         if (btnIcon) btnIcon.classList.add('fa-spin');
-        
-        // 🌟 動態翻譯
         if (typeof window.showToast === 'function') window.showToast(window.rfApp.t('toast_gps_connecting'), 'info');
-        
-        if (watchId) navigator.geolocation.clearWatch(watchId);
 
         watchId = navigator.geolocation.watchPosition(
             (pos) => {
@@ -94,22 +102,27 @@ export function initGPS() {
 
                 if (!userMarker) {
                     userMarker = L.marker([lat, lng], { icon: createCompassIcon(), zIndexOffset: 1000 }).addTo(state.mapInstance);
-                    compassCircle = L.circle([lat, lng], { radius: accuracy, color: 'var(--primary)', opacity: 0.4, fillColor: 'var(--primary)', fillOpacity: 0.08, weight: 1 }).addTo(state.mapInstance);
-                    state.mapInstance.flyTo([lat, lng], 17, { animate: true });
-                    // 🌟 動態翻譯
-                    if (typeof window.showToast === 'function') window.showToast(window.rfApp.t('toast_gps_success'), 'success');
+                    compassCircle = L.circle([lat, lng], { radius: accuracy, color: 'var(--primary)', opacity: 0.4, fillColor: 'var(--primary)', fillOpacity: 0.08, weight: 1.5 }).addTo(state.mapInstance);
+                    
+                    // 🌟 核心防呆：如果這期間使用者已經按了「瑞」取消跟隨，這裡就不准飛過去！
+                    if (isFollowing) {
+                        state.mapInstance.flyTo([lat, lng], 17, { animate: true });
+                        if (typeof window.showToast === 'function') window.showToast(window.rfApp.t('toast_gps_success'), 'success');
+                    }
                 } else {
                     userMarker.setLatLng([lat, lng]);
                     compassCircle.setLatLng([lat, lng]);
                     compassCircle.setRadius(accuracy);
-                    if (isFollowing) state.mapInstance.panTo([lat, lng]);
+                    
+                    if (isFollowing) {
+                        state.mapInstance.panTo([lat, lng]);
+                    }
                     events.emit('location_update', { lat, lng, accuracy, timestamp: Date.now() });
                 }
                 if (btnIcon) btnIcon.classList.remove('fa-spin');
             },
             (err) => {
                 if (btnIcon) btnIcon.classList.remove('fa-spin');
-                // 🌟 動態翻譯
                 if (typeof window.showToast === 'function') window.showToast(window.rfApp.t('toast_gps_fail'), 'error');
             },
             { enableHighAccuracy: true, maximumAge: 5000, timeout: 15000 } 
@@ -117,10 +130,12 @@ export function initGPS() {
     };
 
     window.rfApp.map.resetNorth = () => {
-        isFollowing = false;
+        isFollowing = false; // 🌟 確實關閉跟隨模式
+        const gpsBtn = document.querySelector('.control-btn[onclick*="goToUser"]');
+        if (gpsBtn) gpsBtn.classList.remove('active'); // 取消定位按鈕的高亮狀態
+
         if (state.mapInstance) {
             state.mapInstance.flyTo([25.1086, 121.8058], 15, { animate: true });
-            // 🌟 動態翻譯
             if (typeof window.showToast === 'function') window.showToast(window.rfApp.t('toast_gps_reset'), 'info');
         }
     };
