@@ -11,6 +11,7 @@ let totalRotation = 0;
 let isCompassActive = false;
 let isFollowing = false; 
 
+// (CSS 注入部分維持原樣)
 const injectCompassCSS = () => {
     if (document.getElementById('gps-compass-style')) return;
     const style = document.createElement('style');
@@ -81,13 +82,15 @@ export function initGPS() {
         
         const btnIcon = gpsBtn ? gpsBtn.querySelector('i') : null;
         
-        // 🌟 效能優化：如果硬體 GPS 已經在跑了，就不需要重置它，直接飛過去就好！
+        // 🌟 效能優化：如果硬體 GPS 已經有定位點了，直接切換視角，不重新發送硬體請求
         if (watchId && userMarker) {
             const latlng = userMarker.getLatLng();
             state.mapInstance.flyTo(latlng, 17, { animate: true });
             if (typeof window.showToast === 'function') window.showToast(window.rfApp.t('toast_gps_success'), 'success');
             return; 
         }
+
+        if (watchId) navigator.geolocation.clearWatch(watchId);
 
         if (btnIcon) btnIcon.classList.add('fa-spin');
         if (typeof window.showToast === 'function') window.showToast(window.rfApp.t('toast_gps_connecting'), 'info');
@@ -102,9 +105,10 @@ export function initGPS() {
 
                 if (!userMarker) {
                     userMarker = L.marker([lat, lng], { icon: createCompassIcon(), zIndexOffset: 1000 }).addTo(state.mapInstance);
-                    compassCircle = L.circle([lat, lng], { radius: accuracy, color: 'var(--primary)', opacity: 0.4, fillColor: 'var(--primary)', fillOpacity: 0.08, weight: 1.5 }).addTo(state.mapInstance);
+                    compassCircle = L.circle([lat, lng], { radius: accuracy, color: 'var(--primary)', opacity: 0.4, fillColor: 'var(--primary)', fillOpacity: 0.08, weight: 1 }).addTo(state.mapInstance);
                     
-                    // 🌟 核心防呆：如果這期間使用者已經按了「瑞」取消跟隨，這裡就不准飛過去！
+                    // 🌟 BUG 修復核心：即使是第一次拿到定位，也必須檢查 isFollowing
+                    // 如果使用者在這幾秒的空窗期內已經按了「瑞」或拖曳了地圖，就不准飛過去拉回視角！
                     if (isFollowing) {
                         state.mapInstance.flyTo([lat, lng], 17, { animate: true });
                         if (typeof window.showToast === 'function') window.showToast(window.rfApp.t('toast_gps_success'), 'success');
