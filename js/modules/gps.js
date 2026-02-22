@@ -1,6 +1,6 @@
-// js/modules/gps.js (v646) - 事件驅動版
+// js/modules/gps.js (v647) - 智慧跟隨控制版
 import { state } from '../core/store.js';
-import { events } from '../core/events.js?v=646'; // 🌟 引入事件匯流排
+import { events } from '../core/events.js?v=646'; 
 
 let watchId = null;
 let userMarker = null;
@@ -9,6 +9,7 @@ let currentHeading = 0;
 let lastRawHeading = 0;
 let totalRotation = 0;
 let isCompassActive = false;
+let isFollowing = false; // 🌟 核心開關：是否正在跟隨使用者
 
 // 🌟 動態注入 CSS
 const injectCompassCSS = () => {
@@ -91,8 +92,15 @@ const requestCompassPermission = () => {
 export function initGPS() {
     injectCompassCSS();
 
-    // GPS 模組不再關心「使用者是否在拖曳地圖」，它只負責報告位置
-    // 那些 UI 邏輯將由接收端 (announcer) 自己判斷
+    // 🌟 當使用者開始拖曳地圖時，立刻解除跟隨模式
+    if (state.mapInstance) {
+        state.mapInstance.on('dragstart', () => {
+            if (isFollowing) {
+                isFollowing = false;
+                if(typeof window.showToast === 'function') window.showToast('已停止跟隨', 'info');
+            }
+        });
+    }
 
     window.rfApp.map.goToUser = () => {
         if (!navigator.geolocation) {
@@ -100,6 +108,7 @@ export function initGPS() {
             return;
         }
         
+        isFollowing = true; // 🌟 啟動跟隨模式
         requestCompassPermission();
         
         const btnIcon = document.querySelector('.control-btn.active .fa-location-crosshairs');
@@ -113,14 +122,13 @@ export function initGPS() {
                 const { latitude: lat, longitude: lng, accuracy } = pos.coords;
                 state.userLocation = { lat, lng };
 
-                // 1. 更新本機 UI (GPS 座標顯示) - 這是 GPS 模組的本份
                 const gpsValText = document.getElementById('gps-val-text');
                 if (gpsValText) gpsValText.textContent = `GPS: ${lat.toFixed(4)}, ${lng.toFixed(4)}`;
 
-                // 2. 更新地圖圖標
                 if (!userMarker) {
                     userMarker = L.marker([lat, lng], { icon: createCompassIcon(), zIndexOffset: 1000 }).addTo(state.mapInstance);
                     compassCircle = L.circle([lat, lng], { radius: accuracy, color: 'var(--primary)', opacity: 0.35, fillColor: 'var(--primary)', fillOpacity: 0.08, weight: 1 }).addTo(state.mapInstance);
+                    
                     state.mapInstance.flyTo([lat, lng], 17, { animate: true, duration: 1.5 });
                     if (typeof window.showToast === 'function') window.showToast('✅ 定位成功！實境羅盤已啟動', 'success');
                 } else {
@@ -128,8 +136,12 @@ export function initGPS() {
                     compassCircle.setLatLng([lat, lng]);
                     compassCircle.setRadius(accuracy);
                     
-                    // 🌟 這裡發出一個「重要事件」，告知全系統：使用者位置更新了！
-                    // 並附帶「是否該鎖定視角」的建議 (但接收者可以選擇不理會)
+                    // 🌟 只有在跟隨模式下，地圖才會自動平移
+                    if (isFollowing) {
+                        state.mapInstance.panTo([lat, lng]);
+                    }
+
+                    // 廣播位置更新 (給 announcer 和 nearby 使用)
                     events.emit('location_update', { lat, lng, accuracy, timestamp: Date.now() });
                 }
                 if (btnIcon) btnIcon.classList.remove('fa-spin');
@@ -143,10 +155,13 @@ export function initGPS() {
         );
     };
 
+    // 🌟 按下重置按鈕時，強制解除跟隨，並飛回瑞芳中心
     window.rfApp.map.resetNorth = () => {
+        isFollowing = false; // 解除跟隨
         if (state.mapInstance) {
-            state.mapInstance.flyTo(state.mapInstance.getCenter(), state.mapInstance.getZoom(), { animate: true });
-            if (typeof window.showToast === 'function') window.showToast('地圖視角已重置', 'info');
+            // 飛回瑞芳車站預設位置，而不是原地的 getCenter()
+            state.mapInstance.flyTo([25.1086, 121.8058], 15, { animate: true });
+            if (typeof window.showToast === 'function') window.showToast('已回到瑞芳中心', 'info');
         }
     };
 
