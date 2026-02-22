@@ -1,4 +1,4 @@
-// js/modules/weather.js (v709) - 防彈綁定版
+// js/modules/weather.js (v710) - 瑞芳資訊中樞 (防彈整合版)
 import { state } from '../core/store.js';
 import { zones } from '../data/boundary.js';
 
@@ -6,7 +6,7 @@ let isDashboardInjected = false;
 let isFetching = false;
 let currentTab = 'weather';
 
-// 🌟 [關鍵修正] 確保全域物件存在
+// 確保全域物件存在
 window.rfApp = window.rfApp || {};
 window.rfApp.weather = window.rfApp.weather || {};
 
@@ -14,19 +14,19 @@ const getT = (key) => window.rfApp?.t ? window.rfApp.t(key) : key;
 
 const getWeatherInfo = (code) => {
     const t = getT;
-    if (code === 0) return { icon: 'fa-sun', name: t('wmo_clear'), class: 'weather-sun' };
-    if (code <= 3) return { icon: 'fa-cloud-sun', name: t('wmo_cloudy'), class: 'weather-cloud' };
-    if (code <= 48) return { icon: 'fa-smog', name: t('wmo_fog'), class: 'weather-cloud' };
-    if (code <= 67 || (code >= 80 && code <= 82)) return { icon: 'fa-cloud-rain', name: t('wmo_rain'), class: 'weather-rain' };
-    if (code >= 95) return { icon: 'fa-bolt', name: t('wmo_storm'), class: 'weather-rain' };
+    if (code === 0) return { icon: 'fa-sun', name: t('wmo_clear') || '晴朗', class: 'weather-sun' };
+    if (code <= 3) return { icon: 'fa-cloud-sun', name: t('wmo_cloudy') || '多雲', class: 'weather-cloud' };
+    if (code <= 48) return { icon: 'fa-smog', name: t('wmo_fog') || '起霧', class: 'weather-cloud' };
+    if (code <= 67 || (code >= 80 && code <= 82)) return { icon: 'fa-cloud-rain', name: t('wmo_rain') || '有雨', class: 'weather-rain' };
+    if (code >= 95) return { icon: 'fa-bolt', name: t('wmo_storm') || '雷雨', class: 'weather-rain' };
     return { icon: 'fa-cloud', name: '--', class: '' };
 };
 
 const getAqiInfo = (aqi) => {
     const t = getT;
-    if (aqi <= 50) return { color: '#2ecc71', status: t('aqi_good'), icon: 'fa-smile' };
-    if (aqi <= 100) return { color: '#f1c40f', status: t('aqi_moderate'), icon: 'fa-meh' };
-    return { color: '#e74c3c', status: t('aqi_unhealthy'), icon: 'fa-frown' };
+    if (aqi <= 50) return { color: '#2ecc71', status: t('aqi_good') || '良好', icon: 'fa-smile' };
+    if (aqi <= 100) return { color: '#f1c40f', status: t('aqi_moderate') || '普通', icon: 'fa-meh' };
+    return { color: '#e74c3c', status: t('aqi_unhealthy') || '不佳', icon: 'fa-frown' };
 };
 
 function injectDashboard() {
@@ -50,6 +50,7 @@ function injectDashboard() {
         .tab-page.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
+        /* 天氣卡片 */
         .dash-main-card { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 20px; padding: 25px; color: white; display: flex; flex-direction: column; align-items: center; box-shadow: 0 10px 25px rgba(118, 75, 162, 0.4); position: relative; overflow: hidden; margin-bottom: 20px; }
         .dash-main-card.sunny { background: linear-gradient(135deg, #f6d365 0%, #fda085 100%); box-shadow: 0 10px 25px rgba(253, 160, 133, 0.4); }
         .dash-main-card.rainy { background: linear-gradient(135deg, #3a1c71 0%, #d76d77 100%); }
@@ -63,12 +64,14 @@ function injectDashboard() {
         .item-val { font-size: 18px; font-weight: bold; color: var(--text-main); }
         .forecast-item { display: flex; align-items: center; justify-content: space-between; padding: 12px 15px; background: rgba(0,0,0,0.03); border-radius: 12px; margin-bottom: 8px; }
 
+        /* 區域網格 */
         .zone-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
         .zone-btn { aspect-ratio: 1; background: white; border-radius: 16px; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.05); cursor: pointer; transition: transform 0.1s; border: 1px solid rgba(0,0,0,0.05); }
         .zone-btn:active { transform: scale(0.95); background: #f0f0f0; }
         .zone-icon { font-size: 32px; margin-bottom: 8px; }
         .zone-name { font-size: 14px; font-weight: bold; color: var(--text-main); }
 
+        /* 交通與新聞 */
         .trans-card { background: white; border-radius: 16px; padding: 20px; margin-bottom: 15px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 10px rgba(0,0,0,0.05); cursor: pointer; }
         .trans-info h4 { margin: 0 0 5px 0; font-size: 16px; color: var(--text-main); }
         .trans-info p { margin: 0; font-size: 13px; color: var(--text-sub); }
@@ -79,6 +82,7 @@ function injectDashboard() {
         .news-title { font-weight: bold; color: var(--text-main); font-size: 15px; margin-bottom: 4px; }
         .news-desc { font-size: 13px; color: #666; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 
+        /* AI 助理 */
         .ai-chat-box { display: flex; flex-direction: column; height: 100%; }
         .ai-msg-list { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; padding-bottom: 15px; }
         .msg { max-width: 80%; padding: 12px 16px; border-radius: 18px; font-size: 14px; line-height: 1.5; }
@@ -88,6 +92,7 @@ function injectDashboard() {
         .ai-input { flex: 1; padding: 10px 15px; border-radius: 20px; border: 1px solid #ddd; background: #f9f9f9; }
         .ai-send { width: 40px; height: 40px; border-radius: 50%; background: var(--primary); color: white; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; }
 
+        /* 底部導覽 */
         .dash-tabbar { position: absolute; bottom: 0; left: 0; width: 100%; height: 65px; background: white; display: flex; justify-content: space-around; align-items: center; box-shadow: 0 -5px 15px rgba(0,0,0,0.05); z-index: 10; padding-bottom: 10px; }
         .tab-item { display: flex; flex-direction: column; align-items: center; gap: 4px; color: #aaa; cursor: pointer; width: 20%; transition: 0.2s; -webkit-tap-highlight-color: transparent; }
         .tab-item i { font-size: 20px; }
@@ -125,31 +130,17 @@ function injectDashboard() {
 
                 <div id="tab-news" class="tab-page">
                     <h3 data-i18n="news_title" style="margin:0 0 15px 0;">瑞芳在地快訊</h3>
-                    <div class="news-item">
-                        <div class="news-date">2026/02/20</div>
-                        <div><div class="news-title">九份紅燈籠祭開跑</div><div class="news-desc">活動期間老街將點亮千盞紅燈籠，歡迎遊客共襄盛舉。</div></div>
-                    </div>
-                    <div class="news-item">
-                        <div class="news-date">2026/02/18</div>
-                        <div><div class="news-title">猴硐貓村新設施啟用</div><div class="news-desc">全新的貓咪友善步道與遊客中心已正式對外開放。</div></div>
-                    </div>
+                    <div class="news-item"><div class="news-date">2026/02/20</div><div><div class="news-title">九份紅燈籠祭開跑</div><div class="news-desc">活動期間老街將點亮千盞紅燈籠，歡迎遊客共襄盛舉。</div></div></div>
+                    <div class="news-item"><div class="news-date">2026/02/18</div><div><div class="news-title">猴硐貓村新設施啟用</div><div class="news-desc">全新的貓咪友善步道與遊客中心已正式對外開放。</div></div></div>
                 </div>
 
                 <div id="tab-transport" class="tab-page">
                     <h3 data-i18n="trans_title" style="margin:0 0 15px 0;">即時交通資訊</h3>
                     <div class="trans-card" onclick="window.open('https://tip.railway.gov.tw/tra-tip-web/tip/tip001/tip112/goby-station', '_blank')">
-                        <div style="display:flex; align-items:center;">
-                            <div class="trans-icon"><i class="fas fa-train"></i></div>
-                            <div class="trans-info"><h4 data-i18n="trans_train">台鐵列車動態</h4><p data-i18n="trans_desc">查詢時刻表</p></div>
-                        </div>
-                        <i class="fas fa-chevron-right" style="color:#ccc;"></i>
+                        <div style="display:flex; align-items:center;"><div class="trans-icon"><i class="fas fa-train"></i></div><div class="trans-info"><h4 data-i18n="trans_train">台鐵列車動態</h4><p data-i18n="trans_desc">查詢時刻表</p></div></div><i class="fas fa-chevron-right" style="color:#ccc;"></i>
                     </div>
                     <div class="trans-card" onclick="window.open('https://ebus.gov.taipei/', '_blank')">
-                        <div style="display:flex; align-items:center;">
-                            <div class="trans-icon"><i class="fas fa-bus"></i></div>
-                            <div class="trans-info"><h4 data-i18n="trans_bus">公車動態</h4><p data-i18n="trans_desc">查詢公車位置</p></div>
-                        </div>
-                        <i class="fas fa-chevron-right" style="color:#ccc;"></i>
+                        <div style="display:flex; align-items:center;"><div class="trans-icon"><i class="fas fa-bus"></i></div><div class="trans-info"><h4 data-i18n="trans_bus">公車動態</h4><p data-i18n="trans_desc">查詢公車位置</p></div></div><i class="fas fa-chevron-right" style="color:#ccc;"></i>
                     </div>
                 </div>
 
@@ -184,12 +175,22 @@ function injectDashboard() {
     document.body.appendChild(div);
     div.addEventListener('click', (e) => { if(e.target === div) window.rfApp.weather.toggleDashboard(); });
     
-    generateZoneGrid();
+    // 生成九大區按鈕
+    const container = document.getElementById('zone-grid-container');
+    if(container && zones) {
+        container.innerHTML = zones.map(z => `
+            <div class="zone-btn" onclick="window.rfApp.weather.jumpToZone('${z.id}')">
+                <div class="zone-icon">${z.icon}</div>
+                <div class="zone-name">${z.name}</div>
+            </div>
+        `).join('');
+    }
+
     isDashboardInjected = true;
 }
 
-// 🌟 核心函數：切換分頁 (立即綁定到全域)
-function switchTab(tabId) {
+// 🌟 開放全域呼叫的函數
+window.rfApp.weather.switchTab = function(tabId) {
     currentTab = tabId;
     document.querySelectorAll('.tab-item').forEach(el => el.classList.remove('active'));
     const tabs = ['weather', 'news', 'transport', 'zones', 'ai'];
@@ -197,34 +198,35 @@ function switchTab(tabId) {
     if(idx > -1) document.querySelectorAll('.tab-item')[idx].classList.add('active');
 
     document.querySelectorAll('.tab-page').forEach(el => el.classList.remove('active'));
-    document.getElementById(`tab-${tabId}`).classList.add('active');
-}
-window.rfApp.weather.switchTab = switchTab; // 🔥 強制綁定
+    const targetPage = document.getElementById(`tab-${tabId}`);
+    if(targetPage) targetPage.classList.add('active');
+};
 
-// 🌟 核心函數：跳轉區域 (立即綁定到全域)
-function jumpToZone(zoneId) {
+window.rfApp.weather.jumpToZone = function(zoneId) {
+    if(!zones) return;
     const zone = zones.find(z => z.id === zoneId);
     if(zone && state.mapInstance) {
         state.mapInstance.flyTo([zone.lat, zone.lng], zone.zoom, { animate: true, duration: 1.5 });
         window.rfApp.weather.toggleDashboard();
     }
-}
-window.rfApp.weather.jumpToZone = jumpToZone; // 🔥 強制綁定
+};
 
-function generateZoneGrid() {
-    const container = document.getElementById('zone-grid-container');
-    if(!container) return;
-    container.innerHTML = zones.map(z => `
-        <div class="zone-btn" onclick="window.rfApp.weather.jumpToZone('${z.id}')">
-            <div class="zone-icon">${z.icon}</div>
-            <div class="zone-name">${z.name}</div>
-        </div>
-    `).join('');
-}
+window.rfApp.weather.toggleDashboard = function() {
+    injectDashboard();
+    const overlay = document.getElementById('dashboard-overlay');
+    if (overlay) {
+        if (overlay.classList.contains('active')) {
+            overlay.classList.remove('active');
+        } else {
+            overlay.classList.add('active');
+            if(currentTab === 'weather') fetchWeather(); // 如果停在天氣頁，打開時刷新資料
+        }
+    }
+};
 
+// 🌟 抓取天氣 API
 export async function fetchWeather() {
     if (isFetching) return;
-    injectDashboard();
     isFetching = true;
 
     const topTempEl = document.getElementById('weather-temp');
@@ -241,6 +243,8 @@ export async function fetchWeather() {
     if(mainLocEl) mainLocEl.innerText = getT('loading_weather') || "Updating...";
 
     try {
+        if (!navigator.onLine) throw new Error('Offline');
+
         const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,rain,weather_code,wind_speed_10m&hourly=uv_index&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,precipitation_probability_max&timezone=auto`;
         const aqiUrl = `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${lat}&longitude=${lng}&current=us_aqi`;
 
@@ -256,30 +260,48 @@ export async function fetchWeather() {
         if (topTempEl) topTempEl.innerText = `${Math.round(current.temperature_2m)}°`;
         if (topBoxEl) {
             topBoxEl.innerHTML = `<i class="fas ${wInfo.icon} ${wInfo.class}"></i><span id="weather-temp">${Math.round(current.temperature_2m)}°</span>`;
-            topBoxEl.onclick = window.rfApp.weather.toggleDashboard;
         }
 
         if(mainLocEl) mainLocEl.innerHTML = `<i class="fas fa-map-marker-alt"></i> ${locName}`;
-        document.getElementById('dash-main-temp').innerText = `${Math.round(current.temperature_2m)}°`;
-        document.getElementById('dash-main-status').innerText = wInfo.name;
+        
+        const mainTempEl = document.getElementById('dash-main-temp');
+        if(mainTempEl) mainTempEl.innerText = `${Math.round(current.temperature_2m)}°`;
+        
+        const mainStatusEl = document.getElementById('dash-main-status');
+        if(mainStatusEl) mainStatusEl.innerText = wInfo.name;
         
         const aqiInfo = getAqiInfo(aqiVal);
         const aqiEl = document.getElementById('dash-aqi-badge');
-        aqiEl.innerHTML = `<i class="fas ${aqiInfo.icon}"></i> ${getT('aqi_level')}: ${aqiVal} (${aqiInfo.status})`;
-        aqiEl.style.backgroundColor = aqiInfo.color + '40'; 
-        aqiEl.style.border = `1px solid ${aqiInfo.color}`;
+        if(aqiEl) {
+            aqiEl.innerHTML = `<i class="fas ${aqiInfo.icon}"></i> ${getT('aqi_level') || 'AQI'}: ${aqiVal} (${aqiInfo.status})`;
+            aqiEl.style.backgroundColor = aqiInfo.color + '40'; 
+            aqiEl.style.border = `1px solid ${aqiInfo.color}`;
+        }
 
         const mainCard = document.getElementById('dash-main-card');
-        mainCard.className = 'dash-main-card';
-        if(current.weather_code <= 3) mainCard.classList.add('sunny');
-        else if(current.weather_code >= 51) mainCard.classList.add('rainy');
+        if(mainCard) {
+            mainCard.className = 'dash-main-card';
+            if(current.weather_code <= 3) mainCard.classList.add('sunny');
+            else if(current.weather_code >= 51) mainCard.classList.add('rainy');
+        }
 
-        document.getElementById('dash-humidity').innerText = `${current.relative_humidity_2m}%`;
-        const hourIndex = new Date().getHours();
-        document.getElementById('dash-uv').innerText = data.hourly.uv_index[hourIndex] || 0;
-        document.getElementById('dash-prob').innerText = `${daily.precipitation_probability_max[0] || 0}%`;
-        const sunsetTime = new Date(daily.sunset[0]).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', hour12: false});
-        document.getElementById('dash-sunset').innerText = sunsetTime;
+        const humEl = document.getElementById('dash-humidity');
+        if(humEl) humEl.innerText = `${current.relative_humidity_2m}%`;
+        
+        const uvEl = document.getElementById('dash-uv');
+        if(uvEl) {
+            const hourIndex = new Date().getHours();
+            uvEl.innerText = data.hourly.uv_index[hourIndex] || 0;
+        }
+        
+        const probEl = document.getElementById('dash-prob');
+        if(probEl) probEl.innerText = `${daily.precipitation_probability_max[0] || 0}%`;
+        
+        const sunsetEl = document.getElementById('dash-sunset');
+        if(sunsetEl) {
+            const sunsetTime = new Date(daily.sunset[0]).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', hour12: false});
+            sunsetEl.innerText = sunsetTime;
+        }
 
         let forecastHTML = '';
         for(let i=1; i<=6; i++) {
@@ -294,33 +316,31 @@ export async function fetchWeather() {
                 </div>
             `;
         }
-        document.getElementById('forecast-list').innerHTML = forecastHTML;
+        const forecastList = document.getElementById('forecast-list');
+        if(forecastList) forecastList.innerHTML = forecastHTML;
 
     } catch (e) {
-        console.error(e);
-        if(mainLocEl) mainLocEl.innerText = getT('weather_error') || "Error";
+        console.error("API 載入失敗:", e);
+        if(mainLocEl) mainLocEl.innerText = "無法取得天氣資訊";
+        if (topTempEl && topTempEl.innerText === "") topTempEl.innerText = "--"; 
+        
+        if (!navigator.onLine) {
+            console.warn("⚠️ 進入離線模式");
+            window.addEventListener('online', fetchWeather, { once: true });
+        }
     } finally {
         isFetching = false;
     }
 }
-window.rfApp.weather.fetchWeather = fetchWeather; // 🔥 強制綁定
-
-// 全域開關
-window.toggleDashboard = () => {
-    injectDashboard();
-    const overlay = document.getElementById('dashboard-overlay');
-    if (overlay) {
-        if (overlay.classList.contains('active')) {
-            overlay.classList.remove('active');
-        } else {
-            overlay.classList.add('active');
-            if(currentTab === 'weather') fetchWeather();
-        }
-    }
-};
-window.rfApp.weather.toggleDashboard = window.toggleDashboard; // 🔥 強制綁定
 
 export function initWeather() {
-    // 這裡只是輔助，主要功能已在上方綁定
-    setTimeout(fetchWeather, 2000);
+    // 無論 API 成功與否，立刻綁定右上角按鈕的點擊事件
+    const topBoxEl = document.getElementById('weather-box');
+    if (topBoxEl) {
+        topBoxEl.onclick = window.rfApp.weather.toggleDashboard;
+        topBoxEl.style.cursor = 'pointer';
+    }
+    
+    // 延遲抓取天氣，避免阻塞首頁地圖載入
+    setTimeout(fetchWeather, 1500);
 }
