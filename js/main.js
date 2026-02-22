@@ -1,4 +1,4 @@
-// js/main.js (v631)
+// js/main.js (v632)
 // 🌟 1. 建立企業級全域命名空間 (Namespace 工具箱)
 window.rfApp = {
     ui: {},
@@ -13,24 +13,24 @@ window.rfApp = {
     tts: {}
 };
 
-import { initTTS } from './modules/tts.js?v=631';
-import { initErrorHandler, showToast } from './modules/toast.js?v=631';
-import { state } from './core/store.js?v=631'; 
-import { initMap, toggleLayer } from './core/map.js?v=631'; 
-import { fetchWeather } from './modules/weather.js?v=631';
-import { initGPS } from './modules/gps.js?v=631';
-import { initAnnouncer } from './modules/announcer.js?v=631'; 
-import { initCardGestures, closeCard } from './modules/cards.js?v=631';
-import { renderAllMarkers } from './modules/markers.js?v=631';
-import { initSearch } from './modules/search.js?v=631';
-import { initNavigation } from './modules/navigation.js?v=631';
-import { initUI } from './modules/ui.js?v=631'; 
-import { initFirebase } from './modules/firebase-sync.js?v=631';
-import { initTheme } from './modules/theme.js?v=631'; 
-import { initPWA } from './modules/pwa.js?v=631';
-import { initTour } from './modules/tour.js?v=631';
-import { initFavorites } from './modules/favorites.js?v=631';
-import { initCustomSpots } from './modules/customSpots.js?v=631'; 
+import { initTTS } from './modules/tts.js?v=632';
+import { initErrorHandler, showToast } from './modules/toast.js?v=632';
+import { state } from './core/store.js?v=632'; 
+import { initMap, toggleLayer } from './core/map.js?v=632'; 
+import { fetchWeather } from './modules/weather.js?v=632';
+import { initGPS } from './modules/gps.js?v=632';
+import { initAnnouncer } from './modules/announcer.js?v=632'; 
+import { initCardGestures, closeCard } from './modules/cards.js?v=632';
+import { renderAllMarkers } from './modules/markers.js?v=632';
+import { initSearch } from './modules/search.js?v=632';
+import { initNavigation } from './modules/navigation.js?v=632';
+import { initUI } from './modules/ui.js?v=632'; 
+import { initFirebase } from './modules/firebase-sync.js?v=632';
+import { initTheme } from './modules/theme.js?v=632'; 
+import { initPWA } from './modules/pwa.js?v=632';
+import { initTour } from './modules/tour.js?v=632';
+import { initFavorites } from './modules/favorites.js?v=632';
+import { initCustomSpots } from './modules/customSpots.js?v=632'; 
 
 // 將核心方法收納進工具箱，並建立向下相容橋樑
 window.rfApp.map.toggleLayer = toggleLayer;
