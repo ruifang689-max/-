@@ -1,4 +1,4 @@
-// js/modules/cards.js (v629) - 語音導覽修復版
+// js/modules/cards.js (v630) - 瘦身版
 import { state, saveState } from '../core/store.js';
 import { translations } from '../data/lang.js';
 
@@ -9,53 +9,11 @@ export function getPlaceholderImage(text) {
     return canvas.toDataURL('image/jpeg', 0.8);
 }
 
-// =========================================
-// 🌟 核心新功能：切換語音導覽 (TTS)
-// 改為標準的 export 函數，避免模組載入順序錯誤
-// =========================================
-export function toggleTTS() {
-    // 檢查瀏覽器支援度
-    if (!window.speechSynthesis) {
-        if(typeof window.showToast === 'function') window.showToast('您的瀏覽器不支援語音功能', 'error');
-        return;
-    }
-    
-    // 如果正在播放，就當作「停止鍵」使用
-    if (window.speechSynthesis.speaking) {
-        window.speechSynthesis.cancel();
-        if(typeof window.showToast === 'function') window.showToast('🔇 語音導覽已停止', 'info');
-        return;
-    }
-
-    const s = state.targetSpot;
-    if (!s) return;
-    
-    // 抓取要朗讀的內容，並用 Regex 過濾掉 HTML 標籤，確保發音正常
-    const rawText = (s.description || s.highlights || s.history || "暫無詳細介紹").replace(/<[^>]*>?/gm, '');
-    const textToSpeak = `${s.name}。${rawText}`;
-
-    const utterance = new SpeechSynthesisUtterance(textToSpeak);
-    
-    // 根據目前的語系設定發音口音
-    const langMap = { 'zh': 'zh-TW', 'en': 'en-US', 'ja': 'ja-JP', 'ko': 'ko-KR' };
-    utterance.lang = langMap[state.currentLang] || 'zh-TW';
-    utterance.rate = 0.95; // 稍微放慢語速，讓長輩也聽得清楚
-    
-    window.speechSynthesis.speak(utterance);
-    
-    // 搭配我們剛做的 Toast 提示系統
-    if(typeof window.showToast === 'function') window.showToast('🔊 語音導覽播放中...', 'success');
-}
-
-// 🌟 將函數掛載到全域，讓 HTML 字串的 onclick 可以直接呼叫
-window.toggleTTS = toggleTTS;
-
 export function showCard(s) { 
     state.targetSpot = s; 
     document.getElementById("card-fav-icon").className = (state.myFavs || []).includes(s.name) ? "fas fa-heart active" : "fas fa-heart"; 
     document.getElementById("title").innerText = s.name; 
     
-    // 圖片懶載入
     const imgEl = document.getElementById('img');
     if (imgEl) {
         imgEl.loading = "lazy";
@@ -63,7 +21,6 @@ export function showCard(s) {
         imgEl.onerror = () => { imgEl.src = getPlaceholderImage(s.name); };
     }
     
-    // 標籤處理
     const tags = s.tags ? (Array.isArray(s.tags) ? s.tags : [s.tags]) : (s.category ? [s.category] : []);
     document.getElementById("card-tags").innerHTML = tags.map(t => `<span class="info-tag">${t}</span>`).join(''); 
     
@@ -89,12 +46,10 @@ export function showCard(s) {
     const transportEl = document.getElementById("card-transport"); 
     if(transportEl) { transportEl.style.display = "block"; transportEl.innerText = s.transport || "自行前往"; }
     
-    // =========================================
-    // 🌟 按鈕渲染 (語音導覽按鈕改為直接呼叫 toggleTTS)
-    // =========================================
     const t = translations[state.currentLang] || translations['zh'];
     const btnGroup = document.getElementById("card-btn-group");
     
+    // UI 按鈕依然呼叫 toggleTTS()，因為我們在 tts.js 建立了全域橋樑
     if (tags.includes('自訂')) { 
         btnGroup.innerHTML = `
             <button onclick="startNav()" style="flex: 1;"><i class="fas fa-location-arrow"></i> ${t.nav || '導航'}</button>
@@ -117,8 +72,8 @@ export function showCard(s) {
 export function closeCard() { 
     document.getElementById("card").classList.remove("open"); 
     document.getElementById("card").style.transform = ''; 
-    // 🌟 貼心設計：關閉卡片時立刻中斷語音，避免背景一直碎碎念
-    if (window.speechSynthesis) window.speechSynthesis.cancel();
+    // 🌟 呼叫新模組的 stop API
+    if (typeof window.stopTTS === 'function') window.stopTTS();
 }
 
 export function initCardGestures() {
