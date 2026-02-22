@@ -47,6 +47,9 @@ function removeSplashScreen() {
     }
 }
 
+// ✅ 【關鍵修正】把這個函數暴露給 HTML 使用
+window.enterMap = enterMap;
+
 function safeInit(fn, name) {
     try { 
         fn(); 
