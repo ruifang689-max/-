@@ -1,4 +1,4 @@
-// js/modules/gps.js (v633) - 專業雷達波紋版
+// js/modules/gps.js (v634) - 頂級雷達光束與高精度版
 import { state } from '../core/store.js';
 
 let watchId = null;
@@ -7,7 +7,7 @@ let compassCircle = null;
 let currentHeading = 0; 
 let isCompassActive = false;
 
-// 🌟 動態注入 CSS：打造專業雷達聲納波紋
+// 🌟 動態注入 CSS：打造扇形雷達光束與波紋
 const injectCompassCSS = () => {
     if (document.getElementById('gps-compass-style')) return;
     const style = document.createElement('style');
@@ -18,37 +18,36 @@ const injectCompassCSS = () => {
         /* 中心點 */
         .gps-core { width: 16px; height: 16px; background-color: var(--primary); border: 3px solid white; border-radius: 50%; box-shadow: 0 2px 6px rgba(0,0,0,0.3); z-index: 3; position: relative; }
         
-        /* 🌟 雷達波紋容器 */
+        /* 雷達擴散波紋 */
         .gps-radar { position: absolute; width: 100%; height: 100%; z-index: 1; pointer-events: none; }
-        
-        /* 🌟 利用偽元素製造雙重波紋 */
         .gps-radar::before, .gps-radar::after {
-            content: '';
-            position: absolute;
-            top: 50%; left: 50%;
-            width: 20px; height: 20px; /* 初始大小 */
-            background-color: var(--primary); /* 跟隨主題色 */
-            border-radius: 50%;
-            transform: translate(-50%, -50%) scale(1);
-            opacity: 0;
+            content: ''; position: absolute; top: 50%; left: 50%; width: 20px; height: 20px;
+            background-color: var(--primary); border-radius: 50%;
+            transform: translate(-50%, -50%) scale(1); opacity: 0;
             animation: radar-wave 2s infinite linear;
         }
-        /* 讓第二個波紋延遲發射，製造層次感 */
         .gps-radar::after { animation-delay: 1s; }
-
-        /* 🌟 全新的雷達擴散動畫關鍵影格 */
         @keyframes radar-wave {
             0% { transform: translate(-50%, -50%) scale(0.5); opacity: 0.7; }
-            100% { transform: translate(-50%, -50%) scale(3.5); opacity: 0; } /* 擴散到 3.5 倍大並消失 */
+            100% { transform: translate(-50%, -50%) scale(3.5); opacity: 0; }
         }
 
-        /* 方向箭頭 */
-        .gps-arrow-container { position: absolute; top: 0; left: 0; width: 60px; height: 60px; display: flex; align-items: flex-start; justify-content: center; transition: transform 0.1s ease-out; z-index: 2; }
+        /* 🌟 全新：扇形雷達光束 (取代原本的死板三角形) */
+        .gps-arrow-container { position: absolute; top: 0; left: 0; width: 60px; height: 60px; z-index: 2; transition: transform 0.15s ease-out; }
         .gps-arrow-container::before { 
-            content: ''; width: 0; height: 0; 
-            border-left: 12px solid transparent; border-right: 12px solid transparent; 
-            border-bottom: 28px solid rgba(0, 123, 255, 0.7); /* 稍微加深顏色 */
-            transform: translateY(-10px); filter: drop-shadow(0 1px 2px rgba(0,0,0,0.2)); 
+            content: '';
+            position: absolute;
+            bottom: 50%; /* 從中心點出發 */
+            left: 50%;
+            transform: translateX(-50%);
+            width: 70px; /* 扇形掃描的寬度 */
+            height: 50px; /* 掃描的距離 */
+            /* 使用放射狀漸層，製造邊緣模糊的光束感 */
+            background: radial-gradient(circle at 50% 100%, var(--primary) 0%, transparent 75%);
+            /* 將方形裁切成倒三角形的光束形狀 */
+            clip-path: polygon(50% 100%, 0 0, 100% 0);
+            opacity: 0.85; /* 顏色比波紋深，但保持微透明 */
+            filter: drop-shadow(0 -2px 4px rgba(0, 123, 255, 0.4));
         }
     `;
     document.head.appendChild(style);
@@ -59,12 +58,13 @@ const createCompassIcon = () => {
         className: 'custom-compass-icon',
         html: `
             <div class="gps-marker-wrap">
-                <div class="gps-radar"></div> <div class="gps-arrow-container" id="real-time-arrow" style="transform: rotate(${currentHeading}deg);"></div>
+                <div class="gps-radar"></div>
+                <div class="gps-arrow-container" id="real-time-arrow" style="transform: rotate(${currentHeading}deg);"></div>
                 <div class="gps-core"></div>
             </div>
         `,
         iconSize: [60, 60],
-        iconAnchor: [30, 30]
+        iconAnchor: [30, 30] // 確保錨點完美置中
     });
 };
 
@@ -110,15 +110,22 @@ export function initGPS() {
 
                 if (!userMarker) {
                     userMarker = L.marker([lat, lng], { icon: createCompassIcon(), zIndexOffset: 1000 }).addTo(state.mapInstance);
-                    compassCircle = L.circle([lat, lng], { radius: accuracy, color: 'var(--primary)', fillColor: 'var(--primary)', fillOpacity: 0.08, weight: 1 }).addTo(state.mapInstance);
+                    
+                    // 🌟 範圍圓圈修改：將外框線(color)改為極淺的灰色，並且稍微降低填色透明度
+                    compassCircle = L.circle([lat, lng], { 
+                        radius: accuracy, 
+                        color: 'rgba(200, 200, 200, 0.4)', // 淺色邊框
+                        fillColor: 'var(--primary)', 
+                        fillOpacity: 0.05, // 更淡的填充色，突顯雷達光束
+                        weight: 1 
+                    }).addTo(state.mapInstance);
+                    
                     state.mapInstance.flyTo([lat, lng], 17, { animate: true, duration: 1.5 });
                     if (typeof window.showToast === 'function') window.showToast('✅ 定位成功！實境羅盤已啟動', 'success');
                 } else {
                     userMarker.setLatLng([lat, lng]);
                     compassCircle.setLatLng([lat, lng]);
                     compassCircle.setRadius(accuracy);
-                    // 只有在用戶沒有手動拖曳地圖時才自動跟隨，避免干擾操作
-                    // state.mapInstance.panTo([lat, lng]); 
                 }
                 if (btnIcon) btnIcon.classList.remove('fa-spin');
                 const addrText = document.getElementById('addr-text');
@@ -129,7 +136,8 @@ export function initGPS() {
                 if (btnIcon) btnIcon.classList.remove('fa-spin');
                 if (typeof window.showToast === 'function') window.showToast('無法取得定位，請確認已開啟 GPS', 'error');
             },
-            { enableHighAccuracy: true, maximumAge: 5000, timeout: 10000 }
+            // 🌟 極限精度參數：強制不使用快取 (maximumAge: 0)，給予更多運算時間
+            { enableHighAccuracy: true, maximumAge: 0, timeout: 15000 } 
         );
     };
 
