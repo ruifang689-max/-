@@ -1,7 +1,10 @@
-// js/modules/cards.js (v683) - 事件綁定防彈與標準 Google Maps 導航版
+// js/modules/cards.js (v702) - 翻譯與主題深度整合版
 import { state } from '../core/store.js';
 
 let isCardInitialized = false;
+
+// 輔助：取得翻譯函數
+const getT = () => window.rfApp?.t || ((k) => k);
 
 function getDistanceText(lat, lng) {
     if (!state.userLocation || !state.userLocation.lat) return "";
@@ -11,8 +14,11 @@ function getDistanceText(lat, lng) {
     const a = Math.sin(dLat/2)*Math.sin(dLat/2) + Math.cos(state.userLocation.lat*Math.PI/180)*Math.cos(lat*Math.PI/180)*Math.sin(dLon/2)*Math.sin(dLon/2);
     const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
     const d = R * c;
-    if (d < 1) return `📍 距離 ${(d*1000).toFixed(0)}m`;
-    return `📍 距離 ${d.toFixed(1)}km`;
+    const t = getT();
+    
+    // 🌟 翻譯距離文字
+    const distText = d < 1 ? `${(d*1000).toFixed(0)}m` : `${d.toFixed(1)}km`;
+    return `📍 ${t('distance_prefix') || '距離'} ${distText}`;
 }
 
 // 🌟 全域展開卡片函數
@@ -28,20 +34,21 @@ window.expandCard = () => {
     document.getElementById("card-btn-group").classList.remove('u-hidden');
 };
 
-// 🌟 全域開啟路線選單函數 (使用官方 Google Maps URL Scheme)
+// 🌟 全域開啟路線選單函數
 window.openRouteMenu = (lat, lng, nameRaw) => {
     const menu = document.getElementById('route-menu-container');
     if(!menu) return;
-    
+    const t = getT();
     const name = encodeURIComponent(nameRaw);
     
+    // 🌟 翻譯路線選單
     menu.innerHTML = `
-        <div style="font-weight:bold; margin-bottom:10px; color:#555;">選擇前往方式：</div>
-        <a href="https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=driving" target="_blank" class="route-btn-item"><i class="fas fa-car"></i> 開車 (Driving)</a>
-        <a href="https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=two-wheeler" target="_blank" class="route-btn-item"><i class="fas fa-motorcycle"></i> 機車 (Scooter)</a>
-        <a href="https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=transit" target="_blank" class="route-btn-item"><i class="fas fa-bus"></i> 大眾運輸 (Transit)</a>
-        <a href="https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=walking" target="_blank" class="route-btn-item"><i class="fas fa-walking"></i> 步行 (Walk)</a>
-        <div class="route-close" onclick="document.getElementById('route-menu-container').classList.remove('active')">取消</div>
+        <div style="font-weight:bold; margin-bottom:10px; color:#555;">${t('route_title') || '選擇前往方式'}：</div>
+        <a href="https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=driving" target="_blank" class="route-btn-item"><i class="fas fa-car"></i> ${t('route_drive') || '開車 (Driving)'}</a>
+        <a href="https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=two-wheeler" target="_blank" class="route-btn-item"><i class="fas fa-motorcycle"></i> ${t('route_scooter') || '機車 (Scooter)'}</a>
+        <a href="https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=transit" target="_blank" class="route-btn-item"><i class="fas fa-bus"></i> ${t('route_transit') || '大眾運輸 (Transit)'}</a>
+        <a href="https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=walking" target="_blank" class="route-btn-item"><i class="fas fa-walking"></i> ${t('route_walk') || '步行 (Walk)'}</a>
+        <div class="route-close" onclick="document.getElementById('route-menu-container').classList.remove('active')">${t('cancel') || '取消'}</div>
     `;
     menu.classList.add('active');
 };
@@ -51,7 +58,6 @@ function initCardDOM() {
     const cardEl = document.getElementById("card");
     if (!cardEl) return;
 
-    // 🌟 移除容易出錯的 HTML onClick，改用 ID 後續綁定
     cardEl.innerHTML = `
         <div class="card-drag-handle" id="card-drag-handle"><div class="drag-pill"></div></div>
         
@@ -90,8 +96,9 @@ function initCardDOM() {
         <div id="route-menu-container" class="route-menu-overlay"></div>
     `;
 
+    // 🌟 CSS 優化：支援 Glassmorphism 與各區域主題色
     const style = document.createElement('style');
-    style.id = 'card-style-v683';
+    style.id = 'card-style-v702';
     style.innerHTML = `
         #card.theme-jiufen { --card-accent: #e74c3c; --card-bg: #fff5f5; }
         #card.theme-jinguashi { --card-accent: #d4ac0d; --card-bg: #fcfbf6; }
@@ -99,9 +106,19 @@ function initCardDOM() {
         #card.theme-shuinandong { --card-accent: #3498db; --card-bg: #f0f8ff; }
         #card.theme-default { --card-accent: var(--primary); --card-bg: #ffffff; }
 
-        #card { background: var(--card-bg); border-radius: 20px 20px 0 0; padding: 0; display: flex; flex-direction: column; transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), height 0.3s; overflow: hidden; z-index: 2000; }
-        #card.preview { height: auto; min-height: 110px; }
-        #card.expanded { height: 85vh; }
+        /* 針對 Skin-Glass 的特殊處理 */
+        body.skin-glass #card { 
+            background: rgba(255, 255, 255, 0.75) !important; 
+            backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid rgba(255,255,255,0.4);
+            box-shadow: 0 -10px 40px rgba(0,0,0,0.15);
+        }
+
+        #card { background: var(--card-bg); border-radius: 20px 20px 0 0; padding: 0; display: flex; flex-direction: column; transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), height 0.3s; overflow: hidden; z-index: 2000; position: fixed; bottom: 0; left: 0; width: 100%; box-shadow: 0 -5px 25px rgba(0,0,0,0.1); }
+        #card.preview { height: auto; min-height: 110px; transform: translateY(0); }
+        #card.expanded { height: 85vh; transform: translateY(0); }
+        /* 隱藏狀態 */
+        #card:not(.open) { transform: translateY(100%); }
         
         .card-drag-handle { width: 100%; height: 24px; display: flex; justify-content: center; align-items: center; cursor: grab; background: transparent; position: absolute; top:0; z-index: 10; }
         .drag-pill { width: 40px; height: 5px; background: rgba(0,0,0,0.2); border-radius: 3px; }
@@ -136,7 +153,7 @@ function initCardDOM() {
         .section-title::before { content: ''; width: 4px; height: 16px; background: var(--card-accent); border-radius: 2px; }
         .section-content { font-size: 14px; color: #666; text-align: justify; line-height: 1.6; }
 
-        .route-menu-overlay { position: absolute; bottom: 0; left: 0; width: 100%; background: white; border-radius: 20px 20px 0 0; box-shadow: 0 -5px 20px rgba(0,0,0,0.2); transform: translateY(100%); transition: transform 0.3s; z-index: 100; padding: 20px; display: flex; flex-direction: column; gap: 10px; }
+        .route-menu-overlay { position: absolute; bottom: 0; left: 0; width: 100%; background: white; border-radius: 20px 20px 0 0; box-shadow: 0 -5px 20px rgba(0,0,0,0.2); transform: translateY(100%); transition: transform 0.3s; z-index: 2100; padding: 20px; display: flex; flex-direction: column; gap: 10px; }
         .route-menu-overlay.active { transform: translateY(0); }
         .route-btn-item { display: flex; align-items: center; gap: 12px; padding: 14px; border-radius: 12px; background: #f8f9fa; border: 1px solid #eee; color: #333; font-weight: bold; text-decoration: none; font-size: 15px;}
         .route-btn-item:active { background: #e9ecef; transform: scale(0.98); }
@@ -173,65 +190,77 @@ const getCardTheme = (tags) => {
 export function showCard(s) { 
     initCardDOM(); 
     state.targetSpot = s; 
-    
+    const t = getT();
+    const lang = state.currentLang || 'zh';
+
     const cardEl = document.getElementById("card");
     const tags = s.tags ? (Array.isArray(s.tags) ? s.tags : [s.tags]) : [];
     cardEl.className = getCardTheme(tags) + ' preview open'; 
     
-    const t = window.rfApp?.t || (k => k); 
-    const lang = state.currentLang || 'zh';
-    const imgUrl = s.wikiImg || s.coverImg || getPlaceholderImage(s.name);
+    // 🌟 多語系欄位支援 (如果資料有 name_en, name_jp 等)
+    const displayName = s[`name_${lang}`] || s.name;
+    const imgUrl = s.wikiImg || s.coverImg || getPlaceholderImage(displayName);
     const tagsHtml = tags.map(tag => `<span class="info-tag">${tag}</span>`).join('');
 
     // --- 填入預覽資料 ---
-    document.getElementById("preview-title").innerText = s.name;
+    document.getElementById("preview-title").innerText = displayName;
     const pImg = document.getElementById('preview-img');
-    pImg.src = imgUrl; pImg.onerror = () => pImg.src = getPlaceholderImage(s.name);
+    pImg.src = imgUrl; pImg.onerror = () => pImg.src = getPlaceholderImage(displayName);
     document.getElementById("preview-tags").innerHTML = tagsHtml;
     document.getElementById("preview-distance").innerText = getDistanceText(s.lat, s.lng);
 
-    // 🌟 防彈綁定：預覽卡片的路線按鈕
     const previewBtn = document.getElementById('preview-route-btn');
     if (previewBtn) {
         previewBtn.onclick = (e) => {
-            e.stopPropagation(); // 阻止卡片展開
-            window.openRouteMenu(s.lat, s.lng, s.name);
+            e.stopPropagation(); 
+            window.openRouteMenu(s.lat, s.lng, displayName);
         };
     }
 
     // --- 填入完整資料 ---
-    document.getElementById("full-title").innerText = s.name;
+    document.getElementById("full-title").innerText = displayName;
     const fImg = document.getElementById('full-img');
-    fImg.src = imgUrl; fImg.onerror = () => fImg.src = getPlaceholderImage(s.name);
+    fImg.src = imgUrl; fImg.onerror = () => fImg.src = getPlaceholderImage(displayName);
     document.getElementById("full-tags").innerHTML = tagsHtml;
     document.getElementById("card-fav-icon").className = (state.myFavs || []).includes(s.name) ? "fas fa-heart active" : "fas fa-heart"; 
     
     let infoHtml = s.warning ? `<div class="warning-banner" style="background:#fff3cd; color:#856404; padding:10px; border-radius:8px; margin-bottom:15px; font-size:13px; display:flex; gap:8px;"><i class="fas fa-exclamation-triangle"></i><span>${s.warning}</span></div>` : '';
-    // 如果有地址，提供複製功能
-    const copyFn = `if(navigator.clipboard){navigator.clipboard.writeText('${s.address}').then(()=>showToast('已複製地址','success'))}`;
+    
+    // 翻譯：地址複製提示
+    const txtCopy = t('addr_copy_success') || '已複製地址';
+    const copyFn = `if(navigator.clipboard){navigator.clipboard.writeText('${s.address}').then(()=>showToast('${txtCopy}','success'))}`;
+    
     if (s.address) infoHtml += `<div class="info-row"><i class="fas fa-map-marker-alt"></i> <span onclick="${copyFn}" style="cursor:pointer;">${s.address} <i class="far fa-copy" style="font-size:11px; opacity:0.6;"></i></span></div>`;
     if (s.openTime) infoHtml += `<div class="info-row"><i class="fas fa-clock"></i> <span>${s.openTime}</span></div>`;
     if (s.tel && s.tel !== '無') infoHtml += `<div class="info-row"><i class="fas fa-phone"></i> <a href="tel:${s.tel}">${s.tel}</a></div>`;
     document.getElementById("full-info-rows").innerHTML = infoHtml;
     
-    document.getElementById("full-desc").innerText = s.description || s.highlights || (lang === 'zh' ? "暫無詳細介紹，建議親自前往探索。" : "No description available.");
+    // 🌟 翻譯：描述與預設文字
+    const descText = s[`description_${lang}`] || s.description || s.highlights || (lang === 'zh' ? "暫無詳細介紹，建議親自前往探索。" : "No description available.");
+    document.getElementById("full-desc").innerText = descText;
     
     let sectionsHtml = '';
+    const txtHistory = t('tab_history') || '歷史背景';
+    const txtFood = t('tab_food') || '推薦美食';
+    const txtTransport = t('tab_transport') || '交通資訊';
+
     if (s.history && s.history !== "暫無歷史資訊" && s.history !== "--") {
-        sectionsHtml += `<div class="section-title">${t('history') || '歷史背景'}</div><div class="section-content">${s.history}</div>`;
+        sectionsHtml += `<div class="section-title">${txtHistory}</div><div class="section-content">${s.history}</div>`;
     }
     if (s.food && s.food !== "--") {
-        sectionsHtml += `<div class="section-title">${t('food') || '推薦美食'}</div><div class="section-content">${s.food}</div>`;
+        sectionsHtml += `<div class="section-title">${txtFood}</div><div class="section-content">${s.food}</div>`;
     }
     if (s.transport && s.transport !== "自行前往" && s.transport !== "--") {
-        sectionsHtml += `<div class="section-title">${t('transport') || '交通資訊'}</div><div class="section-content">${s.transport}</div>`;
+        sectionsHtml += `<div class="section-title">${txtTransport}</div><div class="section-content">${s.transport}</div>`;
     }
     document.getElementById("full-sections").innerHTML = sectionsHtml;
 
-    // --- 底部按鈕 ---
+    // --- 底部按鈕翻譯 ---
     const btnGroup = document.getElementById("card-btn-group");
-    const txtRoute = lang === 'en' ? 'Route' : '前往';
-    const txtVoice = lang === 'en' ? 'Voice' : '語音';
+    const txtRoute = t('btn_route') || (lang === 'en' ? 'Route' : '前往');
+    const txtVoice = t('btn_voice') || (lang === 'en' ? 'Voice' : '語音');
+    const txtEdit = t('btn_edit') || '編輯';
+    const txtDel = t('btn_del') || '刪除';
 
     if (tags.includes('自訂')) { 
         btnGroup.innerHTML = `
@@ -247,9 +276,8 @@ export function showCard(s) {
         `; 
     }
     
-    // 🌟 防彈綁定：展開後的路線按鈕
     const fullBtn = document.getElementById('full-route-btn');
-    if(fullBtn) fullBtn.onclick = () => window.openRouteMenu(s.lat, s.lng, s.name);
+    if(fullBtn) fullBtn.onclick = () => window.openRouteMenu(s.lat, s.lng, displayName);
 
     document.getElementById("card-preview-zone").classList.remove('u-hidden');
     document.getElementById("card-full-zone").classList.add('u-hidden');
@@ -275,6 +303,8 @@ export function closeCard() {
     } else {
         cardEl.classList.remove("open", "preview", "expanded"); 
         cardEl.style.transform = ''; 
+        // 🌟 關閉時清除地圖上的全域狀態 (可選)
+        state.targetSpot = null;
     }
 }
 
@@ -305,7 +335,7 @@ export function initCardGestures() {
                 cardEl.style.transform = '';
             }
         }
-    }); 
+    }, {passive:true}); 
     
     cardEl.addEventListener('touchend', (e) => { 
         if(isSwiping){ 
