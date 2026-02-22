@@ -1,45 +1,35 @@
-// js/main.js (v661) - 企業級架構穩定版
-// 🌟 1. 建立企業級全域命名空間 (工具箱)
+// js/main.js (v662) - 終極效能打磨版
 window.rfApp = {
-    ui: {},
-    theme: {},
-    nav: {},
-    fav: {},
-    tour: {},
-    map: {},
-    search: {},
-    custom: {},
-    pwa: {},
-    tts: {}
+    ui: {}, theme: {}, nav: {}, fav: {}, tour: {}, 
+    map: {}, search: {}, custom: {}, pwa: {}, tts: {}
 };
 
-import { initErrorHandler, showToast } from './modules/toast.js?v=661';
-import { state } from './core/store.js?v=661'; 
-import { initMap, toggleLayer } from './core/map.js?v=661'; 
-import { fetchWeather } from './modules/weather.js?v=661';
-import { initGPS } from './modules/gps.js?v=661';
-import { initAnnouncer } from './modules/announcer.js?v=661'; 
+import { events } from './core/events.js?v=651'; // 🌟 引入事件匯流排
+import { initErrorHandler, showToast } from './modules/toast.js?v=651';
+import { state } from './core/store.js?v=651'; 
+import { initMap, toggleLayer } from './core/map.js?v=651'; 
+import { fetchWeather } from './modules/weather.js?v=662'; // 更新 v662
+import { initGPS } from './modules/gps.js?v=662'; // 更新 v662
+import { initAnnouncer } from './modules/announcer.js?v=659'; 
 import { initCardGestures, closeCard } from './modules/cards.js?v=661';
-import { renderAllMarkers, filterSpots } from './modules/markers.js?v=661';
+import { renderAllMarkers, filterSpots } from './modules/markers.js?v=651';
 import { initSearch } from './modules/search.js?v=661';
-import { initNavigation } from './modules/navigation.js?v=661';
+import { initNavigation } from './modules/navigation.js?v=651';
 import { initUI } from './modules/ui.js?v=661'; 
-import { initFirebase } from './modules/firebase-sync.js?v=661';
-import { initTheme } from './modules/theme.js?v=661'; 
-import { initPWA } from './modules/pwa.js?v=661';
-import { initTour } from './modules/tour.js?v=661';
-import { initFavorites } from './modules/favorites.js?v=661';
-import { initCustomSpots } from './modules/customSpots.js?v=661'; 
-import { initTTS } from './modules/tts.js?v=661';
-import { initNearby } from './modules/nearby.js?v=661';
+import { initFirebase } from './modules/firebase-sync.js?v=651';
+import { initTheme } from './modules/theme.js?v=656'; 
+import { initPWA } from './modules/pwa.js?v=657';
+import { initTour } from './modules/tour.js?v=651';
+import { initFavorites } from './modules/favorites.js?v=657';
+import { initCustomSpots } from './modules/customSpots.js?v=657'; 
+import { initTTS } from './modules/tts.js?v=657';
+import { initNearby } from './modules/nearby.js?v=651';
 
-// 🌟 2. 建立命名空間橋樑
 window.rfApp.map.toggleLayer = toggleLayer;
 window.rfApp.ui.closeCard = closeCard;
 window.toggleLayer = window.rfApp.map.toggleLayer;
 window.closeCard = window.rfApp.ui.closeCard;
 
-// 🌟 3. UI 移除邏輯 (僅負責視覺效果)
 function removeSplashScreen() {
     const splash = document.getElementById('splash-screen');
     if (splash) { 
@@ -47,44 +37,45 @@ function removeSplashScreen() {
             splash.style.opacity = '0'; 
             setTimeout(() => { 
                 splash.style.display = 'none'; 
-                // 確保地圖尺寸在動畫結束後正確刷新
                 if (state.mapInstance) state.mapInstance.invalidateSize(); 
+                
+                // 🌟 發送「App 已完全就緒」廣播
+                events.emit('app_ready', null);
             }, 500); 
         }, 2000);
+    } else {
+        // 若沒有開場動畫，直接廣播
+        events.emit('app_ready', null);
     }
-} // <--- 剛才這裡少了一個 }，現在已補上
+}
 
-// 🛡️ 核心防護機制
 function safeInit(fn, name) {
     try { 
         fn(); 
     } catch (e) { 
         console.error(`❌ [防護機制] 模組 ${name} 啟動失敗:`, e);
-        if (typeof showToast === 'function') {
-            showToast(`模組 [${name}] 載入失敗 ⚠️`, 'error');
-        }
+        if (typeof showToast === 'function') { showToast(`模組 [${name}] 載入失敗 ⚠️`, 'error'); }
     }
 }
 
-// 🔗 路由偵探：處理 ?spot=名稱 邏輯
+// 🌟 拔除 1500ms 的魔法數字，改用事件驅動！
 function handleDeepLink() {
     const params = new URLSearchParams(window.location.search);
     const spotName = params.get('spot'); 
+    
     if (spotName) {
-        setTimeout(() => {
+        // 監聽 App 就緒事件，一準備好就瞬間觸發！
+        events.on('app_ready', () => {
             if (window.rfApp.search && typeof window.rfApp.search.triggerSearch === 'function') {
                 window.rfApp.search.triggerSearch(spotName);
             }
-        }, 1500); 
+        });
     }
 }
 
-// 🚀 重新編排的啟動順序
 function bootstrapApp() {
-    // 第零階段：啟動全域報錯監聽
     initErrorHandler();
     
-    // 🛡️ 第一階段：基礎系統與主題 (不依賴地圖)
     safeInit(initTheme, '主題與語系');
     safeInit(initPWA, 'PWA 系統');
     safeInit(initTour, '導覽教學');
@@ -92,9 +83,10 @@ function bootstrapApp() {
     safeInit(initUI, '基礎 UI 介面');
     safeInit(initFirebase, 'Firebase 雲端同步');
 
-    // 第二階段：地圖載入 (非同步)
+    // 🌟 先註冊 DeepLink 監聽器
+    safeInit(handleDeepLink, 'URL路由解析');
+
     initMap().then(() => {
-        // 第三階段：地圖相關增強功能
         safeInit(initGPS, 'GPS定位');
         safeInit(initAnnouncer, '報幕系統');
         safeInit(initCardGestures, '卡片手勢');
@@ -103,21 +95,16 @@ function bootstrapApp() {
         safeInit(initNavigation, '導航系統');
         safeInit(initCustomSpots, '自訂秘境');
         safeInit(initTTS, '語音導覽模組');
-        safeInit(initNearby, '周邊雷達'); // 🌟 成功啟動事件監聽器
-        
-        // 最終階段：執行深層連結解析
-        safeInit(handleDeepLink, 'URL路由解析');
+        safeInit(initNearby, '周邊雷達');
     }).catch(e => {
         console.error("地圖啟動失敗", e);
         if (typeof showToast === 'function') showToast("地圖核心啟動失敗，請重新整理頁面", "error");
     });
     
-    // 獨立 UI 任務
     fetchWeather();
-    removeSplashScreen();
+    removeSplashScreen(); // 這裡執行完畢會觸發 app_ready
 }
 
-// 啟動入口
 if (document.readyState === 'complete' || document.readyState === 'interactive') {
     bootstrapApp();
 } else {
