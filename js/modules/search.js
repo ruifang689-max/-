@@ -1,14 +1,14 @@
-// js/modules/search.js (v642) - 情境感知與點擊修復完美融合版
+// js/modules/search.js (v643) - 徹底修復分類點擊與搜尋欄關閉問題
 import { state, saveState } from '../core/store.js';
 import { spots } from '../data/spots.js';
 import { showCard } from './cards.js';
-import { getContextualData } from './contextEngine.js?v=631'; // 🌟 引入情境大腦
+import { getContextualData } from './contextEngine.js?v=643';
 
 let debounceTimer = null;
 let searchWorker = null;
 
 if (window.Worker) {
-    searchWorker = new Worker('./js/workers/searchWorker.js?v=631');
+    searchWorker = new Worker('./js/workers/searchWorker.js?v=643');
 }
 
 export function triggerSearch(name) { 
@@ -33,7 +33,6 @@ export function initSearch() {
     const content = document.getElementById("suggest-content");
     const tplListItem = document.getElementById('tpl-list-item');
 
-    // 🌟 初始化時，根據時間動態更改輸入框的 Placeholder
     if (searchInput) {
         const ctx = getContextualData();
         searchInput.placeholder = `${ctx.timeContext.greeting} 試試「${ctx.seasonContext.keywords[0]}」`;
@@ -46,12 +45,12 @@ export function initSearch() {
     window.rfApp.search.clearSearchInput = () => {
         if(searchInput) {
             searchInput.value = "";
-            // 清除時恢復情境提示
             const ctx = getContextualData();
             searchInput.placeholder = `${ctx.timeContext.greeting} 試試「${ctx.seasonContext.keywords[0]}」`;
         }
         if(clearBtn) { clearBtn.classList.remove('u-block'); clearBtn.classList.add('u-hidden'); }
         window.rfApp.search.closeSuggest();
+        // 如果清空搜尋，退回全部景點
         if(typeof window.filterSpots === 'function') window.filterSpots('all', null);
     };
 
@@ -60,7 +59,6 @@ export function initSearch() {
         content.innerHTML = ""; 
         const fragment = document.createDocumentFragment();
         
-        // A. 歷史紀錄
         if (state.searchHistory && state.searchHistory.length > 0) {
             const title = document.createElement('div');
             title.className = "search-section-title";
@@ -77,7 +75,6 @@ export function initSearch() {
             });
         }
         
-        // B. 快速分類
         const catTitle = document.createElement('div');
         catTitle.className = "search-section-title";
         catTitle.textContent = "🏷️ 快速分類";
@@ -86,22 +83,37 @@ export function initSearch() {
         const catBox = document.createElement("div");
         catBox.style.cssText = "display:flex; gap:8px; padding:10px 15px; flex-wrap:wrap;";
         const cats = ['美食', '自然', '歷史', '交通']; 
+        
         cats.forEach(cat => {
             const btn = document.createElement('button');
             btn.className = "chip"; btn.textContent = cat;
             
-            // 🌟 修復關鍵：加上參數 e，並呼叫 e.stopPropagation()
+            // 🌟 終極修復：確保點擊分類時，一定會關閉面板
             btn.onclick = (e) => {
-                e.stopPropagation(); // 阻止事件冒泡，完美解決無法關閉的 Bug
+                e.preventDefault();
+                e.stopPropagation(); 
+                
                 if(searchInput) searchInput.value = cat; 
-                if(typeof window.filterSpots === 'function') window.filterSpots(cat, null); 
-                window.rfApp.search.closeSuggest();
+                
+                // 1. 強制關閉搜尋建議框
+                if(sugBox) { sugBox.classList.remove('u-block'); sugBox.classList.add('u-hidden'); }
+                
+                // 2. 移除焦點，收起手機虛擬鍵盤
+                if(searchInput) searchInput.blur();
+                
+                // 3. 呼叫 markers.js 的過濾功能 (加上 setTimeout 避免阻塞 UI)
+                setTimeout(() => {
+                    if(typeof window.filterSpots === 'function') {
+                        window.filterSpots(cat, null); 
+                    } else {
+                        console.error("找不到 filterSpots 函數！請確認 markers.js 已正確載入");
+                    }
+                }, 50);
             };
             catBox.appendChild(btn);
         });
         fragment.appendChild(catBox);
         
-        // 🌟 C. 情境探索推薦
         const ctx = getContextualData();
         const targetTags = [ctx.timeContext.suggestTag, ...ctx.seasonContext.keywords];
         
