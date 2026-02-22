@@ -56,6 +56,20 @@ export const translations = {
         // 🌟 [新增] 交通路網開關
         "setting_transit": "顯示交通路網",
         "label_transit_on": "開啟鐵路/捷運線",
+
+        "distance_prefix": "距離",
+        "route_title": "選擇前往方式",
+        "route_drive": "開車 (Driving)",
+        "route_scooter": "機車 (Scooter)",
+        "route_transit": "大眾運輸 (Transit)",
+        "route_walk": "步行 (Walk)",
+        "cancel": "取消",
+        "addr_copy_success": "地址已複製",
+        "tab_history": "歷史背景",
+        "tab_food": "推薦美食",
+        "tab_transport": "交通資訊",
+        "btn_route": "前往導航",
+        "btn_voice": "語音介紹",
     },
     'en': { 
         splash_title: "Ruifang Guide", splash_desc: "Accurate local guide in Ruifang.", 
@@ -107,6 +121,20 @@ export const translations = {
 
         setting_transit: "Transit Network",
         label_transit_on: "Show Railway/Metro",
+
+        "distance_prefix": "Dist",
+        "route_title": "Directions",
+        "route_drive": "Driving",
+        "route_scooter": "Scooter",
+        "route_transit": "Transit",
+        "route_walk": "Walk",
+        "cancel": "Cancel",
+        "addr_copy_success": "Address Copied",
+        "tab_history": "History",
+        "tab_food": "Local Food",
+        "tab_transport": "Transport",
+        "btn_route": "Route",
+        "btn_voice": "Voice",
     },
     'ja': { 
         splash_title: "瑞芳ガイド", splash_desc: "瑞芳の正確なローカルガイド。", 
@@ -158,6 +186,20 @@ export const translations = {
 
         setting_transit: "交通網表示",
         label_transit_on: "鉄道・地下鉄を表示",
+
+        "distance_prefix": "距離",
+        "route_title": "アクセス方法",
+        "route_drive": "車で",
+        "route_scooter": "バイクで",
+        "route_transit": "交通機関",
+        "route_walk": "徒歩",
+        "cancel": "キャンセル",
+        "addr_copy_success": "住所をコピーしました",
+        "tab_history": "歴史",
+        "tab_food": "グルメ",
+        "tab_transport": "アクセス",
+        "btn_route": "ルート",
+        "btn_voice": "音声ガイド",
     },
     'ko': { 
         splash_title: "루이팡 가이드", splash_desc: "루이팡 지역의 정확한 로컬 가이드.", 
