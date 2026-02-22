@@ -472,17 +472,33 @@
         <i class="fas fa-magic"></i> 
         <span data-i18n="setting_skin">介面風格 (Skin)</span>
     </div>
-    <div class="setting-control">
-        <select id="skin-selector" class="form-select" onchange="changeSkin(this.value)">
-            <option value="default" data-i18n="skin_default">系統預設 (乾淨)</option>
-            <option value="glass" data-i18n="skin_glass">💧 液態玻璃 (Glassmorphism)</option>
-            <option value="newyear" data-i18n="skin_newyear">🧧 恭賀新禧 (燈籠春聯)</option>
-            <option value="sakura" data-i18n="skin_sakura">🌸 浪漫櫻花 (飄落特效)</option>
-        </select>
+    
+    <div class="custom-select-container" onclick="toggleSkinOptions()">
+        <div class="custom-select-display">
+            <span id="current-skin-text" data-i18n="skin_default">系統預設 (乾淨)</span>
+            <i class="fas fa-chevron-down"></i>
+        </div>
+        
+        <div id="skin-options-list" class="custom-select-options u-hidden">
+            <div class="option-item" onclick="selectSkinOption('default', '系統預設 (乾淨)')">
+                <span data-i18n="skin_default">系統預設 (乾淨)</span>
+            </div>
+            <div class="option-item" onclick="selectSkinOption('glass', '💧 液態玻璃 (Glassmorphism)')">
+                <span data-i18n="skin_glass">💧 液態玻璃 (Glassmorphism)</span>
+            </div>
+            <div class="option-item" onclick="selectSkinOption('newyear', '🧧 恭賀新禧 (燈籠春聯)')">
+                <span data-i18n="skin_newyear">🧧 恭賀新禧 (燈籠春聯)</span>
+            </div>
+            <div class="option-item" onclick="selectSkinOption('sakura', '🌸 浪漫櫻花 (飄落特效)')">
+                <span data-i18n="skin_sakura">🌸 浪漫櫻花 (飄落特效)</span>
+            </div>
+        </div>
     </div>
+</div>
     
 </body>
 </html>
+
 
 
 
