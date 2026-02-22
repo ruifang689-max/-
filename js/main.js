@@ -1,66 +1,71 @@
-// js/main.js (v705) - 最終整合版
+// js/main.js (加入搜尋與過濾功能版)
 import { initMap } from './core/map.js';
 import { initTheme } from './modules/theme.js';
 import { initCardGestures } from './modules/cards.js';
+import { initSearch } from './modules/search.js'; // 🌟 引入搜尋模組
 import { state } from './core/store.js';
 
-// 🌟 1. 定義進入地圖的函數
 function enterMap() {
     const intro = document.getElementById('welcome-screen');
     const app = document.getElementById('app');
     
     if (intro && app) {
-        // 淡出動畫
         intro.style.opacity = '0';
         intro.style.transition = 'opacity 0.5s ease';
         
         setTimeout(() => {
             intro.style.display = 'none';
             app.style.display = 'block';
-            
-            // 修正地圖尺寸 (防止破圖)
-            if (state.mapInstance) {
-                state.mapInstance.invalidateSize();
-            }
+            if (state.mapInstance) state.mapInstance.invalidateSize();
         }, 500);
     } else {
-        console.error("找不到 intro-screen 或 app 元素，請檢查 HTML ID");
+        console.error("找不到 welcome-screen 或 app 元素");
     }
 }
 
-// 🌟 2. 應用程式初始化
 async function initApp() {
     console.log("🚀 應用程式啟動中...");
     
-    // 初始化主題與翻譯 (必須最先執行)
     initTheme();
-    
-    // 初始化地圖
     await initMap();
-    
-    // 初始化卡片手勢 (拖曳關閉)
     initCardGestures();
+    
+    // 🌟 啟動搜尋功能
+    initSearch();
 
-    // 取得使用者位置 (選用功能)
     if ("geolocation" in navigator) {
         navigator.geolocation.getCurrentPosition(
-            (pos) => {
-                state.userLocation = { lat: pos.coords.latitude, lng: pos.coords.longitude };
-                console.log("📍 已取得使用者位置");
-            },
-            (err) => console.log("無法取得位置", err),
-            { enableHighAccuracy: true }
+            (pos) => { state.userLocation = { lat: pos.coords.latitude, lng: pos.coords.longitude }; },
+            (err) => console.log("無法取得位置", err), { enableHighAccuracy: true }
         );
     }
     
-    // 移除載入動畫 (如果有的話)
     const loader = document.getElementById('loader');
     if (loader) loader.style.display = 'none';
 }
 
-// 🌟 3. 全域掛載 (解決 HTML onclick 找不到函數的問題)
-window.enterMap = enterMap;
-window.rfApp = window.rfApp || {}; // 確保全域物件存在
+// 🌟 全域：點擊標籤分類時觸發 (UI 切換 + 通知地圖過濾)
+window.filterSpots = (category, btnElement) => {
+    // 1. 切換按鈕的視覺狀態 (藍色背景)
+    document.querySelectorAll('#category-chips .chip').forEach(c => c.classList.remove('active'));
+    if (btnElement) {
+        btnElement.classList.add('active');
+    } else {
+        // 若沒有傳入按鈕，預設亮起「全部」
+        const allChip = document.querySelector('#category-chips .chip[onclick*="all"]');
+        if (allChip) allChip.classList.add('active');
+    }
 
-// 🌟 4. 啟動！
+    // 2. 呼叫地圖模組進行標記過濾
+    if (window.rfApp.map && typeof window.rfApp.map.filterMarkers === 'function') {
+        window.rfApp.map.filterMarkers(category);
+        // 過濾後自動關閉搜尋建議框
+        if (typeof window.rfApp.search?.closeSuggest === 'function') {
+            window.rfApp.search.closeSuggest();
+        }
+    }
+};
+
+window.enterMap = enterMap;
+window.rfApp = window.rfApp || {};
 document.addEventListener('DOMContentLoaded', initApp);
