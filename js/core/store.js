@@ -1,4 +1,4 @@
-// js/core/store.js (v611)
+// js/core/store.js (v706) - Proxy 自動存檔與全域狀態庫
 
 // 1. 定義所有 LocalStorage 的金鑰
 const STORAGE_KEYS = {
@@ -9,30 +9,24 @@ const STORAGE_KEYS = {
 
 // 2. 建立基礎狀態 (從 LocalStorage 讀取初始值)
 const baseState = {
-    mapInstance: null,
-    cluster: null,
-    userPos: null,
-    targetSpot: null,
-    currentRoute: null,
-    navMode: 'walking',
+    mapInstance: null,      // Leaflet 地圖實例
+    userLocation: null,     // 使用者 GPS 位置 {lat, lng}
+    targetSpot: null,       // 目前選中的景點 (用於卡片)
     currentLang: localStorage.getItem('ruifang_lang') || 'zh',
-    tourModeInterval: null,
-    tempCustomSpot: null,
-    currentEditingSpotName: null,
-    _tempNavLat: null,
-    _tempNavLng: null,
+    tempCustomSpot: null,   // 暫存準備新增的自訂景點
+    currentEditingSpotName: null, // 正在編輯的自訂景點名稱
     
+    // 需要自動存檔的陣列資料
     myFavs: JSON.parse(localStorage.getItem(STORAGE_KEYS.myFavs) || '[]'),
     savedCustomSpots: JSON.parse(localStorage.getItem(STORAGE_KEYS.savedCustomSpots) || '[]'),
     searchHistory: JSON.parse(localStorage.getItem(STORAGE_KEYS.searchHistory) || '[]')
 };
 
-// 3. 🌟 陣列代理工廠 (攔截 push, splice, pop 等所有陣列操作)
+// 3. 🌟 陣列代理工廠 (攔截 push, splice 等陣列操作，實現自動存檔)
 function createReactiveArray(storageKey, initialArray) {
     return new Proxy(initialArray, {
         set(target, property, value) {
             target[property] = value;
-            // 只要陣列內容有任何變動，自動幫您存進 LocalStorage！
             if (property !== 'length') { 
                 localStorage.setItem(storageKey, JSON.stringify(target));
             }
@@ -55,7 +49,6 @@ baseState.searchHistory = createReactiveArray(STORAGE_KEYS.searchHistory, baseSt
 export const state = new Proxy(baseState, {
     set(target, prop, value) {
         if (STORAGE_KEYS[prop]) {
-            // 如果有其他模組直接替換整個陣列 (如 state.myFavs = [])，重新把它包裝成 Proxy 並存檔
             target[prop] = createReactiveArray(STORAGE_KEYS[prop], value);
             localStorage.setItem(STORAGE_KEYS[prop], JSON.stringify(value));
             return true;
@@ -71,8 +64,7 @@ export const state = new Proxy(baseState, {
     }
 });
 
-// 5. 為了向下相容保留 saveState
-// (因為其他的 js 模組裡面還有寫到 saveState.favs() 等字眼，為了不讓它們報錯而保留。但其實它們已經不需要被手動呼叫了！)
+// 5. 向下相容保留的 saveState 函數 (其實已經不需要手動呼叫了)
 export const saveState = {
     favs: () => localStorage.setItem(STORAGE_KEYS.myFavs, JSON.stringify(state.myFavs)),
     customSpots: () => localStorage.setItem(STORAGE_KEYS.savedCustomSpots, JSON.stringify(state.savedCustomSpots)),
