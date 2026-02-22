@@ -1,71 +1,112 @@
-// js/main.js (加入搜尋與過濾功能版)
-import { initMap } from './core/map.js';
-import { initTheme } from './modules/theme.js';
-import { initCardGestures } from './modules/cards.js';
-import { initSearch } from './modules/search.js'; // 🌟 引入搜尋模組
-import { state } from './core/store.js';
-
-function enterMap() {
-    const intro = document.getElementById('welcome-screen');
-    const app = document.getElementById('app');
-    
-    if (intro && app) {
-        intro.style.opacity = '0';
-        intro.style.transition = 'opacity 0.5s ease';
-        
-        setTimeout(() => {
-            intro.style.display = 'none';
-            app.style.display = 'block';
-            if (state.mapInstance) state.mapInstance.invalidateSize();
-        }, 500);
-    } else {
-        console.error("找不到 welcome-screen 或 app 元素");
-    }
-}
-
-async function initApp() {
-    console.log("🚀 應用程式啟動中...");
-    
-    initTheme();
-    await initMap();
-    initCardGestures();
-    
-    // 🌟 啟動搜尋功能
-    initSearch();
-
-    if ("geolocation" in navigator) {
-        navigator.geolocation.getCurrentPosition(
-            (pos) => { state.userLocation = { lat: pos.coords.latitude, lng: pos.coords.longitude }; },
-            (err) => console.log("無法取得位置", err), { enableHighAccuracy: true }
-        );
-    }
-    
-    const loader = document.getElementById('loader');
-    if (loader) loader.style.display = 'none';
-}
-
-// 🌟 全域：點擊標籤分類時觸發 (UI 切換 + 通知地圖過濾)
-window.filterSpots = (category, btnElement) => {
-    // 1. 切換按鈕的視覺狀態 (藍色背景)
-    document.querySelectorAll('#category-chips .chip').forEach(c => c.classList.remove('active'));
-    if (btnElement) {
-        btnElement.classList.add('active');
-    } else {
-        // 若沒有傳入按鈕，預設亮起「全部」
-        const allChip = document.querySelector('#category-chips .chip[onclick*="all"]');
-        if (allChip) allChip.classList.add('active');
-    }
-
-    // 2. 呼叫地圖模組進行標記過濾
-    if (window.rfApp.map && typeof window.rfApp.map.filterMarkers === 'function') {
-        window.rfApp.map.filterMarkers(category);
-        // 過濾後自動關閉搜尋建議框
-        if (typeof window.rfApp.search?.closeSuggest === 'function') {
-            window.rfApp.search.closeSuggest();
-        }
-    }
+// js/main.js (v662) - 終極效能打磨版
+window.rfApp = {
+    ui: {}, theme: {}, nav: {}, fav: {}, tour: {}, 
+    map: {}, search: {}, custom: {}, pwa: {}, tts: {}
 };
 
-window.enterMap = enterMap;
-window.rfApp = window.rfApp || {};
-document.addEventListener('DOMContentLoaded', initApp);
+import { events } from './core/events.js?v=651'; // 🌟 引入事件匯流排
+import { initErrorHandler, showToast } from './modules/toast.js?v=651';
+import { state } from './core/store.js?v=651'; 
+import { initMap, toggleLayer } from './core/map.js?v=651'; 
+import { fetchWeather } from './modules/weather.js?v=662'; // 更新 v662
+import { initGPS } from './modules/gps.js?v=662'; // 更新 v662
+import { initAnnouncer } from './modules/announcer.js?v=659'; 
+import { initCardGestures, closeCard } from './modules/cards.js?v=661';
+import { renderAllMarkers, filterSpots } from './modules/markers.js?v=651';
+import { initSearch } from './modules/search.js?v=661';
+import { initNavigation } from './modules/navigation.js?v=651';
+import { initUI } from './modules/ui.js?v=661'; 
+import { initFirebase } from './modules/firebase-sync.js?v=651';
+import { initTheme } from './modules/theme.js?v=656'; 
+import { initPWA } from './modules/pwa.js?v=657';
+import { initTour } from './modules/tour.js?v=651';
+import { initFavorites } from './modules/favorites.js?v=657';
+import { initCustomSpots } from './modules/customSpots.js?v=657'; 
+import { initTTS } from './modules/tts.js?v=657';
+import { initNearby } from './modules/nearby.js?v=651';
+
+window.rfApp.map.toggleLayer = toggleLayer;
+window.rfApp.ui.closeCard = closeCard;
+window.toggleLayer = window.rfApp.map.toggleLayer;
+window.closeCard = window.rfApp.ui.closeCard;
+
+function removeSplashScreen() {
+    const splash = document.getElementById('splash-screen');
+    if (splash) { 
+        setTimeout(() => { 
+            splash.style.opacity = '0'; 
+            setTimeout(() => { 
+                splash.style.display = 'none'; 
+                if (state.mapInstance) state.mapInstance.invalidateSize(); 
+                
+                // 🌟 發送「App 已完全就緒」廣播
+                events.emit('app_ready', null);
+            }, 500); 
+        }, 2000);
+    } else {
+        // 若沒有開場動畫，直接廣播
+        events.emit('app_ready', null);
+    }
+}
+
+function safeInit(fn, name) {
+    try { 
+        fn(); 
+    } catch (e) { 
+        console.error(`❌ [防護機制] 模組 ${name} 啟動失敗:`, e);
+        if (typeof showToast === 'function') { showToast(`模組 [${name}] 載入失敗 ⚠️`, 'error'); }
+    }
+}
+
+// 🌟 拔除 1500ms 的魔法數字，改用事件驅動！
+function handleDeepLink() {
+    const params = new URLSearchParams(window.location.search);
+    const spotName = params.get('spot'); 
+    
+    if (spotName) {
+        // 監聽 App 就緒事件，一準備好就瞬間觸發！
+        events.on('app_ready', () => {
+            if (window.rfApp.search && typeof window.rfApp.search.triggerSearch === 'function') {
+                window.rfApp.search.triggerSearch(spotName);
+            }
+        });
+    }
+}
+
+function bootstrapApp() {
+    initErrorHandler();
+    
+    safeInit(initTheme, '主題與語系');
+    safeInit(initPWA, 'PWA 系統');
+    safeInit(initTour, '導覽教學');
+    safeInit(initFavorites, '收藏夾');
+    safeInit(initUI, '基礎 UI 介面');
+    safeInit(initFirebase, 'Firebase 雲端同步');
+
+    // 🌟 先註冊 DeepLink 監聽器
+    safeInit(handleDeepLink, 'URL路由解析');
+
+    initMap().then(() => {
+        safeInit(initGPS, 'GPS定位');
+        safeInit(initAnnouncer, '報幕系統');
+        safeInit(initCardGestures, '卡片手勢');
+        safeInit(renderAllMarkers, '圖釘渲染');
+        safeInit(initSearch, '搜尋系統');
+        safeInit(initNavigation, '導航系統');
+        safeInit(initCustomSpots, '自訂秘境');
+        safeInit(initTTS, '語音導覽模組');
+        safeInit(initNearby, '周邊雷達');
+    }).catch(e => {
+        console.error("地圖啟動失敗", e);
+        if (typeof showToast === 'function') showToast("地圖核心啟動失敗，請重新整理頁面", "error");
+    });
+    
+    fetchWeather();
+    removeSplashScreen(); // 這裡執行完畢會觸發 app_ready
+}
+
+if (document.readyState === 'complete' || document.readyState === 'interactive') {
+    bootstrapApp();
+} else {
+    document.addEventListener('DOMContentLoaded', bootstrapApp);
+}
