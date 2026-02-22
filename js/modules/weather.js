@@ -1,15 +1,17 @@
-// js/modules/weather.js (v708) - 資訊中樞 (Info Hub)
+// js/modules/weather.js (v709) - 防彈綁定版
 import { state } from '../core/store.js';
-import { zones } from '../data/boundary.js'; // 引入區域資料
+import { zones } from '../data/boundary.js';
 
 let isDashboardInjected = false;
 let isFetching = false;
-let currentTab = 'weather'; // 預設分頁
+let currentTab = 'weather';
 
-// 輔助：取得翻譯
+// 🌟 [關鍵修正] 確保全域物件存在
+window.rfApp = window.rfApp || {};
+window.rfApp.weather = window.rfApp.weather || {};
+
 const getT = (key) => window.rfApp?.t ? window.rfApp.t(key) : key;
 
-// WMO 天氣代碼轉換
 const getWeatherInfo = (code) => {
     const t = getT;
     if (code === 0) return { icon: 'fa-sun', name: t('wmo_clear'), class: 'weather-sun' };
@@ -20,7 +22,6 @@ const getWeatherInfo = (code) => {
     return { icon: 'fa-cloud', name: '--', class: '' };
 };
 
-// AQI 轉換 (美規 US AQI)
 const getAqiInfo = (aqi) => {
     const t = getT;
     if (aqi <= 50) return { color: '#2ecc71', status: t('aqi_good'), icon: 'fa-smile' };
@@ -28,33 +29,27 @@ const getAqiInfo = (aqi) => {
     return { color: '#e74c3c', status: t('aqi_unhealthy'), icon: 'fa-frown' };
 };
 
-// 🌟 1. 動態注入儀表板 (含分頁系統)
 function injectDashboard() {
     if (isDashboardInjected) return;
     
-    // CSS
     const style = document.createElement('style');
     style.innerHTML = `
         #dashboard-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: 3000; display: flex; flex-direction: column; justify-content: flex-end; opacity: 0; pointer-events: none; transition: opacity 0.3s; backdrop-filter: blur(2px); }
         #dashboard-overlay.active { opacity: 1; pointer-events: auto; }
         
-        /* 主容器 */
         .dash-container { background: var(--bg-color, #f8f9fa); width: 100%; height: 90vh; border-radius: 24px 24px 0 0; display: flex; flex-direction: column; transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1); box-shadow: 0 -5px 20px rgba(0,0,0,0.2); overflow: hidden; }
         #dashboard-overlay.active .dash-container { transform: translateY(0); }
         body.skin-glass .dash-container { background: rgba(255, 255, 255, 0.9); backdrop-filter: blur(25px); border: 1px solid rgba(255,255,255,0.6); }
 
-        /* 標題列 */
         .dash-header { padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(0,0,0,0.05); flex-shrink: 0; }
         .dash-title { font-size: 18px; font-weight: bold; color: var(--text-main); display: flex; align-items: center; gap: 8px; }
         .dash-close { background: rgba(0,0,0,0.05); border: none; width: 32px; height: 32px; border-radius: 50%; font-size: 16px; color: #555; cursor: pointer; display: flex; align-items: center; justify-content: center; }
 
-        /* 內容滾動區 */
         .dash-content-area { flex: 1; overflow-y: auto; padding: 20px; padding-bottom: 80px; position: relative; }
         .tab-page { display: none; animation: fadeIn 0.3s ease; }
         .tab-page.active { display: block; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
-        /* --- 天氣分頁樣式 --- */
         .dash-main-card { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 20px; padding: 25px; color: white; display: flex; flex-direction: column; align-items: center; box-shadow: 0 10px 25px rgba(118, 75, 162, 0.4); position: relative; overflow: hidden; margin-bottom: 20px; }
         .dash-main-card.sunny { background: linear-gradient(135deg, #f6d365 0%, #fda085 100%); box-shadow: 0 10px 25px rgba(253, 160, 133, 0.4); }
         .dash-main-card.rainy { background: linear-gradient(135deg, #3a1c71 0%, #d76d77 100%); }
@@ -68,26 +63,22 @@ function injectDashboard() {
         .item-val { font-size: 18px; font-weight: bold; color: var(--text-main); }
         .forecast-item { display: flex; align-items: center; justify-content: space-between; padding: 12px 15px; background: rgba(0,0,0,0.03); border-radius: 12px; margin-bottom: 8px; }
 
-        /* --- 網格按鈕 (九大區) --- */
         .zone-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; }
         .zone-btn { aspect-ratio: 1; background: white; border-radius: 16px; display: flex; flex-direction: column; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.05); cursor: pointer; transition: transform 0.1s; border: 1px solid rgba(0,0,0,0.05); }
         .zone-btn:active { transform: scale(0.95); background: #f0f0f0; }
         .zone-icon { font-size: 32px; margin-bottom: 8px; }
         .zone-name { font-size: 14px; font-weight: bold; color: var(--text-main); }
 
-        /* --- 交通分頁 --- */
         .trans-card { background: white; border-radius: 16px; padding: 20px; margin-bottom: 15px; display: flex; align-items: center; justify-content: space-between; box-shadow: 0 2px 10px rgba(0,0,0,0.05); cursor: pointer; }
         .trans-info h4 { margin: 0 0 5px 0; font-size: 16px; color: var(--text-main); }
         .trans-info p { margin: 0; font-size: 13px; color: var(--text-sub); }
         .trans-icon { width: 45px; height: 45px; background: #eef2f7; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 20px; color: var(--primary); margin-right: 15px; }
 
-        /* --- 新聞分頁 --- */
         .news-item { padding: 15px; border-bottom: 1px solid #eee; display: flex; gap: 15px; }
         .news-date { font-size: 12px; color: #888; white-space: nowrap; }
         .news-title { font-weight: bold; color: var(--text-main); font-size: 15px; margin-bottom: 4px; }
         .news-desc { font-size: 13px; color: #666; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
 
-        /* --- AI 分頁 --- */
         .ai-chat-box { display: flex; flex-direction: column; height: 100%; }
         .ai-msg-list { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 15px; padding-bottom: 15px; }
         .msg { max-width: 80%; padding: 12px 16px; border-radius: 18px; font-size: 14px; line-height: 1.5; }
@@ -97,7 +88,6 @@ function injectDashboard() {
         .ai-input { flex: 1; padding: 10px 15px; border-radius: 20px; border: 1px solid #ddd; background: #f9f9f9; }
         .ai-send { width: 40px; height: 40px; border-radius: 50%; background: var(--primary); color: white; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; }
 
-        /* --- 底部導覽列 (TabBar) --- */
         .dash-tabbar { position: absolute; bottom: 0; left: 0; width: 100%; height: 65px; background: white; display: flex; justify-content: space-around; align-items: center; box-shadow: 0 -5px 15px rgba(0,0,0,0.05); z-index: 10; padding-bottom: 10px; }
         .tab-item { display: flex; flex-direction: column; align-items: center; gap: 4px; color: #aaa; cursor: pointer; width: 20%; transition: 0.2s; -webkit-tap-highlight-color: transparent; }
         .tab-item i { font-size: 20px; }
@@ -106,14 +96,13 @@ function injectDashboard() {
     `;
     document.head.appendChild(style);
 
-    // HTML Structure
     const div = document.createElement('div');
     div.id = 'dashboard-overlay';
     div.innerHTML = `
         <div class="dash-container">
             <div class="dash-header">
                 <div class="dash-title"><i class="fas fa-layer-group" style="color:var(--primary)"></i> <span id="dash-header-title">資訊中樞</span></div>
-                <button class="dash-close" onclick="toggleDashboard()"><i class="fas fa-chevron-down"></i></button>
+                <button class="dash-close" onclick="window.rfApp.weather.toggleDashboard()"><i class="fas fa-chevron-down"></i></button>
             </div>
             
             <div class="dash-content-area">
@@ -184,67 +173,60 @@ function injectDashboard() {
             </div>
 
             <div class="dash-tabbar">
-                <div class="tab-item active" onclick="rfApp.weather.switchTab('weather')"><i class="fas fa-cloud-sun"></i><span data-i18n="tab_weather">氣象</span></div>
-                <div class="tab-item" onclick="rfApp.weather.switchTab('news')"><i class="fas fa-newspaper"></i><span data-i18n="tab_news">快訊</span></div>
-                <div class="tab-item" onclick="rfApp.weather.switchTab('transport')"><i class="fas fa-bus"></i><span data-i18n="tab_transport">交通</span></div>
-                <div class="tab-item" onclick="rfApp.weather.switchTab('zones')"><i class="fas fa-th-large"></i><span data-i18n="tab_zones">區域</span></div>
-                <div class="tab-item" onclick="rfApp.weather.switchTab('ai')"><i class="fas fa-robot"></i><span data-i18n="tab_ai">助理</span></div>
+                <div class="tab-item active" onclick="window.rfApp.weather.switchTab('weather')"><i class="fas fa-cloud-sun"></i><span data-i18n="tab_weather">氣象</span></div>
+                <div class="tab-item" onclick="window.rfApp.weather.switchTab('news')"><i class="fas fa-newspaper"></i><span data-i18n="tab_news">快訊</span></div>
+                <div class="tab-item" onclick="window.rfApp.weather.switchTab('transport')"><i class="fas fa-bus"></i><span data-i18n="tab_transport">交通</span></div>
+                <div class="tab-item" onclick="window.rfApp.weather.switchTab('zones')"><i class="fas fa-th-large"></i><span data-i18n="tab_zones">區域</span></div>
+                <div class="tab-item" onclick="window.rfApp.weather.switchTab('ai')"><i class="fas fa-robot"></i><span data-i18n="tab_ai">助理</span></div>
             </div>
         </div>
     `;
     document.body.appendChild(div);
-    div.addEventListener('click', (e) => { if(e.target === div) window.toggleDashboard(); });
+    div.addEventListener('click', (e) => { if(e.target === div) window.rfApp.weather.toggleDashboard(); });
     
-    // 生成九大區按鈕
     generateZoneGrid();
-
     isDashboardInjected = true;
 }
 
-// 生成九大區域網格按鈕
+// 🌟 核心函數：切換分頁 (立即綁定到全域)
+function switchTab(tabId) {
+    currentTab = tabId;
+    document.querySelectorAll('.tab-item').forEach(el => el.classList.remove('active'));
+    const tabs = ['weather', 'news', 'transport', 'zones', 'ai'];
+    const idx = tabs.indexOf(tabId);
+    if(idx > -1) document.querySelectorAll('.tab-item')[idx].classList.add('active');
+
+    document.querySelectorAll('.tab-page').forEach(el => el.classList.remove('active'));
+    document.getElementById(`tab-${tabId}`).classList.add('active');
+}
+window.rfApp.weather.switchTab = switchTab; // 🔥 強制綁定
+
+// 🌟 核心函數：跳轉區域 (立即綁定到全域)
+function jumpToZone(zoneId) {
+    const zone = zones.find(z => z.id === zoneId);
+    if(zone && state.mapInstance) {
+        state.mapInstance.flyTo([zone.lat, zone.lng], zone.zoom, { animate: true, duration: 1.5 });
+        window.rfApp.weather.toggleDashboard();
+    }
+}
+window.rfApp.weather.jumpToZone = jumpToZone; // 🔥 強制綁定
+
 function generateZoneGrid() {
     const container = document.getElementById('zone-grid-container');
     if(!container) return;
-    
     container.innerHTML = zones.map(z => `
-        <div class="zone-btn" onclick="rfApp.weather.jumpToZone('${z.id}')">
+        <div class="zone-btn" onclick="window.rfApp.weather.jumpToZone('${z.id}')">
             <div class="zone-icon">${z.icon}</div>
             <div class="zone-name">${z.name}</div>
         </div>
     `).join('');
 }
 
-// 跳轉到區域
-function jumpToZone(zoneId) {
-    const zone = zones.find(z => z.id === zoneId);
-    if(zone && state.mapInstance) {
-        state.mapInstance.flyTo([zone.lat, zone.lng], zone.zoom, { animate: true, duration: 1.5 });
-        window.toggleDashboard(); // 關閉儀表板
-    }
-}
-
-// 切換分頁
-function switchTab(tabId) {
-    currentTab = tabId;
-    // 1. 更新 TabBar 樣式
-    document.querySelectorAll('.tab-item').forEach(el => el.classList.remove('active'));
-    // 簡單判斷 index: weather(0), news(1), transport(2), zones(3), ai(4)
-    const tabs = ['weather', 'news', 'transport', 'zones', 'ai'];
-    const idx = tabs.indexOf(tabId);
-    if(idx > -1) document.querySelectorAll('.tab-item')[idx].classList.add('active');
-
-    // 2. 更新內容顯示
-    document.querySelectorAll('.tab-page').forEach(el => el.classList.remove('active'));
-    document.getElementById(`tab-${tabId}`).classList.add('active');
-}
-
-// 核心：抓取天氣與 AQI
 export async function fetchWeather() {
     if (isFetching) return;
     injectDashboard();
     isFetching = true;
 
-    // 定義 UI
     const topTempEl = document.getElementById('weather-temp');
     const topBoxEl = document.getElementById('weather-box');
     const mainLocEl = document.getElementById('dash-main-location');
@@ -259,7 +241,6 @@ export async function fetchWeather() {
     if(mainLocEl) mainLocEl.innerText = getT('loading_weather') || "Updating...";
 
     try {
-        // 🌟 新增 air_quality API 請求 (US AQI)
         const weatherUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,rain,weather_code,wind_speed_10m&hourly=uv_index&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset,precipitation_probability_max&timezone=auto`;
         const aqiUrl = `https://air-quality-api.open-meteo.com/v1/air-quality?latitude=${lat}&longitude=${lng}&current=us_aqi`;
 
@@ -271,33 +252,28 @@ export async function fetchWeather() {
         const daily = data.daily;
         const aqiVal = dataAqi.current?.us_aqi || 0;
 
-        // --- A. 首頁小方塊 ---
         const wInfo = getWeatherInfo(current.weather_code);
         if (topTempEl) topTempEl.innerText = `${Math.round(current.temperature_2m)}°`;
         if (topBoxEl) {
             topBoxEl.innerHTML = `<i class="fas ${wInfo.icon} ${wInfo.class}"></i><span id="weather-temp">${Math.round(current.temperature_2m)}°</span>`;
-            topBoxEl.onclick = window.toggleDashboard;
+            topBoxEl.onclick = window.rfApp.weather.toggleDashboard;
         }
 
-        // --- B. 儀表板主卡片 ---
         if(mainLocEl) mainLocEl.innerHTML = `<i class="fas fa-map-marker-alt"></i> ${locName}`;
         document.getElementById('dash-main-temp').innerText = `${Math.round(current.temperature_2m)}°`;
         document.getElementById('dash-main-status').innerText = wInfo.name;
         
-        // AQI 顯示
         const aqiInfo = getAqiInfo(aqiVal);
         const aqiEl = document.getElementById('dash-aqi-badge');
         aqiEl.innerHTML = `<i class="fas ${aqiInfo.icon}"></i> ${getT('aqi_level')}: ${aqiVal} (${aqiInfo.status})`;
-        aqiEl.style.backgroundColor = aqiInfo.color + '40'; // 加上透明度
+        aqiEl.style.backgroundColor = aqiInfo.color + '40'; 
         aqiEl.style.border = `1px solid ${aqiInfo.color}`;
 
-        // 動態背景
         const mainCard = document.getElementById('dash-main-card');
         mainCard.className = 'dash-main-card';
         if(current.weather_code <= 3) mainCard.classList.add('sunny');
         else if(current.weather_code >= 51) mainCard.classList.add('rainy');
 
-        // --- C. 詳細數據 ---
         document.getElementById('dash-humidity').innerText = `${current.relative_humidity_2m}%`;
         const hourIndex = new Date().getHours();
         document.getElementById('dash-uv').innerText = data.hourly.uv_index[hourIndex] || 0;
@@ -305,7 +281,6 @@ export async function fetchWeather() {
         const sunsetTime = new Date(daily.sunset[0]).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', hour12: false});
         document.getElementById('dash-sunset').innerText = sunsetTime;
 
-        // --- D. 未來預報 ---
         let forecastHTML = '';
         for(let i=1; i<=6; i++) {
             const d = new Date(daily.time[i]);
@@ -328,6 +303,7 @@ export async function fetchWeather() {
         isFetching = false;
     }
 }
+window.rfApp.weather.fetchWeather = fetchWeather; // 🔥 強制綁定
 
 // 全域開關
 window.toggleDashboard = () => {
@@ -342,9 +318,9 @@ window.toggleDashboard = () => {
         }
     }
 };
+window.rfApp.weather.toggleDashboard = window.toggleDashboard; // 🔥 強制綁定
 
 export function initWeather() {
-    window.rfApp = window.rfApp || {};
-    window.rfApp.weather = { fetchWeather, toggleDashboard, switchTab, jumpToZone };
+    // 這裡只是輔助，主要功能已在上方綁定
     setTimeout(fetchWeather, 2000);
 }
