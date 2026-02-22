@@ -38,6 +38,24 @@ export const translations = {
         toast_custom_saved: "✅ 秘境已儲存",
         toast_custom_deleted: "🗑️ 標記已刪除",
         toast_network_err: "網路連線異常，請稍後再試"
+
+        // 🌟 [新增] 介面風格 (Skin)
+        "setting_skin": "介面風格 (Skin)",
+        "skin_default": "系統預設 (乾淨)",
+        "skin_glass": "💧 液態玻璃 (透視感)",
+        "skin_newyear": "🧧 恭賀新禧 (燈籠)",
+        "skin_sakura": "🌸 浪漫櫻花 (飄落)",
+
+        // 🌟 [新增] 地圖圖層設定
+        "setting_map_layer": "地圖底圖模式",
+        "map_std": "標準街道圖 (預設)",
+        "map_sat": "衛星影像 (Satellite)",
+        "map_topo": "等高地形圖 (Topo)",
+        "map_hist": "懷舊歷史濾鏡 (Sepia)",
+        
+        // 🌟 [新增] 交通路網開關
+        "setting_transit": "顯示交通路網",
+        "label_transit_on": "開啟鐵路/捷運線"
     },
     'en': { 
         splash_title: "Ruifang Guide", splash_desc: "Accurate local guide in Ruifang.", 
@@ -74,6 +92,21 @@ export const translations = {
         toast_custom_saved: "✅ Custom spot saved",
         toast_custom_deleted: "🗑️ Spot deleted",
         toast_network_err: "Network error, please try again"
+
+        setting_skin: "Interface Skin",
+        skin_default: "Default (Clean)",
+        skin_glass: "💧 Liquid Glass",
+        skin_newyear: "🧧 Lunar New Year",
+        skin_sakura: "🌸 Sakura Falling",
+
+        setting_map_layer: "Map Base Layer",
+        map_std: "Standard Street",
+        map_sat: "Satellite Imagery",
+        map_topo: "Topographic",
+        map_hist: "History Filter",
+
+        setting_transit: "Transit Network",
+        label_transit_on: "Show Railway/Metro"
     },
     'ja': { 
         splash_title: "瑞芳ガイド", splash_desc: "瑞芳の正確なローカルガイド。", 
@@ -110,6 +143,21 @@ export const translations = {
         toast_custom_saved: "✅ 保存しました",
         toast_custom_deleted: "🗑️ 削除しました",
         toast_network_err: "ネットワークエラー"
+
+        setting_skin: "テーマスキン",
+        skin_default: "デフォルト (標準)",
+        skin_glass: "💧 ガラス風 (Glass)",
+        skin_newyear: "🧧 新年 (提灯)",
+        skin_sakura: "🌸 桜吹雪 (Sakura)",
+
+        setting_map_layer: "地図レイヤー",
+        map_std: "標準マップ",
+        map_sat: "衛星写真",
+        map_topo: "地形図",
+        map_hist: "レトロフィルター",
+
+        setting_transit: "交通網表示",
+        label_transit_on: "鉄道・地下鉄を表示"
     },
     'ko': { 
         splash_title: "루이팡 가이드", splash_desc: "루이팡 지역의 정확한 로컬 가이드.", 
