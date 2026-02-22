@@ -1,6 +1,6 @@
-// js/modules/announcer.js (v647) - 純粹報幕版 (不干涉地圖視角)
+// js/modules/announcer.js (v659) - 精準字串還原與跟隨判定版
 import { state } from '../core/store.js';
-import { events } from '../core/events.js?v=646'; // 維持 v646
+import { events } from '../core/events.js?v=651'; 
 
 const ruifangMap = {
     "龍潭里": "瑞芳市區", "龍鎮里": "瑞芳市區", "龍安里": "瑞芳市區", "龍川里": "瑞芳市區", "龍山里": "瑞芳市區", 
@@ -25,6 +25,7 @@ export function fetchRealAddress(lat, lng, accuracy = null) {
 
     const render = (addr) => {
         if (accuracy !== null) {
+            // 🌟 嚴格遵守您要求的字串格式，一字不差！
             addrEl.innerText = `你在：${addr}｜精度：±${accuracy}m`;
         } else {
             addrEl.innerText = addr;
@@ -32,6 +33,7 @@ export function fetchRealAddress(lat, lng, accuracy = null) {
     };
 
     const distSq = Math.pow(lat - lastLat, 2) + Math.pow(lng - lastLng, 2);
+    // 即使地址一樣(快取命中)，但如果 GPS 精度改變了，依然會呼叫 render() 更新最後的數字！
     if (distSq < 0.000001 && cachedAddress) {
         render(cachedAddress);
         return;
@@ -127,17 +129,17 @@ export function initAnnouncer() {
             
             geocodeTimer = setTimeout(() => {
                 const center = state.mapInstance.getCenter();
-                // 這裡只負責抓地址，絕對不要移動地圖 (panTo)！
+                // 拖曳地圖時，不帶精度(null)，所以不會顯示「你在...精度...」字樣
                 fetchRealAddress(center.lat, center.lng, null);
             }, 800); 
         });
     }
 
-    // 訂閱 GPS 更新事件 (只負責更新文字)
+    // 🌟 核心防呆：只有當 GPS 處於「跟隨模式」時，才更新地址與精度
+    // 這樣您在拖曳地圖看別的地方時，文字就不會一直被 GPS 蓋掉了！
     events.on('location_update', (data) => {
-        // 如果地圖正在被拖曳（或處於非跟隨模式），我們只更新資料但不強制覆寫文字，
-        // 這裡的邏輯可以簡化：只要收到精確位置更新，就嘗試解析地址
-        // 前提是我們不要去 call panTo，這樣就不會干擾使用者
-        fetchRealAddress(data.lat, data.lng, Math.round(data.accuracy));
+        if (data.isFollowing) {
+            fetchRealAddress(data.lat, data.lng, Math.round(data.accuracy));
+        }
     });
 }
