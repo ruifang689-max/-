@@ -12,6 +12,10 @@ const SKINS = { 'default': '系統預設 (乾淨)', 'glass': '💧 液態玻璃 
 let sakuraInterval = null;
 
 export function initTheme() {
+
+    // 🌟 【關鍵修復】確保全域物件與 theme 命名空間存在
+    window.rfApp = window.rfApp || {};
+    window.rfApp.theme = window.rfApp.theme || {};
     
     // 🌟 1. 【核心】全域動態翻譯引擎
     window.rfApp.t = (key) => {
