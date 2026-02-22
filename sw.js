@@ -1,6 +1,6 @@
-// sw.js (v641) - 企業級動態快取引擎
+// sw.js (v642) - 企業級動態快取引擎
 
-const CACHE_VERSION = 'v641';
+const CACHE_VERSION = 'v642';
 const STATIC_CACHE = `rf-static-${CACHE_VERSION}`;
 const DYNAMIC_CACHE = `rf-dynamic-${CACHE_VERSION}`;
 const MAP_CACHE = `rf-map-${CACHE_VERSION}`;
