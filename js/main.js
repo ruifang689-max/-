@@ -6,7 +6,7 @@ import { state } from './core/store.js';
 
 // 🌟 1. 定義進入地圖的函數
 function enterMap() {
-    const intro = document.getElementById('intro-screen');
+    const intro = document.getElementById('welcome-screen');
     const app = document.getElementById('app');
     
     if (intro && app) {
