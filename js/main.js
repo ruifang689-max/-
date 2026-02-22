@@ -1,4 +1,4 @@
-// js/main.js (v660) - 企業級架構穩定版
+// js/main.js (v661) - 企業級架構穩定版
 // 🌟 1. 建立企業級全域命名空間 (工具箱)
 window.rfApp = {
     ui: {},
@@ -13,25 +13,25 @@ window.rfApp = {
     tts: {}
 };
 
-import { initErrorHandler, showToast } from './modules/toast.js?v=660';
-import { state } from './core/store.js?v=660'; 
-import { initMap, toggleLayer } from './core/map.js?v=660'; 
-import { fetchWeather } from './modules/weather.js?v=660';
-import { initGPS } from './modules/gps.js?v=660';
-import { initAnnouncer } from './modules/announcer.js?v=660'; 
-import { initCardGestures, closeCard } from './modules/cards.js?v=660';
-import { renderAllMarkers, filterSpots } from './modules/markers.js?v=660';
-import { initSearch } from './modules/search.js?v=660';
-import { initNavigation } from './modules/navigation.js?v=660';
-import { initUI } from './modules/ui.js?v=660'; 
-import { initFirebase } from './modules/firebase-sync.js?v=660';
-import { initTheme } from './modules/theme.js?v=660'; 
-import { initPWA } from './modules/pwa.js?v=660';
-import { initTour } from './modules/tour.js?v=660';
-import { initFavorites } from './modules/favorites.js?v=660';
-import { initCustomSpots } from './modules/customSpots.js?v=660'; 
-import { initTTS } from './modules/tts.js?v=660';
-import { initNearby } from './modules/nearby.js?v=660';
+import { initErrorHandler, showToast } from './modules/toast.js?v=661';
+import { state } from './core/store.js?v=661'; 
+import { initMap, toggleLayer } from './core/map.js?v=661'; 
+import { fetchWeather } from './modules/weather.js?v=661';
+import { initGPS } from './modules/gps.js?v=661';
+import { initAnnouncer } from './modules/announcer.js?v=661'; 
+import { initCardGestures, closeCard } from './modules/cards.js?v=661';
+import { renderAllMarkers, filterSpots } from './modules/markers.js?v=661';
+import { initSearch } from './modules/search.js?v=661';
+import { initNavigation } from './modules/navigation.js?v=661';
+import { initUI } from './modules/ui.js?v=661'; 
+import { initFirebase } from './modules/firebase-sync.js?v=661';
+import { initTheme } from './modules/theme.js?v=661'; 
+import { initPWA } from './modules/pwa.js?v=661';
+import { initTour } from './modules/tour.js?v=661';
+import { initFavorites } from './modules/favorites.js?v=661';
+import { initCustomSpots } from './modules/customSpots.js?v=661'; 
+import { initTTS } from './modules/tts.js?v=661';
+import { initNearby } from './modules/nearby.js?v=661';
 
 // 🌟 2. 建立命名空間橋樑
 window.rfApp.map.toggleLayer = toggleLayer;
