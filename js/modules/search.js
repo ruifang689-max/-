@@ -1,11 +1,11 @@
-// js/modules/search.js (v619)
+// js/modules/search.js (v621)
 import { state, saveState } from '../core/store.js';
 import { spots } from '../data/spots.js';
 import { showCard } from './cards.js';
 
-let debounceTimer = null; // 用於搜尋防抖
+let debounceTimer = null;
 
-// 🌟 核心搜尋觸發：地圖飛過去並打開卡片
+// 🌟 核心搜尋觸發
 export function triggerSearch(name) { 
     const searchInput = document.getElementById("search"); 
     const clearBtn = document.getElementById("search-clear-btn");
@@ -30,7 +30,7 @@ export function initSearch() {
     const clearBtn = document.getElementById("search-clear-btn");
     const content = document.getElementById("suggest-content");
 
-    // 🌟 1. 定義 rfApp.search 命名空間下的方法
+    // 🌟 1. 定義命名空間方法
     window.rfApp.search.closeSuggest = () => { 
         if(sugBox) { sugBox.classList.remove('u-block'); sugBox.classList.add('u-hidden'); }
     };
@@ -39,55 +39,48 @@ export function initSearch() {
         if(searchInput) searchInput.value = "";
         if(clearBtn) { clearBtn.classList.remove('u-block'); clearBtn.classList.add('u-hidden'); }
         window.rfApp.search.closeSuggest();
-        // 如果有 filterSpots 功能也可在此呼叫
         if(typeof window.filterSpots === 'function') window.filterSpots('all', null);
     };
 
+    // 🌟 2. 渲染邏輯：完全捨棄 createElement，改用純 HTML 字串與 data-name 屬性
     window.rfApp.search.renderDefaultSearch = () => {
         if(!content || !sugBox) return;
-        content.innerHTML = "";
         
-        // A. 渲染歷史紀錄
+        // 使用字串拼接，速度比 DOM 操作快數倍
+        let htmlString = "";
+        
+        // A. 歷史紀錄
         if (state.searchHistory && state.searchHistory.length > 0) {
-            content.innerHTML += `<div class="search-section-title">🕒 最近搜尋 <span class="clear-history-btn" onclick="rfApp.search.clearHistory()">清除</span></div>`;
+            htmlString += `<div class="search-section-title">🕒 最近搜尋 <span class="clear-history-btn" onclick="rfApp.search.clearHistory()">清除</span></div>`;
             state.searchHistory.forEach(h => {
-                const div = document.createElement("div"); div.className = "list-item";
-                div.innerHTML = `<span><i class="fas fa-history" style="color:#888; margin-right:5px;"></i> ${h}</span>`;
-                div.onclick = () => triggerSearch(h);
-                content.appendChild(div);
+                // 加上 data-name 屬性供事件委託辨識
+                htmlString += `<div class="list-item" data-name="${h}"><span><i class="fas fa-history" style="color:#888; margin-right:5px;"></i> ${h}</span></div>`;
             });
         }
         
-        // B. 渲染快速分類
-        content.innerHTML += `<div class="search-section-title">🏷️ 快速分類</div>`;
+        // B. 快速分類 (維持 Button onclick，因數量極少且邏輯單純)
+        htmlString += `<div class="search-section-title">🏷️ 快速分類</div>`;
+        htmlString += `<div style="display:flex; gap:8px; padding:10px 15px; flex-wrap:wrap;">`;
         const cats = ['美食', '自然', '歷史', '交通']; 
-        const catBox = document.createElement("div");
-        catBox.style.cssText = "display:flex; gap:8px; padding:10px 15px; flex-wrap:wrap;";
         cats.forEach(cat => {
-            const btn = document.createElement("button");
-            btn.className = "chip"; btn.innerText = cat;
-            btn.onclick = () => { 
-                if(searchInput) searchInput.value = cat; 
-                if(typeof window.filterSpots === 'function') window.filterSpots(cat, null); 
-                window.rfApp.search.closeSuggest();
-            };
-            catBox.appendChild(btn);
+            htmlString += `<button class="chip" onclick="if(document.getElementById('search')){document.getElementById('search').value='${cat}'}; if(typeof window.filterSpots==='function') window.filterSpots('${cat}', null); window.rfApp.search.closeSuggest();">${cat}</button>`;
         });
-        content.appendChild(catBox);
+        htmlString += `</div>`;
         
-        // C. 渲染隨機推薦
+        // C. 隨機推薦
         const recCats = ['美食', '自然', '歷史']; 
         const randomCat = recCats[Math.floor(Math.random() * recCats.length)];
-        content.innerHTML += `<div class="search-section-title" style="color: var(--accent);">🎁 探索推薦：${randomCat}</div>`;
+        htmlString += `<div class="search-section-title" style="color: var(--accent);">🎁 探索推薦：${randomCat}</div>`;
+        
         const matched = spots.concat(state.savedCustomSpots || []).filter(s => (s.tags || []).includes(randomCat));
         const shuffled = matched.sort(() => 0.5 - Math.random()).slice(0, 5);
         shuffled.forEach(s => {
-            const div = document.createElement("div"); div.className = "list-item";
-            div.innerHTML = `<span><i class="fas fa-star" style="color:var(--accent); margin-right:8px;"></i> ${s.name}</span><i class="fas fa-chevron-right" style="color:#ccc; font-size:12px;"></i>`;
-            div.onclick = () => triggerSearch(s.name);
-            content.appendChild(div);
+            // 加上 data-name 屬性
+            htmlString += `<div class="list-item" data-name="${s.name}"><span><i class="fas fa-star" style="color:var(--accent); margin-right:8px;"></i> ${s.name}</span><i class="fas fa-chevron-right" style="color:#ccc; font-size:12px;"></i></div>`;
         });
         
+        // 一次性寫入 DOM
+        content.innerHTML = htmlString;
         sugBox.classList.remove('u-hidden'); sugBox.classList.add('u-block');
     };
 
@@ -97,7 +90,29 @@ export function initSearch() {
         window.rfApp.search.renderDefaultSearch();
     };
 
-    // 🌟 2. 綁定監聽器
+    // 🌟 3. 極限效能：事件委託 (Event Delegation) 綁定在父元素
+    if (content) {
+        content.addEventListener('click', (e) => {
+            // 尋找被點擊元素最近的 .list-item 祖先
+            const item = e.target.closest('.list-item');
+            if (!item) return; // 如果點到的不是清單項目，就略過
+
+            // 從自訂屬性取得景點名稱
+            const spotName = item.getAttribute('data-name');
+            if (spotName) {
+                // 儲存搜尋歷史
+                state.searchHistory = (state.searchHistory || []).filter(h => h !== spotName);
+                state.searchHistory.unshift(spotName);
+                if(state.searchHistory.length > 5) state.searchHistory.pop();
+                if(typeof saveState !== 'undefined') saveState.history();
+                
+                // 觸發搜尋
+                triggerSearch(spotName);
+            }
+        });
+    }
+
+    // 🌟 4. 輸入框監聽器
     if(searchInput) {
         searchInput.addEventListener('focus', () => {
             if(!searchInput.value.trim()) window.rfApp.search.renderDefaultSearch();
@@ -110,7 +125,7 @@ export function initSearch() {
                 else { clearBtn.classList.add('u-hidden'); clearBtn.classList.remove('u-block'); }
             }
 
-            // 防抖搜尋邏輯
+            // 防抖
             clearTimeout(debounceTimer);
             debounceTimer = setTimeout(() => {
                 if(!k) { window.rfApp.search.renderDefaultSearch(); return; }
@@ -121,20 +136,13 @@ export function initSearch() {
                 );
 
                 if(matches.length > 0) {
-                    content.innerHTML = "";
-                    sugBox.classList.remove('u-hidden'); sugBox.classList.add('u-block');
+                    let htmlString = "";
                     matches.forEach(s => {
-                        const div = document.createElement("div"); div.className = "list-item";
-                        div.innerHTML = `<span><i class="fas fa-map-marker-alt" style="color:var(--primary)"></i> ${s.name}</span>`;
-                        div.onclick = () => {
-                            state.searchHistory = (state.searchHistory || []).filter(h => h !== s.name);
-                            state.searchHistory.unshift(s.name);
-                            if(state.searchHistory.length > 5) state.searchHistory.pop();
-                            if(typeof saveState !== 'undefined') saveState.history();
-                            triggerSearch(s.name);
-                        };
-                        content.appendChild(div);
+                        // 🌟 搜尋結果也改用字串拼接與 data-name
+                        htmlString += `<div class="list-item" data-name="${s.name}"><span><i class="fas fa-map-marker-alt" style="color:var(--primary)"></i> ${s.name}</span></div>`;
                     });
+                    content.innerHTML = htmlString;
+                    sugBox.classList.remove('u-hidden'); sugBox.classList.add('u-block');
                 } else { window.rfApp.search.closeSuggest(); }
             }, 300);
         });
@@ -147,10 +155,10 @@ export function initSearch() {
         }
     });
 
-    // 🌟 3. 向下相容橋樑 (Legacy Bridge)
+    // 🌟 5. 向下相容橋樑 (Legacy Bridge)
     window.closeSuggest = window.rfApp.search.closeSuggest;
     window.clearSearchInput = window.rfApp.search.clearSearchInput;
     window.renderDefaultSearch = window.rfApp.search.renderDefaultSearch;
     window.clearHistory = window.rfApp.search.clearHistory;
-    window.rfApp.search.triggerSearch = triggerSearch; // 註冊到命名空間
+    window.rfApp.search.triggerSearch = triggerSearch; 
 }
