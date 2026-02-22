@@ -1,3 +1,4 @@
+// js/modules/cards.js (v623)
 import { state, saveState } from '../core/store.js';
 import { translations } from '../data/lang.js';
 
@@ -13,10 +14,18 @@ export function showCard(s) {
     document.getElementById("card-fav-icon").className = state.myFavs.includes(s.name) ? "fas fa-heart active" : "fas fa-heart"; 
     document.getElementById("title").innerText = s.name; 
     
-    // 圖片處理
-    const imgEl = document.getElementById("img"); 
-    imgEl.src = s.wikiImg || s.brochureUrl || getPlaceholderImage(s.name); 
-    imgEl.onerror = () => { imgEl.src = getPlaceholderImage(s.name); }; 
+    // 🌟 圖片處理：修復變數名稱，並加入超滑順懶載入
+    const imgEl = document.getElementById('img');
+    if (imgEl) {
+        // 加入懶載入屬性，讓畫面外面的圖片先不下載，省流量！
+        imgEl.loading = "lazy";
+        
+        // 使用傳入的 s，如果沒有圖片，直接呼叫動態產生器畫一張專屬佔位圖
+        imgEl.src = s.wikiImg || getPlaceholderImage(s.name);
+        
+        // 網路錯誤破圖時的終極防線
+        imgEl.onerror = () => { imgEl.src = getPlaceholderImage(s.name); };
+    }
     
     // 標籤處理
     const tags = s.tags ? (Array.isArray(s.tags) ? s.tags : [s.tags]) : (s.category ? [s.category] : []);
