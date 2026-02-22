@@ -1,4 +1,4 @@
-// js/modules/search.js (v631) - 情境感知升級版
+// js/modules/search.js (v642) - 情境感知與點擊修復完美融合版
 import { state, saveState } from '../core/store.js';
 import { spots } from '../data/spots.js';
 import { showCard } from './cards.js';
@@ -89,7 +89,10 @@ export function initSearch() {
         cats.forEach(cat => {
             const btn = document.createElement('button');
             btn.className = "chip"; btn.textContent = cat;
-            btn.onclick = () => {
+            
+            // 🌟 修復關鍵：加上參數 e，並呼叫 e.stopPropagation()
+            btn.onclick = (e) => {
+                e.stopPropagation(); // 阻止事件冒泡，完美解決無法關閉的 Bug
                 if(searchInput) searchInput.value = cat; 
                 if(typeof window.filterSpots === 'function') window.filterSpots(cat, null); 
                 window.rfApp.search.closeSuggest();
@@ -98,9 +101,8 @@ export function initSearch() {
         });
         fragment.appendChild(catBox);
         
-        // 🌟 C. 情境探索推薦 (取代原本的隨機推薦)
+        // 🌟 C. 情境探索推薦
         const ctx = getContextualData();
-        // 將時間推薦與季節推薦的關鍵字合併，進行過濾
         const targetTags = [ctx.timeContext.suggestTag, ...ctx.seasonContext.keywords];
         
         const recTitle = document.createElement('div');
@@ -109,7 +111,6 @@ export function initSearch() {
         recTitle.innerHTML = `🎁 探索推薦：${ctx.seasonContext.season}的${ctx.timeContext.suggestTag}`;
         fragment.appendChild(recTitle);
         
-        // 過濾出符合當前情境的景點
         const allSpots = spots.concat(state.savedCustomSpots || []);
         const matched = allSpots.filter(s => 
             targetTags.some(tag => 
@@ -119,7 +120,6 @@ export function initSearch() {
             )
         );
         
-        // 如果情境剛好沒配對到，退回完全隨機
         const finalPool = matched.length > 0 ? matched : allSpots;
         const shuffled = finalPool.sort(() => 0.5 - Math.random()).slice(0, 5);
         
@@ -143,7 +143,6 @@ export function initSearch() {
         window.rfApp.search.renderDefaultSearch();
     };
 
-    // (後面保留 Web Worker 接收、事件委託、輸入框監聽等，與 v627 完全相同)
     if (searchWorker) {
         searchWorker.onmessage = function(e) {
             const matches = e.data.result;
