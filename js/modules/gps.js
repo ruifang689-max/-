@@ -188,11 +188,11 @@ export function initGPS() {
                 }
                 if (btnIcon) btnIcon.classList.remove('fa-spin');
                 
-                // 🌟 修改報幕顯示：全形符號與指定格式
+                // 🌟 恢復顯示地區名稱與精度
                 if (!isUserPanning) {
                     const nearestRegion = getNearestRegion(lat, lng);
                     const addrText = document.getElementById('addr-text');
-                    if (addrText) addrText.textContent = `你在：${nearestRegion}｜精度: ±${Math.round(accuracy)}m`;
+                    if (addrText) addrText.textContent = `你在：${nearestRegion}｜精度：±${Math.round(accuracy)}m`;
                 }
             },
             (err) => {
