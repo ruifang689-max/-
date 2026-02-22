@@ -1,4 +1,4 @@
-// js/main.js (v643)
+// js/main.js (v644)
 // 🌟 1. 建立企業級全域命名空間 (Namespace 工具箱)
 window.rfApp = {
     ui: {},
@@ -13,24 +13,24 @@ window.rfApp = {
     tts: {}
 };
 
-import { initTTS } from './modules/tts.js?v=643';
-import { initErrorHandler, showToast } from './modules/toast.js?v=643';
-import { state } from './core/store.js?v=643'; 
-import { initMap, toggleLayer } from './core/map.js?v=643'; 
-import { fetchWeather } from './modules/weather.js?v=643';
-import { initGPS } from './modules/gps.js?v=643';
-import { initAnnouncer } from './modules/announcer.js?v=643'; 
-import { initCardGestures, closeCard } from './modules/cards.js?v=643';
-import { renderAllMarkers, filterSpots } from './modules/markers.js?v=643';
-import { initSearch } from './modules/search.js?v=643';
-import { initNavigation } from './modules/navigation.js?v=643';
-import { initUI } from './modules/ui.js?v=643'; 
-import { initFirebase } from './modules/firebase-sync.js?v=643';
-import { initTheme } from './modules/theme.js?v=643'; 
-import { initPWA } from './modules/pwa.js?v=643';
-import { initTour } from './modules/tour.js?v=643';
-import { initFavorites } from './modules/favorites.js?v=643';
-import { initCustomSpots } from './modules/customSpots.js?v=643'; 
+import { initTTS } from './modules/tts.js?v=644';
+import { initErrorHandler, showToast } from './modules/toast.js?v=644';
+import { state } from './core/store.js?v=644'; 
+import { initMap, toggleLayer } from './core/map.js?v=644'; 
+import { fetchWeather } from './modules/weather.js?v=644';
+import { initGPS } from './modules/gps.js?v=644';
+import { initAnnouncer } from './modules/announcer.js?v=644'; 
+import { initCardGestures, closeCard } from './modules/cards.js?v=644';
+import { renderAllMarkers, filterSpots } from './modules/markers.js?v=644';
+import { initSearch } from './modules/search.js?v=644';
+import { initNavigation } from './modules/navigation.js?v=644';
+import { initUI } from './modules/ui.js?v=644'; 
+import { initFirebase } from './modules/firebase-sync.js?v=644';
+import { initTheme } from './modules/theme.js?v=644'; 
+import { initPWA } from './modules/pwa.js?v=644';
+import { initTour } from './modules/tour.js?v=644';
+import { initFavorites } from './modules/favorites.js?v=644';
+import { initCustomSpots } from './modules/customSpots.js?v=644'; 
 
 // 將核心方法收納進工具箱，並建立向下相容橋樑
 window.rfApp.map.toggleLayer = toggleLayer;
