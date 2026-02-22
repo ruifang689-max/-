@@ -1,39 +1,13 @@
-// js/modules/gps.js (v636) - 羅盤平滑與視覺打磨版
+// js/modules/gps.js (v640) - 結合真實地址解析版
 import { state } from '../core/store.js';
 
 let watchId = null;
 let userMarker = null;
 let compassCircle = null;
-
-// 🌟 新增：解決 360度 -> 0度 跳動的平滑演算法變數
 let currentHeading = 0; 
 let lastRawHeading = 0;
 let totalRotation = 0;
-
 let isCompassActive = false;
-
-// 🌟 九大區域地理中心座標
-const ruifangRegions = [
-    { name: "瑞芳市區", lat: 25.107, lng: 121.806 },
-    { name: "九份", lat: 25.109, lng: 121.844 },
-    { name: "金瓜石", lat: 25.107, lng: 121.859 },
-    { name: "猴硐", lat: 25.086, lng: 121.826 },
-    { name: "深澳", lat: 25.129, lng: 121.820 },
-    { name: "水湳洞", lat: 25.121, lng: 121.864 },
-    { name: "四腳亭", lat: 25.102, lng: 121.762 },
-    { name: "三貂嶺", lat: 25.059, lng: 121.824 },
-    { name: "鼻頭角", lat: 25.119, lng: 121.918 }
-];
-
-function getNearestRegion(lat, lng) {
-    let nearest = "瑞芳區";
-    let minDist = Infinity;
-    ruifangRegions.forEach(r => {
-        const d = Math.pow(r.lat - lat, 2) + Math.pow(r.lng - lng, 2);
-        if (d < minDist) { minDist = d; nearest = r.name; }
-    });
-    return nearest;
-}
 
 // 🌟 動態注入 CSS
 const injectCompassCSS = () => {
@@ -56,16 +30,13 @@ const injectCompassCSS = () => {
             100% { transform: translate(-50%, -50%) scale(3.5); opacity: 0; }
         }
         
-        /* 🌟 修復羅盤延遲：改用 0.1s ease-out 配合累積旋轉量，讓轉動如絲般順滑 */
         .gps-arrow-container { position: absolute; top: 0; left: 0; width: 60px; height: 60px; z-index: 2; transition: transform 0.1s ease-out; }
         
-        /* 🌟 扇形光束微調：加寬 55px，角度向外張開 (+2~3度) */
         .gps-arrow-container::before { 
             content: ''; position: absolute; bottom: 50%; left: 50%; transform: translateX(-50%);
-            width: 55px; /* 加寬 */
-            height: 55px; 
+            width: 55px; height: 55px; 
             background: radial-gradient(circle at 50% 100%, var(--primary) 0%, transparent 80%);
-            clip-path: polygon(50% 100%, 10% 0, 90% 0); /* 稍微張開的銳角 */
+            clip-path: polygon(50% 100%, 10% 0, 90% 0);
             opacity: 0.85; filter: drop-shadow(0 -2px 4px rgba(0, 123, 255, 0.4));
         }
     `;
@@ -89,40 +60,28 @@ const createCompassIcon = () => {
 
 const requestCompassPermission = () => {
     if (isCompassActive) return;
-    
     const getScreenOrientation = () => window.orientation || screen.orientation?.angle || 0;
-
     const handleOrientation = (e) => {
         let heading = 0;
         const screenOrient = getScreenOrientation();
+        if (e.webkitCompassHeading !== undefined) { heading = e.webkitCompassHeading; } 
+        else if (e.alpha !== null) { heading = 360 - e.alpha; }
 
-        if (e.webkitCompassHeading !== undefined) { 
-            heading = e.webkitCompassHeading; 
-        } 
-        else if (e.alpha !== null) { 
-            heading = 360 - e.alpha; 
-        }
-
-        // 🌟 最短路徑平滑演算法：解決 359度到 1度的瘋狂旋轉問題
         let delta = heading - lastRawHeading;
-        if (delta > 180) delta -= 360;       // 走捷徑
-        else if (delta < -180) delta += 360; // 走捷徑
+        if (delta > 180) delta -= 360;       
+        else if (delta < -180) delta += 360; 
         
-        totalRotation += delta;      // 累積旋轉量 (例如可能會轉到 400度、1000度，視覺上完全平滑)
-        lastRawHeading = heading;    // 紀錄這次的原始數值
+        totalRotation += delta;      
+        lastRawHeading = heading;    
 
-        // 加上螢幕旋轉補償
         const finalRotation = totalRotation + screenOrient;
         currentHeading = finalRotation;
         
         const arrowEl = document.getElementById('real-time-arrow');
         if (arrowEl) { arrowEl.style.transform = `rotate(${finalRotation}deg)`; }
     };
-    
     if (typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function') {
-        DeviceOrientationEvent.requestPermission()
-            .then(p => { if (p === 'granted') { window.addEventListener('deviceorientation', handleOrientation, true); isCompassActive = true; } })
-            .catch(err => console.log("羅盤權限遭拒:", err));
+        DeviceOrientationEvent.requestPermission().then(p => { if (p === 'granted') { window.addEventListener('deviceorientation', handleOrientation, true); isCompassActive = true; } }).catch(err => console.log("羅盤權限遭拒:", err));
     } else {
         window.addEventListener('deviceorientationabsolute', handleOrientation, true);
         window.addEventListener('deviceorientation', handleOrientation, true);
@@ -136,10 +95,6 @@ export function initGPS() {
     let isUserPanning = false;
     if (state.mapInstance) {
         state.mapInstance.on('dragstart', () => { isUserPanning = true; });
-        state.mapInstance.on('movestart', () => { 
-            const addrText = document.getElementById('addr-text');
-            if (addrText && isUserPanning) addrText.textContent = `隨處逛逛中...`;
-        });
     }
 
     window.rfApp.map.goToUser = () => {
@@ -162,20 +117,12 @@ export function initGPS() {
                 const { latitude: lat, longitude: lng, accuracy } = pos.coords;
                 state.userLocation = { lat, lng };
 
-                const gpsValText = document.getElementById('gps-val-text');
-                if (gpsValText) gpsValText.textContent = `GPS: ${lat.toFixed(4)}, ${lng.toFixed(4)}`;
-
                 if (!userMarker) {
                     userMarker = L.marker([lat, lng], { icon: createCompassIcon(), zIndexOffset: 1000 }).addTo(state.mapInstance);
                     
-                    // 🌟 圓形範圍線修改：依主題色(var(--primary))，線色透明度大於填色透明度
                     compassCircle = L.circle([lat, lng], { 
-                        radius: accuracy, 
-                        color: 'var(--primary)',     // 圓圈線條顏色
-                        opacity: 0.35,               // 線條的透明度 線的顏色深於範圍色
-                        fillColor: 'var(--primary)', 
-                        fillOpacity: 0.08,           // 內部填充的透明度 範圍色較淺
-                        weight: 1                    // 控制線條粗細 (預設是 1.5)
+                        radius: accuracy, color: 'var(--primary)', opacity: 0.35,        
+                        fillColor: 'var(--primary)', fillOpacity: 0.08, weight: 1
                     }).addTo(state.mapInstance);
                     
                     state.mapInstance.flyTo([lat, lng], 17, { animate: true, duration: 1.5 });
@@ -188,11 +135,11 @@ export function initGPS() {
                 }
                 if (btnIcon) btnIcon.classList.remove('fa-spin');
                 
-                // 🌟 恢復顯示地區名稱與精度
+                // 🌟 核心修改：直接呼叫 announcer 的真實地址解析！
                 if (!isUserPanning) {
-                    const nearestRegion = getNearestRegion(lat, lng);
-                    const addrText = document.getElementById('addr-text');
-                    if (addrText) addrText.textContent = `你在：${nearestRegion}｜精度：±${Math.round(accuracy)}m`;
+                    if (window.rfApp.announcer && typeof window.rfApp.announcer.fetchRealAddress === 'function') {
+                        window.rfApp.announcer.fetchRealAddress(lat, lng, Math.round(accuracy));
+                    }
                 }
             },
             (err) => {
