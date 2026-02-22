@@ -466,9 +466,24 @@
             </div>
         </div>
     </template>
+
+    <div class="setting-item">
+    <div class="setting-label">
+        <i class="fas fa-magic"></i> 
+        <span data-i18n="setting_skin">介面風格 (Skin)</span>
+    </div>
+    <div class="setting-control">
+        <select id="skin-selector" class="form-select" onchange="changeSkin(this.value)">
+            <option value="default" data-i18n="skin_default">系統預設 (乾淨)</option>
+            <option value="glass" data-i18n="skin_glass">💧 液態玻璃 (Glassmorphism)</option>
+            <option value="newyear" data-i18n="skin_newyear">🧧 恭賀新禧 (燈籠春聯)</option>
+            <option value="sakura" data-i18n="skin_sakura">🌸 浪漫櫻花 (飄落特效)</option>
+        </select>
+    </div>
     
 </body>
 </html>
+
 
 
 
