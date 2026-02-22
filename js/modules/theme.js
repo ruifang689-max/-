@@ -24,6 +24,15 @@ export function initTheme() {
     window.rfApp.theme.applyLanguage = (lang) => {
         state.currentLang = lang; 
         const t = translations[lang] || translations['zh'];
+
+        window.rfApp.theme.applyLanguage = (lang) => {
+            // ... 前面的程式碼 ...
+            
+            // 🌟 [新增] 通知地圖模組更新標記文字
+            if (typeof window.rfApp.map.updateMarkerLabels === 'function') {
+                window.rfApp.map.updateMarkerLabels();
+            }
+        };
         
         // 替換 HTML 中的 data-i18n 標籤 (保留 Icon)
         document.querySelectorAll('[data-i18n]').forEach(el => {
