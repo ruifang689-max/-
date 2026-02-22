@@ -32,7 +32,7 @@ export function showCard(s) {
         </div>
     ` : '';
     
-    // 🌟 引入全域翻譯，若找不到則回退為中文預設值
+    // 🌟 引入全域翻譯
     const t = window.rfApp.t || (k => k); 
 
     const desc = s.description || s.highlights || "暫無介紹";
@@ -46,13 +46,12 @@ export function showCard(s) {
     if(historyEl) { historyEl.style.display = "block"; historyEl.innerText = s.history || "--"; }
     
     const transportEl = document.getElementById("card-transport"); 
-    // 加入翻譯
     const selfGuideTxt = state.currentLang === 'en' ? 'Go by yourself' : (state.currentLang === 'ja' ? '各自アクセス' : '自行前往');
     if(transportEl) { transportEl.style.display = "block"; transportEl.innerText = s.transport || selfGuideTxt; }
     
     const btnGroup = document.getElementById("card-btn-group");
     
-    // 🌟 將按鈕文字也接上動態翻譯
+    // 🌟 按鈕文字動態翻譯
     const txtNav = t('nav') || '導航';
     const txtVoice = state.currentLang === 'en' ? 'Voice' : (state.currentLang === 'ja' ? '音声' : '語音');
     const txtEdit = state.currentLang === 'en' ? 'Edit' : (state.currentLang === 'ja' ? '編集' : '編輯');
