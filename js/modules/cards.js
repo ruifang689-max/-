@@ -1,351 +1,91 @@
-// js/modules/cards.js (v702) - 翻譯與主題深度整合版
-import { state } from '../core/store.js';
-
-let isCardInitialized = false;
-
-// 輔助：取得翻譯函數
-const getT = () => window.rfApp?.t || ((k) => k);
-
-function getDistanceText(lat, lng) {
-    if (!state.userLocation || !state.userLocation.lat) return "";
-    const R = 6371; 
-    const dLat = (lat - state.userLocation.lat) * Math.PI / 180;
-    const dLon = (lng - state.userLocation.lng) * Math.PI / 180;
-    const a = Math.sin(dLat/2)*Math.sin(dLat/2) + Math.cos(state.userLocation.lat*Math.PI/180)*Math.cos(lat*Math.PI/180)*Math.sin(dLon/2)*Math.sin(dLon/2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-    const d = R * c;
-    const t = getT();
-    
-    // 🌟 翻譯距離文字
-    const distText = d < 1 ? `${(d*1000).toFixed(0)}m` : `${d.toFixed(1)}km`;
-    return `📍 ${t('distance_prefix') || '距離'} ${distText}`;
-}
-
-// 🌟 全域展開卡片函數
-window.expandCard = () => {
-    const cardEl = document.getElementById("card");
-    if(!cardEl || cardEl.classList.contains('expanded')) return;
-    
-    cardEl.classList.remove('preview');
-    cardEl.classList.add('expanded');
-    
-    document.getElementById("card-preview-zone").classList.add('u-hidden');
-    document.getElementById("card-full-zone").classList.remove('u-hidden');
-    document.getElementById("card-btn-group").classList.remove('u-hidden');
-};
-
-// 🌟 全域開啟路線選單函數
-window.openRouteMenu = (lat, lng, nameRaw) => {
-    const menu = document.getElementById('route-menu-container');
-    if(!menu) return;
-    const t = getT();
-    const name = encodeURIComponent(nameRaw);
-    
-    // 🌟 翻譯路線選單
-    menu.innerHTML = `
-        <div style="font-weight:bold; margin-bottom:10px; color:#555;">${t('route_title') || '選擇前往方式'}：</div>
-        <a href="https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=driving" target="_blank" class="route-btn-item"><i class="fas fa-car"></i> ${t('route_drive') || '開車 (Driving)'}</a>
-        <a href="https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=two-wheeler" target="_blank" class="route-btn-item"><i class="fas fa-motorcycle"></i> ${t('route_scooter') || '機車 (Scooter)'}</a>
-        <a href="https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=transit" target="_blank" class="route-btn-item"><i class="fas fa-bus"></i> ${t('route_transit') || '大眾運輸 (Transit)'}</a>
-        <a href="https://www.google.com/maps/dir/?api=1&destination=${lat},${lng}&travelmode=walking" target="_blank" class="route-btn-item"><i class="fas fa-walking"></i> ${t('route_walk') || '步行 (Walk)'}</a>
-        <div class="route-close" onclick="document.getElementById('route-menu-container').classList.remove('active')">${t('cancel') || '取消'}</div>
-    `;
-    menu.classList.add('active');
-};
-
-function initCardDOM() {
-    if (isCardInitialized) return;
-    const cardEl = document.getElementById("card");
-    if (!cardEl) return;
-
-    cardEl.innerHTML = `
-        <div class="card-drag-handle" id="card-drag-handle"><div class="drag-pill"></div></div>
-        
-        <div id="card-preview-zone" onclick="window.expandCard()">
-            <div class="preview-img-wrap"><img id="preview-img" src="" alt="preview"></div>
-            <div class="preview-info">
-                <h3 id="preview-title"></h3>
-                <div id="preview-tags" class="card-tags-scroll" style="padding-bottom:0;"></div>
-                <div id="preview-distance" style="font-size:12px; color:#888; margin-top:6px; font-weight:bold;"></div>
-            </div>
-            <div class="preview-action">
-                <button id="preview-route-btn" class="icon-btn"><i class="fas fa-directions" style="color:var(--primary)"></i></button>
-            </div>
-        </div>
-
-        <div id="card-full-zone" class="u-hidden">
-            <div class="card-hero">
-                <img id="full-img" src="" alt="full">
-                <div class="hero-overlay">
-                    <h2 id="full-title"></h2>
-                    <div class="card-header-icons">
-                        <i class="fas fa-share-alt" onclick="shareSpot()"></i>
-                        <i class="fas fa-heart" id="card-fav-icon" onclick="toggleCurrentFav()"></i>
-                    </div>
-                </div>
-            </div>
-            <div class="card-content-body">
-                <div id="full-tags" class="card-tags-scroll"></div>
-                <div id="full-info-rows" style="margin-top:15px;"></div>
-                <div id="full-desc" class="spot-desc"></div>
-                <div id="full-sections"></div>
-            </div>
-        </div>
-
-        <div id="card-btn-group" class="u-hidden"></div>
-        <div id="route-menu-container" class="route-menu-overlay"></div>
-    `;
-
-    // 🌟 CSS 優化：支援 Glassmorphism 與各區域主題色
-    const style = document.createElement('style');
-    style.id = 'card-style-v702';
-    style.innerHTML = `
-        #card.theme-jiufen { --card-accent: #e74c3c; --card-bg: #fff5f5; }
-        #card.theme-jinguashi { --card-accent: #d4ac0d; --card-bg: #fcfbf6; }
-        #card.theme-houtong { --card-accent: #e67e22; --card-bg: #fffcf5; }
-        #card.theme-shuinandong { --card-accent: #3498db; --card-bg: #f0f8ff; }
-        #card.theme-default { --card-accent: var(--primary); --card-bg: #ffffff; }
-
-        /* 針對 Skin-Glass 的特殊處理 */
-        body.skin-glass #card { 
-            background: rgba(255, 255, 255, 0.75) !important; 
-            backdrop-filter: blur(20px) saturate(180%);
-            border: 1px solid rgba(255,255,255,0.4);
-            box-shadow: 0 -10px 40px rgba(0,0,0,0.15);
-        }
-
-        #card { background: var(--card-bg); border-radius: 20px 20px 0 0; padding: 0; display: flex; flex-direction: column; transition: transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1), height 0.3s; overflow: hidden; z-index: 2000; position: fixed; bottom: 0; left: 0; width: 100%; box-shadow: 0 -5px 25px rgba(0,0,0,0.1); }
-        #card.preview { height: auto; min-height: 110px; transform: translateY(0); }
-        #card.expanded { height: 85vh; transform: translateY(0); }
-        /* 隱藏狀態 */
-        #card:not(.open) { transform: translateY(100%); }
-        
-        .card-drag-handle { width: 100%; height: 24px; display: flex; justify-content: center; align-items: center; cursor: grab; background: transparent; position: absolute; top:0; z-index: 10; }
-        .drag-pill { width: 40px; height: 5px; background: rgba(0,0,0,0.2); border-radius: 3px; }
-
-        #card-preview-zone { display: flex; padding: 25px 15px 15px 15px; align-items: center; gap: 12px; cursor: pointer; }
-        .preview-img-wrap { width: 70px; height: 70px; border-radius: 12px; overflow: hidden; flex-shrink:0; }
-        .preview-img-wrap img { width: 100%; height: 100%; object-fit: cover; }
-        .preview-info { flex: 1; overflow: hidden; }
-        #preview-title { margin: 0 0 6px 0; font-size: 18px; color: #333; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .preview-action .icon-btn { background: #f0f4f8; border: none; width: 44px; height: 44px; border-radius: 50%; font-size: 20px; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 5px rgba(0,0,0,0.1); cursor: pointer; }
-
-        #card-full-zone { flex: 1; overflow-y: auto; padding-bottom: 20px; display: flex; flex-direction: column; }
-        .card-hero { position: relative; width: 100%; height: 220px; flex-shrink:0; }
-        .card-hero img { width: 100%; height: 100%; object-fit: cover; }
-        .hero-overlay { position: absolute; bottom: 0; left: 0; width: 100%; padding: 40px 20px 15px 20px; background: linear-gradient(to top, rgba(0,0,0,0.8), transparent); display: flex; justify-content: space-between; align-items: flex-end; }
-        #full-title { color: white; margin: 0; font-size: 24px; font-weight: bold; text-shadow: 1px 1px 3px rgba(0,0,0,0.5); }
-        .card-header-icons i { color: white; font-size: 22px; margin-left: 15px; cursor: pointer; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.5)); transition: transform 0.2s; }
-        .card-header-icons i.active { color: #e74c3c; }
-
-        .card-content-body { padding: 20px; }
-        .card-tags-scroll { display: flex; gap: 6px; overflow-x: auto; padding-bottom: 5px; scrollbar-width: none; }
-        .card-tags-scroll::-webkit-scrollbar { display: none; }
-        .info-tag { background: rgba(255,255,255,0.8); border: 1px solid var(--card-accent); color: var(--card-accent); font-size: 12px; padding: 3px 10px; border-radius: 12px; white-space: nowrap; font-weight: bold; }
-
-        .info-row { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 12px; font-size: 14px; color: #555; line-height: 1.5; }
-        .info-row i { color: var(--card-accent); width: 18px; text-align: center; margin-top: 3px; flex-shrink: 0; }
-        .info-row a { color: var(--card-accent); text-decoration: none; border-bottom: 1px dashed; }
-        
-        .spot-desc { font-size: 15px; line-height: 1.6; color: #444; margin: 15px 0; padding: 15px; background: rgba(0,0,0,0.03); border-radius: 12px; }
-        
-        .section-title { font-size: 16px; font-weight: bold; color: #333; margin: 20px 0 8px 0; display: flex; align-items: center; gap: 6px; }
-        .section-title::before { content: ''; width: 4px; height: 16px; background: var(--card-accent); border-radius: 2px; }
-        .section-content { font-size: 14px; color: #666; text-align: justify; line-height: 1.6; }
-
-        .route-menu-overlay { position: absolute; bottom: 0; left: 0; width: 100%; background: white; border-radius: 20px 20px 0 0; box-shadow: 0 -5px 20px rgba(0,0,0,0.2); transform: translateY(100%); transition: transform 0.3s; z-index: 2100; padding: 20px; display: flex; flex-direction: column; gap: 10px; }
-        .route-menu-overlay.active { transform: translateY(0); }
-        .route-btn-item { display: flex; align-items: center; gap: 12px; padding: 14px; border-radius: 12px; background: #f8f9fa; border: 1px solid #eee; color: #333; font-weight: bold; text-decoration: none; font-size: 15px;}
-        .route-btn-item:active { background: #e9ecef; transform: scale(0.98); }
-        .route-btn-item i { font-size: 20px; color: var(--primary); width: 24px; text-align:center; }
-        .route-close { text-align: center; padding: 12px; color: #888; font-size: 15px; margin-top: 5px; cursor: pointer; font-weight:bold; }
-
-        #card-btn-group { padding: 12px 20px; background: rgba(255,255,255,0.95); backdrop-filter: blur(5px); border-top: 1px solid rgba(0,0,0,0.05); display: flex; gap: 10px; }
-        #card-btn-group button { flex: 1; padding: 12px; border-radius: 12px; font-weight: bold; border: none; cursor: pointer; display: flex; justify-content: center; align-items: center; gap: 6px; font-size: 15px; }
-        #card-btn-group button.primary { background: var(--card-accent); color: white; box-shadow: 0 4px 10px rgba(0,0,0,0.15); }
-        #card-btn-group button.secondary { background: #f0f0f0; color: #333; }
-        #card-btn-group button.danger { background: #fee; color: #e74c3c; }
-    `;
-    document.head.appendChild(style);
-    isCardInitialized = true;
-}
+// js/modules/cards.js (v661) - 國際化 UI 補完版
+import { state, saveState } from '../core/store.js';
 
 export function getPlaceholderImage(text) {
-    const canvas = document.createElement('canvas'); canvas.width = 600; canvas.height = 400; const ctx = canvas.getContext('2d');
+    const canvas = document.createElement('canvas'); canvas.width = 400; canvas.height = 200; const ctx = canvas.getContext('2d');
     const color = getComputedStyle(document.documentElement).getPropertyValue('--primary').trim() || '#007bff';
-    ctx.fillStyle = '#f0f0f0'; ctx.fillRect(0, 0, 600, 400); 
-    ctx.fillStyle = color; ctx.font = 'bold 40px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(text, 300, 200);
+    ctx.fillStyle = color; ctx.fillRect(0, 0, 400, 200); ctx.fillStyle = '#ffffff'; ctx.font = 'bold 28px sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText(text, 200, 100);
     return canvas.toDataURL('image/jpeg', 0.8);
 }
 
-const getCardTheme = (tags) => {
-    const t = (tags || []).join('');
-    if (t.includes('九份')) return 'theme-jiufen';
-    if (t.includes('金瓜石') || t.includes('黃金') || t.includes('礦')) return 'theme-jinguashi';
-    if (t.includes('猴硐') || t.includes('貓')) return 'theme-houtong';
-    if (t.includes('水湳洞') || t.includes('陰陽海')) return 'theme-shuinandong';
-    return 'theme-default';
-};
-
 export function showCard(s) { 
-    initCardDOM(); 
     state.targetSpot = s; 
-    const t = getT();
-    const lang = state.currentLang || 'zh';
-
-    const cardEl = document.getElementById("card");
-    const tags = s.tags ? (Array.isArray(s.tags) ? s.tags : [s.tags]) : [];
-    cardEl.className = getCardTheme(tags) + ' preview open'; 
-    
-    // 🌟 多語系欄位支援 (如果資料有 name_en, name_jp 等)
-    const displayName = s[`name_${lang}`] || s.name;
-    const imgUrl = s.wikiImg || s.coverImg || getPlaceholderImage(displayName);
-    const tagsHtml = tags.map(tag => `<span class="info-tag">${tag}</span>`).join('');
-
-    // --- 填入預覽資料 ---
-    document.getElementById("preview-title").innerText = displayName;
-    const pImg = document.getElementById('preview-img');
-    pImg.src = imgUrl; pImg.onerror = () => pImg.src = getPlaceholderImage(displayName);
-    document.getElementById("preview-tags").innerHTML = tagsHtml;
-    document.getElementById("preview-distance").innerText = getDistanceText(s.lat, s.lng);
-
-    const previewBtn = document.getElementById('preview-route-btn');
-    if (previewBtn) {
-        previewBtn.onclick = (e) => {
-            e.stopPropagation(); 
-            window.openRouteMenu(s.lat, s.lng, displayName);
-        };
-    }
-
-    // --- 填入完整資料 ---
-    document.getElementById("full-title").innerText = displayName;
-    const fImg = document.getElementById('full-img');
-    fImg.src = imgUrl; fImg.onerror = () => fImg.src = getPlaceholderImage(displayName);
-    document.getElementById("full-tags").innerHTML = tagsHtml;
     document.getElementById("card-fav-icon").className = (state.myFavs || []).includes(s.name) ? "fas fa-heart active" : "fas fa-heart"; 
+    document.getElementById("title").innerText = s.name; 
     
-    let infoHtml = s.warning ? `<div class="warning-banner" style="background:#fff3cd; color:#856404; padding:10px; border-radius:8px; margin-bottom:15px; font-size:13px; display:flex; gap:8px;"><i class="fas fa-exclamation-triangle"></i><span>${s.warning}</span></div>` : '';
+    const imgEl = document.getElementById('img');
+    if (imgEl) {
+        imgEl.loading = "lazy";
+        imgEl.src = s.wikiImg || s.coverImg || getPlaceholderImage(s.name);
+        imgEl.onerror = () => { imgEl.src = getPlaceholderImage(s.name); };
+    }
     
-    // 翻譯：地址複製提示
-    const txtCopy = t('addr_copy_success') || '已複製地址';
-    const copyFn = `if(navigator.clipboard){navigator.clipboard.writeText('${s.address}').then(()=>showToast('${txtCopy}','success'))}`;
+    const tags = s.tags ? (Array.isArray(s.tags) ? s.tags : [s.tags]) : (s.category ? [s.category] : []);
+    document.getElementById("card-tags").innerHTML = tags.map(t => `<span class="info-tag">${t}</span>`).join(''); 
     
-    if (s.address) infoHtml += `<div class="info-row"><i class="fas fa-map-marker-alt"></i> <span onclick="${copyFn}" style="cursor:pointer;">${s.address} <i class="far fa-copy" style="font-size:11px; opacity:0.6;"></i></span></div>`;
-    if (s.openTime) infoHtml += `<div class="info-row"><i class="fas fa-clock"></i> <span>${s.openTime}</span></div>`;
-    if (s.tel && s.tel !== '無') infoHtml += `<div class="info-row"><i class="fas fa-phone"></i> <a href="tel:${s.tel}">${s.tel}</a></div>`;
-    document.getElementById("full-info-rows").innerHTML = infoHtml;
+    const warningHtml = s.warning ? `<div class="warning-banner"><i class="fas fa-exclamation-triangle"></i><span>${s.warning}</span></div>` : '';
+    const officialDetails = (s.address || s.openTime || (s.tel && s.tel !== '無')) ? `
+        <div class="spot-detail-info" style="margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px dashed var(--glass);">
+            ${s.address ? `<div><i class="fas fa-map-marker-alt"></i> ${s.address}</div>` : ''}
+            ${s.openTime ? `<div><i class="fas fa-clock"></i> ${s.openTime}</div>` : ''}
+            ${s.tel && s.tel !== '無' ? `<div><i class="fas fa-phone"></i> <a href="tel:${s.tel}">${s.tel}</a></div>` : ''}
+        </div>
+    ` : '';
     
-    // 🌟 翻譯：描述與預設文字
-    const descText = s[`description_${lang}`] || s.description || s.highlights || (lang === 'zh' ? "暫無詳細介紹，建議親自前往探索。" : "No description available.");
-    document.getElementById("full-desc").innerText = descText;
-    
-    let sectionsHtml = '';
-    const txtHistory = t('tab_history') || '歷史背景';
-    const txtFood = t('tab_food') || '推薦美食';
-    const txtTransport = t('tab_transport') || '交通資訊';
+    // 🌟 引入全域翻譯
+    const t = window.rfApp.t || (k => k); 
 
-    if (s.history && s.history !== "暫無歷史資訊" && s.history !== "--") {
-        sectionsHtml += `<div class="section-title">${txtHistory}</div><div class="section-content">${s.history}</div>`;
-    }
-    if (s.food && s.food !== "--") {
-        sectionsHtml += `<div class="section-title">${txtFood}</div><div class="section-content">${s.food}</div>`;
-    }
-    if (s.transport && s.transport !== "自行前往" && s.transport !== "--") {
-        sectionsHtml += `<div class="section-title">${txtTransport}</div><div class="section-content">${s.transport}</div>`;
-    }
-    document.getElementById("full-sections").innerHTML = sectionsHtml;
-
-    // --- 底部按鈕翻譯 ---
+    const desc = s.description || s.highlights || "暫無介紹";
+    const highlightsEl = document.getElementById("card-highlights");
+    if (highlightsEl) highlightsEl.innerHTML = warningHtml + officialDetails + `<div>${desc}</div>`;
+    
+    const foodEl = document.getElementById("card-food"); 
+    if(foodEl) { foodEl.style.display = "block"; foodEl.innerText = s.food || "--"; }
+    
+    const historyEl = document.getElementById("card-history"); 
+    if(historyEl) { historyEl.style.display = "block"; historyEl.innerText = s.history || "--"; }
+    
+    const transportEl = document.getElementById("card-transport"); 
+    const selfGuideTxt = state.currentLang === 'en' ? 'Go by yourself' : (state.currentLang === 'ja' ? '各自アクセス' : '自行前往');
+    if(transportEl) { transportEl.style.display = "block"; transportEl.innerText = s.transport || selfGuideTxt; }
+    
     const btnGroup = document.getElementById("card-btn-group");
-    const txtRoute = t('btn_route') || (lang === 'en' ? 'Route' : '前往');
-    const txtVoice = t('btn_voice') || (lang === 'en' ? 'Voice' : '語音');
-    const txtEdit = t('btn_edit') || '編輯';
-    const txtDel = t('btn_del') || '刪除';
+    
+    // 🌟 按鈕文字動態翻譯
+    const txtNav = t('nav') || '導航';
+    const txtVoice = state.currentLang === 'en' ? 'Voice' : (state.currentLang === 'ja' ? '音声' : '語音');
+    const txtEdit = state.currentLang === 'en' ? 'Edit' : (state.currentLang === 'ja' ? '編集' : '編輯');
+    const txtDel = state.currentLang === 'en' ? 'Delete' : (state.currentLang === 'ja' ? '削除' : '刪除');
+    const txtAi = t('ai') || 'AI 行程';
 
     if (tags.includes('自訂')) { 
         btnGroup.innerHTML = `
-            <button class="primary" id="full-route-btn" style="flex: 1.2;"><i class="fas fa-directions"></i> ${txtRoute}</button>
-            <button class="secondary" onclick="toggleTTS()"><i class="fas fa-volume-up"></i></button>
-            <button class="secondary" onclick="openEditModal('${s.name}')"><i class="fas fa-edit"></i></button>
-            <button class="danger" onclick="deleteCustomSpot('${s.name}')"><i class="fas fa-trash-alt"></i></button>
+            <button onclick="startNav()" style="flex: 1;"><i class="fas fa-location-arrow"></i> ${txtNav}</button>
+            <button class="secondary" onclick="toggleTTS()"><i class="fas fa-volume-up"></i> ${txtVoice}</button>
+            <button class="secondary" onclick="openEditModal('${s.name}')"><i class="fas fa-edit"></i> ${txtEdit}</button>
+            <button class="danger" onclick="deleteCustomSpot('${s.name}')"><i class="fas fa-trash-alt"></i> ${txtDel}</button>
         `; 
     } else { 
         btnGroup.innerHTML = `
-            <button class="primary" id="full-route-btn" style="flex: 2;"><i class="fas fa-directions"></i> ${txtRoute}</button>
-            <button class="secondary" onclick="toggleTTS()" style="flex: 1;"><i class="fas fa-volume-up"></i> ${txtVoice}</button>
+            <button onclick="startNav()"><i class="fas fa-location-arrow"></i> ${txtNav}</button>
+            <button class="secondary" onclick="toggleTTS()"><i class="fas fa-volume-up"></i> ${txtVoice}</button>
+            <button class="secondary" onclick="aiTrip()"><i class="fas fa-magic"></i> ${txtAi}</button>
         `; 
     }
     
-    const fullBtn = document.getElementById('full-route-btn');
-    if(fullBtn) fullBtn.onclick = () => window.openRouteMenu(s.lat, s.lng, displayName);
-
-    document.getElementById("card-preview-zone").classList.remove('u-hidden');
-    document.getElementById("card-full-zone").classList.add('u-hidden');
-    document.getElementById("card-btn-group").classList.add('u-hidden');
+    document.getElementById("card").classList.add("open"); 
+    document.getElementById("card").style.transform = ''; 
 }
 
 export function closeCard() { 
-    const cardEl = document.getElementById("card");
-    if(!cardEl) return;
-    
-    if (cardEl.classList.contains('expanded')) {
-        cardEl.classList.remove('expanded');
-        cardEl.classList.add('preview');
-        
-        document.getElementById("card-preview-zone").classList.remove('u-hidden');
-        document.getElementById("card-full-zone").classList.add('u-hidden');
-        document.getElementById("card-btn-group").classList.add('u-hidden');
-        
-        const menu = document.getElementById('route-menu-container');
-        if(menu) menu.classList.remove('active');
-        if (typeof window.stopTTS === 'function') window.stopTTS();
-        
-    } else {
-        cardEl.classList.remove("open", "preview", "expanded"); 
-        cardEl.style.transform = ''; 
-        // 🌟 關閉時清除地圖上的全域狀態 (可選)
-        state.targetSpot = null;
-    }
+    document.getElementById("card").classList.remove("open"); 
+    document.getElementById("card").style.transform = ''; 
+    if (typeof window.stopTTS === 'function') window.stopTTS();
 }
 
 export function initCardGestures() {
-    initCardDOM(); 
-    const cardEl = document.getElementById("card"); 
-    if(!cardEl) return;
-
-    let touchStartY = 0, isSwiping = false; 
-    
-    cardEl.addEventListener('touchstart', (e) => { 
-        const fullZone = document.getElementById('card-full-zone');
-        const isAtTop = !fullZone || fullZone.scrollTop <= 0;
-        if(isAtTop && !e.target.closest('.route-menu-overlay')){ 
-            touchStartY = e.touches[0].clientY; 
-            isSwiping = true; 
-            cardEl.style.transition = 'none'; 
-        }
-    }, {passive:true}); 
-    
-    cardEl.addEventListener('touchmove', (e) => { 
-        if(isSwiping && e.touches[0].clientY > touchStartY){ 
-            cardEl.style.transform = `translateY(${e.touches[0].clientY - touchStartY}px)`; 
-        } else if (isSwiping && e.touches[0].clientY < touchStartY - 20) {
-            if (cardEl.classList.contains('preview')) {
-                window.expandCard();
-                isSwiping = false;
-                cardEl.style.transform = '';
-            }
-        }
-    }, {passive:true}); 
-    
-    cardEl.addEventListener('touchend', (e) => { 
-        if(isSwiping){ 
-            isSwiping = false; 
-            cardEl.style.transition = 'transform 0.3s cubic-bezier(0.2, 0.8, 0.2, 1)'; 
-            if((e.changedTouches[0]?.clientY || 0) - touchStartY > 60) {
-                closeCard(); 
-            } else { 
-                cardEl.style.transform = ''; 
-            }
-        }
-    });
+    const cardEl = document.getElementById("card"); let touchStartY = 0, isSwiping = false; 
+    cardEl.addEventListener('touchstart', (e) => { if(cardEl.scrollTop===0){ touchStartY=e.touches[0].clientY; isSwiping=true; cardEl.style.transition='none'; }},{passive:true}); 
+    cardEl.addEventListener('touchmove', (e) => { if(isSwiping && e.touches[0].clientY > touchStartY){ cardEl.style.transform=`translateY(${e.touches[0].clientY - touchStartY}px)`; }}); 
+    cardEl.addEventListener('touchend', (e) => { if(isSwiping){ isSwiping=false; cardEl.style.transition='transform 0.4s cubic-bezier(0.32, 0.72, 0, 1)'; if((e.changedTouches[0]?.clientY || 0) - touchStartY > 100) closeCard(); else cardEl.style.transform=''; }});
 }

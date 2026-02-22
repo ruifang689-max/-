@@ -1,31 +1,32 @@
-// js/modules/markers.js (v672) - 修復 export 錯誤版
+// js/modules/markers.js (v641) - 分類過濾修復與視角優化版
+
 import { state } from '../core/store.js';
 import { spots } from '../data/spots.js'; 
 import { showCard } from './cards.js';
-
-// 用來裝所有圖釘的普通群組
-let markersGroup = null;
 
 // =========================================
 // 🌟 圖釘外觀與產生邏輯
 // =========================================
 const createCustomPin = (tags, name, category) => {
-    let cls = 'fa-map-marker-alt', col = '#ea4335'; 
+    let cls = 'fa-map-marker-alt', col = '#ea4335'; // 預設紅色圖釘
 
     const combined = (Array.isArray(tags) ? tags.join(',') : (tags || '')) + (category || '');
 
     if (combined.includes('美食') || combined.includes('餐廳') || combined.includes('小吃')) { cls = 'fa-utensils'; col = '#f39c12'; } 
     else if (combined.includes('貓村') || combined.includes('貓')) { cls = 'fa-cat'; col = '#9b59b6'; } 
-    else if (combined.includes('自然') || combined.includes('秘境') || combined.includes('登山')) { cls = 'fa-leaf'; col = '#2ecc71'; } 
-    else if (combined.includes('歷史') || combined.includes('古蹟') || combined.includes('遺址')) { cls = 'fa-landmark'; col = '#7f8c8d'; } 
+    else if (combined.includes('自然') || combined.includes('秘境')) { cls = 'fa-leaf'; col = '#2ecc71'; } 
+    else if (combined.includes('歷史') || combined.includes('古蹟')) { cls = 'fa-landmark'; col = '#7f8c8d'; } 
     else if (combined.includes('自訂')) { cls = 'fa-star'; col = '#f1c40f'; }
-    else if (combined.includes('交通') || combined.includes('車站')) { cls = 'fa-train'; col = '#2980b9'; }
-    else if (combined.includes('海岸') || combined.includes('海景')) { cls = 'fa-water'; col = '#3498db'; }
-    else if (combined.includes('服務')) { cls = 'fa-info-circle'; col = '#ff4757'; }
+    else if (combined.includes('咖啡') || combined.includes('茶')) { cls = 'fa-coffee'; col = '#8e44ad'; }
+    else if (combined.includes('公車') || combined.includes('客運')) { cls = 'fa-bus'; col = '#2980b9'; }
+    else if (combined.includes('火車') || combined.includes('車站')) { cls = 'fa-train'; col = '#2980b9'; }
+    else if (combined.includes('醫院')) { cls = 'fa-hospital'; col = '#d63031'; }
+    else if (combined.includes('警察')) { cls = 'fa-taxi'; col = '#c0392b'; } 
+    else if (combined.includes('服務') || combined.includes('中心')) { cls = 'fa-info-circle'; col = '#ff4757'; }
 
     return L.divIcon({ 
         className: 'custom-pin-wrap', 
-        html: `<div class="gmap-pin" style="background-color:${col}; transform: scale(var(--pin-scale, 1)); transition: transform 0.2s;"><i class="fas ${cls}"></i></div><div class="pin-label" style="transform: scale(var(--pin-scale, 1)); transform-origin: top center; transition: transform 0.2s;">${name}</div>`, 
+        html: `<div class="gmap-pin" style="background-color:${col}"><i class="fas ${cls}"></i></div><div class="pin-label">${name}</div>`, 
         iconSize: [32, 50],   
         iconAnchor: [16, 38]  
     });
@@ -33,121 +34,108 @@ const createCustomPin = (tags, name, category) => {
 
 const createMarkerObj = (spot) => {
     const marker = L.marker([spot.lat, spot.lng], {
-        icon: createCustomPin(spot.tags, spot.name, spot.category),
-        riseOnHover: true 
+        icon: createCustomPin(spot.tags, spot.name, spot.category)
     });
-
-    marker.on('click', () => {
-        state.mapInstance.flyTo([spot.lat, spot.lng], 16, { animate: true, duration: 1.2 });
-        setTimeout(() => showCard(spot), 800); 
-    });
-
+    marker.on('click', () => showCard(spot));
     spot.markerObj = marker;
     return marker;
 };
 
+// 供外部單一呼叫新增 (例如新增自訂秘境)
 export function addMarkerToMap(spot) {
-    if(!markersGroup) return;
-    const m = createMarkerObj(spot);
-    markersGroup.addLayer(m);
+    if (!state.cluster) return;
+    const marker = createMarkerObj(spot);
+    state.cluster.addLayer(marker); 
+    return marker;
 }
 
-// =========================================
-// 🌟 圖釘動態縮放邏輯
-// =========================================
-function updatePinScale() {
-    if (!state.mapInstance) return;
-    const zoom = state.mapInstance.getZoom();
-    let scale = 1;
-
-    if (zoom < 14) {
-        scale = 0; 
-    } else if (zoom === 14) {
-        scale = 0.5; 
-    } else if (zoom === 15) {
-        scale = 0.8;
-    } else {
-        scale = 1; 
-    }
-
-    document.documentElement.style.setProperty('--pin-scale', scale);
-    
-    if (scale === 0 && state.mapInstance.hasLayer(markersGroup)) {
-        state.mapInstance.removeLayer(markersGroup);
-    } else if (scale > 0 && !state.mapInstance.hasLayer(markersGroup)) {
-        state.mapInstance.addLayer(markersGroup);
-    }
-}
-
-// =========================================
-// 🌟 獨立匯出的過濾函數 (修正點)
-// =========================================
-export function filterSpots(category) {
-    if (!markersGroup || !state.mapInstance) return;
-
-    markersGroup.clearLayers(); 
-
-    const allSpots = spots.concat(state.savedCustomSpots || []);
-    
-    let filtered = [];
-    if (category === 'all') {
-        filtered = allSpots;
-    } else {
-        filtered = allSpots.filter(s => {
-            const sCat = s.category || "";
-            const sTags = s.tags || [];
-            if (sCat === category) return true;
-            if (sTags.includes(category)) return true;
-            
-            const joined = (sCat + sTags.join("")).toLowerCase();
-            return joined.includes(category.toLowerCase());
-        });
-        
-        if (filtered.length === 0) {
-            if(typeof window.showToast === 'function') window.showToast(window.rfApp.t ? window.rfApp.t('toast_search_empty') : "找不到該分類景點", 'info');
-            filtered = allSpots;
-        } else {
-            if(typeof window.showToast === 'function') window.showToast(`篩選：${category}`, 'success');
-        }
-    }
-
-    filtered.forEach(spot => markersGroup.addLayer(spot.markerObj || createMarkerObj(spot)));
-
-    if (filtered.length > 0) {
-        const group = new L.featureGroup(filtered.map(s => s.markerObj));
-        state.mapInstance.fitBounds(group.getBounds(), { padding: [50, 50], maxZoom: 16 });
-        
-        document.documentElement.style.setProperty('--pin-scale', 1);
-        if (!state.mapInstance.hasLayer(markersGroup)) state.mapInstance.addLayer(markersGroup);
-    }
-}
-
-// =========================================
-// 🌟 初始化渲染
-// =========================================
+// 初始批次載入所有圖釘
 export function renderAllMarkers() {
-    if (!state.mapInstance) return;
+    if (!state.cluster) return;
+    
+    state.cluster.clearLayers();
 
-    markersGroup = L.layerGroup();
+    const officialSpots = Array.isArray(spots) ? spots : [];
+    const customList = state.savedCustomSpots || []; 
+    const allSpots = [...officialSpots, ...customList];
 
-    spots.forEach(spot => {
-        const m = createMarkerObj(spot);
-        markersGroup.addLayer(m);
+    const markersArray = [];
+
+    allSpots.forEach(spot => {
+        markersArray.push(createMarkerObj(spot));
     });
 
-    if (state.savedCustomSpots) {
-        state.savedCustomSpots.forEach(spot => {
-            const m = createMarkerObj(spot);
-            markersGroup.addLayer(m);
+    state.cluster.addLayers(markersArray);
+}
+
+// =========================================
+// 🌟 核心修復：分類過濾方法 (filterSpots)
+// =========================================
+export function filterSpots(category, elem) {
+    // 1. 處理上方分類按鈕 (Chips) 的 UI 狀態
+    const chips = document.querySelectorAll('#category-chips .chip');
+    chips.forEach(c => c.classList.remove('active'));
+
+    if (elem) {
+        elem.classList.add('active'); // 使用者點擊的按鈕
+    } else {
+        // 如果是從搜尋框等其他地方呼叫，自動尋找並點亮對應的按鈕
+        chips.forEach(c => {
+            if (category === 'all' && c.innerText.includes('全部')) c.classList.add('active');
+            else if (category !== 'all' && c.innerText.includes(category)) c.classList.add('active');
         });
     }
 
-    state.mapInstance.addLayer(markersGroup);
+    if (!state.cluster) return;
+    
+    // 2. 清空當前地圖上的所有圖釘
+    state.cluster.clearLayers();
 
-    state.mapInstance.on('zoomend', updatePinScale);
-    updatePinScale(); 
+    const officialSpots = Array.isArray(spots) ? spots : [];
+    const customList = state.savedCustomSpots || []; 
+    const allSpots = [...officialSpots, ...customList];
 
-    // 掛載到全域變數，供 HTML onclick 或 console 使用
+    let filteredSpots = [];
+    
+    // 3. 過濾邏輯
+    if (category === 'all') {
+        filteredSpots = allSpots;
+    } else if (category === '自訂') {
+        // 特別處理「自訂」分類
+        filteredSpots = customList;
+    } else {
+        filteredSpots = allSpots.filter(spot => {
+            const tags = spot.tags ? (Array.isArray(spot.tags) ? spot.tags : [spot.tags]) : [];
+            const cat = spot.category || '';
+            const keywords = spot.keywords || [];
+            
+            // 只要標籤、分類名稱或關鍵字有中，就顯示出來
+            return tags.includes(category) || cat.includes(category) || keywords.includes(category);
+        });
+    }
+
+    // 4. 將過濾後的圖釘重新繪製到畫面上
+    const markersArray = [];
+    filteredSpots.forEach(spot => {
+        markersArray.push(createMarkerObj(spot));
+    });
+
+    state.cluster.addLayers(markersArray);
+
+    // 🌟 超棒 UX 優化：切換分類後，自動將視角縮放並平移到涵蓋這些景點的範圍！
+    if (markersArray.length > 0 && state.mapInstance) {
+        // 如果是「全部」，避免縮得太遠，我們可以不移動，或給個最大的 maxZoom
+        const group = new L.featureGroup(markersArray);
+        state.mapInstance.fitBounds(group.getBounds(), { padding: [50, 50], maxZoom: 15, animate: true });
+    } else if (markersArray.length === 0 && typeof window.showToast === 'function') {
+        window.showToast(`目前沒有「${category}」相關的景點喔！`, 'info');
+    }
+}
+
+// 🌟 註冊到全域，因為 HTML 中的 onclick 會直接呼叫 window.filterSpots
+if (typeof window !== 'undefined') {
+    if(!window.rfApp) window.rfApp = {};
+    if(!window.rfApp.map) window.rfApp.map = {};
     window.rfApp.map.filterSpots = filterSpots;
-    window.filterSpots = filterSpots;
+    window.filterSpots = filterSpots; // 向下相容 HTML 的綁定
 }
