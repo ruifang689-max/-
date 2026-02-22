@@ -1,7 +1,7 @@
+// js/modules/ui.js (v661) - 解決命名衝突版
 import { state } from '../core/store.js';
 
 export function initUI() {
-    // 🌟 將方法收納到專屬命名空間 rfApp.ui
     window.rfApp.ui.enterMap = () => { 
         ['intro', 'welcome-screen'].forEach(id => {
             const el = document.getElementById(id);
@@ -53,7 +53,7 @@ export function initUI() {
     window.rfApp.ui.openSettings = () => { const m = document.getElementById('settings-modal-overlay'); if(m) { m.classList.remove('u-hidden'); m.classList.add('u-flex'); } };
     window.rfApp.ui.closeSettings = () => { const m = document.getElementById('settings-modal-overlay'); if(m) { m.classList.remove('u-flex'); m.classList.add('u-hidden'); } };
 
-    window.rfApp.ui.resetNorth = () => { if(state.mapInstance) state.mapInstance.flyTo([25.1032, 121.8224], 14); };
+    // 🌟 已移除會產生衝突的 resetNorth，由 gps.js 統一接管
     window.rfApp.ui.goToStation = () => { 
         if(state.mapInstance) state.mapInstance.flyTo([25.108, 121.805], 16); 
         if(typeof window.rfApp.ui.closeCard === 'function') window.rfApp.ui.closeCard(); 
@@ -61,12 +61,10 @@ export function initUI() {
         if (ruiBtn) { ruiBtn.classList.remove('stamped'); void ruiBtn.offsetWidth; ruiBtn.classList.add('stamped'); }
     };
 
-    // 🌟 向下相容橋樑 (Legacy Bridge)：保證 index.html 不用改也能正常運作！
     window.enterMap = window.rfApp.ui.enterMap;
     window.toggleSidePanel = window.rfApp.ui.toggleSidePanel;
     window.toggleDropdown = window.rfApp.ui.toggleDropdown;
     window.openSettings = window.rfApp.ui.openSettings;
     window.closeSettings = window.rfApp.ui.closeSettings;
-    window.resetNorth = window.rfApp.ui.resetNorth;
     window.goToStation = window.rfApp.ui.goToStation;
 }
