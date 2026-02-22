@@ -177,6 +177,9 @@ function createSpotMarkers() {
 }
 
 // 🌟 5. 圖層控制 API
+window.rfApp = window.rfApp || {};          // 👈 新增這行：如果沒有 rfApp 就建一個
+window.rfApp.map = window.rfApp.map || {};  // 👈 新增這行：如果沒有 map 就建一個
+
 window.rfApp.map.switchBaseLayer = (type) => {
     if (!state.mapInstance) return;
     
