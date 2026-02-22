@@ -1,4 +1,4 @@
-// js/main.js (v628)
+// js/main.js (v630)
 // 🌟 1. 建立企業級全域命名空間 (Namespace 工具箱)
 window.rfApp = {
     ui: {},
@@ -9,26 +9,28 @@ window.rfApp = {
     map: {},
     search: {},
     custom: {},
-    pwa: {}
+    pwa: {},
+    tts: {}
 };
 
-import { initErrorHandler, showToast } from './modules/toast.js?v=628';
-import { state } from './core/store.js?v=628'; 
-import { initMap, toggleLayer } from './core/map.js?v=628'; 
-import { fetchWeather } from './modules/weather.js?v=628';
-import { initGPS } from './modules/gps.js?v=628';
-import { initAnnouncer } from './modules/announcer.js?v=628'; 
-import { initCardGestures, closeCard } from './modules/cards.js?v=628';
-import { renderAllMarkers } from './modules/markers.js?v=628';
-import { initSearch } from './modules/search.js?v=628';
-import { initNavigation } from './modules/navigation.js?v=628';
-import { initUI } from './modules/ui.js?v=628'; 
-import { initFirebase } from './modules/firebase-sync.js?v=628';
-import { initTheme } from './modules/theme.js?v=628'; 
-import { initPWA } from './modules/pwa.js?v=628';
-import { initTour } from './modules/tour.js?v=628';
-import { initFavorites } from './modules/favorites.js?v=628';
-import { initCustomSpots } from './modules/customSpots.js?v=628'; 
+import { initTTS } from './modules/tts.js?v=630';
+import { initErrorHandler, showToast } from './modules/toast.js?v=630';
+import { state } from './core/store.js?v=630'; 
+import { initMap, toggleLayer } from './core/map.js?v=630'; 
+import { fetchWeather } from './modules/weather.js?v=630';
+import { initGPS } from './modules/gps.js?v=630';
+import { initAnnouncer } from './modules/announcer.js?v=630'; 
+import { initCardGestures, closeCard } from './modules/cards.js?v=630';
+import { renderAllMarkers } from './modules/markers.js?v=630';
+import { initSearch } from './modules/search.js?v=630';
+import { initNavigation } from './modules/navigation.js?v=630';
+import { initUI } from './modules/ui.js?v=630'; 
+import { initFirebase } from './modules/firebase-sync.js?v=630';
+import { initTheme } from './modules/theme.js?v=630'; 
+import { initPWA } from './modules/pwa.js?v=630';
+import { initTour } from './modules/tour.js?v=630';
+import { initFavorites } from './modules/favorites.js?v=630';
+import { initCustomSpots } from './modules/customSpots.js?v=630'; 
 
 // 將核心方法收納進工具箱，並建立向下相容橋樑
 window.rfApp.map.toggleLayer = toggleLayer;
@@ -118,6 +120,7 @@ function bootstrapApp() {
         safeInit(initSearch, '搜尋系統');
         safeInit(initNavigation, '導航系統');
         safeInit(initCustomSpots, '自訂秘境');
+        safeInit(initTTS, '語音導覽模組');
         
         // 🌟 最後：執行路由偵探，檢查是否有深層連結目的地
         safeInit(handleDeepLink, 'URL路由解析');
