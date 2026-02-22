@@ -171,11 +171,11 @@ export function initGPS() {
                     // 🌟 圓形範圍線修改：依主題色(var(--primary))，線色透明度大於填色透明度
                     compassCircle = L.circle([lat, lng], { 
                         radius: accuracy, 
-                        color: 'var(--primary)', 
-                        opacity: 0.35,        // 線的顏色深於範圍色
+                        color: 'var(--primary)',     // 圓圈線條顏色
+                        opacity: 0.35,               // 線條的透明度 線的顏色深於範圍色
                         fillColor: 'var(--primary)', 
-                        fillOpacity: 0.08,    // 範圍色較淺
-                        weight: 1.5
+                        fillOpacity: 0.08,           // 內部填充的透明度 範圍色較淺
+                        weight: 1                    // 控制線條粗細 (預設是 1.5)
                     }).addTo(state.mapInstance);
                     
                     state.mapInstance.flyTo([lat, lng], 17, { animate: true, duration: 1.5 });
