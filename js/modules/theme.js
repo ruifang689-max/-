@@ -138,6 +138,28 @@ export function initTheme() {
         localStorage.setItem('ruifang_skin', skinName);
     };
 
+    // 綁定到全域給 HTML 呼叫
+    window.toggleSkinOptions = () => {
+        const list = document.getElementById('skin-options-list');
+        if (list) {
+            list.classList.toggle('u-hidden');
+            list.classList.toggle('u-flex'); // 或 u-block，依你的 CSS 而定
+        }
+    };
+    
+    window.selectSkinOption = (value, text) => {
+        // 關閉選單
+        const list = document.getElementById('skin-options-list');
+        if (list) { list.classList.remove('u-flex'); list.classList.add('u-hidden'); }
+        
+        // 更新介面文字
+        const displayText = document.getElementById('current-skin-text');
+        if (displayText) displayText.innerText = text;
+        
+        // 呼叫核心切換功能
+        window.changeSkin(value);
+    };
+
     const renderSkinEffects = (skin) => {
         // 注入共用 CSS (若不存在)
         if (!document.getElementById('theme-skin-css')) {
