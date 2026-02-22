@@ -495,9 +495,40 @@
         </div>
     </div>
 </div>
+
+    <div class="setting-divider"></div>
+
+<div class="setting-item">
+    <div class="setting-label">
+        <i class="fas fa-layer-group"></i> 
+        <span data-i18n="setting_map_layer">地圖底圖模式</span>
+    </div>
+    <div class="setting-control">
+        <select class="form-select" onchange="window.rfApp.map.switchBaseLayer(this.value)">
+            <option value="standard" data-i18n="map_std">標準街道圖</option>
+            <option value="satellite" data-i18n="map_sat">衛星影像</option>
+            <option value="topo" data-i18n="map_topo">等高地形圖</option>
+            <option value="history" data-i18n="map_hist">懷舊歷史濾鏡</option>
+        </select>
+    </div>
+</div>
+
+<div class="setting-item">
+    <div class="setting-label">
+        <i class="fas fa-train"></i> 
+        <span data-i18n="setting_transit">顯示交通路網</span>
+    </div>
+    <div class="setting-control">
+        <label class="toggle-switch">
+            <input type="checkbox" onchange="window.rfApp.map.toggleTransitLayer(this.checked)">
+            <span class="slider round"></span>
+        </label>
+    </div>
+</div>
     
 </body>
 </html>
+
 
 
 
