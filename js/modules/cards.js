@@ -1,4 +1,4 @@
-// js/modules/cards.js (v628) - 智慧語音導覽版
+// js/modules/cards.js (v629) - 語音導覽修復版
 import { state, saveState } from '../core/store.js';
 import { translations } from '../data/lang.js';
 
@@ -11,8 +11,9 @@ export function getPlaceholderImage(text) {
 
 // =========================================
 // 🌟 核心新功能：切換語音導覽 (TTS)
+// 改為標準的 export 函數，避免模組載入順序錯誤
 // =========================================
-window.rfApp.ui.toggleTTS = () => {
+export function toggleTTS() {
     // 檢查瀏覽器支援度
     if (!window.speechSynthesis) {
         if(typeof window.showToast === 'function') window.showToast('您的瀏覽器不支援語音功能', 'error');
@@ -44,7 +45,10 @@ window.rfApp.ui.toggleTTS = () => {
     
     // 搭配我們剛做的 Toast 提示系統
     if(typeof window.showToast === 'function') window.showToast('🔊 語音導覽播放中...', 'success');
-};
+}
+
+// 🌟 將函數掛載到全域，讓 HTML 字串的 onclick 可以直接呼叫
+window.toggleTTS = toggleTTS;
 
 export function showCard(s) { 
     state.targetSpot = s; 
@@ -86,7 +90,7 @@ export function showCard(s) {
     if(transportEl) { transportEl.style.display = "block"; transportEl.innerText = s.transport || "自行前往"; }
     
     // =========================================
-    // 🌟 按鈕渲染 (加入全新的語音導覽按鈕)
+    // 🌟 按鈕渲染 (語音導覽按鈕改為直接呼叫 toggleTTS)
     // =========================================
     const t = translations[state.currentLang] || translations['zh'];
     const btnGroup = document.getElementById("card-btn-group");
@@ -94,14 +98,14 @@ export function showCard(s) {
     if (tags.includes('自訂')) { 
         btnGroup.innerHTML = `
             <button onclick="startNav()" style="flex: 1;"><i class="fas fa-location-arrow"></i> ${t.nav || '導航'}</button>
-            <button class="secondary" onclick="window.rfApp.ui.toggleTTS()"><i class="fas fa-volume-up"></i> 語音</button>
+            <button class="secondary" onclick="toggleTTS()"><i class="fas fa-volume-up"></i> 語音</button>
             <button class="secondary" onclick="openEditModal('${s.name}')"><i class="fas fa-edit"></i> 編輯</button>
             <button class="danger" onclick="deleteCustomSpot('${s.name}')"><i class="fas fa-trash-alt"></i> 刪除</button>
         `; 
     } else { 
         btnGroup.innerHTML = `
             <button onclick="startNav()"><i class="fas fa-location-arrow"></i> ${t.nav || '導航'}</button>
-            <button class="secondary" onclick="window.rfApp.ui.toggleTTS()"><i class="fas fa-volume-up"></i> 語音</button>
+            <button class="secondary" onclick="toggleTTS()"><i class="fas fa-volume-up"></i> 語音</button>
             <button class="secondary" onclick="aiTrip()"><i class="fas fa-magic"></i> ${t.ai || 'AI 行程'}</button>
         `; 
     }
