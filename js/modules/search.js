@@ -1,4 +1,4 @@
-// js/modules/search.js (v661) - 多國語言與搜尋欄修正版
+// js/modules/search.js (v661) - 多國語言、關鍵字搜尋修復版
 import { state, saveState } from '../core/store.js';
 import { spots } from '../data/spots.js';
 import { showCard } from './cards.js';
@@ -33,14 +33,15 @@ export function initSearch() {
     const content = document.getElementById("suggest-content");
     const tplListItem = document.getElementById('tpl-list-item');
 
-    // 🌟 動態更新 Placeholder，支援多國語言與情境引擎
+    // 🌟 1. 動態 Placeholder (支援多國語言)
     const updatePlaceholder = () => {
         if (searchInput) {
             if (state.currentLang === 'zh' || !state.currentLang) {
                 const ctx = getContextualData();
                 searchInput.placeholder = `${ctx.timeContext.greeting} 試試「${ctx.seasonContext.keywords[0]}」`;
             } else {
-                searchInput.placeholder = window.rfApp.t ? window.rfApp.t('search_ph') : "🔍 搜尋景點...";
+                // 如果翻譯引擎還沒載入，就用預設英文
+                searchInput.placeholder = (window.rfApp.t ? window.rfApp.t('search_ph') : "🔍 Search...");
             }
         }
     };
@@ -73,6 +74,7 @@ export function initSearch() {
         if (state.searchHistory && state.searchHistory.length > 0) {
             const title = document.createElement('div');
             title.className = "search-section-title";
+            // 簡單的標題翻譯
             const histTitle = isZh ? '🕒 最近搜尋' : '🕒 Recent';
             const clearText = isZh ? '清除' : 'Clear';
             title.innerHTML = `${histTitle} <span class="clear-history-btn" onclick="rfApp.search.clearHistory()">${clearText}</span>`;
@@ -86,7 +88,7 @@ export function initSearch() {
             });
         }
         
-        // B. 快速分類 (支援多國語言，並解決標籤過濾邏輯)
+        // B. 快速分類 (支援多國語言)
         const catTitle = document.createElement('div');
         catTitle.className = "search-section-title";
         catTitle.textContent = isZh ? "🏷️ 快速分類" : "🏷️ Quick Categories";
@@ -95,43 +97,40 @@ export function initSearch() {
         const catBox = document.createElement("div");
         catBox.style.cssText = "display:flex; gap:8px; padding:10px 15px; flex-wrap:wrap;";
         
-        // 🌟 將分類綁定至 lang.js 中的 key，但保留中文 tag 供搜尋底層使用
+        // 定義分類鍵值與中文標籤的對應
         const quickCats = [
             { key: 'chip_food', tag: '美食', fallback: '🍜 Food' },
             { key: 'chip_nature', tag: '自然', fallback: '⛰️ Nature' },
             { key: 'chip_history', tag: '歷史', fallback: '🏛️ History' },
-            { key: 'transport', tag: '交通', fallback: '🚌 Transport' } // 擴充交通類
+            { key: 'transport', tag: '交通', fallback: '🚌 Transport' }
         ];
         
         quickCats.forEach(cat => {
             const btn = document.createElement('button');
             btn.className = "chip"; 
             
-            // 透過翻譯引擎取得對應文字
+            // 嘗試取得翻譯
             let displayText = window.rfApp.t ? window.rfApp.t(cat.key) : '';
             if (!displayText || displayText === cat.key) {
                 displayText = isZh ? cat.tag : cat.fallback;
-                // 為了中文版美觀，自動補上 Emoji
                 if (isZh && displayText === '美食') displayText = '🍜 美食';
                 if (isZh && displayText === '自然') displayText = '⛰️ 自然';
                 if (isZh && displayText === '歷史') displayText = '🏛️ 歷史';
                 if (isZh && displayText === '交通') displayText = '🚌 交通';
             }
-            
             btn.textContent = displayText;
             
             btn.onclick = (e) => {
                 e.stopPropagation(); 
                 if(searchInput) { 
-                    // 將選中的分類純文字填入搜尋框 (把 Emoji 濾掉，看起來更簡潔)
+                    // 填入搜尋框時，過濾掉 Emoji，讓畫面乾淨
                     const cleanText = displayText.replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]|\s/g, '').replace(/[🍜⛰️🏛️🚌📍🌟]/g, '').trim();
                     searchInput.value = cleanText; 
                     searchInput.blur(); 
-                    
                     if(clearBtn) { clearBtn.classList.remove('u-hidden'); clearBtn.classList.add('u-block'); }
                 }
                 window.rfApp.search.closeSuggest();
-                // 🌟 核心：確保傳給 filterSpots 的永遠是中文資料庫的 tag 標籤 (如: '美食')，解決外文模式下找不到景點的 Bug！
+                // 🌟 重要：傳給過濾器的永遠是「中文 Tag」，確保能找到資料！
                 setTimeout(() => { if(typeof window.filterSpots === 'function') window.filterSpots(cat.tag, null); }, 50);
             };
             catBox.appendChild(btn);
@@ -210,7 +209,7 @@ export function initSearch() {
 
     if(searchInput) {
         searchInput.addEventListener('focus', () => { if(!searchInput.value.trim()) window.rfApp.search.renderDefaultSearch(); });
-       searchInput.addEventListener('input', function() {
+        searchInput.addEventListener('input', function() {
             const k = this.value.trim().toLowerCase();
             if (clearBtn) { if (k) { clearBtn.classList.remove('u-hidden'); clearBtn.classList.add('u-block'); } else { clearBtn.classList.add('u-hidden'); clearBtn.classList.remove('u-block'); } }
             clearTimeout(debounceTimer);
@@ -218,11 +217,11 @@ export function initSearch() {
                 if(!k) { window.rfApp.search.renderDefaultSearch(); return; }
                 const allSpots = spots.concat(state.savedCustomSpots || []);
                 
-                // 🌟 修復關鍵：把 keywords 也一起打包傳給 Worker！
+                // 🌟 2. 關鍵 Bug 修復：必須把 keywords 也傳給 Worker，否則搜尋會壞掉！
                 const plainSpots = allSpots.map(s => ({ 
                     name: s.name, 
                     tags: s.tags || [],
-                    keywords: s.keywords || [] // <--- 補上這行
+                    keywords: s.keywords || [] 
                 }));
                 
                 if (searchWorker) { searchWorker.postMessage({ action: 'search', keyword: k, spotsData: plainSpots }); }
