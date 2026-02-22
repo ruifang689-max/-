@@ -1,8 +1,8 @@
-// js/modules/search.js (v643) - 徹底修復分類點擊與搜尋欄關閉問題
+// js/modules/search.js (v644) - 修復 Worker Clone 與非同步面板 Bug
 import { state, saveState } from '../core/store.js';
 import { spots } from '../data/spots.js';
 import { showCard } from './cards.js';
-import { getContextualData } from './contextEngine.js?v=643';
+import { getContextualData } from './contextEngine.js?v=643'; // 維持 643
 
 let debounceTimer = null;
 let searchWorker = null;
@@ -50,7 +50,6 @@ export function initSearch() {
         }
         if(clearBtn) { clearBtn.classList.remove('u-block'); clearBtn.classList.add('u-hidden'); }
         window.rfApp.search.closeSuggest();
-        // 如果清空搜尋，退回全部景點
         if(typeof window.filterSpots === 'function') window.filterSpots('all', null);
     };
 
@@ -88,25 +87,23 @@ export function initSearch() {
             const btn = document.createElement('button');
             btn.className = "chip"; btn.textContent = cat;
             
-            // 🌟 終極修復：確保點擊分類時，一定會關閉面板
             btn.onclick = (e) => {
                 e.preventDefault();
                 e.stopPropagation(); 
                 
+                // 🌟 阻斷：清空正在打字造成的延遲搜尋，避免稍後重開面板
+                clearTimeout(debounceTimer); 
+                
                 if(searchInput) searchInput.value = cat; 
+                if(clearBtn) { clearBtn.classList.remove('u-hidden'); clearBtn.classList.add('u-block'); }
                 
-                // 1. 強制關閉搜尋建議框
-                if(sugBox) { sugBox.classList.remove('u-block'); sugBox.classList.add('u-hidden'); }
-                
-                // 2. 移除焦點，收起手機虛擬鍵盤
+                // 🌟 強制關閉面板與收起鍵盤
+                window.rfApp.search.closeSuggest();
                 if(searchInput) searchInput.blur();
                 
-                // 3. 呼叫 markers.js 的過濾功能 (加上 setTimeout 避免阻塞 UI)
                 setTimeout(() => {
                     if(typeof window.filterSpots === 'function') {
                         window.filterSpots(cat, null); 
-                    } else {
-                        console.error("找不到 filterSpots 函數！請確認 markers.js 已正確載入");
                     }
                 }, 50);
             };
@@ -157,6 +154,9 @@ export function initSearch() {
 
     if (searchWorker) {
         searchWorker.onmessage = function(e) {
+            // 🌟 防呆：如果此時輸入框已經沒有焦點 (使用者已經點擊分類或關閉)，就不要再把面板彈出來
+            if (document.activeElement !== searchInput) return;
+
             const matches = e.data.result;
             if (matches && matches.length > 0) {
                 content.innerHTML = "";
@@ -205,14 +205,26 @@ export function initSearch() {
             debounceTimer = setTimeout(() => {
                 if(!k) { window.rfApp.search.renderDefaultSearch(); return; }
                 const allSpots = spots.concat(state.savedCustomSpots || []);
+                
+                // 🌟 核心修復：把含有 markerObj (DOM元素) 的物件剝離，只保留 Worker 需要的純文字資料
+                const plainSpots = allSpots.map(s => ({
+                    name: s.name,
+                    tags: s.tags || [],
+                    keywords: s.keywords || []
+                }));
+
                 if (searchWorker) {
-                    searchWorker.postMessage({ action: 'search', keyword: k, spotsData: allSpots });
+                    // 發送純淨資料給小幫手
+                    searchWorker.postMessage({ action: 'search', keyword: k, spotsData: plainSpots });
                 } else {
                     const matches = allSpots.filter(s => 
                         (s.name || '').toLowerCase().includes(k) || 
                         (s.tags || []).some(t => t.toLowerCase().includes(k)) ||
                         (s.keywords || []).some(kw => kw.toLowerCase().includes(k))
                     );
+                    
+                    if (document.activeElement !== searchInput) return; // 備用方案也要防呆
+
                     if(matches.length > 0) {
                         content.innerHTML = "";
                         const fragment = document.createDocumentFragment();
