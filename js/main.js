@@ -2,7 +2,7 @@
 window.rfApp = {
     ui: {}, theme: {}, nav: {}, fav: {}, tour: {}, 
     map: {}, search: {}, custom: {}, pwa: {}, tts: {},
-    cards: {}
+    cards: {}, dashboard: {}
 };
 
 import { events } from './core/events.js?v=683'; // 🌟 引入事件匯流排
