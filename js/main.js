@@ -1,4 +1,4 @@
-// js/main.js (v649)
+// js/main.js (v650)
 // 🌟 1. 建立企業級全域命名空間 (Namespace 工具箱)
 window.rfApp = {
     ui: {},
@@ -13,25 +13,25 @@ window.rfApp = {
     tts: {}
 };
 
-import { initNearby } from './modules/nearby.js?v=649';
-import { initTTS } from './modules/tts.js?v=649';
-import { initErrorHandler, showToast } from './modules/toast.js?v=649';
-import { state } from './core/store.js?v=649'; 
-import { initMap, toggleLayer } from './core/map.js?v=649'; 
-import { fetchWeather } from './modules/weather.js?v=649';
-import { initGPS } from './modules/gps.js?v=649';
-import { initAnnouncer } from './modules/announcer.js?v=649'; 
-import { initCardGestures, closeCard } from './modules/cards.js?v=649';
-import { renderAllMarkers, filterSpots } from './modules/markers.js?v=649';
-import { initSearch } from './modules/search.js?v=649';
-import { initNavigation } from './modules/navigation.js?v=649';
-import { initUI } from './modules/ui.js?v=649'; 
-import { initFirebase } from './modules/firebase-sync.js?v=649';
-import { initTheme } from './modules/theme.js?v=649'; 
-import { initPWA } from './modules/pwa.js?v=649';
-import { initTour } from './modules/tour.js?v=649';
-import { initFavorites } from './modules/favorites.js?v=649';
-import { initCustomSpots } from './modules/customSpots.js?v=649'; 
+import { initNearby } from './modules/nearby.js?v=650';
+import { initTTS } from './modules/tts.js?v=650';
+import { initErrorHandler, showToast } from './modules/toast.js?v=650';
+import { state } from './core/store.js?v=650'; 
+import { initMap, toggleLayer } from './core/map.js?v=650'; 
+import { fetchWeather } from './modules/weather.js?v=650';
+import { initGPS } from './modules/gps.js?v=650';
+import { initAnnouncer } from './modules/announcer.js?v=650'; 
+import { initCardGestures, closeCard } from './modules/cards.js?v=650';
+import { renderAllMarkers, filterSpots } from './modules/markers.js?v=650';
+import { initSearch } from './modules/search.js?v=650';
+import { initNavigation } from './modules/navigation.js?v=650';
+import { initUI } from './modules/ui.js?v=650'; 
+import { initFirebase } from './modules/firebase-sync.js?v=650';
+import { initTheme } from './modules/theme.js?v=650'; 
+import { initPWA } from './modules/pwa.js?v=650';
+import { initTour } from './modules/tour.js?v=650';
+import { initFavorites } from './modules/favorites.js?v=650';
+import { initCustomSpots } from './modules/customSpots.js?v=650'; 
 
 // 將核心方法收納進工具箱，並建立向下相容橋樑
 window.rfApp.map.toggleLayer = toggleLayer;
