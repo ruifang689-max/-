@@ -1,4 +1,4 @@
-// js/modules/search.js (v653) - 搜尋與情境感知終極整合版
+// js/modules/search.js (v660) - 多國語言與搜尋欄修正版
 import { state, saveState } from '../core/store.js';
 import { spots } from '../data/spots.js';
 import { showCard } from './cards.js';
@@ -33,14 +33,20 @@ export function initSearch() {
     const content = document.getElementById("suggest-content");
     const tplListItem = document.getElementById('tpl-list-item');
 
-    // 🌟 初始化動態 Placeholder
+    // 🌟 動態更新 Placeholder，支援多國語言與情境引擎
     const updatePlaceholder = () => {
         if (searchInput) {
-            const ctx = getContextualData();
-            searchInput.placeholder = `${ctx.timeContext.greeting} 試試「${ctx.seasonContext.keywords[0]}」`;
+            if (state.currentLang === 'zh' || !state.currentLang) {
+                const ctx = getContextualData();
+                searchInput.placeholder = `${ctx.timeContext.greeting} 試試「${ctx.seasonContext.keywords[0]}」`;
+            } else {
+                searchInput.placeholder = window.rfApp.t ? window.rfApp.t('search_ph') : "🔍 搜尋景點...";
+            }
         }
     };
+    
     updatePlaceholder();
+    window.rfApp.search.updatePlaceholder = updatePlaceholder;
 
     window.rfApp.search.closeSuggest = () => { 
         if(sugBox) { sugBox.classList.remove('u-block'); sugBox.classList.add('u-hidden'); }
@@ -61,11 +67,15 @@ export function initSearch() {
         content.innerHTML = ""; 
         const fragment = document.createDocumentFragment();
         
-        // A. 歷史紀錄 (同前版本)
+        const isZh = (!state.currentLang || state.currentLang === 'zh');
+        
+        // A. 歷史紀錄
         if (state.searchHistory && state.searchHistory.length > 0) {
             const title = document.createElement('div');
             title.className = "search-section-title";
-            title.innerHTML = `🕒 最近搜尋 <span class="clear-history-btn" onclick="rfApp.search.clearHistory()">清除</span>`;
+            const histTitle = isZh ? '🕒 最近搜尋' : '🕒 Recent';
+            const clearText = isZh ? '清除' : 'Clear';
+            title.innerHTML = `${histTitle} <span class="clear-history-btn" onclick="rfApp.search.clearHistory()">${clearText}</span>`;
             fragment.appendChild(title);
             state.searchHistory.forEach(h => {
                 const node = tplListItem.content.cloneNode(true);
@@ -76,35 +86,65 @@ export function initSearch() {
             });
         }
         
-        // B. 快速分類 (整合修復點擊冒泡)
+        // B. 快速分類 (支援多國語言，並解決標籤過濾邏輯)
         const catTitle = document.createElement('div');
         catTitle.className = "search-section-title";
-        catTitle.textContent = "🏷️ 快速分類";
+        catTitle.textContent = isZh ? "🏷️ 快速分類" : "🏷️ Quick Categories";
         fragment.appendChild(catTitle);
         
         const catBox = document.createElement("div");
         catBox.style.cssText = "display:flex; gap:8px; padding:10px 15px; flex-wrap:wrap;";
-        const cats = ['美食', '自然', '歷史', '交通']; 
-        cats.forEach(cat => {
+        
+        // 🌟 將分類綁定至 lang.js 中的 key，但保留中文 tag 供搜尋底層使用
+        const quickCats = [
+            { key: 'chip_food', tag: '美食', fallback: '🍜 Food' },
+            { key: 'chip_nature', tag: '自然', fallback: '⛰️ Nature' },
+            { key: 'chip_history', tag: '歷史', fallback: '🏛️ History' },
+            { key: 'transport', tag: '交通', fallback: '🚌 Transport' } // 擴充交通類
+        ];
+        
+        quickCats.forEach(cat => {
             const btn = document.createElement('button');
-            btn.className = "chip"; btn.textContent = cat;
+            btn.className = "chip"; 
+            
+            // 透過翻譯引擎取得對應文字
+            let displayText = window.rfApp.t ? window.rfApp.t(cat.key) : '';
+            if (!displayText || displayText === cat.key) {
+                displayText = isZh ? cat.tag : cat.fallback;
+                // 為了中文版美觀，自動補上 Emoji
+                if (isZh && displayText === '美食') displayText = '🍜 美食';
+                if (isZh && displayText === '自然') displayText = '⛰️ 自然';
+                if (isZh && displayText === '歷史') displayText = '🏛️ 歷史';
+                if (isZh && displayText === '交通') displayText = '🚌 交通';
+            }
+            
+            btn.textContent = displayText;
+            
             btn.onclick = (e) => {
                 e.stopPropagation(); 
-                if(searchInput) { searchInput.value = cat; searchInput.blur(); }
+                if(searchInput) { 
+                    // 將選中的分類純文字填入搜尋框 (把 Emoji 濾掉，看起來更簡潔)
+                    const cleanText = displayText.replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]|\s/g, '').replace(/[🍜⛰️🏛️🚌📍🌟]/g, '').trim();
+                    searchInput.value = cleanText; 
+                    searchInput.blur(); 
+                    
+                    if(clearBtn) { clearBtn.classList.remove('u-hidden'); clearBtn.classList.add('u-block'); }
+                }
                 window.rfApp.search.closeSuggest();
-                setTimeout(() => { if(typeof window.filterSpots === 'function') window.filterSpots(cat, null); }, 50);
+                // 🌟 核心：確保傳給 filterSpots 的永遠是中文資料庫的 tag 標籤 (如: '美食')，解決外文模式下找不到景點的 Bug！
+                setTimeout(() => { if(typeof window.filterSpots === 'function') window.filterSpots(cat.tag, null); }, 50);
             };
             catBox.appendChild(btn);
         });
         fragment.appendChild(catBox);
         
-        // 🌟 C. 情境感知推薦
+        // C. 情境感知推薦
         const ctx = getContextualData();
         const targetTags = [ctx.timeContext.suggestTag, ...ctx.seasonContext.keywords];
         const recTitle = document.createElement('div');
         recTitle.className = "search-section-title";
         recTitle.style.color = "var(--accent)";
-        recTitle.innerHTML = `🎁 ${ctx.seasonContext.season}的${ctx.timeContext.suggestTag}推薦`;
+        recTitle.innerHTML = isZh ? `🎁 ${ctx.seasonContext.season}的${ctx.timeContext.suggestTag}推薦` : `🎁 Recommended`;
         fragment.appendChild(recTitle);
         
         const allSpots = spots.concat(state.savedCustomSpots || []);
@@ -127,7 +167,6 @@ export function initSearch() {
         sugBox.classList.remove('u-hidden'); sugBox.classList.add('u-block');
     };
 
-    // 其他 Worker 接收、歷史紀錄清理邏輯維持 v644 穩定版內容...
     window.rfApp.search.clearHistory = () => {
         state.searchHistory = [];
         if (typeof saveState !== 'undefined') saveState.history();
@@ -180,7 +219,6 @@ export function initSearch() {
                 const allSpots = spots.concat(state.savedCustomSpots || []);
                 const plainSpots = allSpots.map(s => ({ name: s.name, tags: s.tags || [] }));
                 if (searchWorker) { searchWorker.postMessage({ action: 'search', keyword: k, spotsData: plainSpots }); }
-                else { /* 備用邏輯... */ }
             }, 300);
         });
     }
