@@ -1,126 +1,102 @@
-// js/core/map.js (v617)
+// js/core/map.js (v670) - 智慧縮放與分區導覽版
 import { state } from './store.js';
+import { zones, ruifangBounds, ruifangBoundary } from '../data/boundary.js?v=670';
 
-const mapLayers = [
-    { url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', name: '街道', icon: 'fa-map', dark: false },
-    { url: 'https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', name: '交通', icon: 'fa-bus', dark: false },
-    { url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', name: '地形', icon: 'fa-mountain', dark: false },
-    { url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', name: '夜間', icon: 'fa-moon', dark: true }
-];
+// 動態注入區域標籤 CSS
+const style = document.createElement('style');
+style.innerHTML = `
+    .zone-label-icon { background: transparent; border: none; }
+    .zone-label-content {
+        display: flex; flex-direction: column; align-items: center; justify-content: center;
+        background: rgba(255, 255, 255, 0.9);
+        backdrop-filter: blur(4px);
+        padding: 6px 12px;
+        border-radius: 20px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+        border: 2px solid var(--primary);
+        transform: scale(1);
+        transition: transform 0.2s;
+        cursor: pointer;
+    }
+    .zone-label-content:active { transform: scale(0.95); }
+    .zone-icon { font-size: 24px; margin-bottom: 2px; }
+    .zone-name { font-size: 14px; font-weight: bold; color: var(--text-main); white-space: nowrap; }
+`;
+document.head.appendChild(style);
 
-// 🌟 九大區域地理中心座標 (浮水印)
-const ruifangRegions = [
-    { name: "瑞芳市區", lat: 25.107, lng: 121.806 },
-    { name: "九份", lat: 25.109, lng: 121.844 },
-    { name: "金瓜石", lat: 25.107, lng: 121.859 },
-    { name: "猴硐", lat: 25.086, lng: 121.826 },
-    { name: "深澳", lat: 25.129, lng: 121.820 },
-    { name: "水湳洞", lat: 25.121, lng: 121.864 },
-    { name: "四腳亭", lat: 25.102, lng: 121.762 },
-    { name: "三貂嶺", lat: 25.059, lng: 121.824 },
-    { name: "鼻頭角", lat: 25.119, lng: 121.918 }
-];
+// 用來儲存區域標籤的圖層群組
+let zoneLabelLayer = null;
 
-let currentLayerIdx = 0; 
-let currentTileLayer = null;
+export async function initMap() {
+    // 1. 初始化地圖，但不設定 view，改用 fitBounds
+    state.mapInstance = L.map('map', {
+        zoomControl: false,
+        attributionControl: false
+    });
 
-export function initMap() {
-    return new Promise((resolve, reject) => {
-        try {
-            const mapContainer = document.getElementById('map');
-            if (mapContainer && mapContainer._leaflet_id) {
-                console.warn("地圖已經存在，已攔截重複建立的指令！");
-                resolve(); 
-                return; 
-            }
+    // 2. 載入圖層
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 19
+    }).addTo(state.mapInstance);
 
-            state.mapInstance = L.map('map', { zoomControl: false, attributionControl: false }).setView([25.1032, 121.8224], 13);
-            
-            currentTileLayer = L.tileLayer(mapLayers[0].url).addTo(state.mapInstance);
-            L.control.scale({ metric: true, imperial: false, position: 'bottomright' }).addTo(state.mapInstance);
+    // 🌟 選配：如果您想把瑞芳區的輪廓線畫出來，可以解除這段註解
+     if (ruifangBoundary && ruifangBoundary.coordinates) {
+         L.geoJSON(ruifangBoundary.coordinates[0][0].geojson, {
+             style: { color: 'var(--primary)', weight: 2, fillOpacity: 0.05, dashArray: '5, 5' }
+         }).addTo(state.mapInstance);
+     }
 
-            // 🌟 極限效能版叢集引擎 (MarkerCluster) - 回歸原生視覺
-            state.cluster = L.markerClusterGroup({
-                chunkedLoading: true,        // 效能核心：開啟分塊載入
-                chunkInterval: 200,          
-                chunkDelay: 50,              
-                maxClusterRadius: 40,        
-                spiderfyOnMaxZoom: true,     
-                disableClusteringAtZoom: 16  
-            });
-            
-            state.mapInstance.addLayer(state.cluster);
+    // 3. 🌟 核心升級：自動適配瑞芳邊界 (Item 2)
+    state.mapInstance.fitBounds(ruifangBounds, { padding: [20, 20] });
 
-            state.mapInstance.on('click', () => { 
-                if (window.rfApp && window.rfApp.ui && typeof window.rfApp.ui.closeCard === 'function') {
-                    window.rfApp.ui.closeCard(); 
-                } else if (typeof window.closeCard === 'function') {
-                    window.closeCard(); 
-                }
-                
-                if (typeof window.closeSuggest === 'function') window.closeSuggest(); 
-                
-                const sug = document.getElementById("suggest");
-                if(sug) {
-                    sug.classList.remove('u-block');
-                    sug.classList.add('u-hidden');
-                }
-            });
+    // 4. 建立區域標籤圖層 (Item 3, 7)
+    createZoneLabels();
 
-            // ==========================================
-            // 🌟 繪製九大區域浮水印
-            // ==========================================
-            ruifangRegions.forEach(r => {
-                L.marker([r.lat, r.lng], {
-                    icon: L.divIcon({
-                        className: 'region-label', 
-                        html: `<div class="region-label-text">${r.name}</div>`, 
-                        iconSize: [0, 0] 
-                    }),
-                    interactive: false 
-                }).addTo(state.mapInstance);
-            });
+    // 5. 監聽縮放事件：控制「區域標籤」的顯示與隱藏
+    state.mapInstance.on('zoomend', handleZoomChange);
+    handleZoomChange();
 
-            // ==========================================
-            // 🌟 瑞芳區行政界線 (快取機制)
-            // ==========================================
-            const cacheKey = 'ruifang_boundary';
-            const cachedData = localStorage.getItem(cacheKey);
+    console.log("🗺️ 地圖核心 v670 已啟動 (智慧邊界模式)");
+}
 
-            const drawBoundary = (geojsonData) => {
-                L.geoJSON(geojsonData, {
-                    style: { color: 'var(--primary)', weight: 3, dashArray: '8, 12', fillColor: 'var(--primary)', fillOpacity: 0.04 },
-                    interactive: false 
-                }).addTo(state.mapInstance);
-            };
+function createZoneLabels() {
+    zoneLabelLayer = L.layerGroup().addTo(state.mapInstance);
 
-            if (cachedData) {
-                drawBoundary(JSON.parse(cachedData));
-            } else {
-                fetch('https://nominatim.openstreetmap.org/search?q=瑞芳區,新北市,台灣&format=json&polygon_geojson=1&limit=1')
-                .then(res => res.json())
-                .then(data => {
-                    if (data && data.length > 0 && data[0].geojson) {
-                        localStorage.setItem(cacheKey, JSON.stringify(data[0].geojson));
-                        drawBoundary(data[0].geojson);
-                    }
-                }).catch(err => console.log("界線載入中...", err));
-            }
+    zones.forEach(zone => {
+        const labelIcon = L.divIcon({
+            className: 'zone-label-icon',
+            html: `<div class="zone-label-content">
+                     <span class="zone-icon">${zone.icon}</span>
+                     <span class="zone-name">${zone.name}</span>
+                   </div>`,
+            iconSize: [100, 40],
+            iconAnchor: [50, 20]
+        });
 
-            // 成功結束，通知主程式
-            resolve();
-        } catch (error) {
-            console.error("地圖初始化發生錯誤:", error);
-            reject(error);
-        }
+        const marker = L.marker([zone.lat, zone.lng], { icon: labelIcon });
+        
+        // 點擊標籤 -> 飛入該區域
+        marker.on('click', () => {
+            state.mapInstance.flyTo([zone.lat, zone.lng], zone.zoom, { animate: true, duration: 1.2 });
+        });
+
+        zoneLabelLayer.addLayer(marker);
     });
 }
 
-export function toggleLayer() {
-    currentLayerIdx = (currentLayerIdx + 1) % mapLayers.length; 
-    const c = mapLayers[currentLayerIdx];
-    state.mapInstance.removeLayer(currentTileLayer); 
-    currentTileLayer = L.tileLayer(c.url).addTo(state.mapInstance);
-    document.querySelector('#layer-btn i').className = `fas ${c.icon}`;
-    c.dark ? document.body.classList.add("dark-mode") : document.body.classList.remove("dark-mode");
+function handleZoomChange() {
+    const currentZoom = state.mapInstance.getZoom();
+    const map = state.mapInstance;
+
+    // Zoom < 14 (看全區時)：顯示區域標籤
+    // Zoom >= 14 (看細節時)：隱藏區域標籤
+    if (currentZoom < 14) {
+        if (!map.hasLayer(zoneLabelLayer)) map.addLayer(zoneLabelLayer);
+    } else {
+        if (map.hasLayer(zoneLabelLayer)) map.removeLayer(zoneLabelLayer);
+    }
+}
+
+export function toggleLayer(type) {
+    console.log('切換圖層:', type);
 }
