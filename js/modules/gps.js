@@ -1,4 +1,4 @@
-// js/modules/gps.js (v640) - 結合真實地址解析版
+// js/modules/gps.js (v645) - 恢復比例尺旁 GPS 座標顯示
 import { state } from '../core/store.js';
 
 let watchId = null;
@@ -117,6 +117,10 @@ export function initGPS() {
                 const { latitude: lat, longitude: lng, accuracy } = pos.coords;
                 state.userLocation = { lat, lng };
 
+                // 🌟 修復：在這裡把精確的經緯度座標寫回比例尺旁的 HTML 元素裡
+                const gpsValText = document.getElementById('gps-val-text');
+                if (gpsValText) gpsValText.textContent = `GPS: ${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+
                 if (!userMarker) {
                     userMarker = L.marker([lat, lng], { icon: createCompassIcon(), zIndexOffset: 1000 }).addTo(state.mapInstance);
                     
@@ -135,7 +139,7 @@ export function initGPS() {
                 }
                 if (btnIcon) btnIcon.classList.remove('fa-spin');
                 
-                // 🌟 核心修改：直接呼叫 announcer 的真實地址解析！
+                // 🌟 真實地址解析
                 if (!isUserPanning) {
                     if (window.rfApp.announcer && typeof window.rfApp.announcer.fetchRealAddress === 'function') {
                         window.rfApp.announcer.fetchRealAddress(lat, lng, Math.round(accuracy));
