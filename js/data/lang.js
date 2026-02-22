@@ -37,7 +37,7 @@ export const translations = {
         toast_copy_success: "✅ 內容已複製到剪貼簿",
         toast_custom_saved: "✅ 秘境已儲存",
         toast_custom_deleted: "🗑️ 標記已刪除",
-        toast_network_err: "網路連線異常，請稍後再試"
+        toast_network_err: "網路連線異常，請稍後再試",
 
         "locating_addr": "獲取詳細地址中...",
         "custom_spot_default": "瑞芳秘境",
