@@ -1,29 +1,29 @@
-// js/main.js (v671) - 終極效能打磨版
+// js/main.js (v672) - 終極效能打磨版
 window.rfApp = {
     ui: {}, theme: {}, nav: {}, fav: {}, tour: {}, 
     map: {}, search: {}, custom: {}, pwa: {}, tts: {}
 };
 
-import { events } from './core/events.js?v=671'; // 🌟 引入事件匯流排
-import { initErrorHandler, showToast } from './modules/toast.js?v=671';
-import { state } from './core/store.js?v=671'; 
-import { initMap, toggleLayer } from './core/map.js?v=671'; 
-import { fetchWeather } from './modules/weather.js?v=671'; // 更新 v671
-import { initGPS } from './modules/gps.js?v=671'; // 更新 v671
+import { events } from './core/events.js?v=672'; // 🌟 引入事件匯流排
+import { initErrorHandler, showToast } from './modules/toast.js?v=672';
+import { state } from './core/store.js?v=672'; 
+import { initMap, toggleLayer } from './core/map.js?v=672'; 
+import { fetchWeather } from './modules/weather.js?v=672'; // 更新 v672
+import { initGPS } from './modules/gps.js?v=672'; // 更新 v672
 import { initAnnouncer } from './modules/announcer.js?v=659'; 
-import { initCardGestures, closeCard } from './modules/cards.js?v=671';
-import { renderAllMarkers, filterSpots } from './modules/markers.js?v=671';
-import { initSearch } from './modules/search.js?v=671';
-import { initNavigation } from './modules/navigation.js?v=671';
-import { initUI } from './modules/ui.js?v=671'; 
-import { initFirebase } from './modules/firebase-sync.js?v=671';
-import { initTheme } from './modules/theme.js?v=671'; 
-import { initPWA } from './modules/pwa.js?v=671';
-import { initTour } from './modules/tour.js?v=671';
-import { initFavorites } from './modules/favorites.js?v=671';
-import { initCustomSpots } from './modules/customSpots.js?v=671'; 
-import { initTTS } from './modules/tts.js?v=671';
-import { initNearby } from './modules/nearby.js?v=671';
+import { initCardGestures, closeCard } from './modules/cards.js?v=672';
+import { renderAllMarkers, filterSpots } from './modules/markers.js?v=672';
+import { initSearch } from './modules/search.js?v=672';
+import { initNavigation } from './modules/navigation.js?v=672';
+import { initUI } from './modules/ui.js?v=672'; 
+import { initFirebase } from './modules/firebase-sync.js?v=672';
+import { initTheme } from './modules/theme.js?v=672'; 
+import { initPWA } from './modules/pwa.js?v=672';
+import { initTour } from './modules/tour.js?v=672';
+import { initFavorites } from './modules/favorites.js?v=672';
+import { initCustomSpots } from './modules/customSpots.js?v=672'; 
+import { initTTS } from './modules/tts.js?v=672';
+import { initNearby } from './modules/nearby.js?v=672';
 
 window.rfApp.map.toggleLayer = toggleLayer;
 window.rfApp.ui.closeCard = closeCard;
