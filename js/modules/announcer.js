@@ -1,6 +1,6 @@
-// js/modules/announcer.js (v646) - 事件監聽版
+// js/modules/announcer.js (v647) - 純粹報幕版 (不干涉地圖視角)
 import { state } from '../core/store.js';
-import { events } from '../core/events.js?v=646'; // 🌟 引入事件匯流排
+import { events } from '../core/events.js?v=646'; // 維持 v646
 
 const ruifangMap = {
     "龍潭里": "瑞芳市區", "龍鎮里": "瑞芳市區", "龍安里": "瑞芳市區", "龍川里": "瑞芳市區", "龍山里": "瑞芳市區", 
@@ -18,7 +18,6 @@ let cachedAddress = "";
 let lastLat = 0;
 let lastLng = 0;
 let isFetching = false;
-let isUserPanning = false; // 🌟 自己維護這個狀態，不再依賴外部
 
 export function fetchRealAddress(lat, lng, accuracy = null) {
     const addrEl = document.getElementById("addr-text");
@@ -26,7 +25,7 @@ export function fetchRealAddress(lat, lng, accuracy = null) {
 
     const render = (addr) => {
         if (accuracy !== null) {
-            addrEl.innerText = `你在：${addr}｜精度：±${accuracy}m`; // 保持您要的全形格式
+            addrEl.innerText = `你在：${addr}｜精度：±${accuracy}m`;
         } else {
             addrEl.innerText = addr;
         }
@@ -112,10 +111,8 @@ export function initAnnouncer() {
     
     window.rfApp.announcer = { fetchRealAddress };
 
-    // 🌟 1. 監聽地圖操作，維護自己的狀態
     if (state.mapInstance) {
         state.mapInstance.on('dragstart', () => { 
-            isUserPanning = true; 
             const addrEl = document.getElementById("addr-text");
             if (addrEl) {
                 addrEl.style.opacity = '0.5'; 
@@ -129,22 +126,18 @@ export function initAnnouncer() {
             if(addrEl) { addrEl.innerText = "定位中..."; addrEl.style.opacity = '1'; }
             
             geocodeTimer = setTimeout(() => {
-                isUserPanning = false; // 停止拖曳後，恢復更新
                 const center = state.mapInstance.getCenter();
+                // 這裡只負責抓地址，絕對不要移動地圖 (panTo)！
                 fetchRealAddress(center.lat, center.lng, null);
             }, 800); 
         });
     }
 
-    // 🌟 2. 訂閱 GPS 更新事件 (這是新架構的核心！)
-    // 只要 GPS 說位置變了，我們就檢查是否該更新地址
+    // 訂閱 GPS 更新事件 (只負責更新文字)
     events.on('location_update', (data) => {
-        // 只有當使用者沒有在手動滑地圖，且我們想鎖定使用者時，才更新地址
-        if (!isUserPanning) {
-            fetchRealAddress(data.lat, data.lng, Math.round(data.accuracy));
-            
-            // 順便幫地圖平移 (如果這是我們想要的行為)
-            if (state.mapInstance) state.mapInstance.panTo([data.lat, data.lng]);
-        }
+        // 如果地圖正在被拖曳（或處於非跟隨模式），我們只更新資料但不強制覆寫文字，
+        // 這裡的邏輯可以簡化：只要收到精確位置更新，就嘗試解析地址
+        // 前提是我們不要去 call panTo，這樣就不會干擾使用者
+        fetchRealAddress(data.lat, data.lng, Math.round(data.accuracy));
     });
 }
