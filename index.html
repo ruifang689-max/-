@@ -54,7 +54,7 @@
         <h2 class="splash-title-text">瑞芳導覽</h2>
     </div>
 
-    <div id="intro-screen">
+    <div id="welcome-screen">
         <div class="welcome-wrapper">
             <div class="logo-static">瑞</div>
             <h1 class="welcome-title" data-i18n="splash_title">瑞芳導覽地圖</h1>
@@ -458,14 +458,20 @@
     <script src="https://unpkg.com/leaflet.markercluster/dist/leaflet.markercluster.js"></script>
     <script type="module" src="./js/main.js?v=657"></script>
 
-    <script>
+   <script>
         setTimeout(() => {
             const splash = document.getElementById('splash-screen');
             if (splash && splash.style.display !== 'none' && splash.style.opacity !== '0') {
                 console.warn("⚠️ 啟動超時，已強制解除開場動畫");
                 splash.style.display = 'none';
-                const welcome = document.getElementById('intro-screen'); // 這裡也修正了
-                if (!localStorage.getItem('ruifang_welcomed') && !localStorage.getItem('ruifang_skip_intro-screen') === 'true' && welcome) {
+                
+                // ❌ 找到這一行：
+                // const welcome = document.getElementById('intro-screen'); 
+                
+                // ✅ 改回找 welcome-screen：
+                const welcome = document.getElementById('welcome-screen'); 
+                
+                if (!localStorage.getItem('ruifang_welcomed') && !localStorage.getItem('ruifang_skip_welcome') === 'true' && welcome) {
                     welcome.style.display = 'flex'; welcome.style.opacity = '1';
                 }
             }
@@ -494,18 +500,3 @@
     </template>
 </body>
 </html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
