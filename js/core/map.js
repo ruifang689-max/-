@@ -83,11 +83,16 @@ export function initMap() {
         L.control.scale({ metric: true, imperial: false, position: 'bottomright' }).addTo(state.mapInstance);
 
         // --- A. 繪製瑞芳區界線 (直接使用您上傳的 local 資料，極速載入) ---
-        if (ruifangBoundary) {
-            L.geoJSON(ruifangBoundary, {
-                style: { color: 'var(--primary, #007bff)', weight: 3, dashArray: '8, 12', fillColor: 'var(--primary, #007bff)', fillOpacity: 0.04 },
-                interactive: false 
-            }).addTo(state.mapInstance);
+        // 確保資料存在且有座標，才進行繪製
+        if (ruifangBoundary && ruifangBoundary.geometry && ruifangBoundary.geometry.coordinates) {
+            try {
+                L.geoJSON(ruifangBoundary, {
+                    style: { color: 'var(--primary, #007bff)', weight: 3, dashArray: '8, 12', fillColor: 'var(--primary, #007bff)', fillOpacity: 0.04 },
+                    interactive: false 
+                }).addTo(state.mapInstance);
+            } catch (e) {
+                console.warn("⚠️ 邊界資料繪製失敗，已略過:", e);
+            }
         }
 
         // --- B. 繪製十大區域浮水印 ---
