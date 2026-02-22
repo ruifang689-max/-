@@ -1,7 +1,8 @@
 // js/main.js (v680) - 終極效能打磨版
 window.rfApp = {
     ui: {}, theme: {}, nav: {}, fav: {}, tour: {}, 
-    map: {}, search: {}, custom: {}, pwa: {}, tts: {}
+    map: {}, search: {}, custom: {}, pwa: {}, tts: {},
+    cards: {}
 };
 
 import { events } from './core/events.js?v=680'; // 🌟 引入事件匯流排
