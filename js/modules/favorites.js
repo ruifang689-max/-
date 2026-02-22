@@ -1,4 +1,4 @@
-// js/modules/favorites.js (v649) - 現代化重構版
+// js/modules/favorites.js (v657) - 國際化翻譯支援版
 import { state, saveState } from '../core/store.js';
 
 export function initFavorites() {
@@ -45,10 +45,12 @@ export function initFavorites() {
         const idx = state.myFavs.indexOf(state.targetSpot.name); 
         if(idx === -1) {
             state.myFavs.push(state.targetSpot.name); 
-            if (typeof window.showToast === 'function') window.showToast('❤️ 已加入收藏', 'success');
+            // 🌟 動態翻譯
+            if (typeof window.showToast === 'function') window.showToast(window.rfApp.t('toast_fav_add'), 'success');
         } else {
             state.myFavs.splice(idx, 1); 
-            if (typeof window.showToast === 'function') window.showToast('💔 已取消收藏', 'info');
+            // 🌟 動態翻譯
+            if (typeof window.showToast === 'function') window.showToast(window.rfApp.t('toast_fav_remove'), 'info');
         }
         
         if (typeof saveState !== 'undefined') saveState.favs(); 
@@ -81,7 +83,8 @@ export function initFavorites() {
             const manageBtn = document.createElement('div');
             manageBtn.className = "manage-fav-btn";
             manageBtn.style.cssText = "padding:14px; text-align:center; background:var(--divider-color); font-weight:bold; cursor:pointer; font-size:13px; color:var(--primary);";
-            manageBtn.innerHTML = "<i class='fas fa-cog'></i> 管理收藏夾";
+            // 🌟 也可以把面板內的文字也接上翻譯
+            manageBtn.innerHTML = `<i class='fas fa-cog'></i> ${window.rfApp.t('manage_fav')}`;
             fragment.appendChild(manageBtn);
             favPanel.appendChild(fragment);
             favPanel.classList.remove('u-hidden'); favPanel.classList.add('u-block'); 
@@ -138,7 +141,8 @@ export function initFavorites() {
             const icon = document.getElementById("card-fav-icon");
             if(icon) icon.className = "fas fa-heart";
         }
-        if (typeof window.showToast === 'function') window.showToast('🗑️ 已從收藏移除', 'info');
+        // 🌟 動態翻譯
+        if (typeof window.showToast === 'function') window.showToast(window.rfApp.t('toast_fav_remove'), 'info');
     };
 
     window.toggleCurrentFav = window.rfApp.fav.toggleCurrentFav;
