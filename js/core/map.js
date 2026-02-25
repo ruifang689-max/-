@@ -1,150 +1,126 @@
-// js/core/map.js (v718) - 經典圖示圖釘 + 十大浮水印版
+// js/core/map.js (v617)
 import { state } from './store.js';
-import { ruifangBoundary } from '../data/boundary.js'; 
-import { spots } from '../data/spots.js'; 
 
-const watermarks = [
+const mapLayers = [
+    { url: 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', name: '街道', icon: 'fa-map', dark: false },
+    { url: 'https://{s}.tile.openstreetmap.fr/hot/{z}/{x}/{y}.png', name: '交通', icon: 'fa-bus', dark: false },
+    { url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', name: '地形', icon: 'fa-mountain', dark: false },
+    { url: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', name: '夜間', icon: 'fa-moon', dark: true }
+];
+
+// 🌟 九大區域地理中心座標 (浮水印)
+const ruifangRegions = [
     { name: "瑞芳市區", lat: 25.107, lng: 121.806 },
-    { name: "四腳亭", lat: 25.102, lng: 121.762 },
-    { name: "猴硐", lat: 25.086, lng: 121.826 },
-    { name: "三貂嶺", lat: 25.059, lng: 121.824 },
     { name: "九份", lat: 25.109, lng: 121.844 },
     { name: "金瓜石", lat: 25.107, lng: 121.859 },
-    { name: "水湳洞", lat: 25.121, lng: 121.864 },
+    { name: "猴硐", lat: 25.086, lng: 121.826 },
     { name: "深澳", lat: 25.129, lng: 121.820 },
-    { name: "南雅", lat: 25.120, lng: 121.890 },
+    { name: "水湳洞", lat: 25.121, lng: 121.864 },
+    { name: "四腳亭", lat: 25.102, lng: 121.762 },
+    { name: "三貂嶺", lat: 25.059, lng: 121.824 },
     { name: "鼻頭角", lat: 25.119, lng: 121.918 }
 ];
 
-let currentBaseLayer = null;
-let transitLayer = null;
-let markersLayer = null;
-
-const mapLayers = {
-    standard: L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { maxZoom: 19 }),
-    satellite: L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', { maxZoom: 19 }),
-    topo: L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', { maxZoom: 17 })
-};
-const railwayLayer = L.tileLayer('https://{s}.tiles.openrailwaymap.org/standard/{z}/{x}/{y}.png', { maxZoom: 19, opacity: 0.6 });
+let currentLayerIdx = 0; 
+let currentTileLayer = null;
 
 export function initMap() {
-    return new Promise((resolve) => {
-        if (state.mapInstance) return resolve(); 
+    return new Promise((resolve, reject) => {
+        try {
+            const mapContainer = document.getElementById('map');
+            if (mapContainer && mapContainer._leaflet_id) {
+                console.warn("地圖已經存在，已攔截重複建立的指令！");
+                resolve(); 
+                return; 
+            }
 
-        state.mapInstance = L.map('map', { zoomControl: false, attributionControl: false }).setView([25.1032, 121.8224], 13);
-        
-        currentBaseLayer = mapLayers.standard;
-        state.mapInstance.addLayer(currentBaseLayer);
-        L.control.scale({ metric: true, imperial: false, position: 'bottomright' }).addTo(state.mapInstance);
+            state.mapInstance = L.map('map', { zoomControl: false, attributionControl: false }).setView([25.1032, 121.8224], 13);
+            
+            currentTileLayer = L.tileLayer(mapLayers[0].url).addTo(state.mapInstance);
+            L.control.scale({ metric: true, imperial: false, position: 'bottomright' }).addTo(state.mapInstance);
 
-        // 繪製虛線邊界
-        if (ruifangBoundary && ruifangBoundary.geometry && ruifangBoundary.geometry.coordinates && ruifangBoundary.geometry.coordinates.length > 0) {
-            try {
-                L.geoJSON(ruifangBoundary, {
-                    style: { color: 'var(--primary, #007bff)', weight: 3, dashArray: '8, 12', fillColor: 'var(--primary, #007bff)', fillOpacity: 0.04 },
+            // 🌟 極限效能版叢集引擎 (MarkerCluster) - 回歸原生視覺
+            state.cluster = L.markerClusterGroup({
+                chunkedLoading: true,        // 效能核心：開啟分塊載入
+                chunkInterval: 200,          
+                chunkDelay: 50,              
+                maxClusterRadius: 40,        
+                spiderfyOnMaxZoom: true,     
+                disableClusteringAtZoom: 16  
+            });
+            
+            state.mapInstance.addLayer(state.cluster);
+
+            state.mapInstance.on('click', () => { 
+                if (window.rfApp && window.rfApp.ui && typeof window.rfApp.ui.closeCard === 'function') {
+                    window.rfApp.ui.closeCard(); 
+                } else if (typeof window.closeCard === 'function') {
+                    window.closeCard(); 
+                }
+                
+                if (typeof window.closeSuggest === 'function') window.closeSuggest(); 
+                
+                const sug = document.getElementById("suggest");
+                if(sug) {
+                    sug.classList.remove('u-block');
+                    sug.classList.add('u-hidden');
+                }
+            });
+
+            // ==========================================
+            // 🌟 繪製九大區域浮水印
+            // ==========================================
+            ruifangRegions.forEach(r => {
+                L.marker([r.lat, r.lng], {
+                    icon: L.divIcon({
+                        className: 'region-label', 
+                        html: `<div class="region-label-text">${r.name}</div>`, 
+                        iconSize: [0, 0] 
+                    }),
                     interactive: false 
                 }).addTo(state.mapInstance);
-            } catch (err) {
-                console.warn("⚠️ 邊界繪製略過:", err);
+            });
+
+            // ==========================================
+            // 🌟 瑞芳區行政界線 (快取機制)
+            // ==========================================
+            const cacheKey = 'ruifang_boundary';
+            const cachedData = localStorage.getItem(cacheKey);
+
+            const drawBoundary = (geojsonData) => {
+                L.geoJSON(geojsonData, {
+                    style: { color: 'var(--primary)', weight: 3, dashArray: '8, 12', fillColor: 'var(--primary)', fillOpacity: 0.04 },
+                    interactive: false 
+                }).addTo(state.mapInstance);
+            };
+
+            if (cachedData) {
+                drawBoundary(JSON.parse(cachedData));
+            } else {
+                fetch('https://nominatim.openstreetmap.org/search?q=瑞芳區,新北市,台灣&format=json&polygon_geojson=1&limit=1')
+                .then(res => res.json())
+                .then(data => {
+                    if (data && data.length > 0 && data[0].geojson) {
+                        localStorage.setItem(cacheKey, JSON.stringify(data[0].geojson));
+                        drawBoundary(data[0].geojson);
+                    }
+                }).catch(err => console.log("界線載入中...", err));
             }
+
+            // 成功結束，通知主程式
+            resolve();
+        } catch (error) {
+            console.error("地圖初始化發生錯誤:", error);
+            reject(error);
         }
-
-        // 繪製十大浮水印
-        watermarks.forEach(w => {
-            L.marker([w.lat, w.lng], {
-                icon: L.divIcon({ className: 'region-watermark', html: `<div class="region-watermark-text">${w.name}</div>`, iconSize: [0, 0] }),
-                interactive: false,
-                zIndexOffset: -1000 
-            }).addTo(state.mapInstance);
-        });
-
-        createSpotMarkers();
-
-        state.mapInstance.on('click', () => {
-            if (typeof window.closeCard === 'function') window.closeCard();
-            if (typeof window.rfApp?.search?.closeSuggest === 'function') window.rfApp.search.closeSuggest();
-        });
-
-        console.log("🗺️ 地圖核心 v718 (經典動態圖示版) 啟動成功");
-        resolve();
     });
 }
 
-function createSpotMarkers() {
-    markersLayer = L.markerClusterGroup({
-        showCoverageOnHover: false,
-        zoomToBoundsOnClick: true,
-        spiderfyOnMaxZoom: true,
-        maxClusterRadius: 40,
-        chunkedLoading: true
-    });
-
-    window.rfApp = window.rfApp || {};
-    window.rfApp.map = window.rfApp.map || {};
-    
-    window.rfApp.map.filterMarkers = (category = 'all') => {
-        if (!markersLayer) return;
-        markersLayer.clearLayers();
-        const lang = state.currentLang || 'zh';
-        const allSpots = [...(spots || []), ...(state.savedCustomSpots || [])];
-
-        allSpots.forEach(spot => {
-            const isMatch = category === 'all' || (spot.tags && spot.tags.includes(category));
-            if (isMatch) {
-                // 🌟 根據標籤決定 FontAwesome 圖示與顏色
-                let faIcon = 'fa-map-marker-alt';
-                let bgColor = 'var(--primary, #007bff)';
-                
-                if(spot.tags) {
-                    if(spot.tags.includes('美食')) { faIcon = 'fa-utensils'; bgColor = '#e67e22'; }
-                    else if(spot.tags.includes('歷史')) { faIcon = 'fa-landmark'; bgColor = '#8e44ad'; }
-                    else if(spot.tags.includes('自然')) { faIcon = 'fa-leaf'; bgColor = '#27ae60'; }
-                    else if(spot.tags.includes('自訂')) { faIcon = 'fa-star'; bgColor = '#e74c3c'; }
-                }
-
-                // 🌟 使用您舊版喜歡的 gmap-pin 結構
-                const icon = L.divIcon({
-                    className: 'custom-pin-wrap',
-                    html: `<div class='marker-pulse'></div><div class='gmap-pin' style='background: ${bgColor} !important;'><i class='fas ${faIcon}'></i></div>`,
-                    iconSize: [32, 42],
-                    iconAnchor: [16, 42],
-                    popupAnchor: [0, -35]
-                });
-                
-                const marker = L.marker([spot.lat, spot.lng], { icon: icon });
-                const displayName = spot[`name_${lang}`] || spot.name;
-                marker.bindTooltip(displayName, { direction: 'top', offset: [0, -38], opacity: 0.95 });
-                
-                marker.on('click', () => {
-                    import('../modules/cards.js').then(module => { module.showCard(spot); });
-                    state.mapInstance.flyTo([spot.lat, spot.lng], 16, { animate: true, duration: 0.8 });
-                });
-                markersLayer.addLayer(marker);
-            }
-        });
-        state.mapInstance.addLayer(markersLayer);
-    };
-    window.rfApp.map.filterMarkers('all');
+export function toggleLayer() {
+    currentLayerIdx = (currentLayerIdx + 1) % mapLayers.length; 
+    const c = mapLayers[currentLayerIdx];
+    state.mapInstance.removeLayer(currentTileLayer); 
+    currentTileLayer = L.tileLayer(c.url).addTo(state.mapInstance);
+    document.querySelector('#layer-btn i').className = `fas ${c.icon}`;
+    c.dark ? document.body.classList.add("dark-mode") : document.body.classList.remove("dark-mode");
 }
-
-// 圖層控制 API
-window.rfApp = window.rfApp || {};
-window.rfApp.map = window.rfApp.map || {};
-
-window.rfApp.map.switchBaseLayer = (type) => {
-    if (!state.mapInstance) return;
-    const mapEl = document.getElementById('map');
-    if (type === 'history') { mapEl.classList.add('history-mode'); type = 'standard'; } 
-    else { mapEl.classList.remove('history-mode'); }
-
-    if (currentBaseLayer) state.mapInstance.removeLayer(currentBaseLayer);
-    currentBaseLayer = mapLayers[type] || mapLayers.standard;
-    state.mapInstance.addLayer(currentBaseLayer);
-    if (transitLayer) transitLayer.bringToFront();
-};
-
-window.rfApp.map.toggleTransitLayer = (show) => {
-    if (!state.mapInstance) return;
-    if (show) { transitLayer = railwayLayer; state.mapInstance.addLayer(transitLayer); } 
-    else { if (transitLayer) state.mapInstance.removeLayer(transitLayer); transitLayer = null; }
-};
