@@ -1,5 +1,5 @@
 /* =====================================================================
-   瑞芳導覽地圖 - 地圖標記與浮水印 (v718 經典圖示復刻版)
+   瑞芳導覽地圖 - 地圖標記與浮水印 (v719 經典圖釘 + V717 浮水印)
 ===================================================================== */
 
 /* 🌟 1. 經典水滴圖釘 (內含 FontAwesome 圖示) */
@@ -9,7 +9,7 @@
     width: 32px !important; 
     height: 32px !important; 
     border-radius: 50% 50% 50% 0 !important; 
-    background: var(--primary, #007bff); /* 會被 JS 動態覆蓋 */
+    background: var(--primary, #007bff); 
     position: absolute;
     left: 50%; top: 50%;
     margin: -16px 0 0 -16px;
@@ -35,43 +35,4 @@
 
 /* 圖釘底部的立體呼吸波紋 */
 .marker-pulse {
-    background: rgba(255, 255, 255, 0.5); border-radius: 50%;
-    height: 16px; width: 16px; position: absolute; left: 50%; top: 50%;
-    margin: 12px 0px 0px -8px; transform: rotateX(60deg); z-index: -1;
-}
-
-/* 🌟 2. 景點名稱標籤 (Leaflet Tooltip 覆寫，毛玻璃質感) */
-.leaflet-tooltip {
-    background: var(--glass, rgba(255,255,255,0.95)) !important;
-    color: var(--text-main, #333) !important;
-    border: 1.5px solid var(--border-color, #ddd) !important;
-    padding: 4px 8px !important;
-    border-radius: 6px !important;
-    font-size: 13px !important;
-    font-weight: bold !important;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.2) !important;
-    backdrop-filter: blur(10px) !important;
-    -webkit-backdrop-filter: blur(10px) !important;
-}
-
-/* 🌟 3. 十大區域浮水印 */
-.region-watermark { background: transparent; border: none; box-shadow: none; }
-.region-watermark-text { 
-    font-size: 22px; font-weight: 900; color: rgba(255, 255, 255, 0.85); 
-    transform: translate(-50%, -50%); 
-    text-shadow: 0 0 8px rgba(0,0,0,0.8), 0 0 16px rgba(0,0,0,0.6), 2px 2px 4px rgba(0,0,0,0.7); 
-    white-space: nowrap; letter-spacing: 4px; 
-    pointer-events: none; user-select: none; text-align: center; 
-}
-body.dark-mode .region-watermark-text { 
-    color: rgba(30, 30, 30, 0.85); 
-    text-shadow: 0 0 8px rgba(255,255,255,0.8), 0 0 16px rgba(255,255,255,0.6), 1px 1px 2px rgba(255,255,255,0.7); 
-}
-
-/* 🌟 4. 叢集圖釘 (MarkerCluster) */
-.marker-cluster div {
-    background-color: var(--primary, #007bff) !important;
-    color: white !important; font-weight: bold; border: 2px solid white;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.3); transition: transform 0.2s; 
-}
-.marker-cluster:hover div { transform: scale(1.1); background-color: var(--accent, #e67e22) !important; }
+    background: rgba(255, 255, 255, 0.5); border-radius: 5
