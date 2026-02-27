@@ -4,7 +4,7 @@ import { addMarkerToMap } from './markers.js';
 import { showCard } from './cards.js';
 
 // 🌟 將這裡替換為您在第一步複製的 Apps Script 網址 🌟
-const GAS_WEB_APP_URL = "請將這裡替換成您的_Apps_Script_部署網址";
+const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwqMFBi7x70o1xCOqg5ulyCVw118og5pAtJJk9eEq4NfFe23J56VeZiBLoTcXvYRPIZ/exec";
 
 export function initCustomSpots() {
     if (state.mapInstance) {
