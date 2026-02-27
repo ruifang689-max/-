@@ -164,7 +164,8 @@ export function initTheme() {
         
         if (color === '#007bff' && !syncIntro) { 
             root.style.setProperty('--accent', '#e67e22'); 
-            root.style.setProperty('--dynamic-border', 'var(--text-main)'); 
+            // 🌟 這裡將系統預設色狀態下的「動態外框(--dynamic-border)」改為綠色
+            root.style.setProperty('--dynamic-border', '#28a745'); 
             root.style.setProperty('--stamp-active', 'var(--danger)'); 
         } else { 
             root.style.setProperty('--accent', color); 
@@ -183,7 +184,6 @@ export function initTheme() {
         const textSpan = document.getElementById('current-theme-text');
         if (colorSwatch && textSpan) {
             colorSwatch.style.background = color;
-            // 🌟 將選定的顏色名稱送進翻譯引擎
             let targetText = "";
             if (color === '#007bff' && !syncIntro) {
                 targetText = '系統主題色 (預設)';
