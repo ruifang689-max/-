@@ -2,9 +2,9 @@
 
 const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSOeeREvMoEmLqZ2QFsujd7SMQBZELP2CQn-WqvgWjlvysaCJ_9pLE_PR1Iw4Y06Ds3MlDvCDmxR463/pub?output=csv"; 
 
-export let spots = []; 
+// 🌟 關鍵修復 2：改用 const，鎖定記憶體位置，其他檔案才抓得到更新！
+export const spots = []; 
 
-// 🌟 1. 保留原本已建檔的豐富景點資料 (做為基礎底層資料)
 const LOCAL_SPOTS = [
     // ================== 【瑞芳市區】 ==================
     { name: "瑞芳火車站", wikiTitle: "瑞芳車站", lat: 25.10875, lng: 121.80597, tags: ["交通", "歷史", "美食"], keywords: ["車站", "龍鳳腿", "胡椒餅", "平溪線"], highlights: "🌟 前往黃金山城與平溪線的轉運大站", food: "龍鳳腿、福州胡椒餅", history: "大正八年(西元1919)五月宜蘭線鐵路八堵至瑞芳段通車，瑞芳正式設火車站。目前火車站仍為進入黃金山城(水湳洞、金瓜石及九份)、濱海漁村及黑金鐵道平溪線的重要轉運站。前站有熱鬧的美食廣場，後站可通往充滿歷史底蘊的瑞芳老街。", transport: "🚉 台鐵瑞芳站", address: "新北市瑞芳區龍潭里明燈路三段82號", openTime: "06:00-24:00", heat: 0.9 },
@@ -45,12 +45,10 @@ const LOCAL_SPOTS = [
     { name: "三貂嶺步道 (瀑布群)", wikiTitle: "三貂嶺瀑布群", lat: 25.06158, lng: 121.81182, tags: ["自然", "登山"], keywords: ["瀑布", "森林", "秘境"], highlights: "🌿 尋訪深山秘境，壯闊的三層絕美瀑布", food: "三貂嶺車站旁麵攤", history: "新北熱門登山路線。沿途平緩原始，可接連觀賞落差極大的「合谷瀑布」、壯觀的「摩天瀑布」與「枇杷洞瀑布」。四周蓊鬱山林環抱，峭壁與壺穴景觀令人流連忘返。", transport: "三貂嶺車站旁碩仁國小登山口", heat: 0.85 }
 ];
 
-// 🌟 2. 強化版 CSV 解析器 (修復 BOM 亂碼與引號問題)
 function parseCSV(text) {
     const lines = text.split(/\r?\n/);
     if (lines.length === 0) return [];
     
-    // 【關鍵修復】使用 replace 去除隱藏的 UTF-8 BOM 符號，否則 'name' 標題會變成 '\ufeffname'
     const headers = lines[0].replace(/^\uFEFF/, '').split(',').map(h => h.trim());
     const result = [];
     
@@ -78,6 +76,11 @@ function parseCSV(text) {
         headers.forEach((header, index) => {
             let val = row[index] !== undefined ? row[index].trim() : '';
             
+            // 🌟 關鍵修復 3：加回雙引號過濾，否則 "古蹟,自然" 會被當作不合法的格式
+            if (val.startsWith('"') && val.endsWith('"')) {
+                val = val.substring(1, val.length - 1).replace(/""/g, '"');
+            }
+            
             if (header === 'tags') {
                 obj[header] = val ? val.split(',').map(t => t.trim()) : [];
             } 
@@ -92,7 +95,6 @@ function parseCSV(text) {
             }
         });
         
-        // 嚴格檢查：只要有名稱與正常的經緯度，就當作有效景點
         if (obj.name && !isNaN(obj.lat) && !isNaN(obj.lng)) {
             result.push(obj);
         }
@@ -100,7 +102,6 @@ function parseCSV(text) {
     return result;
 }
 
-// 🌟 3. 合併雲端與本地資料
 export async function fetchSpotsFromSheet() {
     try {
         console.log("🔄 正在從 Google Sheets 同步景點資料...");
@@ -110,16 +111,17 @@ export async function fetchSpotsFromSheet() {
         const csvText = await response.text();
         const cloudSpots = parseCSV(csvText);
         
-        // 【關鍵修復】將本地原本的 30 幾個景點與雲端新抓的景點合併！
-        spots = [...LOCAL_SPOTS, ...cloudSpots];
+        // 🌟 關鍵修復 4：直接把新資料「推進」原本的陣列裡，保持記憶體連結不中斷！
+        spots.length = 0; // 先清空
+        spots.push(...LOCAL_SPOTS, ...cloudSpots); // 再塞入合併後的資料
         
         console.log(`✅ 成功載入！本地 ${LOCAL_SPOTS.length} 筆 + 雲端 ${cloudSpots.length} 筆，共 ${spots.length} 筆景點！`);
         return spots;
         
     } catch (error) {
         console.error("❌ Google Sheets 載入失敗，僅使用本地資料", error);
-        // 如果無網路或試算表失效，至少確保原本寫死的景點能出來
-        spots = [...LOCAL_SPOTS]; 
+        spots.length = 0;
+        spots.push(...LOCAL_SPOTS); 
         return spots;
     }
 }
