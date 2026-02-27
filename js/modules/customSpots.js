@@ -90,17 +90,13 @@ export function initCustomSpots() {
     // 🌟 核心修改：新增景點時，同步推播至 Google 試算表
     window.rfApp.custom.confirmCustomSpot = () => { 
         const spotName = document.getElementById('custom-spot-name').value.trim() || "我的秘境"; 
-        
-        // 🌟 獲取圖片網址
         const imgInput = document.getElementById('custom-spot-img');
         const coverImgUrl = imgInput ? imgInput.value.trim() : "";
 
-        const authInput = document.getElementById('custom-spot-auth');
-        let authCode = authInput ? authInput.value.trim() : "";
-        
-        // 支援從 UI.js 點擊「開發者模式」後自動帶入權限
+        // 🌟 自動授權邏輯：完全不看輸入框，只看系統狀態
+        let authCode = "";
         if (window.rfApp && window.rfApp.isDeveloper) {
-            authCode = "689"; // 自動帶入開發者密碼
+            authCode = "689"; // 只要開啟開發者模式，自動帶入後端通關密碼
         }
 
         if (state.tempCustomSpot) { 
@@ -114,10 +110,10 @@ export function initCustomSpots() {
                 food: "--", 
                 history: "自訂標記", 
                 transport: "自行前往", 
-                coverImg: coverImgUrl, // 🌟 將圖片連結寫入
+                coverImg: coverImgUrl,
                 wikiImg: "",
-                authCode: authCode 
-            }; 
+                authCode: authCode // 帶入自動取得的密碼
+            };
             
             state.savedCustomSpots.push(newSpot); 
             if (typeof saveState !== 'undefined') saveState.customSpots(); 
