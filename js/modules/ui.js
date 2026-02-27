@@ -1,4 +1,4 @@
-// js/modules/ui.js (v664) - 修復分享功能與選單展開 Bug
+// js/modules/ui.js (v665) - 修復推薦路線介面與分享功能
 import { state } from '../core/store.js';
 
 export function initUI() {
@@ -30,7 +30,6 @@ export function initUI() {
         }
     };
 
-    // 🌟 修正：補上大括號 {}，讓選單能夠正常展開與收合
     window.rfApp.ui.toggleDropdown = (listId) => {
         document.querySelectorAll('.custom-select-options').forEach(list => { 
             if (list.id !== listId) {
@@ -63,6 +62,10 @@ export function initUI() {
     window.rfApp.ui.openSettings = () => { const m = document.getElementById('settings-modal-overlay'); if(m) { m.classList.remove('u-hidden'); m.classList.add('u-flex'); } };
     window.rfApp.ui.closeSettings = () => { const m = document.getElementById('settings-modal-overlay'); if(m) { m.classList.remove('u-flex'); m.classList.add('u-hidden'); } };
 
+    // 🌟 新增：推薦路線的開啟與關閉控制
+    window.rfApp.ui.openRouteMenu = () => { const m = document.getElementById('route-select-modal'); if(m) { m.classList.remove('u-hidden'); m.classList.add('u-flex'); } };
+    window.rfApp.ui.closeRouteMenu = () => { const m = document.getElementById('route-select-modal'); if(m) { m.classList.remove('u-flex'); m.classList.add('u-hidden'); } };
+
     window.rfApp.ui.goToStation = () => { 
         if(state.mapInstance) state.mapInstance.flyTo([25.108, 121.805], 16); 
         if(typeof window.rfApp.ui.closeCard === 'function') window.rfApp.ui.closeCard(); 
@@ -86,9 +89,7 @@ export function initUI() {
         }
     };
 
-    // 🌟 新增：解決 shareSpot is not defined 的問題，並加入專屬景點 DeepLink
     window.rfApp.ui.shareSpot = (name, lat, lng) => {
-        // 建立帶有參數的網址，朋友點開時地圖會自動搜尋並飛到這個景點
         const shareUrl = `${window.location.origin}${window.location.pathname}?spot=${encodeURIComponent(name)}`;
         
         if (navigator.share) {
@@ -104,15 +105,6 @@ export function initUI() {
         }
     };
 
-    window.enterMap = window.rfApp.ui.enterMap;
-    window.toggleSidePanel = window.rfApp.ui.toggleSidePanel;
-    window.toggleDropdown = window.rfApp.ui.toggleDropdown;
-    window.openSettings = window.rfApp.ui.openSettings;
-    window.closeSettings = window.rfApp.ui.closeSettings;
-    window.goToStation = window.rfApp.ui.goToStation;
-    window.shareAppMap = window.rfApp.ui.shareAppMap;
-    window.shareSpot = window.rfApp.ui.shareSpot; // 🌟 開放全域呼叫讓 HTML 按鈕使用
-
     window.enableDeveloperMode = () => {
         if (typeof window.showToast === 'function') {
             window.showToast("🔓 已啟用開發者模式！您現在可以直接將景點同步至官方資料庫。", "success");
@@ -120,4 +112,16 @@ export function initUI() {
         window.rfApp.isDeveloper = true; 
         window.closeSettings();
     };
+
+    // 🌟 將指令暴露給全域，讓 HTML 按鈕可以點擊
+    window.enterMap = window.rfApp.ui.enterMap;
+    window.toggleSidePanel = window.rfApp.ui.toggleSidePanel;
+    window.toggleDropdown = window.rfApp.ui.toggleDropdown;
+    window.openSettings = window.rfApp.ui.openSettings;
+    window.closeSettings = window.rfApp.ui.closeSettings;
+    window.openRouteMenu = window.rfApp.ui.openRouteMenu;
+    window.closeRouteMenu = window.rfApp.ui.closeRouteMenu;
+    window.goToStation = window.rfApp.ui.goToStation;
+    window.shareAppMap = window.rfApp.ui.shareAppMap;
+    window.shareSpot = window.rfApp.ui.shareSpot; 
 }
