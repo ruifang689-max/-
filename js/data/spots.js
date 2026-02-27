@@ -1,5 +1,65 @@
 // js/data/spots.js (v655) - 官方數據與在地指南終極融合版
-export const spots = [
+// js/data/spots.js (Google Sheets 動態載入版)
+
+// 填入您剛才複製的 Google Sheets CSV 網址 👇
+const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSOeeREvMoEmLqZ2QFsujd7SMQBZELP2CQn-WqvgWjlvysaCJ_9pLE_PR1Iw4Y06Ds3MlDvCDmxR463/pub?output=csv"; 
+
+export let spots = []; // 改為 let，讓資料可以動態更新
+
+// 簡單的 CSV 解析器 (處理包含換行與逗號的儲存格)
+function parseCSV(text) {
+    const lines = text.split(/\r?\n/);
+    const headers = lines[0].split(',');
+    const result = [];
+    
+    for (let i = 1; i < lines.length; i++) {
+        if (!lines[i].trim()) continue;
+        
+        // 處理 CSV 中可能被雙引號包圍的內容 (例如描述裡有逗號)
+        const row = lines[i].match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g) || lines[i].split(',');
+        const obj = {};
+        
+        headers.forEach((header, index) => {
+            let val = row[index] || '';
+            // 去除頭尾雙引號
+            if (val.startsWith('"') && val.endsWith('"')) {
+                val = val.substring(1, val.length - 1).replace(/""/g, '"');
+            }
+            // 將 tags 轉回陣列
+            if (header.trim() === 'tags') {
+                obj[header.trim()] = val ? val.split(',').map(t => t.trim()) : [];
+            } 
+            // 處理經緯度數字
+            else if (header.trim() === 'lat' || header.trim() === 'lng') {
+                obj[header.trim()] = parseFloat(val);
+            } 
+            else {
+                obj[header.trim()] = val;
+            }
+        });
+        
+        if (obj.name && obj.lat && obj.lng) {
+            result.push(obj);
+        }
+    }
+    return result;
+}
+
+export async function fetchSpotsFromSheet() {
+    try {
+        console.log("🔄 正在從 Google Sheets 同步景點資料...");
+        const response = await fetch(SHEET_CSV_URL);
+        if (!response.ok) throw new Error("網路連線錯誤");
+        
+        const csvText = await response.text();
+        spots = parseCSV(csvText);
+        console.log(`✅ 成功載入 ${spots.length} 筆景點資料！`);
+        return spots;
+        
+    } catch (error) {
+        console.error("❌ Google Sheets 載入失敗，使用備用本機資料", error);
+        // 如果沒網路，這裡可以放幾筆預設的硬碟資料作為保底
+        spots = [
     // ================== 【瑞芳市區】 ==================
     { 
         name: "瑞芳火車站", wikiTitle: "瑞芳車站", 
@@ -249,4 +309,7 @@ export const spots = [
         history: "新北熱門登山路線。沿途平緩原始，可接連觀賞落差極大的「合谷瀑布」、壯觀的「摩天瀑布」與「枇杷洞瀑布」。四周蓊鬱山林環抱，峭壁與壺穴景觀令人流連忘返。", 
         transport: "三貂嶺車站旁碩仁國小登山口", heat: 0.85 
     }
-];
+        ];
+        return spots;
+    }
+}
