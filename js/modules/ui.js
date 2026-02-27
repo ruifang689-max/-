@@ -1,4 +1,4 @@
-// js/modules/ui.js (v663) - 加入分享功能版
+// js/modules/ui.js (v664) - 修復分享功能與選單展開 Bug
 import { state } from '../core/store.js';
 
 export function initUI() {
@@ -30,23 +30,33 @@ export function initUI() {
         }
     };
 
+    // 🌟 修正：補上大括號 {}，讓選單能夠正常展開與收合
     window.rfApp.ui.toggleDropdown = (listId) => {
         document.querySelectorAll('.custom-select-options').forEach(list => { 
-            if (list.id !== listId) list.classList.add('u-hidden'); list.classList.remove('u-flex');
+            if (list.id !== listId) {
+                list.classList.add('u-hidden'); 
+                list.classList.remove('u-flex');
+            }
         });
+        
         const targetList = document.getElementById(listId); 
         if(targetList) {
-            if (targetList.classList.contains('u-hidden') || targetList.style.display === 'none' || !targetList.classList.contains('u-flex')) {
-                targetList.classList.remove('u-hidden'); targetList.classList.add('u-flex');
+            if (targetList.classList.contains('u-hidden')) {
+                targetList.classList.remove('u-hidden'); 
+                targetList.classList.add('u-flex');
             } else {
-                targetList.classList.remove('u-flex'); targetList.classList.add('u-hidden');
+                targetList.classList.remove('u-flex'); 
+                targetList.classList.add('u-hidden');
             }
         }
     };
     
     document.addEventListener('click', (e) => {
         if (!e.target.closest('.custom-select-wrapper')) { 
-            document.querySelectorAll('.custom-select-options').forEach(list => { list.classList.remove('u-flex'); list.classList.add('u-hidden'); });
+            document.querySelectorAll('.custom-select-options').forEach(list => { 
+                list.classList.remove('u-flex'); 
+                list.classList.add('u-hidden'); 
+            });
         }
     });
 
@@ -60,20 +70,36 @@ export function initUI() {
         if (ruiBtn) { ruiBtn.classList.remove('stamped'); void ruiBtn.offsetWidth; ruiBtn.classList.add('stamped'); }
     };
 
-    // 🌟 新增：推薦地圖給好友的功能
     window.rfApp.ui.shareAppMap = () => {
         const shareData = {
             title: '瑞芳導覽地圖',
             text: '發現一個超棒的瑞芳與九份秘境導覽地圖！',
-            url: window.location.href
+            url: window.location.href.split('?')[0]
         };
 
         if (navigator.share) {
             navigator.share(shareData).catch(() => {});
         } else {
-            // 如果電腦瀏覽器不支援 Web Share API，改為複製網址
-            navigator.clipboard.writeText(window.location.href).then(() => {
+            navigator.clipboard.writeText(shareData.url).then(() => {
                 if (typeof window.showToast === 'function') window.showToast('地圖網址已複製到剪貼簿！', 'success');
+            });
+        }
+    };
+
+    // 🌟 新增：解決 shareSpot is not defined 的問題，並加入專屬景點 DeepLink
+    window.rfApp.ui.shareSpot = (name, lat, lng) => {
+        // 建立帶有參數的網址，朋友點開時地圖會自動搜尋並飛到這個景點
+        const shareUrl = `${window.location.origin}${window.location.pathname}?spot=${encodeURIComponent(name)}`;
+        
+        if (navigator.share) {
+            navigator.share({
+                title: `瑞芳導覽地圖 - ${name}`,
+                text: `我推薦你來看看這個超棒的景點：「${name}」！`,
+                url: shareUrl
+            }).catch(() => {});
+        } else {
+            navigator.clipboard.writeText(shareUrl).then(() => {
+                if (typeof window.showToast === 'function') window.showToast(`「${name}」的專屬連結已複製！`, 'success');
             });
         }
     };
@@ -84,7 +110,8 @@ export function initUI() {
     window.openSettings = window.rfApp.ui.openSettings;
     window.closeSettings = window.rfApp.ui.closeSettings;
     window.goToStation = window.rfApp.ui.goToStation;
-    window.shareAppMap = window.rfApp.ui.shareAppMap; // 🌟 開放全域呼叫
+    window.shareAppMap = window.rfApp.ui.shareAppMap;
+    window.shareSpot = window.rfApp.ui.shareSpot; // 🌟 開放全域呼叫讓 HTML 按鈕使用
 
     window.enableDeveloperMode = () => {
         if (typeof window.showToast === 'function') {
