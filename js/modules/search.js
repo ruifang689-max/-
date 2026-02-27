@@ -1,4 +1,4 @@
-// js/modules/search.js (終極融合版：多國語言 + 情境感知 + 即時高光搜尋)
+// js/modules/search.js (修復情境推薦空白與洗牌優化版)
 
 import { spots } from '../data/spots.js';
 import { state, saveState } from '../core/store.js';
@@ -6,19 +6,21 @@ import { showCard } from './cards.js';
 import { getContextualData } from './contextEngine.js'; 
 
 export function initSearch() {
-    // 支援舊版與新版的 ID 命名
     const searchInput = document.getElementById('search-input') || document.getElementById('search');
     const suggestBox = document.getElementById('suggest');
     const clearBtn = document.getElementById('search-clear-btn');
     
     if (!searchInput) return;
 
-    // 🌟 1. 動態 Placeholder (結合情境引擎與多國語言)
+    // 🌟 1. 動態 Placeholder
     const updatePlaceholder = () => {
         if (!searchInput) return;
         if (state.currentLang === 'zh' || !state.currentLang) {
-            const ctx = getContextualData();
-            searchInput.placeholder = `${ctx.timeContext.greeting} 試試「${ctx.seasonContext.keywords[0]}」`;
+            let ctx = { timeContext: { greeting: "您好" }, seasonContext: { keywords: ["風景"] } };
+            try { if (typeof getContextualData === 'function') ctx = getContextualData() || ctx; } catch(e){}
+            
+            const keyword = (ctx.seasonContext?.keywords && ctx.seasonContext.keywords.length > 0) ? ctx.seasonContext.keywords[0] : '秘境';
+            searchInput.placeholder = `${ctx.timeContext?.greeting || '您好'}！試試「${keyword}」`;
         } else {
             searchInput.placeholder = (window.rfApp.t ? window.rfApp.t('search_ph') : "🔍 Search...");
         }
@@ -28,10 +30,9 @@ export function initSearch() {
     window.rfApp.search = window.rfApp.search || {};
     window.rfApp.search.updatePlaceholder = updatePlaceholder;
 
-    // 2. 監聽焦點與輸入，觸發即時 UI 更新
+    // 2. 監聽焦點與輸入
     searchInput.addEventListener('focus', () => {
-        const keyword = searchInput.value.trim().toLowerCase();
-        updateSearchUI(keyword);
+        updateSearchUI(searchInput.value.trim().toLowerCase());
     });
 
     searchInput.addEventListener('input', (e) => {
@@ -43,7 +44,7 @@ export function initSearch() {
         updateSearchUI(keyword);
     });
 
-    // 3. 點擊外部關閉搜尋框
+    // 3. 點擊外部關閉
     document.addEventListener('click', (e) => {
         if (!e.target.closest('#search-container') && !e.target.closest('#suggest') && e.target !== searchInput) {
             if (suggestBox) suggestBox.classList.add('u-hidden');
@@ -62,7 +63,6 @@ export function initSearch() {
         if (clearBtn) { clearBtn.classList.remove('u-hidden'); clearBtn.classList.add('u-block'); }
         updateSearchUI(categoryText.toLowerCase());
         
-        // 同時連動地圖上的圖釘過濾
         setTimeout(() => { if(typeof window.filterSpots === 'function') window.filterSpots(categoryText, null); }, 50);
     };
 
@@ -81,11 +81,11 @@ export function initSearch() {
     };
 
     window.rfApp.search.goToSpot = (spotName) => {
-        const allSpots = spots.concat(state.savedCustomSpots || []);
-        const spot = allSpots.find(s => s.name === spotName);
+        if (!spotName) return;
+        const allSpots = [...spots, ...(state.savedCustomSpots || [])];
+        const spot = allSpots.find(s => s && s.name === spotName);
         if (!spot) return;
 
-        // 儲存搜尋歷史
         state.searchHistory = (state.searchHistory || []).filter(h => h !== spotName);
         state.searchHistory.unshift(spotName);
         if (state.searchHistory.length > 8) state.searchHistory.pop();
@@ -94,7 +94,6 @@ export function initSearch() {
         window.rfApp.search.closeSuggest();
         if (searchInput) searchInput.blur();
 
-        // 飛到景點並展開卡片與叢集
         if (state.mapInstance && spot.lat && spot.lng) {
             state.mapInstance.flyTo([spot.lat, spot.lng], 16, { duration: 1.5 });
             if (state.cluster && spot.markerObj) {
@@ -106,7 +105,6 @@ export function initSearch() {
         }
     };
 
-    // 暴露給 HTML 按鈕使用
     window.goToSpot = window.rfApp.search.goToSpot;
     window.filterByCategory = window.rfApp.search.filterByCategory;
     window.clearSearchInput = window.rfApp.search.clearSearchInput;
@@ -118,7 +116,7 @@ export function initSearch() {
     };
 }
 
-// 🌟 核心 UI 渲染引擎：動態組合所有區塊
+// 🌟 核心 UI 渲染引擎
 function updateSearchUI(keyword) {
     const suggestBox = document.getElementById('suggest');
     const suggestContent = document.getElementById('suggest-content');
@@ -130,7 +128,6 @@ function updateSearchUI(keyword) {
     const isZh = (!state.currentLang || state.currentLang === 'zh');
     const t = window.rfApp.t || (k => k); 
 
-    // --- 區塊 A：歷史紀錄 (僅在未輸入關鍵字時顯示) ---
     let historyHtml = '';
     if (!keyword && state.searchHistory && state.searchHistory.length > 0) {
         historyHtml = `
@@ -139,12 +136,11 @@ function updateSearchUI(keyword) {
                 <span onclick="clearSearchHistory()" style="color: var(--danger); font-size: 12px; font-weight: normal; cursor: pointer;">${t('清除')}</span>
             </div>
             <div style="display: flex; flex-wrap: wrap; gap: 8px; padding: 0 15px 15px 15px; border-bottom: 1px solid var(--divider-color);">
-                ${state.searchHistory.map(h => `<span onclick="goToSpot('${h}')" style="background: var(--divider-color); color: var(--text-main); padding: 5px 12px; border-radius: 15px; font-size: 13px; cursor: pointer; transition: 0.2s;">${h}</span>`).join('')}
+                ${state.searchHistory.map(h => `<span data-name="${h.replace(/"/g, '&quot;')}" onclick="goToSpot(this.getAttribute('data-name'))" style="background: var(--divider-color); color: var(--text-main); padding: 5px 12px; border-radius: 15px; font-size: 13px; cursor: pointer; transition: 0.2s;">${h}</span>`).join('')}
             </div>
         `;
     }
 
-    // --- 區塊 B：快速分類 (支援多國語言，永遠顯示) ---
     const quickCats = [
         { key: 'chip_food', tag: '美食', icon: 'fa-utensils', bg: '#fff3e0', color: '#ff9800', fallback: 'Food' },
         { key: 'chip_nature', tag: '自然', icon: 'fa-leaf', bg: '#e3f2fd', color: '#2196f3', fallback: 'Nature' },
@@ -155,7 +151,6 @@ function updateSearchUI(keyword) {
     let categoryButtonsHtml = quickCats.map(cat => {
         let displayText = window.rfApp.t ? window.rfApp.t(cat.key) : '';
         if (!displayText || displayText === cat.key) displayText = isZh ? cat.tag : cat.fallback;
-        
         return `
             <div onclick="filterByCategory('${cat.tag}')" style="text-align: center; cursor: pointer; transition: transform 0.2s;">
                 <div style="width: 45px; height: 45px; background: ${cat.bg}; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 5px auto; color: ${cat.color}; font-size: 18px;"><i class="fas ${cat.icon}"></i></div>
@@ -173,26 +168,38 @@ function updateSearchUI(keyword) {
         </div>
     `;
 
-    // --- 區塊 C：情境感知推薦 或 搜尋結果 ---
     let resultsHtml = '';
-    const allSpots = spots.concat(state.savedCustomSpots || []);
+    const allSpots = [...spots, ...(state.savedCustomSpots || [])].filter(s => s && s.name);
 
     if (!keyword) {
-        // 【無關鍵字】：顯示情境推薦 (融合自 contextEngine)
-        const ctx = getContextualData();
-        const targetTags = [ctx.timeContext.suggestTag, ...ctx.seasonContext.keywords];
-        const recTitle = isZh ? `🎁 ${ctx.seasonContext.season}的${ctx.timeContext.suggestTag}推薦` : `🎁 Recommended`;
+        // 🌟 修正：加入防護網，避免 contextEngine 取不到資料時崩潰
+        let ctx = { timeContext: {}, seasonContext: {} };
+        try { if (typeof getContextualData === 'function') ctx = getContextualData() || ctx; } catch(e) {}
+        
+        const suggestTag = ctx.timeContext?.suggestTag || '秘境';
+        const season = ctx.seasonContext?.season || '當季';
+        const keywords = ctx.seasonContext?.keywords || [];
+        
+        const targetTags = [suggestTag, ...keywords].filter(Boolean);
+        const recTitle = isZh ? `🎁 ${season}的${suggestTag}推薦` : `🎁 Recommended`;
         
         const matched = allSpots.filter(s => 
             targetTags.some(tag => (s.tags || []).includes(tag) || (s.name || '').includes(tag))
         );
-        const shuffled = (matched.length > 0 ? matched : allSpots).sort(() => 0.5 - Math.random()).slice(0, 5);
+        
+        // 🌟 修正：採用 100% 穩定的洗牌演算法，並確保 fallback 有資料
+        const baseList = matched.length > 0 ? matched : allSpots;
+        const shuffled = baseList.map(value => ({ value, sort: Math.random() }))
+                                 .sort((a, b) => a.sort - b.sort)
+                                 .map(({ value }) => value)
+                                 .slice(0, 5);
 
-        resultsHtml = `<div style="padding: 10px 15px; font-size: 13px; color: var(--accent); font-weight: bold; border-bottom: 1px solid var(--divider-color);">${recTitle}</div>`;
-        resultsHtml += buildSpotListHtml(shuffled, ''); // 不需高光
+        if (shuffled.length > 0) {
+            resultsHtml = `<div style="padding: 10px 15px; font-size: 13px; color: var(--accent); font-weight: bold; border-bottom: 1px solid var(--divider-color);">${recTitle}</div>`;
+            resultsHtml += buildSpotListHtml(shuffled, ''); 
+        }
 
     } else {
-        // 【有關鍵字】：顯示即時多維度搜尋結果
         const results = allSpots.filter(spot => {
             const nameMatch = spot.name && spot.name.toLowerCase().includes(keyword);
             const tagMatch = spot.tags && spot.tags.some(t => t.toLowerCase().includes(keyword));
@@ -213,11 +220,10 @@ function updateSearchUI(keyword) {
         }
     }
 
-    // 組合最終 HTML 並寫入 DOM
     suggestContent.innerHTML = historyHtml + categoryHtml + resultsHtml;
 }
 
-// 輔助函數：建立景點清單的 HTML (支援縮圖與關鍵字高光)
+// 輔助函數：建立景點清單的 HTML
 function buildSpotListHtml(spotsArray, keyword) {
     return spotsArray.map(spot => {
         const mainTag = spot.tags && spot.tags.length > 0 ? spot.tags[0] : (spot.category || '秘境');
@@ -230,8 +236,11 @@ function buildSpotListHtml(spotsArray, keyword) {
             } catch (e) {}
         }
         
+        // 🌟 修正：改用 data-name 儲存名稱，防止名稱內有引號造成 HTML 壞掉
+        const safeName = spot.name.replace(/"/g, '&quot;');
+
         return `
-            <div class="search-result-item" onclick="goToSpot('${spot.name}')" style="padding: 12px 15px; border-bottom: 1px solid var(--divider-color); cursor: pointer; display: flex; align-items: center; gap: 12px; transition: background 0.2s;">
+            <div class="search-result-item" data-name="${safeName}" onclick="goToSpot(this.getAttribute('data-name'))" style="padding: 12px 15px; border-bottom: 1px solid var(--divider-color); cursor: pointer; display: flex; align-items: center; gap: 12px; transition: background 0.2s;">
                 <div style="width: 45px; height: 45px; border-radius: 8px; background: var(--divider-color); display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
                     ${spot.coverImg ? `<img src="${spot.coverImg}" style="width:100%; height:100%; object-fit:cover;">` : `<i class="fas ${keyword ? 'fa-map-marker-alt' : 'fa-star'}" style="color: ${keyword ? 'var(--primary)' : 'var(--accent)'}; font-size: 20px;"></i>`}
                 </div>
