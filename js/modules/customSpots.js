@@ -217,6 +217,17 @@ export function initCustomSpots() {
         if (typeof window.showToast === 'function') window.showToast(window.rfApp.t('toast_custom_deleted'), 'info');
     };
 
+    // 🌟 開發者專屬：將編輯後的景點同步更新至雲端
+    window.rfApp.custom.uploadEditToCloud = () => {
+        if (typeof window.showToast === 'function') {
+            window.showToast("準備將修改同步至雲端...", "info");
+        }
+        // 這裡未來可以發送 fetch 請求給您的 Google Apps Script 執行「更新 (Update)」邏輯
+        console.log("觸發雲端同步更新：", state.currentEditingSpotName);
+    };
+    
+    // 記得將它暴露給全域
+    window.uploadEditToCloud = window.rfApp.custom.uploadEditToCloud;
     window.closeCustomSpotModal = window.rfApp.custom.closeCustomSpotModal;
     window.confirmCustomSpot = window.rfApp.custom.confirmCustomSpot;
     window.openEditModal = window.rfApp.custom.openEditModal;
