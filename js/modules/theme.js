@@ -183,11 +183,14 @@ export function initTheme() {
         const textSpan = document.getElementById('current-theme-text');
         if (colorSwatch && textSpan) {
             colorSwatch.style.background = color;
+            // 🌟 將選定的顏色名稱送進翻譯引擎
+            let targetText = "";
             if (color === '#007bff' && !syncIntro) {
-                textSpan.innerText = '系統主題色 (預設)';
+                targetText = '系統主題色 (預設)';
             } else {
-                textSpan.innerText = THEME_NAME_MAP[color] || `自訂顏色 (${color})`;
+                targetText = THEME_NAME_MAP[color] || `自訂顏色 (${color})`;
             }
+            textSpan.innerText = window.rfApp.t(targetText);
         }
     };
 
@@ -204,7 +207,11 @@ export function initTheme() {
         
         localStorage.setItem('ruifang_font', fontValue);
         const displayLabel = fontText || FONT_NAME_MAP[fontValue] || FONT_NAME_MAP['default'];
-        if (document.getElementById('current-font-text')) document.getElementById('current-font-text').innerText = displayLabel;
+        
+        // 🌟 將選定的字體名稱送進翻譯引擎
+        if (document.getElementById('current-font-text')) {
+            document.getElementById('current-font-text').innerText = window.rfApp.t(displayLabel);
+        }
     };
 
     // 🌟 向下相容橋樑
