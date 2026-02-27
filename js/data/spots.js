@@ -6,39 +6,61 @@ const SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSOeeREvM
 
 export let spots = []; // 改為 let，讓資料可以動態更新
 
-// 簡單的 CSV 解析器 (處理包含換行與逗號的儲存格)
+// 🌟 強化版 CSV 解析器 (完美處理空欄位與內含逗號的儲存格)
 function parseCSV(text) {
     const lines = text.split(/\r?\n/);
-    const headers = lines[0].split(',');
+    if (lines.length === 0) return [];
+    
+    const headers = lines[0].split(',').map(h => h.trim());
     const result = [];
     
     for (let i = 1; i < lines.length; i++) {
         if (!lines[i].trim()) continue;
         
-        // 處理 CSV 中可能被雙引號包圍的內容 (例如描述裡有逗號)
-        const row = lines[i].match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g) || lines[i].split(',');
-        const obj = {};
+        const row = [];
+        let currentVal = '';
+        let inQuote = false;
         
+        // 逐字元掃描，確保連續逗號 (,,) 能被正確辨識為空字串
+        for (let j = 0; j < lines[i].length; j++) {
+            const char = lines[i][j];
+            if (char === '"') {
+                inQuote = !inQuote; // 切換引號狀態
+            } else if (char === ',' && !inQuote) {
+                row.push(currentVal);
+                currentVal = ''; // 遇到逗號且不在引號內，結算當前欄位
+            } else {
+                currentVal += char;
+            }
+        }
+        row.push(currentVal); // 推入最後一個欄位
+        
+        const obj = {};
         headers.forEach((header, index) => {
-            let val = row[index] || '';
-            // 去除頭尾雙引號
+            let val = row[index] !== undefined ? row[index].trim() : '';
+            
+            // 處理被雙引號包圍的內容與跳脫引號
             if (val.startsWith('"') && val.endsWith('"')) {
                 val = val.substring(1, val.length - 1).replace(/""/g, '"');
             }
-            // 將 tags 轉回陣列
-            if (header.trim() === 'tags') {
-                obj[header.trim()] = val ? val.split(',').map(t => t.trim()) : [];
+            
+            if (header === 'tags') {
+                obj[header] = val ? val.split(',').map(t => t.trim()) : [];
             } 
-            // 處理經緯度數字
-            else if (header.trim() === 'lat' || header.trim() === 'lng') {
-                obj[header.trim()] = parseFloat(val);
+            else if (header === 'lat' || header === 'lng') {
+                obj[header] = parseFloat(val);
             } 
+            // 如果您試算表有設定 heat(熱度) 欄位，順便轉數字
+            else if (header === 'heat') {
+                obj[header] = parseFloat(val) || 0.5; 
+            }
             else {
-                obj[header.trim()] = val;
+                obj[header] = val;
             }
         });
         
-        if (obj.name && obj.lat && obj.lng) {
+        // 嚴格檢查：必須有名字，且經緯度必須是有效數字
+        if (obj.name && !isNaN(obj.lat) && !isNaN(obj.lng)) {
             result.push(obj);
         }
     }
