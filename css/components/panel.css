@@ -19,7 +19,7 @@
 #suggest, #fav-list-panel { pointer-events: auto; background: var(--glass); border-radius: var(--radius-md); margin-top: 5px; overflow-y: auto; width: 100%; display: none; box-shadow: var(--card-shadow); z-index: calc(var(--z-controls) + 10); scrollbar-width: none; border: 1px solid var(--border-color); }
 
 /* 👇 關鍵修改：將搜尋與推薦選單的最大高度從 40vh 提高到 65vh，讓列表更長 */
-#suggest { max-height: 65vh; }
+#suggest { max-height: 55vh; }
 
 .suggest-header { padding: 10px 15px; border-bottom: 1px solid var(--divider-color); display: flex; justify-content: space-between; align-items: center; background: var(--bg-color); position: sticky; top: 0; z-index: 10; font-size: 12px;}
 #fav-list-panel { position: absolute; bottom: calc(150px + env(safe-area-inset-bottom, 0px)); right: calc(70px + env(safe-area-inset-right, 0px)); width: 200px; max-height: 250px; }
@@ -39,7 +39,7 @@ body.dark-mode .route-name { color: #e0e0e0 !important; }
 
 /* 👇 橫向螢幕 (Landscape) 時，將下拉選單限制放寬至 55vh (原本為 35vh) */
 @media (max-width: 768px) and (orientation: portrait) { #route-info-panel { top: calc(140px + env(safe-area-inset-top, 0px)); } }
-@media (max-height: 500px) and (orientation: landscape) { #suggest { max-height: 55vh; } #route-info-panel { top: 90px; } }
+@media (max-height: 500px) and (orientation: landscape) { #suggest { max-height: 35vh; } #route-info-panel { top: 90px; } }
 
 @media (orientation: landscape) and (max-height: 600px) {
     #side-function-zone { top: auto !important; bottom: 20px !important; left: 0 !important; right: 0 !important; transform: none !important; flex-direction: row !important; justify-content: center !important; align-items: center !important; width: 100vw !important; }
