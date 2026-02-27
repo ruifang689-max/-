@@ -1,94 +1,92 @@
-// js/data/spots.js (完全雲端化版)
+// js/core/store.js (修復循環參照 Bug 版)
 
-// 🌟 填入您提供的 Google 試算表發布網址
-const USER_SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vSOeeREvMoEmLqZ2QFsujd7SMQBZELP2CQn-WqvgWjlvysaCJ_9pLE_PR1Iw4Y06Ds3MlDvCDmxR463/pubhtml";
+// 1. 定義所有 LocalStorage 的金鑰
+const STORAGE_KEYS = {
+    myFavs: 'ruifang_favs',
+    savedCustomSpots: 'ruifang_custom_spots',
+    searchHistory: 'ruifang_search_history'
+};
 
-// 🌟 系統自動幫您將 html 網址轉換為程式讀取專用的 csv 格式，避免錯誤！
-const SHEET_CSV_URL = USER_SHEET_URL.replace("/pubhtml", "/pub?output=csv");
-
-export const spots = []; 
-
-function parseCSV(text) {
-    const lines = text.split(/\r?\n/);
-    if (lines.length === 0) return [];
-    
-    // 去除隱藏 BOM 符號
-    const headers = lines[0].replace(/^\uFEFF/, '').split(',').map(h => h.trim());
-    const result = [];
-    
-    for (let i = 1; i < lines.length; i++) {
-        if (!lines[i].trim()) continue;
-        
-        const row = [];
-        let currentVal = '';
-        let inQuote = false;
-        
-        // 逐字元掃描，支援試算表自動加上的雙引號
-        for (let j = 0; j < lines[i].length; j++) {
-            const char = lines[i][j];
-            if (char === '"') {
-                inQuote = !inQuote;
-            } else if (char === ',' && !inQuote) {
-                row.push(currentVal);
-                currentVal = '';
-            } else {
-                currentVal += char;
-            }
-        }
-        row.push(currentVal);
-        
-        const obj = {};
-        headers.forEach((header, index) => {
-            let val = row[index] !== undefined ? row[index].trim() : '';
-            
-            // 過濾並還原被試算表包裝的雙引號
-            if (val.startsWith('"') && val.endsWith('"')) {
-                val = val.substring(1, val.length - 1).replace(/""/g, '"');
-            }
-            
-            if (header === 'tags') {
-                obj[header] = val ? val.split(',').map(t => t.trim()) : [];
-            } 
-            else if (header === 'lat' || header === 'lng') {
-                obj[header] = parseFloat(val);
-            } 
-            else if (header === 'heat') {
-                obj[header] = parseFloat(val) || 0.5; 
-            }
-            else {
-                obj[header] = val;
-            }
-        });
-        
-        // 嚴格檢查：只載入有名字且經緯度正確的景點
-        if (obj.name && !isNaN(obj.lat) && !isNaN(obj.lng)) {
-            result.push(obj);
-        }
-    }
-    return result;
+// 🌟 新增：安全轉換器 (過濾掉會造成無限循環的 markerObj)
+function safeStringify(data) {
+    return JSON.stringify(data, (key, value) => {
+        // 如果遇到名為 markerObj 的屬性，直接略過不存入 LocalStorage
+        if (key === 'markerObj') return undefined;
+        return value;
+    });
 }
 
-export async function fetchSpotsFromSheet() {
-    try {
-        console.log("🔄 正在從 Google Sheets 同步雲端景點資料...");
-        const response = await fetch(SHEET_CSV_URL);
-        if (!response.ok) throw new Error("網路連線錯誤");
-        
-        const csvText = await response.text();
-        const cloudSpots = parseCSV(csvText);
-        
-        // 清空並將所有雲端資料推入全域陣列
-        spots.length = 0; 
-        spots.push(...cloudSpots); 
-        
-        console.log(`✅ 成功載入！完全雲端同步，共 ${spots.length} 筆景點！`);
-        return spots;
-        
-    } catch (error) {
-        console.error("❌ Google Sheets 載入失敗", error);
-        if (typeof window.showToast === 'function') {
-            window.showToast("資料庫連線失敗，請檢查網路狀態", "error");
+// 2. 建立基礎狀態 (從 LocalStorage 讀取初始值)
+const baseState = {
+    mapInstance: null,
+    cluster: null,
+    userPos: null,
+    targetSpot: null,
+    currentRoute: null,
+    navMode: 'walking',
+    currentLang: localStorage.getItem('ruifang_lang') || 'zh',
+    tourModeInterval: null,
+    tempCustomSpot: null,
+    currentEditingSpotName: null,
+    _tempNavLat: null,
+    _tempNavLng: null,
+    
+    myFavs: JSON.parse(localStorage.getItem(STORAGE_KEYS.myFavs) || '[]'),
+    savedCustomSpots: JSON.parse(localStorage.getItem(STORAGE_KEYS.savedCustomSpots) || '[]'),
+    searchHistory: JSON.parse(localStorage.getItem(STORAGE_KEYS.searchHistory) || '[]')
+};
+
+// 3. 🌟 陣列代理工廠 (攔截 push, splice, pop 等所有陣列操作)
+function createReactiveArray(storageKey, initialArray) {
+    return new Proxy(initialArray, {
+        set(target, property, value) {
+            target[property] = value;
+            // 只要陣列內容有任何變動，自動幫您存進 LocalStorage！
+            if (property !== 'length') { 
+                localStorage.setItem(storageKey, safeStringify(target)); // 🌟 改用 safeStringify
+            }
+            return true;
+        },
+        deleteProperty(target, property) {
+            delete target[property];
+            localStorage.setItem(storageKey, safeStringify(target)); // 🌟 改用 safeStringify
+            return true;
         }
-        return spots;
+    });
+}
+
+// 將需要自動存檔的陣列變成「響應式陣列」
+baseState.myFavs = createReactiveArray(STORAGE_KEYS.myFavs, baseState.myFavs);
+baseState.savedCustomSpots = createReactiveArray(STORAGE_KEYS.savedCustomSpots, baseState.savedCustomSpots);
+baseState.searchHistory = createReactiveArray(STORAGE_KEYS.searchHistory, baseState.searchHistory);
+
+// 4. 🌟 匯出全域 state (攔截對整個變數的直接替換)
+export const state = new Proxy(baseState, {
+    set(target, prop, value) {
+        if (STORAGE_KEYS[prop]) {
+            // 如果有其他模組直接替換整個陣列，重新把它包裝成 Proxy 並存檔
+            target[prop] = createReactiveArray(STORAGE_KEYS[prop], value);
+            localStorage.setItem(STORAGE_KEYS[prop], safeStringify(value)); // 🌟 改用 safeStringify
+            return true;
+        }
+        
+        // 語言切換也順便自動存檔
+        if (prop === 'currentLang') {
+            localStorage.setItem('ruifang_lang', value);
+        }
+        
+        target[prop] = value;
+        return true;
     }
+});
+
+// 5. 為了向下相容保留 saveState
+export const saveState = {
+    favs: () => localStorage.setItem(STORAGE_KEYS.myFavs, safeStringify(state.myFavs)), // 🌟 改用 safeStringify
+    customSpots: () => localStorage.setItem(STORAGE_KEYS.savedCustomSpots, safeStringify(state.savedCustomSpots)), // 🌟 改用 safeStringify
+    history: () => localStorage.setItem(STORAGE_KEYS.searchHistory, safeStringify(state.searchHistory)) // 🌟 改用 safeStringify
+};
+
+export function initStore() {
+    console.log("📦 狀態管理引擎 (Proxy) 已全自動啟動！(含循環參照防護)");
 }
