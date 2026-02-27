@@ -1,1 +1,58 @@
+/* css/base.css - 基礎設定與卷軸美化 */
 
+/* 1. 全域基礎重置 (Reset) */
+*, *::before, *::after {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    /* 防止手機版或電腦版出現不正常的橫向捲動 */
+    overflow-x: hidden; 
+}
+
+/* ==========================================
+   🌟 電腦版捲軸美化 (Custom Scrollbar)
+========================================== */
+
+/* 針對 Firefox 瀏覽器的簡化設定 */
+* {
+    scrollbar-width: thin; /* 讓捲軸變細 */
+    scrollbar-color: var(--primary, #007bff) transparent; /* 滑塊顏色 與 軌道顏色 */
+}
+
+/* 針對 WebKit 內核 (Chrome, Edge, Safari) 的詳細美化 */
+
+/* 捲軸整體的寬度與高度 */
+::-webkit-scrollbar {
+    width: 6px;  /* 垂直捲軸的寬度 (設定細一點比較有現代感) */
+    height: 6px; /* 水平捲軸的高度 */
+}
+
+/* 捲軸軌道 (背景) */
+::-webkit-scrollbar-track {
+    background: transparent; /* 透明背景，讓畫面更乾淨 */
+    border-radius: 10px;
+}
+
+/* 捲軸滑塊 (手抓的那個Bar) */
+::-webkit-scrollbar-thumb {
+    background: rgba(180, 180, 180, 0.5); /* 預設為半透明的低調灰色 */
+    border-radius: 10px; /* 圓角滑塊 */
+    /* 加上一點內陰影讓它看起來有立體感（可選）*/
+    box-shadow: inset 0 0 6px rgba(0,0,0,0.1); 
+}
+
+/* 滑鼠懸停在捲軸滑塊上的效果 (結合動態主題色) */
+::-webkit-scrollbar-thumb:hover {
+    background: var(--primary, #007bff); /* 滑鼠游標移過去時，變成使用者選定的主題色！ */
+}
+
+/* 如果有需要，可以針對特定區塊(如側邊欄、卡片內容)加粗捲軸，這裡以卡片為例 */
+#card::-webkit-scrollbar, 
+.modal-box::-webkit-scrollbar {
+    width: 4px; /* 手機版或彈出視窗的捲軸可以更細 */
+}
