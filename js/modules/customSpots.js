@@ -1,7 +1,10 @@
-// js/modules/customSpots.js (v657) - 國際化翻譯支援版
+// js/modules/customSpots.js (v658) - Google Sheets 雲端雙向同步版
 import { state, saveState } from '../core/store.js';
 import { addMarkerToMap } from './markers.js';
 import { showCard } from './cards.js';
+
+// 🌟 將這裡替換為您在第一步複製的 Apps Script 網址 🌟
+const GAS_WEB_APP_URL = "請將這裡替換成您的_Apps_Script_部署網址";
 
 export function initCustomSpots() {
     if (state.mapInstance) {
@@ -84,23 +87,50 @@ export function initCustomSpots() {
 
     window.rfApp.custom.closeCustomSpotModal = () => { const m = document.getElementById('custom-spot-modal'); if(m) { m.classList.remove('u-flex'); m.classList.add('u-hidden'); } };
     
+    // 🌟 核心修改：新增景點時，同步推播至 Google 試算表
     window.rfApp.custom.confirmCustomSpot = () => { 
         const spotName = document.getElementById('custom-spot-name').value.trim() || "我的秘境"; 
         if (state.tempCustomSpot) { 
-            const newSpot = { name: spotName, lat: state.tempCustomSpot.lat, lng: state.tempCustomSpot.lng, tags: ["自訂"], highlights: `詳細地址：${state.tempCustomSpot.addr}`, food: "--", history: "自訂標記", transport: "自行前往", wikiImg: "" }; 
+            const newSpot = { 
+                name: spotName, 
+                lat: state.tempCustomSpot.lat, 
+                lng: state.tempCustomSpot.lng, 
+                tags: ["自訂"], 
+                highlights: `詳細地址：${state.tempCustomSpot.addr}`, 
+                address: state.tempCustomSpot.addr, // 提取純地址給試算表用
+                food: "--", 
+                history: "自訂標記", 
+                transport: "自行前往", 
+                wikiImg: "" 
+            }; 
+            
+            // 1. 本地儲存與渲染 (秒速反應，讓使用者感覺很順)
             state.savedCustomSpots.push(newSpot); 
             if (typeof saveState !== 'undefined') saveState.customSpots(); 
             addMarkerToMap(newSpot); 
             showCard(newSpot); 
-            // 🌟 動態翻譯
+            
             if (typeof window.showToast === 'function') window.showToast(window.rfApp.t('toast_custom_saved'), 'success');
+
+            // 2. 🌟 背景非同步寫入 Google 試算表
+            if (GAS_WEB_APP_URL && GAS_WEB_APP_URL.includes('script.google.com')) {
+                fetch(GAS_WEB_APP_URL, {
+                    method: 'POST',
+                    mode: 'no-cors', // 避免遇到跨網域 (CORS) 阻擋
+                    headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                    body: JSON.stringify(newSpot)
+                }).then(() => {
+                    console.log('✅ 自訂景點已成功推播至 Google 試算表！');
+                }).catch(err => {
+                    console.error('❌ 上傳試算表失敗', err);
+                });
+            }
         } 
         window.rfApp.custom.closeCustomSpotModal(); 
     };
 
     window.rfApp.custom.copyAddr = (addr) => {
         navigator.clipboard.writeText(addr).then(() => {
-            // 🌟 動態翻譯
             if (typeof window.showToast === 'function') window.showToast(window.rfApp.t('toast_copy_success'), 'info');
         });
     };
@@ -109,6 +139,7 @@ export function initCustomSpots() {
         if(navigator.share){ navigator.share({title:'瑞芳秘境', text:addr, url:link}).catch(()=>{}); } 
     };
     
+    // ... 下方的編輯與刪除功能保持不變 ...
     window.rfApp.custom.openEditModal = (name) => { 
         state.currentEditingSpotName = name; 
         const s = state.savedCustomSpots.find(x => x.name === name); 
@@ -137,8 +168,10 @@ export function initCustomSpots() {
         if(s.markerObj) state.cluster.removeLayer(s.markerObj); 
         
         addMarkerToMap(s); window.rfApp.custom.closeEditModal(); showCard(s); 
-        // 🌟 動態翻譯
         if (typeof window.showToast === 'function') window.showToast(window.rfApp.t('toast_custom_saved'), 'success');
+
+        // 備註：編輯與刪除在此邏輯中不回寫雲端，僅本地更新。
+        // 若需雲端刪除，需進一步擴充 Apps Script 邏輯。
     };
     
     window.rfApp.custom.deleteCustomSpot = (name) => { 
@@ -154,7 +187,6 @@ export function initCustomSpots() {
             if (typeof saveState !== 'undefined') saveState.favs(); 
         } 
         if(typeof window.closeCard === 'function') window.closeCard(); 
-        // 🌟 動態翻譯
         if (typeof window.showToast === 'function') window.showToast(window.rfApp.t('toast_custom_deleted'), 'info');
     };
 
