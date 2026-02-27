@@ -160,7 +160,7 @@ function updateSearchUI(keyword) {
     }).join('');
 
     const categoryHtml = `
-        <div style="padding: 10px 15px; font-size: 13px; color: #ff5722; font-weight: bold; border-bottom: ${keyword ? 'none' : '1px solid var(--divider-color)'};">
+        <div style="padding: 10px 15px; font-size: 13px; color: #f39c12; font-weight: bold; border-bottom: ${keyword ? 'none' : '1px solid var(--divider-color)'};">
             <i class="fas fa-compass"></i> ${t('快速分類')}
         </div>
         <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; padding: 5px 15px 15px 15px; border-bottom: 1px solid var(--divider-color);">
