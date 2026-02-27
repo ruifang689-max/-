@@ -404,6 +404,11 @@
                 📍 載入中...
             </div>
             <input type="text" id="custom-spot-name" class="modal-input" placeholder="請為此秘境命名 (例：我的秘密基地)">
+            <input type="text" id="custom-spot-img" class="modal-input" placeholder="🖼️ 貼上圖片網址 (可選，例如 Imgur 連結)" style="margin-top: 10px; font-size: 14px;"> 
+            <input type="password" id="custom-spot-auth" class="modal-input" placeholder="🔑 官方資料庫認證碼 (一般使用者請留空)" style="margin-top: 10px; font-size: 13px; background: #fdfdfd; border: 1px dashed #ccc;">
+            <div style="font-size: 11px; color: #888; margin-top: 6px; text-align: left; line-height: 1.5;">
+                * 留空：僅儲存於您的手機/電腦本機端。<br>
+                * 填寫認證碼：驗證後將永久匯入官方全域地圖。
             <div class="modal-btns">
                 <button class="modal-cancel" onclick="closeCustomSpotModal()">取消</button>
                 <button class="modal-save" onclick="confirmCustomSpot()">儲存景點</button>
@@ -478,6 +483,7 @@
     
 </body>
 </html>
+
 
 
 
