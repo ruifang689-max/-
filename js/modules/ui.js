@@ -1,4 +1,4 @@
-// js/modules/ui.js (v661) - 解決命名衝突版
+// js/modules/ui.js (v663) - 加入分享功能版
 import { state } from '../core/store.js';
 
 export function initUI() {
@@ -53,12 +53,29 @@ export function initUI() {
     window.rfApp.ui.openSettings = () => { const m = document.getElementById('settings-modal-overlay'); if(m) { m.classList.remove('u-hidden'); m.classList.add('u-flex'); } };
     window.rfApp.ui.closeSettings = () => { const m = document.getElementById('settings-modal-overlay'); if(m) { m.classList.remove('u-flex'); m.classList.add('u-hidden'); } };
 
-    // 🌟 已移除與 gps.js 衝突的 resetNorth，確保「回到瑞芳」功能正常
     window.rfApp.ui.goToStation = () => { 
         if(state.mapInstance) state.mapInstance.flyTo([25.108, 121.805], 16); 
         if(typeof window.rfApp.ui.closeCard === 'function') window.rfApp.ui.closeCard(); 
         const ruiBtn = document.querySelector('.rui-icon');
         if (ruiBtn) { ruiBtn.classList.remove('stamped'); void ruiBtn.offsetWidth; ruiBtn.classList.add('stamped'); }
+    };
+
+    // 🌟 新增：推薦地圖給好友的功能
+    window.rfApp.ui.shareAppMap = () => {
+        const shareData = {
+            title: '瑞芳導覽地圖',
+            text: '發現一個超棒的瑞芳與九份秘境導覽地圖！',
+            url: window.location.href
+        };
+
+        if (navigator.share) {
+            navigator.share(shareData).catch(() => {});
+        } else {
+            // 如果電腦瀏覽器不支援 Web Share API，改為複製網址
+            navigator.clipboard.writeText(window.location.href).then(() => {
+                if (typeof window.showToast === 'function') window.showToast('地圖網址已複製到剪貼簿！', 'success');
+            });
+        }
     };
 
     window.enterMap = window.rfApp.ui.enterMap;
@@ -67,18 +84,13 @@ export function initUI() {
     window.openSettings = window.rfApp.ui.openSettings;
     window.closeSettings = window.rfApp.ui.closeSettings;
     window.goToStation = window.rfApp.ui.goToStation;
+    window.shareAppMap = window.rfApp.ui.shareAppMap; // 🌟 開放全域呼叫
 
-    // 🌟 開發者模式啟動邏輯
     window.enableDeveloperMode = () => {
         if (typeof window.showToast === 'function') {
             window.showToast("🔓 已啟用開發者模式！您現在可以直接將景點同步至官方資料庫。", "success");
         }
-        
-        // 將認證密碼存入系統狀態中，讓 customSpots.js 儲存時可以直接抓取
         window.rfApp.isDeveloper = true; 
-        
-        // 關閉設定視窗
         window.closeSettings();
     };
-
 }
