@@ -90,10 +90,15 @@ export function initFirebase() {
     });
 }
 
+// ... (上方 import 與變數保持不變) ...
+
 function updateLoginUI(user) {
     const btnText = document.getElementById('login-btn-text');
     const userInfo = document.getElementById('user-info');
     const loginBtn = document.getElementById('google-login-btn');
+    
+    // 🌟 獲取開發者按鈕區塊
+    const devModeContainer = document.getElementById('dev-mode-container'); 
 
     if (user) {
         if(btnText) btnText.innerText = "登出帳號";
@@ -102,12 +107,26 @@ function updateLoginUI(user) {
             userInfo.innerHTML = `👋 歡迎回來，<span style="color:var(--primary);">${user.displayName}</span>！<br><span style="font-size:12px; font-weight:normal; color:var(--success);">您的地圖資料已啟用雲端同步 <i class="fas fa-cloud-upload-alt"></i></span>`;
         }
         if(loginBtn) { loginBtn.style.background = "var(--divider-color)"; loginBtn.style.color = "var(--text-main)"; }
+        
+        // 🌟 核心驗證：判斷登入的 Email 是否為官方帳號
+        if (devModeContainer) {
+            if (user.email === 'ruifang689@gmail.com') {
+                devModeContainer.style.display = 'block'; // 是開發者 -> 顯示按鈕
+            } else {
+                devModeContainer.style.display = 'none';  // 是一般使用者 -> 隱藏按鈕
+            }
+        }
     } else {
         if(btnText) btnText.innerText = "使用 Google 帳號登入";
         if(userInfo) userInfo.style.display = "none";
         if(loginBtn) { loginBtn.style.background = "#4285F4"; loginBtn.style.color = "white"; }
+        
+        // 🌟 沒登入時，一律隱藏開發者按鈕
+        if (devModeContainer) devModeContainer.style.display = 'none';
     }
 }
+
+// ... (下方 pullFromCloud 等函數保持不變) ...
 
 async function pullFromCloud(uid) {
     try {
