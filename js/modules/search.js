@@ -69,6 +69,7 @@ export function initSearch() {
         const fragment = document.createDocumentFragment();
         
         const isZh = (!state.currentLang || state.currentLang === 'zh');
+        const t = window.rfApp.t || (k => k); // 取得翻譯函數
         
         // A. 歷史紀錄
         if (state.searchHistory && state.searchHistory.length > 0) {
@@ -77,7 +78,7 @@ export function initSearch() {
             // 簡單的標題翻譯
             const histTitle = isZh ? '🕒 最近搜尋' : '🕒 Recent';
             const clearText = isZh ? '清除' : 'Clear';
-            title.innerHTML = `${histTitle} <span class="clear-history-btn" onclick="rfApp.search.clearHistory()">${clearText}</span>`;
+            title.innerHTML = `🕒 ${t('最近搜尋')} <span class="clear-history-btn" onclick="rfApp.search.clearHistory()">${t('清除')}</span>`;
             fragment.appendChild(title);
             state.searchHistory.forEach(h => {
                 const node = tplListItem.content.cloneNode(true);
@@ -91,7 +92,7 @@ export function initSearch() {
         // B. 快速分類 (支援多國語言)
         const catTitle = document.createElement('div');
         catTitle.className = "search-section-title";
-        catTitle.textContent = isZh ? "🏷️ 快速分類" : "🏷️ Quick Categories";
+       catTitle.textContent = `🏷️ ${t('快速分類')}`; // 🌟 讓動態引擎去翻譯
         fragment.appendChild(catTitle);
         
         const catBox = document.createElement("div");
