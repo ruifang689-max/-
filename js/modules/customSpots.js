@@ -159,11 +159,23 @@ export function initCustomSpots() {
         state.currentEditingSpotName = name; 
         const s = state.savedCustomSpots.find(x => x.name === name); 
         if(!s) return; 
+        
         document.getElementById('edit-name').value = s.name; 
         document.getElementById('edit-highlights').value = s.highlights; 
         document.getElementById('edit-history').value = s.history; 
         const preview = document.getElementById('edit-image-preview');
         if(s.wikiImg) { preview.classList.remove('u-hidden'); preview.classList.add('u-block'); preview.src = s.wikiImg; } else { preview.classList.remove('u-block'); preview.classList.add('u-hidden'); preview.src = ""; }
+        
+        // 🌟 判斷是否為開發者，來決定要不要顯示右上角的上傳圖示
+        const devUploadBtn = document.getElementById('dev-upload-btn');
+        if (devUploadBtn) {
+            if (window.rfApp && window.rfApp.isDeveloper) {
+                devUploadBtn.style.display = 'block';
+            } else {
+                devUploadBtn.style.display = 'none';
+            }
+        }
+
         const m = document.getElementById('edit-modal-overlay'); 
         if(m) { m.classList.remove('u-hidden'); m.classList.add('u-flex'); }
     };
