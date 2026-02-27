@@ -7,6 +7,7 @@ window.rfApp = {
 import { events } from './core/events.js?v=651'; // 🌟 引入事件匯流排
 import { initErrorHandler, showToast } from './modules/toast.js?v=651';
 import { state } from './core/store.js?v=651'; 
+import { fetchSpotsFromSheet } from './data/spots.js?v=663';
 import { initMap, toggleLayer } from './core/map.js?v=651'; 
 import { fetchWeather } from './modules/weather.js?v=662'; // 更新 v662
 import { initGPS } from './modules/gps.js?v=662'; // 更新 v662
@@ -78,7 +79,7 @@ function handleDeepLink() {
     });
 }
 
-function bootstrapApp() {
+async function bootstrapApp() {
     initErrorHandler();
     
     safeInit(initTheme, '主題與語系');
@@ -90,6 +91,10 @@ function bootstrapApp() {
 
     // 🌟 先註冊 DeepLink 監聽器
     safeInit(handleDeepLink, 'URL路由解析');
+
+    // 🌟 【新增】等待 Google Sheets 資料載入完成
+    if (typeof showToast === 'function') showToast("🔄 同步雲端景點資料中...", "info");
+    await fetchSpotsFromSheet();
 
     initMap().then(() => {
         safeInit(initGPS, 'GPS定位');
