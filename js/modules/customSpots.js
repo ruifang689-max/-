@@ -90,6 +90,11 @@ export function initCustomSpots() {
     // 🌟 核心修改：新增景點時，同步推播至 Google 試算表
     window.rfApp.custom.confirmCustomSpot = () => { 
         const spotName = document.getElementById('custom-spot-name').value.trim() || "我的秘境"; 
+        
+        // 🌟 獲取使用者輸入的密碼
+        const authInput = document.getElementById('custom-spot-auth');
+        const authCode = authInput ? authInput.value.trim() : "";
+
         if (state.tempCustomSpot) { 
             const newSpot = { 
                 name: spotName, 
@@ -97,14 +102,15 @@ export function initCustomSpots() {
                 lng: state.tempCustomSpot.lng, 
                 tags: ["自訂"], 
                 highlights: `詳細地址：${state.tempCustomSpot.addr}`, 
-                address: state.tempCustomSpot.addr, // 提取純地址給試算表用
+                address: state.tempCustomSpot.addr, 
                 food: "--", 
                 history: "自訂標記", 
                 transport: "自行前往", 
-                wikiImg: "" 
+                wikiImg: "",
+                authCode: authCode // 🌟 將密碼包裝在資料裡送給後端
             }; 
             
-            // 1. 本地儲存與渲染 (秒速反應，讓使用者感覺很順)
+            // 1. 本地儲存與渲染 (無論有無密碼，都先存在自己的手機裡，讓自己馬上看得到)
             state.savedCustomSpots.push(newSpot); 
             if (typeof saveState !== 'undefined') saveState.customSpots(); 
             addMarkerToMap(newSpot); 
@@ -112,15 +118,17 @@ export function initCustomSpots() {
             
             if (typeof window.showToast === 'function') window.showToast(window.rfApp.t('toast_custom_saved'), 'success');
 
-            // 2. 🌟 背景非同步寫入 Google 試算表
-            if (GAS_WEB_APP_URL && GAS_WEB_APP_URL.includes('script.google.com')) {
+            // 2. 🌟 雲端同步邏輯：有輸入密碼，才向 Google 試算表發出請求！
+            if (authCode && GAS_WEB_APP_URL && GAS_WEB_APP_URL.includes('script.google.com')) {
+                if (typeof window.showToast === 'function') window.showToast('正在驗證並同步至官方雲端...', 'info');
+
                 fetch(GAS_WEB_APP_URL, {
                     method: 'POST',
-                    mode: 'no-cors', // 避免遇到跨網域 (CORS) 阻擋
+                    mode: 'no-cors', 
                     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                     body: JSON.stringify(newSpot)
                 }).then(() => {
-                    console.log('✅ 自訂景點已成功推播至 Google 試算表！');
+                    console.log('✅ 雲端同步請求已發出 (密碼審核由後端把關)');
                 }).catch(err => {
                     console.error('❌ 上傳試算表失敗', err);
                 });
@@ -128,6 +136,7 @@ export function initCustomSpots() {
         } 
         window.rfApp.custom.closeCustomSpotModal(); 
     };
+    // ...
 
     window.rfApp.custom.copyAddr = (addr) => {
         navigator.clipboard.writeText(addr).then(() => {
