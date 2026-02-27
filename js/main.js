@@ -1,10 +1,10 @@
-// js/main.js (修復模組重複載入 Bug)
+// js/main.js (純淨無快取干擾版)
 window.rfApp = {
     ui: {}, theme: {}, nav: {}, fav: {}, tour: {}, 
     map: {}, search: {}, custom: {}, pwa: {}, tts: {}
 };
 
-// 🌟 關鍵修復 1：移除所有 import 後面的 ?v=xxx，確保全站共用同一個資料庫與狀態！
+// 🌟 絕對不能加上任何 ?v=xxx，否則模組會互相衝突！
 import { events } from './core/events.js'; 
 import { initErrorHandler, showToast } from './modules/toast.js';
 import { state } from './core/store.js'; 
