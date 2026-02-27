@@ -60,29 +60,21 @@ function safeInit(fn, name) {
 
 // 🌟 拔除 1500ms 的魔法數字，改用事件驅動！
 // 🌟 整合 DeepLink 解析與「自動啟動 GPS」功能
+// 🌟 整合 DeepLink 解析 (取消自動 GPS 定位)
 function handleDeepLink() {
     const params = new URLSearchParams(window.location.search);
     const spotName = params.get('spot'); 
     
-    // 監聽 App 就緒事件，一準備好就瞬間觸發！
+    // 監聽 App 就緒事件
     events.on('app_ready', () => {
         if (spotName) {
             // 如果網址有帶景點名稱，優先搜尋該景點並飛過去
             if (window.rfApp.search && typeof window.rfApp.search.triggerSearch === 'function') {
                 window.rfApp.search.triggerSearch(spotName);
             }
-        } else {
-            // 🌟 如果沒有指定特定景點，一進入地圖就「自動觸發 GPS 定位」！
-            // 延遲 500 毫秒是為了確保地圖動畫與 UI 都已經完全展開，避免畫面卡頓
-            setTimeout(() => {
-                if (typeof window.goToUser === 'function') {
-                    window.goToUser();
-                    
-                    // (選擇性) 如果想要一併顯示 Toast 提示，可以解除下面這行的註解：
-                    // if (typeof window.showToast === 'function') window.showToast(window.rfApp.t('locating') || '自動定位中...', 'info');
-                }
-            }, 500);
         }
+        // 🌟 已經將自動呼叫 window.goToUser() 的邏輯移除！
+        // 現在地圖會乖乖停在預設的瑞芳火車站，直到使用者主動點擊右下角的「標靶」按鈕。
     });
 }
 
