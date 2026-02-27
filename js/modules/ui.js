@@ -67,4 +67,18 @@ export function initUI() {
     window.openSettings = window.rfApp.ui.openSettings;
     window.closeSettings = window.rfApp.ui.closeSettings;
     window.goToStation = window.rfApp.ui.goToStation;
+
+    // 🌟 開發者模式啟動邏輯
+    window.enableDeveloperMode = () => {
+        if (typeof window.showToast === 'function') {
+            window.showToast("🔓 已啟用開發者模式！您現在可以直接將景點同步至官方資料庫。", "success");
+        }
+        
+        // 將認證密碼存入系統狀態中，讓 customSpots.js 儲存時可以直接抓取
+        window.rfApp.isDeveloper = true; 
+        
+        // 關閉設定視窗
+        window.closeSettings();
+    };
+
 }
