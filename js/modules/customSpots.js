@@ -91,9 +91,17 @@ export function initCustomSpots() {
     window.rfApp.custom.confirmCustomSpot = () => { 
         const spotName = document.getElementById('custom-spot-name').value.trim() || "我的秘境"; 
         
-        // 🌟 獲取使用者輸入的密碼
+        // 🌟 獲取圖片網址
+        const imgInput = document.getElementById('custom-spot-img');
+        const coverImgUrl = imgInput ? imgInput.value.trim() : "";
+
         const authInput = document.getElementById('custom-spot-auth');
-        const authCode = authInput ? authInput.value.trim() : "";
+        let authCode = authInput ? authInput.value.trim() : "";
+        
+        // 支援從 UI.js 點擊「開發者模式」後自動帶入權限
+        if (window.rfApp && window.rfApp.isDeveloper) {
+            authCode = "689"; // 自動帶入開發者密碼
+        }
 
         if (state.tempCustomSpot) { 
             const newSpot = { 
@@ -106,11 +114,11 @@ export function initCustomSpots() {
                 food: "--", 
                 history: "自訂標記", 
                 transport: "自行前往", 
+                coverImg: coverImgUrl, // 🌟 將圖片連結寫入
                 wikiImg: "",
-                authCode: authCode // 🌟 將密碼包裝在資料裡送給後端
+                authCode: authCode 
             }; 
             
-            // 1. 本地儲存與渲染 (無論有無密碼，都先存在自己的手機裡，讓自己馬上看得到)
             state.savedCustomSpots.push(newSpot); 
             if (typeof saveState !== 'undefined') saveState.customSpots(); 
             addMarkerToMap(newSpot); 
@@ -118,7 +126,6 @@ export function initCustomSpots() {
             
             if (typeof window.showToast === 'function') window.showToast(window.rfApp.t('toast_custom_saved'), 'success');
 
-            // 2. 🌟 雲端同步邏輯：有輸入密碼，才向 Google 試算表發出請求！
             if (authCode && GAS_WEB_APP_URL && GAS_WEB_APP_URL.includes('script.google.com')) {
                 if (typeof window.showToast === 'function') window.showToast('正在驗證並同步至官方雲端...', 'info');
 
@@ -128,15 +135,18 @@ export function initCustomSpots() {
                     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                     body: JSON.stringify(newSpot)
                 }).then(() => {
-                    console.log('✅ 雲端同步請求已發出 (密碼審核由後端把關)');
+                    console.log('✅ 雲端同步請求已發出');
                 }).catch(err => {
                     console.error('❌ 上傳試算表失敗', err);
                 });
             }
         } 
         window.rfApp.custom.closeCustomSpotModal(); 
+        
+        // 🌟 關閉後清空輸入框，避免下次打開殘留
+        if(imgInput) imgInput.value = "";
+        if(document.getElementById('custom-spot-name')) document.getElementById('custom-spot-name').value = "";
     };
-    // ...
 
     window.rfApp.custom.copyAddr = (addr) => {
         navigator.clipboard.writeText(addr).then(() => {
