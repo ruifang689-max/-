@@ -1,5 +1,5 @@
-// js/modules/cards.js (v661) - 國際化 UI 補完版
-import { state, saveState } from '../core/store.js';
+// js/modules/cards.js (v662) - 全面套用全域翻譯引擎版
+import { state } from '../core/store.js';
 
 export function getPlaceholderImage(text) {
     const canvas = document.createElement('canvas'); canvas.width = 400; canvas.height = 200; const ctx = canvas.getContext('2d');
@@ -37,26 +37,26 @@ export function showCard(s) {
 
     const desc = s.description || s.highlights || "暫無介紹";
     const highlightsEl = document.getElementById("card-highlights");
-    if (highlightsEl) highlightsEl.innerHTML = warningHtml + officialDetails + `<div>${desc}</div>`;
+    // 長篇文章直接丟給 t()，動態翻譯快取會自動接手！
+    if (highlightsEl) highlightsEl.innerHTML = warningHtml + officialDetails + `<div>${t(desc)}</div>`;
     
     const foodEl = document.getElementById("card-food"); 
-    if(foodEl) { foodEl.style.display = "block"; foodEl.innerText = s.food || "--"; }
+    if(foodEl) { foodEl.style.display = "block"; foodEl.innerText = t(s.food) || "--"; }
     
     const historyEl = document.getElementById("card-history"); 
-    if(historyEl) { historyEl.style.display = "block"; historyEl.innerText = s.history || "--"; }
+    if(historyEl) { historyEl.style.display = "block"; historyEl.innerText = t(s.history) || "--"; }
     
     const transportEl = document.getElementById("card-transport"); 
-    const selfGuideTxt = state.currentLang === 'en' ? 'Go by yourself' : (state.currentLang === 'ja' ? '各自アクセス' : '自行前往');
-    if(transportEl) { transportEl.style.display = "block"; transportEl.innerText = s.transport || selfGuideTxt; }
+    if(transportEl) { transportEl.style.display = "block"; transportEl.innerText = t(s.transport) || t('self_transport'); }
     
     const btnGroup = document.getElementById("card-btn-group");
     
-    // 🌟 按鈕文字動態翻譯
+    // 🌟 按鈕文字全面動態翻譯，不再寫死 if-else
     const txtNav = t('nav') || '導航';
-    const txtVoice = state.currentLang === 'en' ? 'Voice' : (state.currentLang === 'ja' ? '音声' : '語音');
-    const txtEdit = state.currentLang === 'en' ? 'Edit' : (state.currentLang === 'ja' ? '編集' : '編輯');
-    const txtDel = state.currentLang === 'en' ? 'Delete' : (state.currentLang === 'ja' ? '削除' : '刪除');
-    const txtAi = t('ai') || 'AI 行程';
+    const txtVoice = t('btn_voice') || '語音介紹';
+    const txtEdit = t('編輯'); // 動態翻譯引擎會自動轉成 Edit / 編集 等
+    const txtDel = t('刪除');  // 動態翻譯引擎會自動轉成 Delete / 削除 等
+    const txtAi = t('ai') || '智慧推薦';
 
     if (tags.includes('自訂')) { 
         btnGroup.innerHTML = `
