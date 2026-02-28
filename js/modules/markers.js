@@ -36,7 +36,7 @@ const createCustomPin = (tags, name, category) => {
     });
 };
 
-// 🌟 修正：整合為單一個 createMarkerObj
+// 🌟 修正：整合為單一個 createMarkerObj，並解決 this 遺失的報錯
 const createMarkerObj = (spot) => {
     const marker = L.marker([spot.lat, spot.lng], {
         icon: createCustomPin(spot.tags, spot.name, spot.category)
@@ -48,7 +48,7 @@ const createMarkerObj = (spot) => {
     // 2. 桌機體驗：滑鼠移入時自動顯示 Popup
     marker.on('mouseover', function() { 
         if (!isMobile()) {
-            this.openPopup(); 
+            this.openPopup(); // 這裡用傳統 function，所以 this 是有效的，但也可以寫 marker.openPopup()
         }
     });
 
@@ -61,7 +61,10 @@ const createMarkerObj = (spot) => {
             if(window.rfApp && window.rfApp.ui && window.rfApp.ui.closeCard) {
                 window.rfApp.ui.closeCard(); 
             }
-            this.closePopup(); // 確保不會彈出預設的 Popup
+            
+            // 🌟 修正：將 this 改為 marker
+            marker.closePopup(); 
+            
             showBottomPreview(spot);
             
             // 讓地圖視角稍微往下移一點，避免圖釘被底部小卡遮擋
