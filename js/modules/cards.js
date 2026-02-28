@@ -20,10 +20,6 @@ export function showCard(s) {
     state.targetSpot = s; 
     document.getElementById("card-fav-icon").className = (state.myFavs || []).includes(s.name) ? "fas fa-heart active" : "fas fa-heart"; 
     document.getElementById("title").innerText = s.name; 
-
-    if (window.rfApp && window.rfApp.ui && window.rfApp.ui.hideBottomPreview) {
-    window.rfApp.ui.hideBottomPreview();
-    }
     
     const imgEl = document.getElementById('img');
     if (imgEl) {
