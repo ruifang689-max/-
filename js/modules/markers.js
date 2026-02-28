@@ -52,7 +52,15 @@ const createMarkerObj = (spot) => {
         showCard(spot); 
     });
 
-    spot.markerObj = marker;
+    // 🌟 修正：使用 Object.defineProperty 綁定 markerObj
+    // 這樣程式依然可以讀取 spot.markerObj，但 JSON.stringify 時會自動忽略它！
+    Object.defineProperty(spot, 'markerObj', {
+        value: marker,
+        enumerable: false, // 👈 關鍵：對 JSON 隱形
+        writable: true,
+        configurable: true
+    });
+    
     return marker;
 };
 
