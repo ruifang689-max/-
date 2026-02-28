@@ -369,7 +369,7 @@
         </div>
     </div>
 
-    <div id="edit-modal-overlay" class="modal-overlay">
+    <div id="edit-modal-overlay" class="modal-overlay u-hidden">
         <div class="modal-box">
             <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--divider-color); padding-bottom: 10px; margin-bottom: 15px;">
                 <h3 class="modal-title" style="margin: 0; border: none; padding: 0;"><i class="fas fa-edit" style="color: var(--primary);"></i> 編輯自訂標記</h3>
@@ -385,7 +385,7 @@
             
             <label id="edit-upload-label" class="modal-file-label" style="margin-top: 15px; display: block; text-align: center; background: rgba(0,0,0,0.03); border: 2px dashed var(--border-color); padding: 15px; border-radius: 8px; cursor: pointer; transition: 0.2s;">
                 <i class="fas fa-camera" style="font-size: 24px; color: var(--primary); margin-bottom: 8px;"></i><br>
-                <span style="font-size: 14px; color: var(--text-sub); font-weight: bold;">上傳專屬照片</span>
+                <span style="font-size: 14px; color: var(--text-sub); font-weight: bold;">點擊上傳照片</span>
                 <input type="file" id="edit-spot-img" accept="image/*" style="display:none;">
             </label>
             <div id="edit-preview-container" class="u-hidden" style="position: relative; margin-top: 10px;">
@@ -393,14 +393,14 @@
                 <button onclick="rfApp.custom.removeUploadImage('edit')" style="position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,0.6); color: white; border: 1px solid white; border-radius: 50%; width: 28px; height: 28px; cursor: pointer; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(4px);"><i class="fas fa-times"></i></button>
             </div>
             
-            <div class="modal-btns" style="margin-top: 15px;">
-                <button class="modal-cancel" onclick="closeEditModal()">取消</button>
-                <button class="modal-save" onclick="saveEditSpot()">儲存</button>
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button onclick="closeEditModal()" style="flex: 1; padding: 12px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--glass); color: var(--text-main); font-weight: bold; cursor: pointer;">取消</button>
+                <button onclick="saveEditSpot()" style="flex: 1; padding: 12px; border-radius: 8px; border: none; background: var(--primary); color: white; font-weight: bold; cursor: pointer;">儲存</button>
             </div>
         </div>
     </div>
 
-     <div id="custom-spot-modal" class="modal-overlay">
+     <div id="custom-spot-modal" class="modal-overlay u-hidden">
         <div class="modal-box">
             <h3 class="modal-title"><i class="fas fa-map-pin" style="color: var(--primary);"></i> 新增自訂景點</h3>
             <div id="custom-spot-addr" style="font-size: 13px; color: var(--text-sub); margin-bottom: 5px; padding: 12px; background: var(--divider-color); border-radius: 8px; line-height: 1.6; border: 1px solid var(--border-color);">
@@ -411,7 +411,7 @@
             
             <label id="add-upload-label" class="modal-file-label" style="margin-top: 15px; display: block; text-align: center; background: rgba(0,0,0,0.03); border: 2px dashed var(--border-color); padding: 15px; border-radius: 8px; cursor: pointer; transition: 0.2s;">
                 <i class="fas fa-camera" style="font-size: 24px; color: var(--primary); margin-bottom: 8px;"></i><br>
-                <span style="font-size: 14px; color: var(--text-sub); font-weight: bold;">點擊上傳秘境照片</span>
+                <span style="font-size: 14px; color: var(--text-sub); font-weight: bold;">點擊上傳照片</span>
                 <input type="file" id="custom-spot-img" accept="image/*" style="display:none;">
             </label>
             <div id="add-preview-container" class="u-hidden" style="position: relative; margin-top: 10px;">
@@ -419,9 +419,9 @@
                 <button onclick="rfApp.custom.removeUploadImage('add')" style="position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,0.6); color: white; border: 1px solid white; border-radius: 50%; width: 28px; height: 28px; cursor: pointer; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(4px);"><i class="fas fa-times"></i></button>
             </div>
            
-            <div class="modal-btns" style="margin-top: 15px;">
-                <button class="modal-cancel" onclick="closeCustomSpotModal()">取消</button>
-                <button class="modal-save" onclick="confirmCustomSpot()">儲存景點</button>
+            <div style="display: flex; gap: 10px; margin-top: 20px;">
+                <button onclick="closeCustomSpotModal()" style="flex: 1; padding: 12px; border-radius: 8px; border: 1px solid var(--border-color); background: var(--glass); color: var(--text-main); font-weight: bold; cursor: pointer;">取消</button>
+                <button onclick="confirmCustomSpot()" style="flex: 1; padding: 12px; border-radius: 8px; border: none; background: var(--primary); color: white; font-weight: bold; cursor: pointer;">儲存景點</button>
             </div>
         </div>
     </div>
@@ -493,3 +493,4 @@
     
 </body>
 </html>
+
