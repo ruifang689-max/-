@@ -1,15 +1,15 @@
-// js/modules/markers.js (修正重複宣告錯誤版)
+// js/modules/markers.js
 
 import { state } from '../core/store.js';
 import { spots } from '../data/spots.js'; 
 import { showCard } from './cards.js';
-import { getPreviewHtml, showBottomPreview, hideBottomPreview, isMobileDevice } from './previews.js';
+import { getPreviewHtml } from './previews.js'; // 只有引入 HTML 產生器
 
 // =========================================
 // 🌟 圖釘外觀與產生邏輯
 // =========================================
 const createCustomPin = (tags, name, category) => {
-    let cls = 'fa-map-marker-alt', col = '#ea4335'; // 預設紅色圖釘
+    let cls = 'fa-map-marker-alt', col = '#ea4335';
 
     const combined = (Array.isArray(tags) ? tags.join(',') : (tags || '')) + (category || '');
 
@@ -33,47 +33,29 @@ const createCustomPin = (tags, name, category) => {
     });
 };
 
-// 🌟 3. 在 createMarkerObj 中全面替換
 const createMarkerObj = (spot) => {
     const marker = L.marker([spot.lat, spot.lng], {
         icon: createCustomPin(spot.tags, spot.name, spot.category)
     });
 
+    // 1. 綁定預覽小卡 (Popup) HTML
     marker.bindPopup(() => getPreviewHtml(spot), { closeButton: false });
 
-    // 桌機體驗
+    // 2. 滑鼠移入時自動顯示預覽小卡
     marker.on('mouseover', function() { 
-        if (!isMobileDevice()) {  // 替換這裡
-            marker.openPopup(); 
-        }
+        this.openPopup(); 
     });
 
-    // 點擊行為分流
+    // 3. 點擊圖釘時：阻止預設事件，並直接開啟下方資訊大卡
     marker.on('click', (e) => { 
         L.DomEvent.stopPropagation(e); 
-        
-        if (isMobileDevice()) { // 替換這裡
-            if(window.rfApp && window.rfApp.ui && window.rfApp.ui.closeCard) {
-                window.rfApp.ui.closeCard(); 
-            }
-            marker.closePopup(); 
-            showBottomPreview(spot);
-            
-            const latlng = marker.getLatLng();
-            const offset = state.mapInstance.getSize().y * 0.15; 
-            const targetPoint = state.mapInstance.project(latlng).subtract([0, offset]);
-            const targetLatLng = state.mapInstance.unproject(targetPoint);
-            state.mapInstance.flyTo(targetLatLng, state.mapInstance.getZoom(), { animate: true, duration: 0.5 });
-        } else {
-            showCard(spot); 
-        }
+        showCard(spot); 
     });
 
     spot.markerObj = marker;
     return marker;
 };
 
-// 供外部單一呼叫新增 (例如新增自訂秘境)
 export function addMarkerToMap(spot) {
     if (!state.cluster) return;
     const marker = createMarkerObj(spot);
@@ -81,20 +63,8 @@ export function addMarkerToMap(spot) {
     return marker;
 }
 
-let isMapClickBound = false;
-
-// 初始批次載入所有圖釘
 export function renderAllMarkers() {
     if (!state.cluster) return;
-
-    // 🌟 確保在這裡綁定點擊事件，此時地圖已初始化
-    if (!isMapClickBound && state.mapInstance) {
-        state.mapInstance.on('click', () => {
-            hideBottomPreview();
-        });
-        isMapClickBound = true;
-    }
-    
     state.cluster.clearLayers();
 
     const officialSpots = Array.isArray(spots) ? spots : [];
@@ -109,18 +79,13 @@ export function renderAllMarkers() {
     state.cluster.addLayers(markersArray);
 }
 
-// =========================================
-// 🌟 核心修復：分類過濾方法 (filterSpots)
-// =========================================
 export function filterSpots(category, elem) {
-    // 1. 處理上方分類按鈕 (Chips) 的 UI 狀態
     const chips = document.querySelectorAll('#category-chips .chip');
     chips.forEach(c => c.classList.remove('active'));
 
     if (elem) {
-        elem.classList.add('active'); // 使用者點擊的按鈕
+        elem.classList.add('active'); 
     } else {
-        // 如果是從搜尋框等其他地方呼叫，自動尋找並點亮對應的按鈕
         chips.forEach(c => {
             if (category === 'all' && c.innerText.includes('全部')) c.classList.add('active');
             else if (category !== 'all' && c.innerText.includes(category)) c.classList.add('active');
@@ -128,8 +93,6 @@ export function filterSpots(category, elem) {
     }
 
     if (!state.cluster) return;
-    
-    // 2. 清空當前地圖上的所有圖釘
     state.cluster.clearLayers();
 
     const officialSpots = Array.isArray(spots) ? spots : [];
@@ -138,24 +101,19 @@ export function filterSpots(category, elem) {
 
     let filteredSpots = [];
     
-    // 3. 過濾邏輯
     if (category === 'all') {
         filteredSpots = allSpots;
     } else if (category === '自訂') {
-        // 特別處理「自訂」分類
         filteredSpots = customList;
     } else {
         filteredSpots = allSpots.filter(spot => {
             const tags = spot.tags ? (Array.isArray(spot.tags) ? spot.tags : [spot.tags]) : [];
             const cat = spot.category || '';
             const keywords = spot.keywords || [];
-            
-            // 只要標籤、分類名稱或關鍵字有中，就顯示出來
             return tags.includes(category) || cat.includes(category) || keywords.includes(category);
         });
     }
 
-    // 4. 將過濾後的圖釘重新繪製到畫面上
     const markersArray = [];
     filteredSpots.forEach(spot => {
         markersArray.push(createMarkerObj(spot));
@@ -163,7 +121,6 @@ export function filterSpots(category, elem) {
 
     state.cluster.addLayers(markersArray);
 
-    // 🌟 UX 優化：切換分類後，自動將視角縮放並平移到涵蓋這些景點的範圍！
     if (markersArray.length > 0 && state.mapInstance) {
         const group = new L.featureGroup(markersArray);
         state.mapInstance.fitBounds(group.getBounds(), { padding: [50, 50], maxZoom: 15, animate: true });
@@ -172,10 +129,9 @@ export function filterSpots(category, elem) {
     }
 }
 
-// 🌟 註冊到全域，因為 HTML 中的 onclick 會直接呼叫 window.filterSpots
 if (typeof window !== 'undefined') {
     if(!window.rfApp) window.rfApp = {};
     if(!window.rfApp.map) window.rfApp.map = {};
     window.rfApp.map.filterSpots = filterSpots;
-    window.filterSpots = filterSpots; // 向下相容 HTML 的綁定
+    window.filterSpots = filterSpots; 
 }
