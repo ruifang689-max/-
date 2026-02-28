@@ -31,3 +31,41 @@ body.dark-mode .region-label-text { color: var(--text-main); text-shadow: 1px 1p
 .custom-cluster-icon:hover { transform: scale(1.1); background: var(--primary); }
 .custom-cluster-icon.medium { width: 44px; height: 44px; font-size: 16px; background: rgba(40, 167, 69, 0.85); /* 綠色 */ }
 .custom-cluster-icon.large { width: 52px; height: 52px; font-size: 18px; background: rgba(220, 53, 69, 0.85); /* 紅色 */ }
+
+/* 🌟 手機版底部預覽小卡容器 */
+#bottom-preview-card {
+    position: absolute;
+    bottom: calc(20px + env(safe-area-inset-bottom, 0px));
+    left: 50%;
+    transform: translateX(-50%) translateY(150%); /* 初始隱藏在底部 */
+    width: 90%;
+    max-width: 400px;
+    background: var(--glass);
+    border-radius: 15px;
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.2);
+    z-index: 3500; /* 高於地圖控制項，但低於資訊大卡 */
+    transition: transform 0.4s cubic-bezier(0.32, 0.72, 0, 1);
+    border: 1px solid var(--primary);
+    overflow: hidden;
+}
+
+/* 顯示時的狀態 */
+#bottom-preview-card.bottom-preview-visible {
+    transform: translateX(-50%) translateY(0);
+}
+
+/* 為了讓裡面的 preview-card 完美適配這個容器 */
+#bottom-preview-card .preview-card {
+    width: 100%; /* 覆寫原本 Popup 限制的 240px 寬度 */
+    background: transparent;
+}
+#bottom-preview-card .preview-img {
+    height: 140px; /* 手機上圖片可以稍微大一點 */
+}
+
+/* 💻 桌機版自動隱藏底部小卡機制 */
+@media (min-width: 769px) {
+    #bottom-preview-card {
+        display: none !important;
+    }
+}
