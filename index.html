@@ -369,7 +369,7 @@
         </div>
     </div>
 
-    <div id="edit-modal-overlay" class="modal-overlay">
+<div id="edit-modal-overlay" class="modal-overlay">
         <div class="modal-box">
             <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--divider-color); padding-bottom: 10px; margin-bottom: 15px;">
                 <h3 class="modal-title" style="margin: 0; border: none; padding: 0;"><i class="fas fa-edit" style="color: var(--primary);"></i> 編輯自訂標記</h3>
@@ -377,10 +377,13 @@
                 <button id="dev-upload-btn" onclick="uploadEditToCloud()" style="display: none; background: transparent; border: none; color: var(--primary); font-size: 20px; cursor: pointer; padding: 5px;">
                     <i class="fas fa-cloud-upload-alt"></i>
                 </button>
-            </div> <input type="text" id="edit-name" class="modal-input" placeholder="地點名稱 (必填)">
+            </div> 
+            
+            <input type="text" id="edit-name" class="modal-input" placeholder="地點名稱 (必填)">
             <textarea id="edit-highlights" class="modal-textarea" placeholder="推薦亮點..."></textarea>
             <textarea id="edit-history" class="modal-textarea" placeholder="備註或歷史..."></textarea>
-           <label id="edit-upload-label" class="modal-file-label" style="margin-top: 15px; display: block; text-align: center; background: rgba(0,0,0,0.03); border: 2px dashed var(--border-color); padding: 15px; border-radius: 8px; cursor: pointer; transition: 0.2s;">
+            
+            <label id="edit-upload-label" class="modal-file-label" style="margin-top: 15px; display: block; text-align: center; background: rgba(0,0,0,0.03); border: 2px dashed var(--border-color); padding: 15px; border-radius: 8px; cursor: pointer; transition: 0.2s;">
                 <i class="fas fa-camera" style="font-size: 24px; color: var(--primary); margin-bottom: 8px;"></i><br>
                 <span style="font-size: 14px; color: var(--text-sub); font-weight: bold;">上傳專屬照片</span>
                 <input type="file" id="edit-spot-img" accept="image/*" style="display:none;">
@@ -390,7 +393,7 @@
                 <button onclick="rfApp.custom.removeUploadImage('edit')" style="position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,0.6); color: white; border: 1px solid white; border-radius: 50%; width: 28px; height: 28px; cursor: pointer; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(4px);"><i class="fas fa-times"></i></button>
             </div>
             
-            <div class="modal-btns">
+            <div class="modal-btns" style="margin-top: 15px;">
                 <button class="modal-cancel" onclick="closeEditModal()">取消</button>
                 <button class="modal-save" onclick="saveEditSpot()">儲存</button>
             </div>
@@ -487,6 +490,7 @@
     
 </body>
 </html>
+
 
 
 
