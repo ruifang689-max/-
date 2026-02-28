@@ -63,7 +63,18 @@ body.dark-mode .region-label-text { color: var(--text-main); text-shadow: 1px 1p
     height: 140px; /* 手機上圖片可以稍微大一點 */
 }
 
-/* 💻 桌機版自動隱藏底部小卡機制 */
+/* ==========================================
+   🌟 裝置實體隔離區 (Device Separation)
+========================================== */
+
+/* 📱 手機版：徹底封殺傳統 Popup，避免閃爍或與底部小卡衝突 */
+@media (max-width: 768px) {
+    .leaflet-popup {
+        display: none !important;
+    }
+}
+
+/* 💻 桌機版：自動隱藏手機專用的底部小卡容器 */
 @media (min-width: 769px) {
     #bottom-preview-card {
         display: none !important;
