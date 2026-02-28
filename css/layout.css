@@ -35,42 +35,13 @@
 .chip { background: var(--glass); border: 1px solid var(--border-color); padding: 8px 16px; border-radius: var(--radius-pill); font-size: 12px; font-weight: bold; color: var(--text-main); white-space: nowrap; cursor: pointer; box-shadow: 0 2px 5px var(--card-shadow); transition: all var(--trans-fast); user-select: none; }
 .chip.active { background: var(--primary); color: white; border-color: var(--primary); }
 
-/* 👇 智慧跑馬燈優化區域 */
-#map-center-panel { 
-    background: var(--glass); 
-    backdrop-filter: blur(10px); 
-    padding: 6px 14px; 
-    border-radius: var(--radius-pill); 
-    box-shadow: 0 2px 10px rgba(0,0,0,0.15); 
-    color: var(--primary); 
-    font-size: 13px; 
-    font-weight: bold; 
-    display: flex; 
-    justify-content: flex-start; /* 🌟 讓文字靠左對齊，跑馬燈才自然 */
-    align-items: center; 
-    gap: 8px; 
-    width: auto;
-    max-width: 95%; 
-    pointer-events: auto; 
-    border: 1px solid var(--border-color);
-    overflow: hidden; /* 隱藏超出的文字 */
-    /* 🌟 加入左右漸層遮罩，讓滑動時邊緣優雅地淡出 */
-    -webkit-mask-image: linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%);
-    mask-image: linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%);
-}
-#map-center-panel i { flex-shrink: 0; }
-#addr-text { 
-    white-space: nowrap; 
-    display: inline-block; 
-    transition: opacity 0.3s ease; 
-    will-change: transform; /* 提升硬體加速動畫效能 */
-}
+#map-center-panel { background: var(--glass); backdrop-filter: blur(8px); padding: 4px 14px; border-radius: var(--radius-pill); box-shadow: 0 2px 8px var(--card-shadow); color: var(--primary); font-size: 12px; font-weight: bold; display: flex; justify-content: center; align-items: center; gap: 6px; max-width: 85%; pointer-events: none; border: 1px solid var(--border-color); }
+#addr-text { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: inline-block; transition: opacity var(--trans-normal); }
 
-/* 🌟 動態計算的來回(Ping-Pong)跑馬燈動畫 */
-@keyframes marquee-ping-pong {
-    0%, 15% { transform: translateX(0); }
-    85%, 100% { transform: translateX(var(--marquee-dist)); }
-}
+#weather-box { position: absolute; top: calc(15px + env(safe-area-inset-top, 0px)); right: calc(15px + env(safe-area-inset-right, 0px)); z-index: var(--z-controls); width: 45px; height: 45px; background: var(--bg-color); border-radius: var(--radius-md); box-shadow: var(--card-shadow); border: 1px solid var(--border-color); display: flex; flex-direction: column; justify-content: center; align-items: center; pointer-events: auto; }
+#weather-box i { font-size: 18px; margin-bottom: 2px; } 
+#weather-temp { font-size: 11px; font-weight: bold; color: var(--text-main); }
+.weather-sun { color: #f39c12 !important; } .weather-cloud { color: #bdc3c7 !important; } .weather-rain { color: #7f8c8d !important; }
 
 /* 🌟 地圖底部 UI */
 .leaflet-bottom.leaflet-right { bottom: calc(20px + env(safe-area-inset-bottom, 0px)) !important; right: calc(15px + env(safe-area-inset-right, 0px)) !important; }
