@@ -1,5 +1,13 @@
 // js/modules/cards.js (v662) - 全面套用全域翻譯引擎版
 import { state } from '../core/store.js';
+import { spots } from '../data/spots.js';
+
+export function openCardByName(name) { 
+    // 合併官方景點與自訂景點來搜尋
+    const allSpots = [...spots, ...(state.savedCustomSpots || [])];
+    const s = allSpots.find(x => x.name === name); 
+    if(s) showCard(s); 
+}
 
 export function getPlaceholderImage(text) {
     const canvas = document.createElement('canvas'); canvas.width = 400; canvas.height = 200; const ctx = canvas.getContext('2d');
