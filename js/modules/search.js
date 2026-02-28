@@ -1,10 +1,9 @@
-// js/modules/search.js (修復情境推薦空白與洗牌優化版 + 搜尋動線優化)
+// js/modules/search.js
 
 import { spots } from '../data/spots.js';
 import { state, saveState } from '../core/store.js';
-import { closeCard, showCard } from './cards.js'; // 🌟 合併引入
+import { closeCard, showCard } from './cards.js'; 
 import { getContextualData } from './contextEngine.js'; 
-import { hideBottomPreview, isMobileDevice } from './previews.js';
 
 // ==========================================
 // 1. 搜尋模組初始化
@@ -16,7 +15,6 @@ export function initSearch() {
     
     if (!searchInput) return;
 
-    // 動態 Placeholder
     const updatePlaceholder = () => {
         if (!searchInput) return;
         if (state.currentLang === 'zh' || !state.currentLang) {
@@ -34,7 +32,6 @@ export function initSearch() {
     window.rfApp.search = window.rfApp.search || {};
     window.rfApp.search.updatePlaceholder = updatePlaceholder;
 
-    // 監聽焦點與輸入
     searchInput.addEventListener('focus', () => {
         updateSearchUI(searchInput.value.trim().toLowerCase());
     });
@@ -48,14 +45,12 @@ export function initSearch() {
         updateSearchUI(keyword);
     });
 
-    // 點擊外部關閉
     document.addEventListener('click', (e) => {
         if (!e.target.closest('#search-container') && !e.target.closest('#suggest') && e.target !== searchInput) {
             if (suggestBox) suggestBox.classList.add('u-hidden');
         }
     });
 
-    // 綁定其他全域方法 (保留您原本的邏輯)
     window.rfApp.search.filterByCategory = (categoryText) => {
         if (searchInput) searchInput.value = categoryText;
         if (clearBtn) { clearBtn.classList.remove('u-hidden'); clearBtn.classList.add('u-block'); }
@@ -78,7 +73,6 @@ export function initSearch() {
         if(typeof window.filterSpots === 'function') window.filterSpots('all', null);
     };
 
-    // 保留向下相容的綁定
     window.filterByCategory = window.rfApp.search.filterByCategory;
     window.clearSearchInput = window.rfApp.search.clearSearchInput;
     window.closeSuggest = window.rfApp.search.closeSuggest;
@@ -88,13 +82,12 @@ export function initSearch() {
         updateSearchUI(searchInput ? searchInput.value.trim().toLowerCase() : '');
     };
     
-    // 🌟 將 goToSpot 指向新的 triggerSearch，統一搜尋邏輯
     window.rfApp.search.goToSpot = triggerSearch;
     window.goToSpot = triggerSearch;
 }
 
 // ==========================================
-// 2. 獨立的觸發搜尋方法 (移出 initSearch 外)
+// 2. 獨立的觸發搜尋方法 (800ms 版本)
 // ==========================================
 export function triggerSearch(name) { 
     if (!name) return;
@@ -122,39 +115,23 @@ export function triggerSearch(name) {
     
     if (s && state.mapInstance) { 
         closeCard();
-        hideBottomPreview(); 
-
         state.mapInstance.flyTo([s.lat, s.lng], 16, { duration: 1.5 }); 
         
+        // 延遲 800ms 後開啟 Popup
         setTimeout(() => {
             if (s.markerObj) {
-                const handlePreview = () => {
-                    // 🌟 3. 替換為 isMobileDevice()
-                    if (isMobileDevice() && window.rfApp.ui && window.rfApp.ui.showBottomPreview) {
-                        s.markerObj.closePopup();
-                        window.rfApp.ui.showBottomPreview(s);
-                        
-                        const latlng = s.markerObj.getLatLng();
-                        const offset = state.mapInstance.getSize().y * 0.15;
-                        const targetPoint = state.mapInstance.project(latlng).subtract([0, offset]);
-                        const targetLatLng = state.mapInstance.unproject(targetPoint);
-                        state.mapInstance.flyTo(targetLatLng, 16, { animate: true, duration: 0.5 });
-                    } else {
-                        s.markerObj.openPopup();
-                    }
-                };
-
                 if (state.cluster && state.cluster.hasLayer(s.markerObj)) {
-                    state.cluster.zoomToShowLayer(s.markerObj, handlePreview);
+                    state.cluster.zoomToShowLayer(s.markerObj, () => {
+                        s.markerObj.openPopup();
+                    });
                 } else {
-                    handlePreview();
+                    s.markerObj.openPopup();
                 }
             }
         }, 800); 
     } 
 }
 
-// 掛載到全域
 if (typeof window !== 'undefined') {
     if(!window.rfApp) window.rfApp = {};
     if(!window.rfApp.search) window.rfApp.search = {};
@@ -163,7 +140,7 @@ if (typeof window !== 'undefined') {
 }
 
 // ==========================================
-// 3. 核心 UI 渲染引擎 (保持原樣)
+// 3. UI 渲染引擎
 // ==========================================
 function updateSearchUI(keyword) {
     const suggestBox = document.getElementById('suggest');
@@ -172,7 +149,6 @@ function updateSearchUI(keyword) {
 
     suggestBox.classList.remove('u-hidden');
     suggestBox.classList.add('u-block');
-    // 強制顯示
     suggestBox.style.display = 'block';
 
     const isZh = (!state.currentLang || state.currentLang === 'zh');
@@ -274,7 +250,6 @@ function updateSearchUI(keyword) {
 function buildSpotListHtml(spotsArray, keyword) {
     return spotsArray.map(spot => {
         const mainTag = spot.tags && spot.tags.length > 0 ? spot.tags[0] : (spot.category || '秘境');
-        
         let highlightedName = spot.name;
         if (keyword) {
             try {
@@ -285,7 +260,6 @@ function buildSpotListHtml(spotsArray, keyword) {
         
         const safeName = spot.name.replace(/"/g, '&quot;');
 
-        // 🌟 將原本的 goToSpot 改為統一呼叫 triggerSearch
         return `
             <div class="search-result-item" data-name="${safeName}" onclick="triggerSearch(this.getAttribute('data-name'))" style="padding: 12px 15px; border-bottom: 1px solid var(--divider-color); cursor: pointer; display: flex; align-items: center; gap: 12px; transition: background 0.2s;">
                 <div style="width: 45px; height: 45px; border-radius: 8px; background: var(--divider-color); display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
