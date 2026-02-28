@@ -3,10 +3,7 @@
 import { state } from '../core/store.js';
 import { spots } from '../data/spots.js'; 
 import { showCard } from './cards.js';
-import { getPreviewHtml, showBottomPreview, hideBottomPreview } from './previews.js';
-
-// 檢查是否為手機裝置 (簡易判斷，可依據需求調整)
-const isMobile = () => window.innerWidth <= 768;
+import { getPreviewHtml, showBottomPreview, hideBottomPreview, isMobileDevice } from './previews.js';
 
 // =========================================
 // 🌟 圖釘外觀與產生邏輯
@@ -36,46 +33,38 @@ const createCustomPin = (tags, name, category) => {
     });
 };
 
-// 🌟 修正：整合為單一個 createMarkerObj，並解決 this 遺失的報錯
+// 🌟 3. 在 createMarkerObj 中全面替換
 const createMarkerObj = (spot) => {
     const marker = L.marker([spot.lat, spot.lng], {
         icon: createCustomPin(spot.tags, spot.name, spot.category)
     });
 
-    // 1. 綁定預覽小卡 (Popup) HTML
     marker.bindPopup(() => getPreviewHtml(spot), { closeButton: false });
 
-    // 2. 桌機體驗：滑鼠移入時自動顯示 Popup
+    // 桌機體驗
     marker.on('mouseover', function() { 
-        if (!isMobile()) {
-            this.openPopup(); // 這裡用傳統 function，所以 this 是有效的，但也可以寫 marker.openPopup()
+        if (!isMobileDevice()) {  // 替換這裡
+            marker.openPopup(); 
         }
     });
 
-    // 3. 點擊圖釘時的行為分流
+    // 點擊行為分流
     marker.on('click', (e) => { 
         L.DomEvent.stopPropagation(e); 
         
-        if (isMobile()) {
-            // 📱 手機版：關閉大卡，彈出底部預覽小卡
+        if (isMobileDevice()) { // 替換這裡
             if(window.rfApp && window.rfApp.ui && window.rfApp.ui.closeCard) {
                 window.rfApp.ui.closeCard(); 
             }
-            
-            // 🌟 修正：將 this 改為 marker
             marker.closePopup(); 
-            
             showBottomPreview(spot);
             
-            // 讓地圖視角稍微往下移一點，避免圖釘被底部小卡遮擋
             const latlng = marker.getLatLng();
-            const offset = state.mapInstance.getSize().y * 0.15; // 往下偏移 15% 畫面高度
+            const offset = state.mapInstance.getSize().y * 0.15; 
             const targetPoint = state.mapInstance.project(latlng).subtract([0, offset]);
             const targetLatLng = state.mapInstance.unproject(targetPoint);
             state.mapInstance.flyTo(targetLatLng, state.mapInstance.getZoom(), { animate: true, duration: 0.5 });
-
         } else {
-            // 💻 桌機版：直接開啟右側資訊大卡
             showCard(spot); 
         }
     });
