@@ -1,11 +1,75 @@
-// js/modules/customSpots.js (v658) - Google Sheets 雲端雙向同步版 + 圖片修復版
+// js/modules/customSpots.js (加入本地圖片高壓縮與 Base64 轉換引擎)
 import { state, saveState } from '../core/store.js';
 import { addMarkerToMap } from './markers.js';
 import { showCard } from './cards.js';
 
 const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwqMFBi7x70o1xCOqg5ulyCVw118og5pAtJJk9eEq4NfFe23J56VeZiBLoTcXvYRPIZ/exec";
 
+// ==========================================
+// 🌟 核心壓縮引擎：將本機相片壓縮成輕量 Base64
+// 預防 LocalStorage (5MB) 和 Firebase (1MB) 被原始照片塞爆
+// ==========================================
+function processImageFile(file, callback) {
+    if (!file || !file.type.startsWith('image/')) {
+        callback("");
+        return;
+    }
+    const reader = new FileReader();
+    reader.onload = (e) => {
+        const img = new Image();
+        img.onload = () => {
+            const canvas = document.createElement('canvas');
+            const MAX_WIDTH = 600; // 壓縮至最大寬度 600px
+            let width = img.width;
+            let height = img.height;
+
+            // 等比例縮放
+            if (width > MAX_WIDTH) {
+                height = Math.round((height * MAX_WIDTH) / width);
+                width = MAX_WIDTH;
+            }
+
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, 0, 0, width, height);
+
+            // 壓縮為 JPEG，品質 0.7，大幅降低容量 (通常只剩 50KB 左右)
+            const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7);
+            callback(compressedBase64);
+        };
+        img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+}
+
 export function initCustomSpots() {
+    // 🌟 攔截圖片選擇事件，並即時壓縮與預覽
+    const handleImageInput = (inputId, previewId, stateKey) => {
+        const inputEl = document.getElementById(inputId);
+        // 確認輸入框是設定為檔案上傳類型
+        if (inputEl && inputEl.type === 'file') {
+            inputEl.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    processImageFile(file, (base64) => {
+                        state[stateKey] = base64; // 將輕量代碼寫入暫存
+                        const preview = document.getElementById(previewId);
+                        if (preview) {
+                            preview.src = base64;
+                            preview.classList.remove('u-hidden');
+                            preview.classList.add('u-block');
+                        }
+                    });
+                }
+            });
+        }
+    };
+
+    // 綁定「新增景點」與「編輯景點」的圖片選擇器
+    handleImageInput('custom-spot-img', 'add-image-preview', 'tempAddImageBase64');
+    handleImageInput('edit-spot-img', 'edit-image-preview', 'tempEditImageBase64');
+
     if (state.mapInstance) {
         state.mapInstance.on('contextmenu', function(e) {
             const lat = e.latlng.lat; const lng = e.latlng.lng;
@@ -42,6 +106,18 @@ export function initCustomSpots() {
                     if(addrContainer) addrContainer.innerHTML = addrHTML; 
                     const nameInput = document.getElementById('custom-spot-name');
                     if(nameInput) nameInput.value = ""; 
+
+                    // 🌟 清空暫存，避免點選上一個景點的圖片殘留
+                    state.tempAddImageBase64 = "";
+                    const imgInput = document.getElementById('custom-spot-img');
+                    if(imgInput) imgInput.value = "";
+                    const addPreview = document.getElementById('add-image-preview');
+                    if (addPreview) {
+                        addPreview.removeAttribute('src');
+                        addPreview.classList.remove('u-block');
+                        addPreview.classList.add('u-hidden');
+                    }
+
                     const m = document.getElementById('custom-spot-modal');
                     if(m) { m.classList.remove('u-hidden'); m.classList.add('u-flex'); }
                 }, 150);
@@ -89,7 +165,14 @@ export function initCustomSpots() {
     window.rfApp.custom.confirmCustomSpot = () => { 
         const spotName = document.getElementById('custom-spot-name').value.trim() || "我的秘境"; 
         const imgInput = document.getElementById('custom-spot-img');
-        const coverImgUrl = imgInput ? imgInput.value.trim() : "";
+        
+        // 🌟 判斷優先權：如果有壓縮好的本機圖片，就用本機圖片；否則才檢查是否為文字網址
+        let coverImgUrl = "";
+        if (state.tempAddImageBase64) {
+            coverImgUrl = state.tempAddImageBase64;
+        } else if (imgInput && imgInput.type === 'text') {
+            coverImgUrl = imgInput.value.trim();
+        }
 
         let authCode = "";
         if (window.rfApp && window.rfApp.isDeveloper) {
@@ -108,7 +191,7 @@ export function initCustomSpots() {
                 history: "自訂標記", 
                 transport: "自行前往", 
                 coverImg: coverImgUrl,
-                wikiImg: coverImgUrl, // 🌟 雙重存檔，確保不漏接
+                wikiImg: coverImgUrl, 
                 authCode: authCode 
             };
             
@@ -127,17 +210,10 @@ export function initCustomSpots() {
                     mode: 'no-cors', 
                     headers: { 'Content-Type': 'text/plain;charset=utf-8' },
                     body: JSON.stringify(newSpot)
-                }).then(() => {
-                    console.log('✅ 雲端同步請求已發出');
-                }).catch(err => {
-                    console.error('❌ 上傳試算表失敗', err);
                 });
             }
         } 
         window.rfApp.custom.closeCustomSpotModal(); 
-        
-        if(imgInput) imgInput.value = "";
-        if(document.getElementById('custom-spot-name')) document.getElementById('custom-spot-name').value = "";
     };
 
     window.rfApp.custom.copyAddr = (addr) => {
@@ -160,9 +236,7 @@ export function initCustomSpots() {
         document.getElementById('edit-history').value = s.history; 
         const preview = document.getElementById('edit-image-preview');
         
-        // 🌟 修復 1：同時檢查兩個圖片屬性
         const imgUrl = s.wikiImg || s.coverImg || "";
-        
         if(imgUrl) { 
             preview.classList.remove('u-hidden'); 
             preview.classList.add('u-block'); 
@@ -170,17 +244,12 @@ export function initCustomSpots() {
         } else { 
             preview.classList.remove('u-block'); 
             preview.classList.add('u-hidden'); 
-            // 🌟 修復 2：用 removeAttribute，避免 src="" 變成網頁連結
             preview.removeAttribute('src'); 
         }
         
         const devUploadBtn = document.getElementById('dev-upload-btn');
         if (devUploadBtn) {
-            if (window.rfApp && window.rfApp.isDeveloper) {
-                devUploadBtn.style.display = 'block';
-            } else {
-                devUploadBtn.style.display = 'none';
-            }
+            devUploadBtn.style.display = (window.rfApp && window.rfApp.isDeveloper) ? 'block' : 'none';
         }
 
         const m = document.getElementById('edit-modal-overlay'); 
@@ -200,7 +269,6 @@ export function initCustomSpots() {
         s.highlights = document.getElementById('edit-highlights').value; 
         s.history = document.getElementById('edit-history').value; 
         
-        // 🌟 修復 3：安全提取圖片，如果元素隱藏就給空字串
         const preview = document.getElementById('edit-image-preview');
         const finalImgUrl = preview.classList.contains('u-hidden') ? "" : (preview.getAttribute('src') || "");
         
@@ -234,7 +302,6 @@ export function initCustomSpots() {
         if (typeof window.showToast === 'function') {
             window.showToast("準備將修改同步至雲端...", "info");
         }
-        console.log("觸發雲端同步更新：", state.currentEditingSpotName);
     };
     
     window.uploadEditToCloud = window.rfApp.custom.uploadEditToCloud;
