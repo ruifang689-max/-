@@ -3,6 +3,7 @@
 import { state } from '../core/store.js';
 import { spots } from '../data/spots.js'; 
 import { showCard } from './cards.js';
+import { getPreviewHtml } from './previews.js';
 
 // =========================================
 // 🌟 圖釘外觀與產生邏輯
@@ -40,6 +41,8 @@ const createMarkerObj = (spot) => {
     spot.markerObj = marker;
     return marker;
 };
+
+m.bindPopup(() => getPreviewHtml(s), { closeButton: false }); [cite: 10]
 
 // 供外部單一呼叫新增 (例如新增自訂秘境)
 export function addMarkerToMap(spot) {
