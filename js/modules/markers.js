@@ -1,4 +1,4 @@
-// js/modules/markers.js (v641) - 分類過濾修復與視角優化版
+// js/modules/markers.js (修正重複宣告錯誤版)
 
 import { state } from '../core/store.js';
 import { spots } from '../data/spots.js'; 
@@ -8,6 +8,35 @@ import { getPreviewHtml, showBottomPreview, hideBottomPreview } from './previews
 // 檢查是否為手機裝置 (簡易判斷，可依據需求調整)
 const isMobile = () => window.innerWidth <= 768;
 
+// =========================================
+// 🌟 圖釘外觀與產生邏輯
+// =========================================
+const createCustomPin = (tags, name, category) => {
+    let cls = 'fa-map-marker-alt', col = '#ea4335'; // 預設紅色圖釘
+
+    const combined = (Array.isArray(tags) ? tags.join(',') : (tags || '')) + (category || '');
+
+    if (combined.includes('美食') || combined.includes('餐廳') || combined.includes('小吃')) { cls = 'fa-utensils'; col = '#f39c12'; } 
+    else if (combined.includes('貓村') || combined.includes('貓')) { cls = 'fa-cat'; col = '#9b59b6'; } 
+    else if (combined.includes('自然') || combined.includes('秘境')) { cls = 'fa-leaf'; col = '#2ecc71'; } 
+    else if (combined.includes('歷史') || combined.includes('古蹟')) { cls = 'fa-landmark'; col = '#7f8c8d'; } 
+    else if (combined.includes('自訂')) { cls = 'fa-star'; col = '#f1c40f'; }
+    else if (combined.includes('咖啡') || combined.includes('茶')) { cls = 'fa-coffee'; col = '#8e44ad'; }
+    else if (combined.includes('公車') || combined.includes('客運')) { cls = 'fa-bus'; col = '#2980b9'; }
+    else if (combined.includes('火車') || combined.includes('車站')) { cls = 'fa-train'; col = '#2980b9'; }
+    else if (combined.includes('醫院')) { cls = 'fa-hospital'; col = '#d63031'; }
+    else if (combined.includes('警察')) { cls = 'fa-taxi'; col = '#c0392b'; } 
+    else if (combined.includes('服務') || combined.includes('中心')) { cls = 'fa-info-circle'; col = '#ff4757'; }
+
+    return L.divIcon({ 
+        className: 'custom-pin-wrap', 
+        html: `<div class="gmap-pin" style="background-color:${col}"><i class="fas ${cls}"></i></div><div class="pin-label">${name}</div>`, 
+        iconSize: [32, 50],   
+        iconAnchor: [16, 38]  
+    });
+};
+
+// 🌟 修正：整合為單一個 createMarkerObj
 const createMarkerObj = (spot) => {
     const marker = L.marker([spot.lat, spot.lng], {
         icon: createCustomPin(spot.tags, spot.name, spot.category)
@@ -46,57 +75,6 @@ const createMarkerObj = (spot) => {
             // 💻 桌機版：直接開啟右側資訊大卡
             showCard(spot); 
         }
-    });
-
-    spot.markerObj = marker;
-    return marker;
-};
-
-// =========================================
-// 🌟 圖釘外觀與產生邏輯
-// =========================================
-const createCustomPin = (tags, name, category) => {
-    let cls = 'fa-map-marker-alt', col = '#ea4335'; // 預設紅色圖釘
-
-    const combined = (Array.isArray(tags) ? tags.join(',') : (tags || '')) + (category || '');
-
-    if (combined.includes('美食') || combined.includes('餐廳') || combined.includes('小吃')) { cls = 'fa-utensils'; col = '#f39c12'; } 
-    else if (combined.includes('貓村') || combined.includes('貓')) { cls = 'fa-cat'; col = '#9b59b6'; } 
-    else if (combined.includes('自然') || combined.includes('秘境')) { cls = 'fa-leaf'; col = '#2ecc71'; } 
-    else if (combined.includes('歷史') || combined.includes('古蹟')) { cls = 'fa-landmark'; col = '#7f8c8d'; } 
-    else if (combined.includes('自訂')) { cls = 'fa-star'; col = '#f1c40f'; }
-    else if (combined.includes('咖啡') || combined.includes('茶')) { cls = 'fa-coffee'; col = '#8e44ad'; }
-    else if (combined.includes('公車') || combined.includes('客運')) { cls = 'fa-bus'; col = '#2980b9'; }
-    else if (combined.includes('火車') || combined.includes('車站')) { cls = 'fa-train'; col = '#2980b9'; }
-    else if (combined.includes('醫院')) { cls = 'fa-hospital'; col = '#d63031'; }
-    else if (combined.includes('警察')) { cls = 'fa-taxi'; col = '#c0392b'; } 
-    else if (combined.includes('服務') || combined.includes('中心')) { cls = 'fa-info-circle'; col = '#ff4757'; }
-
-    return L.divIcon({ 
-        className: 'custom-pin-wrap', 
-        html: `<div class="gmap-pin" style="background-color:${col}"><i class="fas ${cls}"></i></div><div class="pin-label">${name}</div>`, 
-        iconSize: [32, 50],   
-        iconAnchor: [16, 38]  
-    });
-};
-
-const createMarkerObj = (spot) => {
-    const marker = L.marker([spot.lat, spot.lng], {
-        icon: createCustomPin(spot.tags, spot.name, spot.category)
-    });
-
-    // 1. 綁定預覽小卡 (Popup) HTML
-    marker.bindPopup(() => getPreviewHtml(spot), { closeButton: false });
-
-    // 2. 桌機體驗：滑鼠移入時自動顯示預覽小卡
-    marker.on('mouseover', function() { 
-        this.openPopup(); 
-    });
-
-    // 3. 點擊圖釘時：阻止預設事件，並直接開啟下方資訊大卡
-    marker.on('click', (e) => { 
-        L.DomEvent.stopPropagation(e); 
-        showCard(spot); 
     });
 
     spot.markerObj = marker;
@@ -193,9 +171,8 @@ export function filterSpots(category, elem) {
 
     state.cluster.addLayers(markersArray);
 
-    // 🌟 超棒 UX 優化：切換分類後，自動將視角縮放並平移到涵蓋這些景點的範圍！
+    // 🌟 UX 優化：切換分類後，自動將視角縮放並平移到涵蓋這些景點的範圍！
     if (markersArray.length > 0 && state.mapInstance) {
-        // 如果是「全部」，避免縮得太遠，我們可以不移動，或給個最大的 maxZoom
         const group = new L.featureGroup(markersArray);
         state.mapInstance.fitBounds(group.getBounds(), { padding: [50, 50], maxZoom: 15, animate: true });
     } else if (markersArray.length === 0 && typeof window.showToast === 'function') {
