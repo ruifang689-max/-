@@ -3,7 +3,61 @@
 import { state } from '../core/store.js';
 import { spots } from '../data/spots.js'; 
 import { showCard } from './cards.js';
-import { getPreviewHtml } from './previews.js';
+import { getPreviewHtml, showBottomPreview, hideBottomPreview } from './previews.js';
+
+// 檢查是否為手機裝置 (簡易判斷，可依據需求調整)
+const isMobile = () => window.innerWidth <= 768;
+
+const createMarkerObj = (spot) => {
+    const marker = L.marker([spot.lat, spot.lng], {
+        icon: createCustomPin(spot.tags, spot.name, spot.category)
+    });
+
+    // 1. 綁定預覽小卡 (Popup) HTML
+    marker.bindPopup(() => getPreviewHtml(spot), { closeButton: false });
+
+    // 2. 桌機體驗：滑鼠移入時自動顯示 Popup
+    marker.on('mouseover', function() { 
+        if (!isMobile()) {
+            this.openPopup(); 
+        }
+    });
+
+    // 3. 點擊圖釘時的行為分流
+    marker.on('click', (e) => { 
+        L.DomEvent.stopPropagation(e); 
+        
+        if (isMobile()) {
+            // 📱 手機版：關閉大卡，彈出底部預覽小卡
+            if(window.rfApp && window.rfApp.ui && window.rfApp.ui.closeCard) {
+                window.rfApp.ui.closeCard(); 
+            }
+            this.closePopup(); // 確保不會彈出預設的 Popup
+            showBottomPreview(spot);
+            
+            // 讓地圖視角稍微往下移一點，避免圖釘被底部小卡遮擋
+            const latlng = marker.getLatLng();
+            const offset = state.mapInstance.getSize().y * 0.15; // 往下偏移 15% 畫面高度
+            const targetPoint = state.mapInstance.project(latlng).subtract([0, offset]);
+            const targetLatLng = state.mapInstance.unproject(targetPoint);
+            state.mapInstance.flyTo(targetLatLng, state.mapInstance.getZoom(), { animate: true, duration: 0.5 });
+
+        } else {
+            // 💻 桌機版：直接開啟右側資訊大卡
+            showCard(spot); 
+        }
+    });
+
+    spot.markerObj = marker;
+    return marker;
+};
+
+// 🌟 新增：點擊地圖空白處時，隱藏底部預覽小卡
+if (state.mapInstance) {
+    state.mapInstance.on('click', () => {
+        hideBottomPreview();
+    });
+}
 
 // =========================================
 // 🌟 圖釘外觀與產生邏輯
