@@ -1,4 +1,4 @@
-// js/modules/customSpots.js (加入本地圖片高壓縮與 UI 互斥優化版)
+// js/modules/customSpots.js (常駐按鈕 + 預覽防塌陷版)
 import { state, saveState } from '../core/store.js';
 import { addMarkerToMap } from './markers.js';
 import { showCard } from './cards.js';
@@ -42,8 +42,8 @@ function processImageFile(file, callback) {
 
 export function initCustomSpots() {
     
-    // 🌟 攔截圖片選擇事件，並即時壓縮與預覽
-    const handleImageInput = (inputId, previewId, containerId, labelId, stateKey) => {
+    // 🌟 圖片選擇處理：不再隱藏 Label 按鈕
+    const handleImageInput = (inputId, previewId, containerId, stateKey) => {
         const inputEl = document.getElementById(inputId);
         if (inputEl && inputEl.type === 'file') {
             inputEl.addEventListener('change', (e) => {
@@ -55,19 +55,14 @@ export function initCustomSpots() {
                         state[stateKey] = base64; 
                         const preview = document.getElementById(previewId);
                         const container = document.getElementById(containerId);
-                        const label = document.getElementById(labelId);
                         
                         if (preview && container) {
                             preview.src = base64;
                             container.classList.remove('u-hidden');
                             container.classList.add('u-block');
                         }
-                        // 🌟 上傳成功後，隱藏虛線的上傳按鈕
-                        if (label) {
-                            label.style.display = 'none';
-                        }
                         
-                        // 清空 input，允許重複選取相同檔案
+                        // 讓 input 歸零，確保下次點擊仍可重複選取同一張圖
                         inputEl.value = "";
                     });
                 }
@@ -75,31 +70,26 @@ export function initCustomSpots() {
         }
     };
 
-    handleImageInput('custom-spot-img', 'add-image-preview', 'add-preview-container', 'add-upload-label', 'tempAddImageBase64');
-    handleImageInput('edit-spot-img', 'edit-image-preview', 'edit-preview-container', 'edit-upload-label', 'tempEditImageBase64');
+    handleImageInput('custom-spot-img', 'add-image-preview', 'add-preview-container', 'tempAddImageBase64');
+    handleImageInput('edit-spot-img', 'edit-image-preview', 'edit-preview-container', 'tempEditImageBase64');
 
-    // 🌟 新增：移除圖片的邏輯 (互斥顯示還原)
+    // 🌟 點擊「X」時，只清空並隱藏預覽容器
     window.rfApp.custom.removeUploadImage = (type) => {
         if (type === 'add') {
             state.tempAddImageBase64 = "";
             const container = document.getElementById('add-preview-container');
             const preview = document.getElementById('add-image-preview');
-            const label = document.getElementById('add-upload-label');
             
             if(container) { container.classList.remove('u-block'); container.classList.add('u-hidden'); }
             if(preview) preview.removeAttribute('src');
-            // 🌟 移除圖片後，重新顯示虛線的上傳按鈕
-            if(label) label.style.display = 'block';
             
         } else if (type === 'edit') {
+            state.tempEditImageBase64 = ""; 
             const container = document.getElementById('edit-preview-container');
             const preview = document.getElementById('edit-image-preview');
-            const label = document.getElementById('edit-upload-label');
             
             if(container) { container.classList.remove('u-block'); container.classList.add('u-hidden'); }
             if(preview) preview.removeAttribute('src');
-            // 🌟 移除圖片後，重新顯示虛線的上傳按鈕
-            if(label) label.style.display = 'block';
         }
     };
 
@@ -140,7 +130,6 @@ export function initCustomSpots() {
                     const nameInput = document.getElementById('custom-spot-name');
                     if(nameInput) nameInput.value = ""; 
 
-                    // 🌟 開啟時初始化：清空暫存並確保顯示「上傳按鈕」
                     window.rfApp.custom.removeUploadImage('add');
 
                     const m = document.getElementById('custom-spot-modal');
@@ -241,34 +230,31 @@ export function initCustomSpots() {
         if(navigator.share){ navigator.share({title:'瑞芳秘境', text:addr, url:link}).catch(()=>{}); } 
     };
     
-    // 🌟 開啟編輯視窗時的初始化邏輯
+    // 🌟 開啟編輯視窗時：顯示圖片容器，不再隱藏按鈕
     window.rfApp.custom.openEditModal = (name) => { 
         state.currentEditingSpotName = name; 
+        state.tempEditImageBase64 = ""; 
+        
         const s = state.savedCustomSpots.find(x => x.name === name); 
         if(!s) return; 
         
         document.getElementById('edit-name').value = s.name; 
-        document.getElementById('edit-highlights').value = s.highlights; 
-        document.getElementById('edit-history').value = s.history; 
+        document.getElementById('edit-highlights').value = s.highlights || ""; 
+        document.getElementById('edit-history').value = s.history || ""; 
         
         const previewContainer = document.getElementById('edit-preview-container');
         const preview = document.getElementById('edit-image-preview');
-        const label = document.getElementById('edit-upload-label');
         
         const imgUrl = s.wikiImg || s.coverImg || "";
         
         if(imgUrl) { 
-            // 如果原本就有圖片：顯示圖片，隱藏上傳按鈕
             preview.src = imgUrl; 
             previewContainer.classList.remove('u-hidden'); 
             previewContainer.classList.add('u-block'); 
-            if(label) label.style.display = 'none';
         } else { 
-            // 如果沒有圖片：隱藏圖片容器，顯示上傳按鈕
             preview.removeAttribute('src'); 
             previewContainer.classList.remove('u-block'); 
             previewContainer.classList.add('u-hidden'); 
-            if(label) label.style.display = 'block';
         }
         
         const devUploadBtn = document.getElementById('dev-upload-btn');
@@ -295,7 +281,10 @@ export function initCustomSpots() {
         
         const previewContainer = document.getElementById('edit-preview-container');
         const preview = document.getElementById('edit-image-preview');
-        const finalImgUrl = previewContainer.classList.contains('u-hidden') ? "" : (preview.getAttribute('src') || "");
+        
+        const finalImgUrl = previewContainer.classList.contains('u-hidden') 
+            ? "" 
+            : (state.tempEditImageBase64 || preview.src || "");
         
         s.wikiImg = finalImgUrl; 
         s.coverImg = finalImgUrl; 
