@@ -37,12 +37,24 @@ const createMarkerObj = (spot) => {
     const marker = L.marker([spot.lat, spot.lng], {
         icon: createCustomPin(spot.tags, spot.name, spot.category)
     });
-    marker.on('click', () => showCard(spot));
+
+    // 1. 綁定預覽小卡 (Popup) HTML
+    marker.bindPopup(() => getPreviewHtml(spot), { closeButton: false });
+
+    // 2. 桌機體驗：滑鼠移入時自動顯示預覽小卡
+    marker.on('mouseover', function() { 
+        this.openPopup(); 
+    });
+
+    // 3. 點擊圖釘時：阻止預設事件，並直接開啟下方資訊大卡
+    marker.on('click', (e) => { 
+        L.DomEvent.stopPropagation(e); 
+        showCard(spot); 
+    });
+
     spot.markerObj = marker;
     return marker;
 };
-
-m.bindPopup(() => getPreviewHtml(s), { closeButton: false }); [cite: 10]
 
 // 供外部單一呼叫新增 (例如新增自訂秘境)
 export function addMarkerToMap(spot) {
