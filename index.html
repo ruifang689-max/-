@@ -380,8 +380,15 @@
             </div> <input type="text" id="edit-name" class="modal-input" placeholder="地點名稱 (必填)">
             <textarea id="edit-highlights" class="modal-textarea" placeholder="推薦亮點..."></textarea>
             <textarea id="edit-history" class="modal-textarea" placeholder="備註或歷史..."></textarea>
-            <label class="modal-file-label"><i class="fas fa-camera"></i> 上傳專屬照片<input type="file" id="edit-spot-img" accept="image/*"></label>
-            <img id="edit-image-preview" class="u-hidden" style="width:100%; max-height:150px; object-fit:cover; margin-top:10px; border-radius:8px;">
+            <label class="modal-file-label" style="margin-top: 15px; display: block; text-align: center; background: rgba(0,0,0,0.03); border: 2px dashed var(--border-color); padding: 15px; border-radius: 8px; cursor: pointer; transition: 0.2s;">
+                <i class="fas fa-camera" style="font-size: 24px; color: var(--primary); margin-bottom: 8px;"></i><br>
+                <span style="font-size: 14px; color: var(--text-sub); font-weight: bold;">上傳專屬照片</span>
+                <input type="file" id="edit-spot-img" accept="image/*" style="display:none;">
+            </label>
+            <div id="edit-preview-container" class="u-hidden" style="position: relative; margin-top: 10px;">
+                <img id="edit-image-preview" style="width:100%; max-height:180px; object-fit:cover; border-radius:8px; border: 1px solid var(--border-color); box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                <button onclick="rfApp.custom.removeUploadImage('edit')" style="position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,0.6); color: white; border: 1px solid white; border-radius: 50%; width: 28px; height: 28px; cursor: pointer; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(4px);"><i class="fas fa-times"></i></button>
+            </div>
             
             <div class="modal-btns">
                 <button class="modal-cancel" onclick="closeEditModal()">取消</button>
@@ -397,10 +404,15 @@
                 📍 載入中...
             </div>
             <input type="text" id="custom-spot-name" class="modal-input" placeholder="請為此秘境命名 (例：我的秘密基地)">
-            <label class="modal-file-label" style="margin-top: 15px; display: block;"><i class="fas fa-camera"></i> 上傳秘境照片
+            <label class="modal-file-label" style="margin-top: 15px; display: block; text-align: center; background: rgba(0,0,0,0.03); border: 2px dashed var(--border-color); padding: 15px; border-radius: 8px; cursor: pointer; transition: 0.2s;">
+                <i class="fas fa-camera" style="font-size: 24px; color: var(--primary); margin-bottom: 8px;"></i><br>
+                <span style="font-size: 14px; color: var(--text-sub); font-weight: bold;">點擊上傳秘境照片</span>
                 <input type="file" id="custom-spot-img" accept="image/*" style="display:none;">
             </label>
-            <img id="add-image-preview" class="u-hidden" style="width:100%; max-height:150px; object-fit:cover; margin-top:10px; border-radius:8px;"> 
+            <div id="add-preview-container" class="u-hidden" style="position: relative; margin-top: 10px;">
+                <img id="add-image-preview" style="width:100%; max-height:180px; object-fit:cover; border-radius:8px; border: 1px solid var(--border-color); box-shadow: 0 2px 8px rgba(0,0,0,0.1);">
+                <button onclick="rfApp.custom.removeUploadImage('add')" style="position: absolute; top: 8px; right: 8px; background: rgba(0,0,0,0.6); color: white; border: 1px solid white; border-radius: 50%; width: 28px; height: 28px; cursor: pointer; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(4px);"><i class="fas fa-times"></i></button>
+            </div>
                        
             <div class="modal-btns" style="margin-top: 15px;">
                 <button class="modal-cancel" onclick="closeCustomSpotModal()">取消</button>
@@ -476,6 +488,7 @@
     
 </body>
 </html>
+
 
 
 
