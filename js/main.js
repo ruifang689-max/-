@@ -14,6 +14,7 @@ import { fetchWeather } from './modules/weather.js';
 import { initGPS } from './modules/gps.js';
 import { initAnnouncer } from './modules/announcer.js'; 
 import { initCardGestures, closeCard } from './modules/cards.js';
+import { showCard, closeCard, openCardByName } from './modules/cards.js';
 import { renderAllMarkers, filterSpots } from './modules/markers.js';
 import { initSearch } from './modules/search.js';
 import { initNavigation } from './modules/navigation.js';
@@ -29,6 +30,7 @@ import { initNearby } from './modules/nearby.js';
 
 window.rfApp.map.toggleLayer = toggleLayer;
 window.rfApp.ui.closeCard = closeCard;
+window.rfApp.ui.openCardByName = openCardByName;
 window.toggleLayer = window.rfApp.map.toggleLayer;
 window.closeCard = window.rfApp.ui.closeCard;
 
