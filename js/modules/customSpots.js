@@ -1,4 +1,4 @@
-// js/modules/customSpots.js (加入本地圖片高壓縮與 Base64 轉換引擎)
+// js/modules/customSpots.js (加入本地圖片高壓縮與 Base64 轉換引擎 + UX 優化版)
 import { state, saveState } from '../core/store.js';
 import { addMarkerToMap } from './markers.js';
 import { showCard } from './cards.js';
@@ -7,7 +7,6 @@ const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwqMFBi7x70o1xC
 
 // ==========================================
 // 🌟 核心壓縮引擎：將本機相片壓縮成輕量 Base64
-// 預防 LocalStorage (5MB) 和 Firebase (1MB) 被原始照片塞爆
 // ==========================================
 function processImageFile(file, callback) {
     if (!file || !file.type.startsWith('image/')) {
@@ -23,7 +22,6 @@ function processImageFile(file, callback) {
             let width = img.width;
             let height = img.height;
 
-            // 等比例縮放
             if (width > MAX_WIDTH) {
                 height = Math.round((height * MAX_WIDTH) / width);
                 width = MAX_WIDTH;
@@ -34,7 +32,6 @@ function processImageFile(file, callback) {
             const ctx = canvas.getContext('2d');
             ctx.drawImage(img, 0, 0, width, height);
 
-            // 壓縮為 JPEG，品質 0.7，大幅降低容量 (通常只剩 50KB 左右)
             const compressedBase64 = canvas.toDataURL('image/jpeg', 0.7);
             callback(compressedBase64);
         };
@@ -44,31 +41,52 @@ function processImageFile(file, callback) {
 }
 
 export function initCustomSpots() {
+    
     // 🌟 攔截圖片選擇事件，並即時壓縮與預覽
-    const handleImageInput = (inputId, previewId, stateKey) => {
+    const handleImageInput = (inputId, previewId, containerId, stateKey) => {
         const inputEl = document.getElementById(inputId);
-        // 確認輸入框是設定為檔案上傳類型
         if (inputEl && inputEl.type === 'file') {
             inputEl.addEventListener('change', (e) => {
                 const file = e.target.files[0];
                 if (file) {
+                    if (typeof window.showToast === 'function') window.showToast("處理圖片中...", "info");
+                    
                     processImageFile(file, (base64) => {
-                        state[stateKey] = base64; // 將輕量代碼寫入暫存
+                        state[stateKey] = base64; 
                         const preview = document.getElementById(previewId);
-                        if (preview) {
+                        const container = document.getElementById(containerId);
+                        if (preview && container) {
                             preview.src = base64;
-                            preview.classList.remove('u-hidden');
-                            preview.classList.add('u-block');
+                            container.classList.remove('u-hidden');
+                            container.classList.add('u-block');
                         }
+                        // 清空 input 值，確保使用者如果按移除後，想重新上傳同一張照片仍會觸發 change 事件
+                        inputEl.value = "";
                     });
                 }
             });
         }
     };
 
-    // 綁定「新增景點」與「編輯景點」的圖片選擇器
-    handleImageInput('custom-spot-img', 'add-image-preview', 'tempAddImageBase64');
-    handleImageInput('edit-spot-img', 'edit-image-preview', 'tempEditImageBase64');
+    handleImageInput('custom-spot-img', 'add-image-preview', 'add-preview-container', 'tempAddImageBase64');
+    handleImageInput('edit-spot-img', 'edit-image-preview', 'edit-preview-container', 'tempEditImageBase64');
+
+    // 🌟 新增：移除圖片的邏輯
+    window.rfApp.custom.removeUploadImage = (type) => {
+        if (type === 'add') {
+            state.tempAddImageBase64 = "";
+            const container = document.getElementById('add-preview-container');
+            const preview = document.getElementById('add-image-preview');
+            if(container) { container.classList.remove('u-block'); container.classList.add('u-hidden'); }
+            if(preview) preview.removeAttribute('src');
+        } else if (type === 'edit') {
+            const container = document.getElementById('edit-preview-container');
+            const preview = document.getElementById('edit-image-preview');
+            if(container) { container.classList.remove('u-block'); container.classList.add('u-hidden'); }
+            if(preview) preview.removeAttribute('src');
+            // 編輯狀態下，不特別清空 state 變數，等到 saveEditSpot 儲存時會直接抓取 preview 的屬性
+        }
+    };
 
     if (state.mapInstance) {
         state.mapInstance.on('contextmenu', function(e) {
@@ -107,16 +125,8 @@ export function initCustomSpots() {
                     const nameInput = document.getElementById('custom-spot-name');
                     if(nameInput) nameInput.value = ""; 
 
-                    // 🌟 清空暫存，避免點選上一個景點的圖片殘留
-                    state.tempAddImageBase64 = "";
-                    const imgInput = document.getElementById('custom-spot-img');
-                    if(imgInput) imgInput.value = "";
-                    const addPreview = document.getElementById('add-image-preview');
-                    if (addPreview) {
-                        addPreview.removeAttribute('src');
-                        addPreview.classList.remove('u-block');
-                        addPreview.classList.add('u-hidden');
-                    }
+                    // 🌟 清空暫存與預覽，避免殘留
+                    window.rfApp.custom.removeUploadImage('add');
 
                     const m = document.getElementById('custom-spot-modal');
                     if(m) { m.classList.remove('u-hidden'); m.classList.add('u-flex'); }
@@ -164,15 +174,8 @@ export function initCustomSpots() {
     
     window.rfApp.custom.confirmCustomSpot = () => { 
         const spotName = document.getElementById('custom-spot-name').value.trim() || "我的秘境"; 
-        const imgInput = document.getElementById('custom-spot-img');
         
-        // 🌟 判斷優先權：如果有壓縮好的本機圖片，就用本機圖片；否則才檢查是否為文字網址
-        let coverImgUrl = "";
-        if (state.tempAddImageBase64) {
-            coverImgUrl = state.tempAddImageBase64;
-        } else if (imgInput && imgInput.type === 'text') {
-            coverImgUrl = imgInput.value.trim();
-        }
+        let coverImgUrl = state.tempAddImageBase64 || "";
 
         let authCode = "";
         if (window.rfApp && window.rfApp.isDeveloper) {
@@ -203,8 +206,6 @@ export function initCustomSpots() {
             if (typeof window.showToast === 'function') window.showToast(window.rfApp.t('toast_custom_saved'), 'success');
 
             if (authCode && GAS_WEB_APP_URL && GAS_WEB_APP_URL.includes('script.google.com')) {
-                if (typeof window.showToast === 'function') window.showToast('正在驗證並同步至官方雲端...', 'info');
-
                 fetch(GAS_WEB_APP_URL, {
                     method: 'POST',
                     mode: 'no-cors', 
@@ -234,17 +235,19 @@ export function initCustomSpots() {
         document.getElementById('edit-name').value = s.name; 
         document.getElementById('edit-highlights').value = s.highlights; 
         document.getElementById('edit-history').value = s.history; 
+        
+        const previewContainer = document.getElementById('edit-preview-container');
         const preview = document.getElementById('edit-image-preview');
         
         const imgUrl = s.wikiImg || s.coverImg || "";
         if(imgUrl) { 
-            preview.classList.remove('u-hidden'); 
-            preview.classList.add('u-block'); 
             preview.src = imgUrl; 
+            previewContainer.classList.remove('u-hidden'); 
+            previewContainer.classList.add('u-block'); 
         } else { 
-            preview.classList.remove('u-block'); 
-            preview.classList.add('u-hidden'); 
             preview.removeAttribute('src'); 
+            previewContainer.classList.remove('u-block'); 
+            previewContainer.classList.add('u-hidden'); 
         }
         
         const devUploadBtn = document.getElementById('dev-upload-btn');
@@ -269,8 +272,10 @@ export function initCustomSpots() {
         s.highlights = document.getElementById('edit-highlights').value; 
         s.history = document.getElementById('edit-history').value; 
         
+        // 判斷圖片容器是否隱藏來決定是否有圖
+        const previewContainer = document.getElementById('edit-preview-container');
         const preview = document.getElementById('edit-image-preview');
-        const finalImgUrl = preview.classList.contains('u-hidden') ? "" : (preview.getAttribute('src') || "");
+        const finalImgUrl = previewContainer.classList.contains('u-hidden') ? "" : (preview.getAttribute('src') || "");
         
         s.wikiImg = finalImgUrl; 
         s.coverImg = finalImgUrl; 
