@@ -52,13 +52,6 @@ const createMarkerObj = (spot) => {
     return marker;
 };
 
-// 🌟 新增：點擊地圖空白處時，隱藏底部預覽小卡
-if (state.mapInstance) {
-    state.mapInstance.on('click', () => {
-        hideBottomPreview();
-    });
-}
-
 // =========================================
 // 🌟 圖釘外觀與產生邏輯
 // =========================================
@@ -118,9 +111,19 @@ export function addMarkerToMap(spot) {
     return marker;
 }
 
+let isMapClickBound = false;
+
 // 初始批次載入所有圖釘
 export function renderAllMarkers() {
     if (!state.cluster) return;
+
+    // 🌟 確保在這裡綁定點擊事件，此時地圖已初始化
+    if (!isMapClickBound && state.mapInstance) {
+        state.mapInstance.on('click', () => {
+            hideBottomPreview();
+        });
+        isMapClickBound = true;
+    }
     
     state.cluster.clearLayers();
 
@@ -129,7 +132,6 @@ export function renderAllMarkers() {
     const allSpots = [...officialSpots, ...customList];
 
     const markersArray = [];
-
     allSpots.forEach(spot => {
         markersArray.push(createMarkerObj(spot));
     });
