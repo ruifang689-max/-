@@ -139,7 +139,7 @@ export function triggerSearch(name) {
                     s.markerObj.openPopup();
                 }
             }
-        }, 1200); // 稍微延長一點時間，等待飛行快結束再開，視覺會更平滑
+        }, 800); // 👈 就是這裡！把 1200 改回 800 即可
     } 
 }
 
