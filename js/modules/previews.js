@@ -1,6 +1,20 @@
 // js/modules/previews.js
 import { state } from '../core/store.js';
 
+// 🌟 新增：全域統一的裝置判定邏輯 (以 768px 為界線)
+export const isMobileDevice = () => window.innerWidth <= 768;
+
+// 🌟 新增：監聽螢幕旋轉或縮放，動態修正 UI 狀態
+if (typeof window !== 'undefined') {
+    window.addEventListener('resize', () => {
+        const bottomCard = document.getElementById('bottom-preview-card');
+        if (!isMobileDevice() && bottomCard && bottomCard.classList.contains('bottom-preview-visible')) {
+            // 如果切換回桌機版，且底部小卡是開著的，就強制關閉它
+            hideBottomPreview();
+        }
+    });
+}
+
 function calculateWalk(lat, lng) {
     if (!state.userPos) return "--";
     const distance = state.mapInstance.distance(state.userPos, [lat, lng]);
