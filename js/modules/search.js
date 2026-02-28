@@ -2,6 +2,7 @@
 
 import { spots } from '../data/spots.js';
 import { state, saveState } from '../core/store.js';
+import { closeCard } from './cards.js';
 import { showCard } from './cards.js';
 import { getContextualData } from './contextEngine.js'; 
 
@@ -52,11 +53,50 @@ export function initSearch() {
     });
 
     // 4. 全域控制功能
-    window.rfApp.search.triggerSearch = (keyword) => {
-        if (searchInput) searchInput.value = keyword;
-        if (clearBtn) { clearBtn.classList.remove('u-hidden'); clearBtn.classList.add('u-block'); }
-        updateSearchUI(keyword.toLowerCase());
-    };
+export function triggerSearch(name) { 
+    const searchInput = document.getElementById("search");
+    const sugBox = document.getElementById("suggest");
+    
+    if (searchInput) searchInput.value = name; 
+    if (sugBox) sugBox.style.display = "none"; 
+    
+    // 合併官方景點與自訂景點進行查找
+    const officialSpots = Array.isArray(spots) ? spots : [];
+    const customList = state.savedCustomSpots || [];
+    const allSpots = [...officialSpots, ...customList];
+    const s = allSpots.find(x => x.name === name); 
+    
+    if (s) { 
+        // 1. 先關閉可能正開啟著的下方大卡，讓視野乾淨
+        closeCard();
+
+        // 2. 飛行至該景點座標
+        state.mapInstance.flyTo([s.lat, s.lng], 16); 
+        
+        // 3. 延遲 800 毫秒（等待飛行動畫接近完成）後開啟預覽小卡
+        setTimeout(() => {
+            if (s.markerObj) {
+                // 如果圖釘被包含在叢集 (Cluster) 內，必須使用 zoomToShowLayer 展開它
+                if (state.cluster && state.cluster.hasLayer(s.markerObj)) {
+                    state.cluster.zoomToShowLayer(s.markerObj, () => {
+                        s.markerObj.openPopup();
+                    });
+                } else {
+                    // 若無叢集干擾，直接開啟
+                    s.markerObj.openPopup();
+                }
+            }
+        }, 800); 
+    } 
+}
+
+// 🌟 確保將方法掛載到全域，供 HTML onclick 或 Deep Link 呼叫
+if (typeof window !== 'undefined') {
+    if(!window.rfApp) window.rfApp = {};
+    if(!window.rfApp.search) window.rfApp.search = {};
+    window.rfApp.search.triggerSearch = triggerSearch;
+    window.triggerSearch = triggerSearch; // 向下相容
+}
 
     window.rfApp.search.filterByCategory = (categoryText) => {
         if (searchInput) searchInput.value = categoryText;
