@@ -95,6 +95,9 @@ export function initSearch() {
 // ==========================================
 // 2. 獨立的觸發搜尋方法 (移出 initSearch 外)
 // ==========================================
+// 🌟 在 triggerSearch 函數上方加入手機判斷函數
+const isMobile = () => window.innerWidth <= 768;
+
 export function triggerSearch(name) { 
     if (!name) return;
 
@@ -103,43 +106,55 @@ export function triggerSearch(name) {
     
     if (searchInput) {
         searchInput.value = name; 
-        searchInput.blur(); // 搜尋後收起手機鍵盤
+        searchInput.blur(); 
     }
     if (sugBox) {
         sugBox.classList.remove('u-block'); 
         sugBox.classList.add('u-hidden');
-        sugBox.style.display = "none"; // 雙重保險關閉
+        sugBox.style.display = "none"; 
     }
     
-    // 儲存搜尋歷史
     state.searchHistory = (state.searchHistory || []).filter(h => h !== name);
     state.searchHistory.unshift(name);
     if (state.searchHistory.length > 8) state.searchHistory.pop();
     if (typeof saveState !== 'undefined') saveState.history();
 
-    // 尋找景點
     const allSpots = [...(Array.isArray(spots) ? spots : []), ...(state.savedCustomSpots || [])];
     const s = allSpots.find(x => x && x.name === name); 
     
     if (s && state.mapInstance) { 
-        // 1. 先關閉下方大卡
         closeCard();
-
-        // 2. 飛行至景點
         state.mapInstance.flyTo([s.lat, s.lng], 16, { duration: 1.5 }); 
         
-        // 3. 延遲彈出小卡
         setTimeout(() => {
             if (s.markerObj) {
-                if (state.cluster && state.cluster.hasLayer(s.markerObj)) {
-                    state.cluster.zoomToShowLayer(s.markerObj, () => {
+                // 🌟 新增：封裝處理預覽畫面的邏輯
+                const handlePreview = () => {
+                    if (isMobile() && window.rfApp.ui && window.rfApp.ui.showBottomPreview) {
+                        // 📱 手機版：關閉傳統 Popup 並彈出底部小卡
+                        s.markerObj.closePopup();
+                        window.rfApp.ui.showBottomPreview(s);
+                        
+                        // 視角偏移，避免圖釘被底部小卡擋住
+                        const latlng = s.markerObj.getLatLng();
+                        const offset = state.mapInstance.getSize().y * 0.15;
+                        const targetPoint = state.mapInstance.project(latlng).subtract([0, offset]);
+                        const targetLatLng = state.mapInstance.unproject(targetPoint);
+                        state.mapInstance.flyTo(targetLatLng, 16, { animate: true, duration: 0.5 });
+                    } else {
+                        // 💻 桌機版：直接彈出傳統 Popup
                         s.markerObj.openPopup();
-                    });
+                    }
+                };
+
+                // 判斷是否被叢集收合
+                if (state.cluster && state.cluster.hasLayer(s.markerObj)) {
+                    state.cluster.zoomToShowLayer(s.markerObj, handlePreview);
                 } else {
-                    s.markerObj.openPopup();
+                    handlePreview();
                 }
             }
-        }, 800); // 👈 就是這裡！把 1200 改回 800 即可
+        }, 800); 
     } 
 }
 
