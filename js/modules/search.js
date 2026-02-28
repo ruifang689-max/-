@@ -4,6 +4,7 @@ import { spots } from '../data/spots.js';
 import { state, saveState } from '../core/store.js';
 import { closeCard, showCard } from './cards.js'; // 🌟 合併引入
 import { getContextualData } from './contextEngine.js'; 
+import { hideBottomPreview } from './previews.js';
 
 // ==========================================
 // 1. 搜尋模組初始化
@@ -124,6 +125,7 @@ export function triggerSearch(name) {
     
     if (s && state.mapInstance) { 
         closeCard();
+        hideBottomPreview();
         state.mapInstance.flyTo([s.lat, s.lng], 16, { duration: 1.5 }); 
         
         setTimeout(() => {
