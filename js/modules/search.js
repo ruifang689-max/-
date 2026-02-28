@@ -4,7 +4,7 @@ import { spots } from '../data/spots.js';
 import { state, saveState } from '../core/store.js';
 import { closeCard, showCard } from './cards.js'; // 🌟 合併引入
 import { getContextualData } from './contextEngine.js'; 
-import { hideBottomPreview } from './previews.js';
+import { hideBottomPreview, isMobileDevice } from './previews.js';
 
 // ==========================================
 // 1. 搜尋模組初始化
@@ -96,9 +96,6 @@ export function initSearch() {
 // ==========================================
 // 2. 獨立的觸發搜尋方法 (移出 initSearch 外)
 // ==========================================
-// 🌟 在 triggerSearch 函數上方加入手機判斷函數
-const isMobile = () => window.innerWidth <= 768;
-
 export function triggerSearch(name) { 
     if (!name) return;
 
@@ -125,31 +122,28 @@ export function triggerSearch(name) {
     
     if (s && state.mapInstance) { 
         closeCard();
-        hideBottomPreview();
+        hideBottomPreview(); 
+
         state.mapInstance.flyTo([s.lat, s.lng], 16, { duration: 1.5 }); 
         
         setTimeout(() => {
             if (s.markerObj) {
-                // 🌟 新增：封裝處理預覽畫面的邏輯
                 const handlePreview = () => {
-                    if (isMobile() && window.rfApp.ui && window.rfApp.ui.showBottomPreview) {
-                        // 📱 手機版：關閉傳統 Popup 並彈出底部小卡
+                    // 🌟 3. 替換為 isMobileDevice()
+                    if (isMobileDevice() && window.rfApp.ui && window.rfApp.ui.showBottomPreview) {
                         s.markerObj.closePopup();
                         window.rfApp.ui.showBottomPreview(s);
                         
-                        // 視角偏移，避免圖釘被底部小卡擋住
                         const latlng = s.markerObj.getLatLng();
                         const offset = state.mapInstance.getSize().y * 0.15;
                         const targetPoint = state.mapInstance.project(latlng).subtract([0, offset]);
                         const targetLatLng = state.mapInstance.unproject(targetPoint);
                         state.mapInstance.flyTo(targetLatLng, 16, { animate: true, duration: 0.5 });
                     } else {
-                        // 💻 桌機版：直接彈出傳統 Popup
                         s.markerObj.openPopup();
                     }
                 };
 
-                // 判斷是否被叢集收合
                 if (state.cluster && state.cluster.hasLayer(s.markerObj)) {
                     state.cluster.zoomToShowLayer(s.markerObj, handlePreview);
                 } else {
