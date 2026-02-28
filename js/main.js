@@ -79,7 +79,8 @@ async function bootstrapApp() {
     safeInit(initFirebase, 'Firebase 雲端同步');
     safeInit(handleDeepLink, 'URL路由解析');
 
-    if (typeof showToast === 'function') showToast("🔄 同步雲端景點資料中...", "info");
+    // 🌟 優化：將初始的同步提示框註解掉，讓載入畫面更乾淨
+    // if (typeof showToast === 'function') showToast("🔄 同步雲端景點資料中...", "info");
     await fetchSpotsFromSheet();
 
     initMap().then(() => {
