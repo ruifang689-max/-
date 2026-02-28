@@ -1,9 +1,8 @@
-// js/modules/customSpots.js (v658) - Google Sheets 雲端雙向同步版
+// js/modules/customSpots.js (v658) - Google Sheets 雲端雙向同步版 + 圖片修復版
 import { state, saveState } from '../core/store.js';
 import { addMarkerToMap } from './markers.js';
 import { showCard } from './cards.js';
 
-// 🌟 將這裡替換為您在第一步複製的 Apps Script 網址 🌟
 const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbwqMFBi7x70o1xCOqg5ulyCVw118og5pAtJJk9eEq4NfFe23J56VeZiBLoTcXvYRPIZ/exec";
 
 export function initCustomSpots() {
@@ -87,16 +86,14 @@ export function initCustomSpots() {
 
     window.rfApp.custom.closeCustomSpotModal = () => { const m = document.getElementById('custom-spot-modal'); if(m) { m.classList.remove('u-flex'); m.classList.add('u-hidden'); } };
     
-    // 🌟 核心修改：新增景點時，同步推播至 Google 試算表
     window.rfApp.custom.confirmCustomSpot = () => { 
         const spotName = document.getElementById('custom-spot-name').value.trim() || "我的秘境"; 
         const imgInput = document.getElementById('custom-spot-img');
         const coverImgUrl = imgInput ? imgInput.value.trim() : "";
 
-        // 🌟 自動授權邏輯：完全不看輸入框，只看系統狀態
         let authCode = "";
         if (window.rfApp && window.rfApp.isDeveloper) {
-            authCode = "689"; // 只要開啟開發者模式，自動帶入後端通關密碼
+            authCode = "689"; 
         }
 
         if (state.tempCustomSpot) { 
@@ -111,8 +108,8 @@ export function initCustomSpots() {
                 history: "自訂標記", 
                 transport: "自行前往", 
                 coverImg: coverImgUrl,
-                wikiImg: "",
-                authCode: authCode // 帶入自動取得的密碼
+                wikiImg: coverImgUrl, // 🌟 雙重存檔，確保不漏接
+                authCode: authCode 
             };
             
             state.savedCustomSpots.push(newSpot); 
@@ -139,7 +136,6 @@ export function initCustomSpots() {
         } 
         window.rfApp.custom.closeCustomSpotModal(); 
         
-        // 🌟 關閉後清空輸入框，避免下次打開殘留
         if(imgInput) imgInput.value = "";
         if(document.getElementById('custom-spot-name')) document.getElementById('custom-spot-name').value = "";
     };
@@ -154,7 +150,6 @@ export function initCustomSpots() {
         if(navigator.share){ navigator.share({title:'瑞芳秘境', text:addr, url:link}).catch(()=>{}); } 
     };
     
-    // ... 下方的編輯與刪除功能保持不變 ...
     window.rfApp.custom.openEditModal = (name) => { 
         state.currentEditingSpotName = name; 
         const s = state.savedCustomSpots.find(x => x.name === name); 
@@ -164,9 +159,21 @@ export function initCustomSpots() {
         document.getElementById('edit-highlights').value = s.highlights; 
         document.getElementById('edit-history').value = s.history; 
         const preview = document.getElementById('edit-image-preview');
-        if(s.wikiImg) { preview.classList.remove('u-hidden'); preview.classList.add('u-block'); preview.src = s.wikiImg; } else { preview.classList.remove('u-block'); preview.classList.add('u-hidden'); preview.src = ""; }
         
-        // 🌟 判斷是否為開發者，來決定要不要顯示右上角的上傳圖示
+        // 🌟 修復 1：同時檢查兩個圖片屬性
+        const imgUrl = s.wikiImg || s.coverImg || "";
+        
+        if(imgUrl) { 
+            preview.classList.remove('u-hidden'); 
+            preview.classList.add('u-block'); 
+            preview.src = imgUrl; 
+        } else { 
+            preview.classList.remove('u-block'); 
+            preview.classList.add('u-hidden'); 
+            // 🌟 修復 2：用 removeAttribute，避免 src="" 變成網頁連結
+            preview.removeAttribute('src'); 
+        }
+        
         const devUploadBtn = document.getElementById('dev-upload-btn');
         if (devUploadBtn) {
             if (window.rfApp && window.rfApp.isDeveloper) {
@@ -189,16 +196,22 @@ export function initCustomSpots() {
         if(savedIdx === -1) return; 
         
         const s = state.savedCustomSpots[savedIdx]; 
-        s.name = newName; s.highlights = document.getElementById('edit-highlights').value; s.history = document.getElementById('edit-history').value; s.wikiImg = document.getElementById('edit-image-preview').src; 
+        s.name = newName; 
+        s.highlights = document.getElementById('edit-highlights').value; 
+        s.history = document.getElementById('edit-history').value; 
+        
+        // 🌟 修復 3：安全提取圖片，如果元素隱藏就給空字串
+        const preview = document.getElementById('edit-image-preview');
+        const finalImgUrl = preview.classList.contains('u-hidden') ? "" : (preview.getAttribute('src') || "");
+        
+        s.wikiImg = finalImgUrl; 
+        s.coverImg = finalImgUrl; 
         
         if (typeof saveState !== 'undefined') saveState.customSpots(); 
         if(s.markerObj) state.cluster.removeLayer(s.markerObj); 
         
         addMarkerToMap(s); window.rfApp.custom.closeEditModal(); showCard(s); 
         if (typeof window.showToast === 'function') window.showToast(window.rfApp.t('toast_custom_saved'), 'success');
-
-        // 備註：編輯與刪除在此邏輯中不回寫雲端，僅本地更新。
-        // 若需雲端刪除，需進一步擴充 Apps Script 邏輯。
     };
     
     window.rfApp.custom.deleteCustomSpot = (name) => { 
@@ -217,16 +230,13 @@ export function initCustomSpots() {
         if (typeof window.showToast === 'function') window.showToast(window.rfApp.t('toast_custom_deleted'), 'info');
     };
 
-    // 🌟 開發者專屬：將編輯後的景點同步更新至雲端
     window.rfApp.custom.uploadEditToCloud = () => {
         if (typeof window.showToast === 'function') {
             window.showToast("準備將修改同步至雲端...", "info");
         }
-        // 這裡未來可以發送 fetch 請求給您的 Google Apps Script 執行「更新 (Update)」邏輯
         console.log("觸發雲端同步更新：", state.currentEditingSpotName);
     };
     
-    // 記得將它暴露給全域
     window.uploadEditToCloud = window.rfApp.custom.uploadEditToCloud;
     window.closeCustomSpotModal = window.rfApp.custom.closeCustomSpotModal;
     window.confirmCustomSpot = window.rfApp.custom.confirmCustomSpot;
