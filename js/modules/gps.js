@@ -83,6 +83,51 @@ export function initGPS() {
         });
     }
 
+    // ========================================================
+    // 🌟 核心修改 1：網頁一載入，就直接在背景要求 GPS 權限並默默監聽位置
+    // ========================================================
+    if (navigator.geolocation) {
+        watchId = navigator.geolocation.watchPosition(
+            (pos) => {
+                const { latitude: lat, longitude: lng, accuracy } = pos.coords;
+                state.userLocation = { lat, lng };
+
+                const gpsValText = document.getElementById('gps-val-text');
+                if (gpsValText) gpsValText.textContent = `GPS: ${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+
+                if (!userMarker) {
+                    // 建立自身位置圖釘，但因為 isFollowing 初始為 false，所以【不會】改變地圖視角
+                    userMarker = L.marker([lat, lng], { icon: createCompassIcon(), zIndexOffset: 1000 }).addTo(state.mapInstance);
+                    compassCircle = L.circle([lat, lng], { radius: accuracy, color: 'var(--primary)', opacity: 0.4, fillColor: 'var(--primary)', fillOpacity: 0.08, weight: 1 }).addTo(state.mapInstance);
+                } else {
+                    // 更新圖釘位置
+                    userMarker.setLatLng([lat, lng]);
+                    compassCircle.setLatLng([lat, lng]);
+                    compassCircle.setRadius(accuracy);
+                    
+                    // 只有當使用者點擊過按鈕 (isFollowing = true) 時，才會讓地圖跟隨
+                    if (isFollowing) { state.mapInstance.panTo([lat, lng]); }
+                }
+                
+                // 停止按鈕的讀取動畫 (如果有的話)
+                const gpsBtn = document.querySelector('.control-btn[onclick*="goToUser"]');
+                const btnIcon = gpsBtn ? gpsBtn.querySelector('i') : null;
+                if (btnIcon && btnIcon.classList.contains('fa-spin')) {
+                    btnIcon.classList.remove('fa-spin');
+                }
+
+                events.emit('location_update', { lat, lng, accuracy, isFollowing, timestamp: Date.now() });
+            },
+            (err) => {
+                console.warn("背景獲取 GPS 失敗或使用者未授權:", err);
+            },
+            { enableHighAccuracy: true, maximumAge: 5000, timeout: 15000 } 
+        );
+    }
+
+    // ========================================================
+    // 🌟 核心修改 2：點擊定位按鈕時，只需將畫面切換至已知的座標，不用重新要求權限
+    // ========================================================
     window.rfApp.map.goToUser = () => {
         if (!navigator.geolocation) {
             if (typeof window.showToast === 'function') { const msg = window.rfApp.t ? window.rfApp.t('toast_gps_fail') : '您的裝置不支援定位'; window.showToast(msg, 'error'); }
@@ -93,17 +138,38 @@ export function initGPS() {
         const gpsBtn = document.querySelector('.control-btn[onclick*="goToUser"]');
         if (gpsBtn) gpsBtn.classList.add('active'); 
         
-        startCompass(); // 🌟 重新啟動羅盤
+        startCompass(); // 啟動手機羅盤指向
         
         const btnIcon = gpsBtn ? gpsBtn.querySelector('i') : null;
         
-        if (watchId && userMarker) {
+        // 如果背景已經成功抓到座標，直接飛過去！
+        if (userMarker && state.userLocation) {
             const latlng = userMarker.getLatLng();
             state.mapInstance.flyTo(latlng, 17, { animate: true });
             if (typeof window.showToast === 'function') { const msg = window.rfApp.t ? window.rfApp.t('toast_gps_success') : '✅ 定位成功！'; window.showToast(msg, 'success'); }
-            events.emit('location_update', { lat: latlng.lat, lng: latlng.lng, accuracy: compassCircle.getRadius(), isFollowing: true, timestamp: Date.now() });
-            return; 
+        } else {
+            // 如果還沒抓到 (可能網路慢或剛給權限)，讓按鈕轉圈圈等待
+            if (btnIcon) btnIcon.classList.add('fa-spin');
+            if (typeof window.showToast === 'function') { const msg = window.rfApp.t ? window.rfApp.t('toast_gps_connecting') : '🛰️ GPS 衛星連線中...'; window.showToast(msg, 'info'); }
         }
+    };
+
+    window.rfApp.map.resetNorth = () => {
+        isFollowing = false;
+        const gpsBtn = document.querySelector('.control-btn[onclick*="goToUser"]');
+        if (gpsBtn) gpsBtn.classList.remove('active');
+
+        stopCompass(); // 當點擊回到瑞芳時，也停止羅盤省電
+
+        if (state.mapInstance) {
+            state.mapInstance.flyTo([25.1086, 121.8058], 15, { animate: true });
+            if (typeof window.showToast === 'function') { const msg = window.rfApp.t ? window.rfApp.t('toast_gps_reset') : '已回到瑞芳中心'; window.showToast(msg, 'info'); }
+        }
+    };
+
+    window.goToUser = window.rfApp.map.goToUser;
+    window.resetNorth = window.rfApp.map.resetNorth;
+}
 
         if (watchId) navigator.geolocation.clearWatch(watchId);
 
