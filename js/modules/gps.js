@@ -159,63 +159,6 @@ export function initGPS() {
         const gpsBtn = document.querySelector('.control-btn[onclick*="goToUser"]');
         if (gpsBtn) gpsBtn.classList.remove('active');
 
-        stopCompass(); // 當點擊回到瑞芳時，也停止羅盤省電
-
-        if (state.mapInstance) {
-            state.mapInstance.flyTo([25.1086, 121.8058], 15, { animate: true });
-            if (typeof window.showToast === 'function') { const msg = window.rfApp.t ? window.rfApp.t('toast_gps_reset') : '已回到瑞芳中心'; window.showToast(msg, 'info'); }
-        }
-    };
-
-    window.goToUser = window.rfApp.map.goToUser;
-    window.resetNorth = window.rfApp.map.resetNorth;
-}
-
-        if (watchId) navigator.geolocation.clearWatch(watchId);
-
-        if (btnIcon) btnIcon.classList.add('fa-spin');
-        if (typeof window.showToast === 'function') { const msg = window.rfApp.t ? window.rfApp.t('toast_gps_connecting') : '🛰️ GPS 衛星連線中...'; window.showToast(msg, 'info'); }
-
-        watchId = navigator.geolocation.watchPosition(
-            (pos) => {
-                const { latitude: lat, longitude: lng, accuracy } = pos.coords;
-                state.userLocation = { lat, lng };
-
-                const gpsValText = document.getElementById('gps-val-text');
-                if (gpsValText) gpsValText.textContent = `GPS: ${lat.toFixed(4)}, ${lng.toFixed(4)}`;
-
-                if (!userMarker) {
-                    userMarker = L.marker([lat, lng], { icon: createCompassIcon(), zIndexOffset: 1000 }).addTo(state.mapInstance);
-                    compassCircle = L.circle([lat, lng], { radius: accuracy, color: 'var(--primary)', opacity: 0.4, fillColor: 'var(--primary)', fillOpacity: 0.08, weight: 1 }).addTo(state.mapInstance);
-                    
-                    if (isFollowing) {
-                        state.mapInstance.flyTo([lat, lng], 17, { animate: true });
-                        if (typeof window.showToast === 'function') { const msg = window.rfApp.t ? window.rfApp.t('toast_gps_success') : '✅ 定位成功！'; window.showToast(msg, 'success'); }
-                    }
-                } else {
-                    userMarker.setLatLng([lat, lng]);
-                    compassCircle.setLatLng([lat, lng]);
-                    compassCircle.setRadius(accuracy);
-                    
-                    if (isFollowing) { state.mapInstance.panTo([lat, lng]); }
-                }
-                
-                if (btnIcon) btnIcon.classList.remove('fa-spin');
-                events.emit('location_update', { lat, lng, accuracy, isFollowing, timestamp: Date.now() });
-            },
-            (err) => {
-                if (btnIcon) btnIcon.classList.remove('fa-spin');
-                if (typeof window.showToast === 'function') { const msg = window.rfApp.t ? window.rfApp.t('toast_gps_fail') : '無法取得定位'; window.showToast(msg, 'error'); }
-            },
-            { enableHighAccuracy: true, maximumAge: 5000, timeout: 15000 } 
-        );
-    };
-
-    window.rfApp.map.resetNorth = () => {
-        isFollowing = false;
-        const gpsBtn = document.querySelector('.control-btn[onclick*="goToUser"]');
-        if (gpsBtn) gpsBtn.classList.remove('active');
-
         stopCompass(); // 🌟 當點擊回到瑞芳時，也停止羅盤省電
 
         if (state.mapInstance) {
