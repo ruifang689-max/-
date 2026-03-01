@@ -312,9 +312,67 @@ export function initCustomSpots() {
         if (typeof window.showToast === 'function') window.showToast(window.rfApp.t('toast_custom_deleted'), 'info');
     };
 
-    window.rfApp.custom.uploadEditToCloud = () => {
+    window.rfApp.custom.uploadEditToCloud = async () => {
+        const spotName = state.currentEditingSpotName;
+        const spotData = state.savedCustomSpots.find(x => x.name === spotName);
+        if (!spotData) return;
+
         if (typeof window.showToast === 'function') {
-            window.showToast("準備將修改同步至雲端...", "info");
+            window.showToast("🔄 正在進行雙向雲端同步...", "info");
+        }
+
+        let authCode = (window.rfApp && window.rfApp.isDeveloper) ? "689" : "";
+
+        // ==========================================
+        // 🚀 軌道一：完整寫入 Firebase (主力資料庫，無字數限制)
+        // ==========================================
+        let firebaseSuccess = false;
+        try {
+            if (window.rfApp.firebase && typeof window.rfApp.firebase.saveSpot === 'function') {
+                await window.rfApp.firebase.saveSpot(spotData);
+                firebaseSuccess = true;
+            } else {
+                console.warn("Firebase 同步模組未載入");
+            }
+        } catch (err) {
+            console.error("Firebase 同步失敗:", err);
+            if (typeof window.showToast === 'function') window.showToast("❌ Firebase 寫入失敗", "error");
+        }
+
+        // ==========================================
+        // 📊 軌道二：輕量寫入 Google Sheets (後台備份)
+        // ==========================================
+        if (authCode && GAS_WEB_APP_URL && GAS_WEB_APP_URL.includes('script.google.com')) {
+            // 複製一份資料，避免改到原始物件
+            const sheetsPayload = { 
+                ...spotData, 
+                action: 'update', 
+                authCode: authCode 
+            };
+            
+            // 🌟 核心防護：如果圖片大於 40000 字元，拔除它以防 Google Sheets 崩潰
+            if (sheetsPayload.coverImg && sheetsPayload.coverImg.length > 40000) {
+                sheetsPayload.coverImg = "[圖片太大，已安全儲存於 Firebase]"; 
+                sheetsPayload.wikiImg = "[圖片太大，已安全儲存於 Firebase]";
+            }
+
+            fetch(GAS_WEB_APP_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify(sheetsPayload)
+            }).then(() => {
+                if (typeof window.showToast === 'function' && firebaseSuccess) {
+                    window.showToast("✅ Firebase 與 Sheets 雙向同步完成！", "success");
+                } else if (typeof window.showToast === 'function') {
+                    window.showToast("✅ 已同步至 Google Sheets", "success");
+                }
+            }).catch(err => {
+                console.error("GAS 同步失敗:", err);
+            });
+        } else if (firebaseSuccess) {
+            // 如果沒設定 GAS，但 Firebase 成功
+            if (typeof window.showToast === 'function') window.showToast("✅ 已成功同步至 Firebase 雲端", "success");
         }
     };
     
