@@ -66,24 +66,43 @@ const LOCAL_SPOTS = [
 
 export async function fetchSpotsFromSheet() {
     try {
-        console.log("🔄 正在從 Google Sheets 同步景點資料...");
+        // 1. 優先嘗試從 Firebase 讀取官方景點
+        if (window.rfApp && window.rfApp.firebase && typeof window.rfApp.firebase.getOfficialSpots === 'function') {
+            console.log("🔄 嘗試從 Firebase 載入官方景點...");
+            const firebaseSpots = await window.rfApp.firebase.getOfficialSpots();
+            
+            if (firebaseSpots && firebaseSpots.length > 0) {
+                spots.length = 0;
+                spots.push(...firebaseSpots);
+                console.log(`✅ 成功從 Firebase 載入 ${spots.length} 筆官方景點！`);
+                return spots;
+            }
+        }
+        
+        // 2. 如果 Firebase 沒資料（代表還沒執行轉移），則退回從 Google Sheets 讀取
+        console.log("⚠️ Firebase 尚無官方景點，自動退回 Google Sheets 讀取...");
         const response = await fetch(SHEET_CSV_URL);
         if (!response.ok) throw new Error("網路連線錯誤");
         
         const csvText = await response.text();
         const cloudSpots = parseCSV(csvText);
         
-        // 🌟 關鍵修復：清空陣列並用 push 塞入資料，保持記憶體位址不變
         spots.length = 0; 
         spots.push(...cloudSpots);
         
-        console.log(`✅ 成功載入 ${spots.length} 筆景點資料！`);
+        console.log(`✅ 成功從 Google Sheets 載入 ${spots.length} 筆景點資料！`);
         return spots;
         
     } catch (error) {
-        console.error("❌ Google Sheets 載入失敗，使用備用本機資料", error);
+        console.error("❌ 雲端載入全數失敗，使用備用本機資料", error);
         spots.length = 0;
         spots.push(...LOCAL_SPOTS);
         return spots;
     }
+}
+
+// 🌟 將目前的景點資料暴露到全域，方便我們執行「一鍵轉移」
+if (typeof window !== 'undefined') {
+    window.rfApp = window.rfApp || {};
+    window.rfApp.spotsData = spots;
 }
