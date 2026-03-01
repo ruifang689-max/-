@@ -1,6 +1,7 @@
 // js/modules/hub/controller.js
 import { state } from '../../core/store.js';
 import { fetchWeatherData } from './weather.js';
+import { renderTransportPanel } from './transport.js';
 
 let isDashboardInjected = false;
 
@@ -8,6 +9,7 @@ export function initDashboard() {
     if (!isDashboardInjected) {
         injectDashboardUI();
         isDashboardInjected = true;
+        renderTransportPanel();
     }
 
     // 註冊全域 API
