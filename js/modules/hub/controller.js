@@ -2,6 +2,7 @@
 import { state } from '../../core/store.js';
 import { fetchWeatherData } from './weather.js';
 import { renderTransportPanel } from './transport.js';
+import { renderNewsPanel } from './news.js';
 
 let isDashboardInjected = false;
 
@@ -10,6 +11,7 @@ export function initDashboard() {
         injectDashboardUI();
         isDashboardInjected = true;
         renderTransportPanel();
+        renderNewsPanel();
     }
 
     // 註冊全域 API
