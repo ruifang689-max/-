@@ -162,3 +162,35 @@ async function pullFromCloud(uid) {
         isSyncing = false;
     }
 }
+
+// =========================================
+// 🌟 雙軌同步：景點資料專用寫入通道 (Firebase Firestore)
+// =========================================
+window.rfApp.firebase = window.rfApp.firebase || {};
+
+window.rfApp.firebase.saveSpot = async (spotData) => {
+    if (!db) {
+        throw new Error("Firebase 資料庫尚未初始化");
+    }
+    
+    // 判斷要存入哪個資料表：開發者存入 official_spots，一般人存入 custom_spots
+    const collectionName = (window.rfApp && window.rfApp.isDeveloper) ? "official_spots" : "custom_spots";
+    
+    try {
+        // 使用景點名稱當作文件 ID (過濾掉特殊符號以防報錯)
+        const safeDocId = spotData.name.replace(/[\/\.#$\[\]]/g, '_');
+        const docRef = doc(db, collectionName, safeDocId);
+        
+        // 將完整的景點資料 (包含超長 Base64 圖片) 寫入 Firestore
+        await setDoc(docRef, {
+            ...spotData,
+            lastUpdated: new Date().toISOString(),
+            updatedBy: currentUser ? currentUser.email : "anonymous"
+        }, { merge: true }); // merge: true 代表有相同的就更新，沒有的就新增
+        
+        console.log(`☁️ [Firebase] 景點「${spotData.name}」已成功寫入 ${collectionName}`);
+    } catch (error) {
+        console.error("☁️ [Firebase] 景點寫入失敗:", error);
+        throw error;
+    }
+};
