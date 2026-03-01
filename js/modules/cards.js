@@ -24,7 +24,15 @@ export function showCard(s) {
     const imgEl = document.getElementById('img');
     if (imgEl) {
         imgEl.loading = "lazy";
-        imgEl.src = s.wikiImg || s.coverImg || getPlaceholderImage(s.name);
+        
+        // 🌟 防護網：攔截來自 Google Sheets 的佔位文字
+        let targetImg = s.wikiImg || s.coverImg || "";
+        if (typeof targetImg === 'string' && targetImg.includes('[圖片太大')) {
+            targetImg = ""; // 若發現是佔位文字，直接清空
+        }
+        
+        // 如果 targetImg 為空，就會自動呼叫 getPlaceholderImage 產生預設圖
+        imgEl.src = targetImg || getPlaceholderImage(s.name);
         imgEl.onerror = () => { imgEl.src = getPlaceholderImage(s.name); };
     }
     
