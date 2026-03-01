@@ -1,6 +1,11 @@
-// js/modules/cards.js (v662) - 全面套用全域翻譯引擎版
+// js/modules/cards.js (v662) - 本地圖片優先與全域翻譯版
 import { state } from '../core/store.js';
 import { spots } from '../data/spots.js';
+
+// 🌟 告訴系統我們網站內有哪些現成的圖片
+const KNOWN_LOCAL_IMAGES = [
+    "三貂嶺", "九份老街", "四腳亭", "深澳漁港", "猴硐", "瑞芳火車站", "黃金博物館"
+];
 
 export function openCardByName(name) { 
     // 合併官方景點與自訂景點來搜尋
@@ -25,13 +30,21 @@ export function showCard(s) {
     if (imgEl) {
         imgEl.loading = "lazy";
         
-        // 🌟 防護網：攔截來自 Google Sheets 的佔位文字
         let targetImg = s.wikiImg || s.coverImg || "";
+        
+        // 防護網：攔截來自 Google Sheets 的佔位文字
         if (typeof targetImg === 'string' && targetImg.includes('[圖片太大')) {
-            targetImg = ""; // 若發現是佔位文字，直接清空
+            targetImg = ""; 
         }
         
-        // 如果 targetImg 為空，就會自動呼叫 getPlaceholderImage 產生預設圖
+        // 🌟 核心修改：如果景點名稱在我們的清單裡，強制使用網站內的圖片！
+        // 注意：有些景點名稱可能帶有括號 (例如：九份老街 (基山街))，所以用 .includes() 來比對
+        const localMatch = KNOWN_LOCAL_IMAGES.find(localName => s.name.includes(localName));
+        if (localMatch) {
+            targetImg = `./assets/images/spots/${localMatch}.jpg`;
+        }
+        
+        // 如果 targetImg 依然為空，就自動呼叫 getPlaceholderImage 產生預設圖
         imgEl.src = targetImg || getPlaceholderImage(s.name);
         imgEl.onerror = () => { imgEl.src = getPlaceholderImage(s.name); };
     }
@@ -48,12 +61,10 @@ export function showCard(s) {
         </div>
     ` : '';
     
-    // 🌟 引入全域翻譯
     const t = window.rfApp.t || (k => k); 
 
     const desc = s.description || s.highlights || "暫無介紹";
     const highlightsEl = document.getElementById("card-highlights");
-    // 長篇文章直接丟給 t()，動態翻譯快取會自動接手！
     if (highlightsEl) highlightsEl.innerHTML = warningHtml + officialDetails + `<div>${t(desc)}</div>`;
     
     const foodEl = document.getElementById("card-food"); 
@@ -67,11 +78,10 @@ export function showCard(s) {
     
     const btnGroup = document.getElementById("card-btn-group");
     
-    // 🌟 按鈕文字全面動態翻譯，不再寫死 if-else
     const txtNav = t('nav') || '導航';
     const txtVoice = t('btn_voice') || '語音介紹';
-    const txtEdit = t('編輯'); // 動態翻譯引擎會自動轉成 Edit / 編集 等
-    const txtDel = t('刪除');  // 動態翻譯引擎會自動轉成 Delete / 削除 等
+    const txtEdit = t('編輯'); 
+    const txtDel = t('刪除');  
     const txtAi = t('ai') || '智慧推薦';
 
     if (tags.includes('自訂')) { 
