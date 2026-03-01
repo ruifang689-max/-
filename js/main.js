@@ -12,7 +12,7 @@ import { initErrorHandler, showToast } from './modules/toast.js';
 import { state } from './core/store.js'; 
 import { fetchSpotsFromSheet } from './data/spots.js';
 import { initMap, toggleLayer } from './core/map.js'; 
-import { fetchWeather } from './modules/weather.js';
+import { initDashboard } from './modules/hub/controller.js';
 import { initGPS } from './modules/gps.js';
 import { initAnnouncer } from './modules/announcer.js'; 
 import { initCardGestures, showCard, closeCard, openCardByName } from './modules/cards.js';
@@ -97,6 +97,7 @@ async function bootstrapApp() {
         safeInit(initTTS, '語音導覽模組');
         safeInit(initNearby, '周邊雷達');
         safeInit(initContextEngine, '情境推薦引擎');
+        safeInit(initDashboard, '資訊中樞模組');
     }).catch(e => {
         console.error("地圖啟動失敗", e);
         if (typeof showToast === 'function') showToast("地圖核心啟動失敗，請重新整理頁面", "error");
