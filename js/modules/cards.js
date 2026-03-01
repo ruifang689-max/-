@@ -89,7 +89,7 @@ export function showCard(s) {
         btnGroup.innerHTML = `
             <button onclick="startNav()"><i class="fas fa-location-arrow"></i> ${txtNav}</button>
             <button class="secondary" onclick="toggleTTS()"><i class="fas fa-volume-up"></i> ${txtVoice}</button>
-            <button class="secondary" onclick="aiTrip()"><i class="fas fa-magic"></i> ${txtAi}</button>
+            <button class="secondary" onclick="rfApp.route.addSpot('${s.name}')"><i class="fas fa-plus-circle"></i> 加入行程</button>
         `; 
     }
     
