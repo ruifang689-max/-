@@ -1,4 +1,4 @@
-// js/modules/hub/controller.js (補回快速導覽版)
+// js/modules/hub/controller.js (CSS 拆分模組化版)
 import { state } from '../../core/store.js';
 import { fetchWeatherData } from './weather.js';
 import { renderTransportPanel } from './transport.js';
@@ -54,63 +54,12 @@ export function initDashboard() {
         miniWeatherBox.onclick = () => window.rfApp.dashboard.open();
     }
 
+    // 啟動資料抓取
     fetchWeatherData();
 }
 
 function injectDashboardUI() {
-    const style = document.createElement('style');
-    style.id = 'dashboard-style-v711';
-    style.innerHTML = `
-        #dashboard-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); z-index: 3000; display: flex; flex-direction: column; justify-content: flex-end; opacity: 0; pointer-events: none; transition: opacity 0.3s; }
-        #dashboard-overlay.active { opacity: 1; pointer-events: auto; }
-        .dash-container { background: #f8f9fa; width: 100%; height: 85vh; border-radius: 24px 24px 0 0; display: flex; flex-direction: column; transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1); box-shadow: 0 -5px 20px rgba(0,0,0,0.2); overflow: hidden; }
-        #dashboard-overlay.active .dash-container { transform: translateY(0); }
-        
-        .dash-header { padding: 20px; transition: background 0.5s ease; color: white; position: relative; flex-shrink: 0; }
-        .bg-sun { background: linear-gradient(135deg, #4facfe, #00f2fe); }
-        .bg-cloud { background: linear-gradient(135deg, #7f8c8d, #bdc3c7); }
-        .bg-rain { background: linear-gradient(135deg, #34495e, #2c3e50); }
-        .bg-night { background: linear-gradient(135deg, #141e30, #243b55); }
-        
-        .dash-drag-pill { width: 40px; height: 5px; background: rgba(255,255,255,0.4); border-radius: 3px; margin: 0 auto 15px auto; }
-        .dash-close-btn { position: absolute; top: 15px; right: 20px; background: rgba(255,255,255,0.2); border: none; color: white; width: 32px; height: 32px; border-radius: 50%; font-size: 16px; cursor: pointer; display: flex; align-items: center; justify-content: center; backdrop-filter: blur(4px); }
-        .dash-weather-hero { display: flex; align-items: center; justify-content: space-between; }
-        .dash-temp-main { font-size: 48px; font-weight: 800; line-height: 1; }
-        .dash-weather-desc { font-size: 16px; opacity: 0.9; margin-top: 5px; }
-        .dash-weather-icon { font-size: 56px; text-shadow: 0 4px 10px rgba(0,0,0,0.2); }
-        .dash-weather-sub { display: flex; gap: 15px; margin-top: 15px; font-size: 14px; background: rgba(0,0,0,0.15); padding: 8px 12px; border-radius: 12px; width: fit-content; }
-        .dash-weather-sub span { display: flex; align-items: center; gap: 6px; }
-        
-        .dash-tabs { display: flex; background: white; padding: 0 10px; border-bottom: 1px solid #ddd; overflow-x: auto; scrollbar-width: none; flex-shrink: 0; }
-        .dash-tabs::-webkit-scrollbar { display: none; }
-        .dash-tab { padding: 15px 15px; font-weight: bold; color: #7f8c8d; cursor: pointer; white-space: nowrap; border-bottom: 3px solid transparent; transition: 0.2s; }
-        .dash-tab.active { color: var(--primary); border-bottom: 3px solid var(--primary); }
-        .dash-body { flex: 1; overflow-y: auto; padding: 20px; background: #f8f9fa; }
-        .dash-panel { display: none; animation: fadeIn 0.3s ease-out; }
-        .dash-panel.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-        
-        .weather-detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 20px; }
-        .detail-card { background: white; padding: 15px 12px; border-radius: 16px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); display: flex; align-items: center; gap: 10px; }
-        .detail-card i { font-size: 22px; width: 30px; text-align: center; }
-        .detail-info { display: flex; flex-direction: column; }
-        .detail-label { font-size: 12px; color: #888; margin-bottom: 2px; }
-        .detail-val { font-size: 15px; font-weight: bold; color: #333; }
-
-        .forecast-item { display: flex; align-items: center; justify-content: space-between; background: white; padding: 12px 15px; border-radius: 12px; margin-bottom: 10px; box-shadow: 0 2px 5px rgba(0,0,0,0.02); font-weight: bold; color: #333; }
-        .forecast-day { width: 60px; color: #555; }
-        .forecast-icon { font-size: 18px; color: var(--primary); width: 30px; text-align: center; }
-        .forecast-rain { font-size: 13px; color: #3498db; width: 50px; text-align: right; }
-        .forecast-temp { font-size: 15px; width: 80px; text-align: right; }
-
-        .dash-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
-        .dash-grid-btn { background: white; border: none; border-radius: 16px; padding: 15px 5px; display: flex; flex-direction: column; align-items: center; gap: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.04); cursor: pointer; transition: 0.2s; }
-        .dash-grid-btn:active { transform: scale(0.95); }
-        .dash-grid-btn .icon { font-size: 28px; }
-        .dash-grid-btn .text { font-size: 13px; font-weight: bold; color: #444; }
-    `;
-    document.head.appendChild(style);
-
+    // 🌟 CSS 已經抽離到 css/components/dashboard.css 檔案中，這裡只保留純淨的 HTML 骨架
     const overlay = document.createElement('div');
     overlay.id = 'dashboard-overlay';
     overlay.innerHTML = `
@@ -133,6 +82,7 @@ function injectDashboardUI() {
                     <i class="fas fa-cloud dash-weather-icon" id="dash-main-icon"></i>
                 </div>
             </div>
+
             <div class="dash-tabs" id="dash-tabs">
                 <div class="dash-tab active" onclick="window.rfApp.dashboard.switchTab('weather', this)"><i class="fas fa-cloud-sun"></i> 天氣</div>
                 <div class="dash-tab" onclick="window.rfApp.dashboard.switchTab('ai', this)"><i class="fas fa-robot"></i> AI 助理</div>
@@ -140,6 +90,7 @@ function injectDashboardUI() {
                 <div class="dash-tab" onclick="window.rfApp.dashboard.switchTab('transport', this)"><i class="fas fa-bus"></i> 交通</div>
                 <div class="dash-tab" onclick="window.rfApp.dashboard.switchTab('news', this)"><i class="fas fa-newspaper"></i> 新聞</div>
             </div>
+
             <div class="dash-body">
                 <div id="dash-panel-weather" class="dash-panel active">
                     <div class="weather-detail-grid">
@@ -151,6 +102,7 @@ function injectDashboardUI() {
                     <h4 style="margin: 5px 0 10px 5px; color: #555; font-size: 15px;"><i class="far fa-calendar-alt"></i> 一週預報</h4>
                     <div id="forecast-list"><div style="text-align:center; padding:20px; color:#888;"><i class="fas fa-spinner fa-spin"></i> 預報資料載入中...</div></div>
                 </div>
+                
                 <div id="dash-panel-ai" class="dash-panel"><div style="text-align:center; padding:40px 20px;"><i class="fas fa-robot fa-spin" style="font-size:40px; color:var(--primary); margin-bottom:15px;"></i><p style="color:#888; font-size:14px;">小瑞正在分析目前情境...</p></div></div>
                 
                 <div id="dash-panel-map" class="dash-panel">
