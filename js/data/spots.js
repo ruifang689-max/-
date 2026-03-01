@@ -103,6 +103,5 @@ export async function fetchSpotsFromSheet() {
 
 // 🌟 將目前的景點資料暴露到全域，方便我們執行「一鍵轉移」
 if (typeof window !== 'undefined') {
-    window.rfApp = window.rfApp || {};
-    window.rfApp.spotsData = spots;
+    window.GLOBAL_SPOTS_DATA = spots;
 }
