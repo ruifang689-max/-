@@ -1,11 +1,12 @@
 /**
  * js/modules/firebase-sync.js
- * 負責：Firebase 雲端同步、Google 登入、攔截 LocalStorage 達成無痛背景備份
+ * 負責：Firebase 雲端同步、Google 登入、無痛背景備份、雙軌景點同步
  */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
 import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+// 🌟 確保這裡有引入 collection, getDocs, writeBatch
 import { getFirestore, doc, setDoc, getDoc, collection, getDocs, writeBatch } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
-// 🌟 您的 Firebase 專案金鑰
+
 const firebaseConfig = {
     apiKey: "AIzaSyDe_FZeqKtEZuPo7geC4jd-nbTP6xURFZM",
     authDomain: "ruifang689-max.firebaseapp.com",
@@ -22,16 +23,14 @@ const db = getFirestore(app);
 const provider = new GoogleAuthProvider();
 
 let currentUser = null;
-let isSyncing = false; // 防護機制，避免無限迴圈同步
+let isSyncing = false; 
 
 // =========================================
 // 🌟 核心黑科技：攔截 LocalStorage 達成「無痛綁定」
 // =========================================
 const originalSetItem = localStorage.setItem;
 localStorage.setItem = function(key, value) {
-    originalSetItem.apply(this, arguments); // 讓原本地機存檔繼續正常運作
-    
-    // 只要是我們 App 的資料有變動，且處於登入狀態，就觸發背景上傳
+    originalSetItem.apply(this, arguments); 
     if ((key.startsWith('ruifang_') || key.startsWith('rf_')) && currentUser && !isSyncing) {
         scheduleCloudUpload();
     }
@@ -40,7 +39,6 @@ localStorage.setItem = function(key, value) {
 let uploadTimer;
 function scheduleCloudUpload() {
     clearTimeout(uploadTimer);
-    // 延遲 2 秒上傳，將使用者的連續操作「打包」成一次雲端寫入，節省資源
     uploadTimer = setTimeout(async () => {
         const dataToSync = {};
         for (let i = 0; i < localStorage.length; i++) {
@@ -62,9 +60,80 @@ function scheduleCloudUpload() {
 }
 
 // =========================================
-// 🌟 登入 / 登出與 UI 控制
+// 🌟 初始化 Firebase 功能與全域 API 綁定
 // =========================================
 export function initFirebase() {
+    // 確保全域物件存在
+    window.rfApp = window.rfApp || {};
+    window.rfApp.firebase = window.rfApp.firebase || {};
+
+    // 🚀 1. 單一景點寫入通道 (雙軌同步用)
+    window.rfApp.firebase.saveSpot = async (spotData) => {
+        if (!db) throw new Error("Firebase 資料庫尚未初始化");
+        const collectionName = (window.rfApp && window.rfApp.isDeveloper) ? "official_spots" : "custom_spots";
+        try {
+            const safeDocId = spotData.name.replace(/[\/\.#$\[\]]/g, '_');
+            const docRef = doc(db, collectionName, safeDocId);
+            await setDoc(docRef, {
+                ...spotData,
+                lastUpdated: new Date().toISOString(),
+                updatedBy: currentUser ? currentUser.email : "anonymous"
+            }, { merge: true });
+            console.log(`☁️ [Firebase] 景點「${spotData.name}」已成功寫入 ${collectionName}`);
+        } catch (error) {
+            console.error("☁️ [Firebase] 景點寫入失敗:", error);
+            throw error;
+        }
+    };
+
+    // 🚀 2. 獲取官方景點
+    window.rfApp.firebase.getOfficialSpots = async () => {
+        try {
+            const querySnapshot = await getDocs(collection(db, "official_spots"));
+            const spotsList = [];
+            querySnapshot.forEach((doc) => {
+                spotsList.push(doc.data());
+            });
+            return spotsList;
+        } catch (error) {
+            console.error("讀取 Firebase 官方景點失敗:", error);
+            return [];
+        }
+    };
+
+    // 🚀 3. 批次轉移工具 (Google Sheets -> Firebase)
+    window.rfApp.firebase.migrateAllToFirebase = async (spotsArray) => {
+        if (!spotsArray || spotsArray.length === 0) {
+            alert("沒有可轉移的資料！");
+            return;
+        }
+        if (!confirm(`準備將目前地圖上的 ${spotsArray.length} 筆官方景點轉移到 Firebase？\n\n(過程只需約 2 秒鐘)`)) return;
+        
+        try {
+            const batch = writeBatch(db);
+            let count = 0;
+            
+            spotsArray.forEach(spot => {
+                if(!spot.name) return;
+                const safeDocId = spot.name.replace(/[\/\.#$\[\]]/g, '_');
+                const docRef = doc(db, "official_spots", safeDocId);
+                batch.set(docRef, {
+                    ...spot,
+                    lastUpdated: new Date().toISOString(),
+                    dataSource: "firebase_official" 
+                }, { merge: true });
+                count++;
+            });
+            
+            await batch.commit();
+            alert(`✅ 太棒了！成功將 ${count} 筆官方景點轉移至 Firebase！\n\n請重新整理網頁，系統就會自動改從 Firebase 讀取資料了。`);
+        } catch (e) {
+            console.error("轉移失敗", e);
+            alert("❌ 轉移失敗，請檢查 Console 報錯");
+        }
+    };
+
+    // --- 以下為原本的登入 UI 邏輯 ---
     const loginBtn = document.getElementById('google-login-btn');
     if(loginBtn) {
         loginBtn.onclick = async () => {
@@ -73,7 +142,6 @@ export function initFirebase() {
             } else {
                 try {
                     const result = await signInWithPopup(auth, provider);
-                    // 登入成功，拉取雲端資料
                     await pullFromCloud(result.user.uid);
                 } catch (error) {
                     console.error("登入失敗", error);
@@ -89,14 +157,10 @@ export function initFirebase() {
     });
 }
 
-// ... (上方 import 與變數保持不變) ...
-
 function updateLoginUI(user) {
     const btnText = document.getElementById('login-btn-text');
     const userInfo = document.getElementById('user-info');
     const loginBtn = document.getElementById('google-login-btn');
-    
-    // 🌟 獲取開發者按鈕區塊
     const devModeContainer = document.getElementById('dev-mode-container'); 
 
     if (user) {
@@ -107,25 +171,20 @@ function updateLoginUI(user) {
         }
         if(loginBtn) { loginBtn.style.background = "var(--divider-color)"; loginBtn.style.color = "var(--text-main)"; }
         
-        // 🌟 核心驗證：判斷登入的 Email 是否為官方帳號
         if (devModeContainer) {
             if (user.email === 'ruifang689@gmail.com') {
-                devModeContainer.style.display = 'block'; // 是開發者 -> 顯示按鈕
+                devModeContainer.style.display = 'block'; 
             } else {
-                devModeContainer.style.display = 'none';  // 是一般使用者 -> 隱藏按鈕
+                devModeContainer.style.display = 'none';  
             }
         }
     } else {
         if(btnText) btnText.innerText = "使用 Google 帳號登入";
         if(userInfo) userInfo.style.display = "none";
         if(loginBtn) { loginBtn.style.background = "#4285F4"; loginBtn.style.color = "white"; }
-        
-        // 🌟 沒登入時，一律隱藏開發者按鈕
         if (devModeContainer) devModeContainer.style.display = 'none';
     }
 }
-
-// ... (下方 pullFromCloud 等函數保持不變) ...
 
 async function pullFromCloud(uid) {
     try {
@@ -134,25 +193,20 @@ async function pullFromCloud(uid) {
         if (docSnap.exists() && docSnap.data().settings) {
             const cloudData = docSnap.data().settings;
             let hasChanges = false;
-            
-            // 比較雲端與本機差異，若雲端有資料則覆寫本機
             for (const key in cloudData) {
                 if (localStorage.getItem(key) !== cloudData[key]) {
                     originalSetItem.call(localStorage, key, cloudData[key]);
                     hasChanges = true;
                 }
             }
-
             if (hasChanges) {
-                // 最安全的無痛套用方式：重新整理網頁，讓原程式自動讀取最新的 localStorage
                 alert("☁️ 雲端同步完成！已找回您的專屬設定與秘境收藏。\n地圖即將重新載入以套用設定...");
                 window.location.reload();
             } else {
                 console.log("☁️ [Firebase] 本機資料已是最新。");
-                scheduleCloudUpload(); // 確保剛登入時把最新的本機資料推上去
+                scheduleCloudUpload(); 
             }
         } else {
-            // 新用戶，主動把現有本機資料上傳
             scheduleCloudUpload();
         }
         isSyncing = false;
@@ -161,86 +215,3 @@ async function pullFromCloud(uid) {
         isSyncing = false;
     }
 }
-
-// =========================================
-// 🌟 雙軌同步：景點資料專用寫入通道 (Firebase Firestore)
-// =========================================
-window.rfApp.firebase = window.rfApp.firebase || {};
-
-window.rfApp.firebase.saveSpot = async (spotData) => {
-    if (!db) {
-        throw new Error("Firebase 資料庫尚未初始化");
-    }
-    
-    // 判斷要存入哪個資料表：開發者存入 official_spots，一般人存入 custom_spots
-    const collectionName = (window.rfApp && window.rfApp.isDeveloper) ? "official_spots" : "custom_spots";
-    
-    try {
-        // 使用景點名稱當作文件 ID (過濾掉特殊符號以防報錯)
-        const safeDocId = spotData.name.replace(/[\/\.#$\[\]]/g, '_');
-        const docRef = doc(db, collectionName, safeDocId);
-        
-        // 將完整的景點資料 (包含超長 Base64 圖片) 寫入 Firestore
-        await setDoc(docRef, {
-            ...spotData,
-            lastUpdated: new Date().toISOString(),
-            updatedBy: currentUser ? currentUser.email : "anonymous"
-        }, { merge: true }); // merge: true 代表有相同的就更新，沒有的就新增
-        
-        console.log(`☁️ [Firebase] 景點「${spotData.name}」已成功寫入 ${collectionName}`);
-    } catch (error) {
-        console.error("☁️ [Firebase] 景點寫入失敗:", error);
-        throw error;
-    }
-};
-
-// =========================================
-// 🌟 獲取官方景點 (Firebase 讀取)
-// =========================================
-window.rfApp.firebase.getOfficialSpots = async () => {
-    try {
-        const querySnapshot = await getDocs(collection(db, "official_spots"));
-        const spotsList = [];
-        querySnapshot.forEach((doc) => {
-            spotsList.push(doc.data());
-        });
-        return spotsList;
-    } catch (error) {
-        console.error("讀取 Firebase 官方景點失敗:", error);
-        return [];
-    }
-};
-
-// =========================================
-// 🌟 批次轉移工具 (Google Sheets -> Firebase)
-// =========================================
-window.rfApp.firebase.migrateAllToFirebase = async (spotsArray) => {
-    if (!spotsArray || spotsArray.length === 0) {
-        alert("沒有可轉移的資料！");
-        return;
-    }
-    if (!confirm(`準備將目前地圖上的 ${spotsArray.length} 筆官方景點轉移到 Firebase？\n\n(過程只需約 2 秒鐘)`)) return;
-    
-    try {
-        const batch = writeBatch(db);
-        let count = 0;
-        
-        spotsArray.forEach(spot => {
-            if(!spot.name) return;
-            const safeDocId = spot.name.replace(/[\/\.#$\[\]]/g, '_');
-            const docRef = doc(db, "official_spots", safeDocId);
-            batch.set(docRef, {
-                ...spot,
-                lastUpdated: new Date().toISOString(),
-                dataSource: "firebase_official" // 標記為來自 Firebase
-            }, { merge: true });
-            count++;
-        });
-        
-        await batch.commit();
-        alert(`✅ 太棒了！成功將 ${count} 筆官方景點轉移至 Firebase！\n\n請重新整理網頁，系統就會自動改從 Firebase 讀取資料了。`);
-    } catch (e) {
-        console.error("轉移失敗", e);
-        alert("❌ 轉移失敗，請檢查 Console 報錯");
-    }
-};
