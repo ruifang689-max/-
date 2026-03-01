@@ -140,3 +140,22 @@ function createWeatherWidget(icon, desc, temp, msg, tags) {
         }
     };
 }
+// ==========================================
+// 🌟 補回給 search.js 呼叫的狀態獲取函數，防止報錯
+// ==========================================
+export function getContextualData() {
+    if (!currentWeather) return null;
+    
+    let situation = "good";
+    if (currentWeather.code >= 50 && currentWeather.code <= 99) {
+        situation = "rain";
+    } else if (!currentWeather.isDay) {
+        situation = "night";
+    }
+    
+    return {
+        weather: situation,
+        temp: currentWeather.temp,
+        isDay: currentWeather.isDay
+    };
+}
