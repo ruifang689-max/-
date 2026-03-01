@@ -69,6 +69,10 @@ function injectDashboardUI() {
                 <button class="dash-close-btn" onclick="window.rfApp.dashboard.close()"><i class="fas fa-times"></i></button>
                 <div class="dash-weather-hero">
                     <div>
+                        <div style="font-size: 14px; opacity: 0.9; margin-bottom: 6px; font-weight: bold; letter-spacing: 1px;">
+                            <i class="fas fa-map-marker-alt" style="margin-right: 4px;"></i> 瑞芳區
+                        </div>
+                        
                         <div style="display:flex; align-items:baseline; gap:8px;">
                             <div class="dash-temp-main" id="dash-main-temp">--°</div>
                             <div style="font-size:15px; opacity:0.8; font-weight:normal;" id="dash-main-feels">體感 --°</div>
