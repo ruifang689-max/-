@@ -5,6 +5,7 @@ window.rfApp = {
 };
 
 // 🌟 絕對不能加上任何 ?v=xxx，否則模組會互相衝突！
+import { initContextEngine } from './modules/contextEngine.js';
 import { initRouteBuilder } from './modules/routeBuilder.js';
 import { events } from './core/events.js'; 
 import { initErrorHandler, showToast } from './modules/toast.js';
@@ -95,6 +96,7 @@ async function bootstrapApp() {
         safeInit(initCustomSpots, '自訂秘境');
         safeInit(initTTS, '語音導覽模組');
         safeInit(initNearby, '周邊雷達');
+        safeInit(initContextEngine, '情境推薦引擎');
     }).catch(e => {
         console.error("地圖啟動失敗", e);
         if (typeof showToast === 'function') showToast("地圖核心啟動失敗，請重新整理頁面", "error");
