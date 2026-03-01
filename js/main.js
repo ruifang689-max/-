@@ -5,7 +5,6 @@ window.rfApp = {
 };
 
 // 🌟 絕對不能加上任何 ?v=xxx，否則模組會互相衝突！
-import { initContextEngine } from './modules/contextEngine.js';
 import { initRouteBuilder } from './modules/routeBuilder.js';
 import { events } from './core/events.js'; 
 import { initErrorHandler, showToast } from './modules/toast.js';
