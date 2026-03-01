@@ -1,7 +1,52 @@
-// js/modules/weather.js (v691) - 資訊中樞與 AI 助理整合版
+// js/modules/weather.js (v692) - 修正生命週期與全域物件衝突版
 import { state } from '../core/store.js';
 
 let isDashboardInjected = false;
+
+// 🌟 核心防護：將 API 註冊獨立成一個函數，確保在 main.js 覆蓋完 rfApp 之後才執行綁定
+function registerDashboardAPI() {
+    window.rfApp = window.rfApp || {};
+    if (window.rfApp.dashboard) return; // 如果已經註冊過就跳過
+
+    window.rfApp.dashboard = {
+        open: () => {
+            injectDashboard();
+            const overlay = document.getElementById('dashboard-overlay');
+            if(overlay) overlay.classList.add('active');
+        },
+        close: () => {
+            const overlay = document.getElementById('dashboard-overlay');
+            if(overlay) overlay.classList.remove('active');
+        },
+        switchTab: (tabId, element) => {
+            // 移除所有標籤的 active 狀態
+            document.querySelectorAll('#dash-tabs .dash-tab').forEach(el => el.classList.remove('active'));
+            // 加上當前點擊標籤的 active (使用傳入的 this 元素更安全)
+            if (element) {
+                element.classList.add('active');
+            }
+            // 切換下方內容面板
+            document.querySelectorAll('.dash-panel').forEach(el => el.classList.remove('active'));
+            const targetPanel = document.getElementById(`dash-panel-${tabId}`);
+            if(targetPanel) targetPanel.classList.add('active');
+        },
+        goZone: (lat, lng, zoom) => {
+            window.rfApp.dashboard.close();
+            if (state.mapInstance) state.mapInstance.flyTo([lat, lng], zoom, { animate: true, duration: 1.2 });
+        },
+        triggerAIFilter: (tag) => {
+            window.rfApp.dashboard.close();
+            if(window.rfApp.map && typeof window.rfApp.map.filterSpots === 'function') {
+                const chips = document.querySelectorAll('#category-chips .chip');
+                const targetChip = Array.from(chips).find(c => c.innerText.includes(tag));
+                window.rfApp.map.filterSpots(tag, targetChip);
+                if(typeof window.showToast === 'function') {
+                    window.showToast(`✨ 小瑞已為您過濾「${tag}」相關景點！`, 'success');
+                }
+            }
+        }
+    };
+}
 
 function injectDashboard() {
     if (isDashboardInjected) return;
@@ -55,7 +100,7 @@ function injectDashboard() {
     `;
     document.head.appendChild(style);
 
-    // --- 注入 HTML 結構 ---
+    // --- 注入 HTML 結構 (更新 onClick 傳遞 this) ---
     const overlay = document.createElement('div');
     overlay.id = 'dashboard-overlay';
     overlay.innerHTML = `
@@ -77,11 +122,11 @@ function injectDashboard() {
             </div>
 
             <div class="dash-tabs" id="dash-tabs">
-                <div class="dash-tab active" onclick="window.rfApp.dashboard.switchTab('weather')"><i class="fas fa-cloud-sun"></i> 天氣</div>
-                <div class="dash-tab" onclick="window.rfApp.dashboard.switchTab('ai')"><i class="fas fa-robot"></i> AI 助理</div>
-                <div class="dash-tab" onclick="window.rfApp.dashboard.switchTab('map')"><i class="fas fa-map-marked-alt"></i> 導覽</div>
-                <div class="dash-tab" onclick="window.rfApp.dashboard.switchTab('transport')"><i class="fas fa-bus"></i> 交通</div>
-                <div class="dash-tab" onclick="window.rfApp.dashboard.switchTab('news')"><i class="fas fa-newspaper"></i> 新聞</div>
+                <div class="dash-tab active" onclick="window.rfApp.dashboard.switchTab('weather', this)"><i class="fas fa-cloud-sun"></i> 天氣</div>
+                <div class="dash-tab" onclick="window.rfApp.dashboard.switchTab('ai', this)"><i class="fas fa-robot"></i> AI 助理</div>
+                <div class="dash-tab" onclick="window.rfApp.dashboard.switchTab('map', this)"><i class="fas fa-map-marked-alt"></i> 導覽</div>
+                <div class="dash-tab" onclick="window.rfApp.dashboard.switchTab('transport', this)"><i class="fas fa-bus"></i> 交通</div>
+                <div class="dash-tab" onclick="window.rfApp.dashboard.switchTab('news', this)"><i class="fas fa-newspaper"></i> 新聞</div>
             </div>
 
             <div class="dash-body">
@@ -138,47 +183,15 @@ function injectDashboard() {
     const miniWeatherBox = document.getElementById('weather-box');
     if (miniWeatherBox) {
         miniWeatherBox.style.cursor = 'pointer';
-        miniWeatherBox.onclick = () => window.rfApp.dashboard.open();
+        miniWeatherBox.onclick = () => {
+            if(window.rfApp && window.rfApp.dashboard) {
+                window.rfApp.dashboard.open();
+            }
+        };
     }
 
     isDashboardInjected = true;
 }
-
-window.rfApp = window.rfApp || {};
-window.rfApp.dashboard = {
-    open: () => {
-        injectDashboard();
-        const overlay = document.getElementById('dashboard-overlay');
-        if(overlay) overlay.classList.add('active');
-    },
-    close: () => {
-        const overlay = document.getElementById('dashboard-overlay');
-        if(overlay) overlay.classList.remove('active');
-    },
-    switchTab: (tabId) => {
-        document.querySelectorAll('#dash-tabs .dash-tab').forEach(el => el.classList.remove('active'));
-        event.currentTarget.classList.add('active');
-        document.querySelectorAll('.dash-panel').forEach(el => el.classList.remove('active'));
-        const targetPanel = document.getElementById(`dash-panel-${tabId}`);
-        if(targetPanel) targetPanel.classList.add('active');
-    },
-    goZone: (lat, lng, zoom) => {
-        window.rfApp.dashboard.close();
-        if (state.mapInstance) state.mapInstance.flyTo([lat, lng], zoom, { animate: true, duration: 1.2 });
-    },
-    // 讓按鈕呼叫原本的地圖篩選功能
-    triggerAIFilter: (tag) => {
-        window.rfApp.dashboard.close();
-        if(typeof window.rfApp.map.filterSpots === 'function') {
-            const chips = document.querySelectorAll('#category-chips .chip');
-            const targetChip = Array.from(chips).find(c => c.innerText.includes(tag));
-            window.rfApp.map.filterSpots(tag, targetChip);
-            if(typeof window.showToast === 'function') {
-                window.showToast(`✨ 小瑞已為您過濾「${tag}」相關景點！`, 'success');
-            }
-        }
-    }
-};
 
 const parseWeatherCode = (code) => {
     if (code === 0) return { icon: 'fa-sun', text: '晴朗無雲' };
@@ -248,7 +261,10 @@ function updateAIAssistant(temp, code) {
 }
 
 export async function fetchWeather() {
+    // 確保每次抓取天氣時，API 都會被安全地註冊到全域物件上
+    registerDashboardAPI();
     injectDashboard(); 
+
     const topTempEl = document.getElementById('weather-temp');
     const topIconEl = document.querySelector('#weather-box i');
 
@@ -319,6 +335,3 @@ export async function fetchWeather() {
         }
     }
 }
-
-window.rfApp.ui = window.rfApp.ui || {};
-window.rfApp.ui.fetchWeather = fetchWeather;
