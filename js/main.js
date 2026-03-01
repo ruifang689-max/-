@@ -5,6 +5,7 @@ window.rfApp = {
 };
 
 // 🌟 絕對不能加上任何 ?v=xxx，否則模組會互相衝突！
+import { initRouteBuilder } from './modules/routeBuilder.js';
 import { events } from './core/events.js'; 
 import { initErrorHandler, showToast } from './modules/toast.js';
 import { state } from './core/store.js'; 
@@ -90,6 +91,7 @@ async function bootstrapApp() {
         safeInit(renderAllMarkers, '圖釘渲染');
         safeInit(initSearch, '搜尋系統');
         safeInit(initNavigation, '導航系統');
+        safeInit(initRouteBuilder, '自訂路線規劃');
         safeInit(initCustomSpots, '自訂秘境');
         safeInit(initTTS, '語音導覽模組');
         safeInit(initNearby, '周邊雷達');
