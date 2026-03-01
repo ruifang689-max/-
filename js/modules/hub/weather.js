@@ -1,4 +1,4 @@
-// js/modules/hub/weather.js
+// js/modules/hub/weather.js (修正 API 欄位版)
 import { updateAIAssistant } from './assistant.js';
 
 const parseWeatherCode = (code) => {
@@ -25,7 +25,6 @@ export async function fetchWeatherData() {
     try {
         if (!navigator.onLine) throw new Error('Offline');
 
-        // 🌟 更新 API 網址，加入：體感、濕度、風速、紫外線、日落時間
         const [weatherRes, aqiRes] = await Promise.all([
             fetch('https://api.open-meteo.com/v1/forecast?latitude=25.108&longitude=121.805&current=temperature_2m,apparent_temperature,relative_humidity_2m,weather_code,wind_speed_10m&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max,uv_index_max,sunset&timezone=Asia%2FTaipei'),
             fetch('https://air-quality-api.open-meteo.com/v1/air-quality?latitude=25.108&longitude=121.805&current=european_aqi').catch(() => null)
@@ -45,28 +44,24 @@ export async function fetchWeatherData() {
         const currentInfo = parseWeatherCode(currentCode);
         const uvIndex = Math.round(daily.uv_index_max[0] || 0);
 
-        // 解析日落時間
         const sunsetStr = daily.sunset[0];
         const sunsetTime = sunsetStr ? new Date(sunsetStr).toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit', hour12: false }) : '--:--';
 
-        // 🌟 判斷動態背景顏色
         let bgClass = 'bg-cloud';
         const hour = new Date().getHours();
-        const isNight = hour < 6 || hour > 17; // 簡單判斷日夜
+        const isNight = hour < 6 || hour > 17; 
         
         if (currentCode >= 50 && currentCode <= 99) {
-            bgClass = 'bg-rain'; // 雨天
+            bgClass = 'bg-rain'; 
         } else if (isNight) {
-            bgClass = 'bg-night'; // 夜晚
-        } else if (currentCode === 0 || currentCode === 1) {
-            bgClass = 'bg-sun'; // 晴天
+            bgClass = 'bg-night'; 
+        } else if (currentCode === 0 || currentCode === 1 || currentCode === 2) {
+            bgClass = 'bg-sun'; 
         }
 
-        // 更新頂部小圖示
         if (topTempEl) topTempEl.innerText = `${currentTemp}°C`; 
         if (topIconEl) topIconEl.className = `fas ${currentInfo.icon}`; 
 
-        // 更新 Dashboard 大看板
         const headerBg = document.getElementById('dash-header-bg');
         if (headerBg) headerBg.className = `dash-header ${bgClass}`;
 
@@ -93,7 +88,6 @@ export async function fetchWeatherData() {
             }
         }
 
-        // 🌟 更新 2x2 網格資訊
         const humEl = document.getElementById('dash-detail-hum');
         if(humEl) humEl.innerText = `${humidity}%`;
         const windEl = document.getElementById('dash-detail-wind');
@@ -103,17 +97,16 @@ export async function fetchWeatherData() {
         const uvEl = document.getElementById('dash-detail-uv');
         if(uvEl) {
             uvEl.innerText = uvIndex;
-            if (uvIndex >= 8) uvEl.style.color = '#e74c3c'; // 危險級紅字
-            else if (uvIndex >= 6) uvEl.style.color = '#f39c12'; // 高量級橘字
+            if (uvIndex >= 8) uvEl.style.color = '#e74c3c'; 
+            else if (uvIndex >= 6) uvEl.style.color = '#f39c12'; 
         }
 
-        // 呼叫 AI 助理大腦
         updateAIAssistant(currentTemp, currentCode);
 
-        // 渲染一週預報
         let forecastHTML = '';
         for (let i = 0; i < daily.time.length; i++) {
-            const wInfo = parseWeatherCode(daily.weathercode[i]);
+            // 🌟 核心修復：從 weathercode 改為 weather_code
+            const wInfo = parseWeatherCode(daily.weather_code[i]);
             const rain = daily.precipitation_probability_max[i] || 0;
             const tMax = Math.round(daily.temperature_2m_max[i]);
             const tMin = Math.round(daily.temperature_2m_min[i]);
@@ -123,6 +116,7 @@ export async function fetchWeatherData() {
         if(fList) fList.innerHTML = forecastHTML;
 
     } catch (e) { 
+        console.error("天氣解析錯誤:", e);
         if (topTempEl && topTempEl.innerText === "") topTempEl.innerText = "--"; 
         if (topIconEl && topIconEl.className === "") topIconEl.className = `fas fa-cloud`; 
         const fList = document.getElementById('forecast-list');
