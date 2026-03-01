@@ -1,11 +1,6 @@
-// js/modules/cards.js (v662) - 本地圖片優先與全域翻譯版
+// js/modules/cards.js (自動推算本地圖片版)
 import { state } from '../core/store.js';
 import { spots } from '../data/spots.js';
-
-// 🌟 告訴系統我們網站內有哪些現成的圖片
-const KNOWN_LOCAL_IMAGES = [
-    "三貂嶺", "九份老街", "四腳亭", "深澳漁港", "猴硐", "瑞芳火車站", "黃金博物館"
-];
 
 export function openCardByName(name) { 
     // 合併官方景點與自訂景點來搜尋
@@ -30,23 +25,22 @@ export function showCard(s) {
     if (imgEl) {
         imgEl.loading = "lazy";
         
-        let targetImg = s.wikiImg || s.coverImg || "";
-        
-        // 防護網：攔截來自 Google Sheets 的佔位文字
-        if (typeof targetImg === 'string' && targetImg.includes('[圖片太大')) {
-            targetImg = ""; 
+        // 1. 處理雲端圖與防護佔位文字
+        let cloudImg = s.wikiImg || s.coverImg || "";
+        if (typeof cloudImg === 'string' && cloudImg.includes('[圖片太大')) {
+            cloudImg = ""; 
         }
         
-        // 🌟 核心修改：如果景點名稱在我們的清單裡，強制使用網站內的圖片！
-        // 注意：有些景點名稱可能帶有括號 (例如：九份老街 (基山街))，所以用 .includes() 來比對
-        const localMatch = KNOWN_LOCAL_IMAGES.find(localName => s.name.includes(localName));
-        if (localMatch) {
-            targetImg = `./assets/images/spots/${localMatch}.jpg`;
-        }
+        // 2. 自動推算本地端圖片路徑 (去除括號)
+        const baseName = s.name.split('(')[0].trim();
+        const localImg = `./assets/images/spots/${baseName}.jpg`;
         
-        // 如果 targetImg 依然為空，就自動呼叫 getPlaceholderImage 產生預設圖
-        imgEl.src = targetImg || getPlaceholderImage(s.name);
-        imgEl.onerror = () => { imgEl.src = getPlaceholderImage(s.name); };
+        // 3. 先嘗試載入本地圖片，如果失敗 (觸發 onerror)，自動換成雲端圖或預設圖
+        imgEl.src = localImg;
+        imgEl.onerror = () => { 
+            imgEl.onerror = null; // 避免死迴圈
+            imgEl.src = cloudImg || getPlaceholderImage(s.name); 
+        };
     }
     
     const tags = s.tags ? (Array.isArray(s.tags) ? s.tags : [s.tags]) : (s.category ? [s.category] : []);
