@@ -5,13 +5,14 @@ window.rfApp = {
 };
 
 // 🌟 絕對不能加上任何 ?v=xxx，否則模組會互相衝突！
+// (已移除舊的 contextEngine 匯入)
 import { initRouteBuilder } from './modules/routeBuilder.js';
 import { events } from './core/events.js'; 
 import { initErrorHandler, showToast } from './modules/toast.js';
 import { state } from './core/store.js'; 
 import { fetchSpotsFromSheet } from './data/spots.js';
 import { initMap, toggleLayer } from './core/map.js'; 
-import { initDashboard } from './modules/hub/controller.js';
+import { initDashboard } from './modules/hub/controller.js'; // 🌟 新總部
 import { initGPS } from './modules/gps.js';
 import { initAnnouncer } from './modules/announcer.js'; 
 import { initCardGestures, showCard, closeCard, openCardByName } from './modules/cards.js';
@@ -80,8 +81,6 @@ async function bootstrapApp() {
     safeInit(initFirebase, 'Firebase 雲端同步');
     safeInit(handleDeepLink, 'URL路由解析');
 
-    // 🌟 優化：將初始的同步提示框註解掉，讓載入畫面更乾淨
-    // if (typeof showToast === 'function') showToast("🔄 同步雲端景點資料中...", "info");
     await fetchSpotsFromSheet();
 
     initMap().then(() => {
@@ -95,14 +94,17 @@ async function bootstrapApp() {
         safeInit(initCustomSpots, '自訂秘境');
         safeInit(initTTS, '語音導覽模組');
         safeInit(initNearby, '周邊雷達');
-        safeInit(initContextEngine, '情境推薦引擎');
+        
+        // 🌟 舊的 initContextEngine 已經被移除
+        // 🌟 啟動新的資訊中樞總部！
         safeInit(initDashboard, '資訊中樞模組');
+        
     }).catch(e => {
         console.error("地圖啟動失敗", e);
         if (typeof showToast === 'function') showToast("地圖核心啟動失敗，請重新整理頁面", "error");
     });
     
-    fetchWeather();
+    // 🌟 舊的 fetchWeather() 已經被移除，改由 Dashboard 內部自動處理
     removeSplashScreen(); 
 }
 
