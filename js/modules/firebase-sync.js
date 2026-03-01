@@ -4,8 +4,7 @@
  */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
 import { getAuth, signInWithPopup, GoogleAuthProvider, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
-import { getFirestore, doc, setDoc, getDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
-
+import { getFirestore, doc, setDoc, getDoc, collection, getDocs, writeBatch } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 // 🌟 您的 Firebase 專案金鑰
 const firebaseConfig = {
     apiKey: "AIzaSyDe_FZeqKtEZuPo7geC4jd-nbTP6xURFZM",
@@ -192,5 +191,56 @@ window.rfApp.firebase.saveSpot = async (spotData) => {
     } catch (error) {
         console.error("☁️ [Firebase] 景點寫入失敗:", error);
         throw error;
+    }
+};
+
+// =========================================
+// 🌟 獲取官方景點 (Firebase 讀取)
+// =========================================
+window.rfApp.firebase.getOfficialSpots = async () => {
+    try {
+        const querySnapshot = await getDocs(collection(db, "official_spots"));
+        const spotsList = [];
+        querySnapshot.forEach((doc) => {
+            spotsList.push(doc.data());
+        });
+        return spotsList;
+    } catch (error) {
+        console.error("讀取 Firebase 官方景點失敗:", error);
+        return [];
+    }
+};
+
+// =========================================
+// 🌟 批次轉移工具 (Google Sheets -> Firebase)
+// =========================================
+window.rfApp.firebase.migrateAllToFirebase = async (spotsArray) => {
+    if (!spotsArray || spotsArray.length === 0) {
+        alert("沒有可轉移的資料！");
+        return;
+    }
+    if (!confirm(`準備將目前地圖上的 ${spotsArray.length} 筆官方景點轉移到 Firebase？\n\n(過程只需約 2 秒鐘)`)) return;
+    
+    try {
+        const batch = writeBatch(db);
+        let count = 0;
+        
+        spotsArray.forEach(spot => {
+            if(!spot.name) return;
+            const safeDocId = spot.name.replace(/[\/\.#$\[\]]/g, '_');
+            const docRef = doc(db, "official_spots", safeDocId);
+            batch.set(docRef, {
+                ...spot,
+                lastUpdated: new Date().toISOString(),
+                dataSource: "firebase_official" // 標記為來自 Firebase
+            }, { merge: true });
+            count++;
+        });
+        
+        await batch.commit();
+        alert(`✅ 太棒了！成功將 ${count} 筆官方景點轉移至 Firebase！\n\n請重新整理網頁，系統就會自動改從 Firebase 讀取資料了。`);
+    } catch (e) {
+        console.error("轉移失敗", e);
+        alert("❌ 轉移失敗，請檢查 Console 報錯");
     }
 };
